@@ -45,5 +45,11 @@ poetry config pypi-token.pypi ...
 ## Current Status
 
 <!-- {cts} COVERAGE -->
+| File                                  | Statements | Missing | Excluded | Coverage |
+|---------------------------------------|-----------:|--------:|---------:|---------:|
+| `diacea/__init__.py`                  | 4          | 0       | 0        | 100.0%   |
+| `diacea/_runtime_type_check_setup.py` | 13         | 0       | 37       | 100.0%   |
+| **Totals**                            | 17         | 0       | 37       | 100.0%   |
 
+Generated on: 2024-12-12
 <!-- {cte} -->

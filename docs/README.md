@@ -1,6 +1,6 @@
 # diacea
 
-TBD
+Convert between Excalidraw and PlantUML
 
 ## Installation
 
