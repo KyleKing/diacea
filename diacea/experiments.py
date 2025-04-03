@@ -48,52 +48,52 @@ def find_nearest_rectangle(point, rectangles):
 
 
 def convert_to_relative(absolute_data):
-    # elements = {item["id"]: item for item in absolute_data}
     relative_data = []
+    rectangles = [item for item in absolute_data if item['type'] == 'rectangle']
+    texts = [item for item in absolute_data if item['type'] == 'text']
+    arrows = [item for item in absolute_data if item['type'] == 'arrow']
 
-    for item in absolute_data:
-        if item['type'] in {'rectangle', 'text'}:
-            relative_item = {
-                'id': item['id'],
-                'type': item['type'],
-                'label': '',
-                'parent': '',
-            }
+    # Sort rectangles by area (largest to smallest) to process outer rectangles first
+    rectangles.sort(key=lambda r: r['width'] * r['height'], reverse=True)
 
-            # Find text within rectangle
-            if item['type'] == 'rectangle':
-                for text in absolute_data:
-                    if text['type'] == 'text' and (
-                        item['x'] < text['x'] < item['x'] + item['width']
-                        and item['y'] < text['y'] < item['y'] + item['height']
-                    ):
-                        relative_item['label'] = text['text']
-                        break
-                relative_data.append(relative_item)
-            # Don't store text
+    for rect in rectangles:
+        relative_item = {
+            'id': rect['id'],
+            'type': 'rectangle',
+            'label': '',
+            'parent': '',
+        }
 
-        elif item['type'] == 'arrow':
-            arrow_start, arrow_end = item['points']
+        # Find text within rectangle
+        for text in texts:
+            if (
+                rect['x'] < text['x'] < rect['x'] + rect['width']
+                and rect['y'] < text['y'] < rect['y'] + rect['height']
+            ):
+                relative_item['label'] = text['text']
+                break
 
-            from_element = min(
-                (elem for elem in absolute_data if elem['type'] == 'rectangle'),
-                key=lambda r: _dist(r, tuple(arrow_start)),
-            )
-            to_element = min(
-                (elem for elem in absolute_data if elem['type'] == 'rectangle'),
-                key=lambda r: _dist(r, tuple(arrow_end)),
-            )
+        # Find parent rectangle (the smallest containing rectangle)
+        for potential_parent in rectangles:
+            if potential_parent['id'] != rect['id'] and is_rectangle_inside(potential_parent, rect):
+                relative_item['parent'] = potential_parent['id']
+                break
 
-            relative_data.append(
-                {
-                    'id': item['id'],
-                    'type': 'arrow',
-                    # PLANNED: closest text that isn't within a rectangle. Maybe secondary step to look for free text (and other floating items?
-                    'label': '',
-                    'from': from_element['id'],
-                    'to': to_element['id'],
-                },
-            )
+        relative_data.append(relative_item)
+
+    # Process arrows
+    for arrow in arrows:
+        arrow_start, arrow_end = arrow['points']
+        from_element = find_nearest_rectangle(arrow_start, rectangles)
+        to_element = find_nearest_rectangle(arrow_end, rectangles)
+
+        relative_data.append({
+            'id': arrow['id'],
+            'type': 'arrow',
+            'label': '',
+            'from': from_element['id'],
+            'to': to_element['id'],
+        })
 
     return relative_data
 
@@ -114,14 +114,6 @@ def rule_based_approach(data):
     rectangles.sort(key=lambda r: r['width'] * r['height'], reverse=True)
 
     for rect in rectangles:
-        # Find the smallest containing rectangle
-        parent = None
-        for potential_parent in rectangles:
-            if potential_parent['id'] != rect['id'] and is_rectangle_inside(
-                potential_parent, rect,
-            ) and (parent is None or is_rectangle_inside(parent, potential_parent)):
-                parent = potential_parent
-
         # Find text within this rectangle
         label = ''
         for text in texts:
@@ -131,6 +123,13 @@ def rule_based_approach(data):
             ):
                 label = text['text']
                 break
+
+        # Find parent rectangle (the smallest containing rectangle)
+        parent = None
+        for potential_parent in rectangles:
+            if potential_parent['id'] != rect['id'] and is_rectangle_inside(potential_parent, rect):
+                if parent is None or is_rectangle_inside(potential_parent, parent):
+                    parent = potential_parent
 
         output_item = {'id': rect['id'], 'type': 'rectangle', 'label': label}
         if parent:
@@ -144,15 +143,13 @@ def rule_based_approach(data):
         from_rect = find_nearest_rectangle(start, rectangles)
         to_rect = find_nearest_rectangle(end, rectangles)
 
-        output.append(
-            {
-                'id': arrow['id'],
-                'type': 'arrow',
-                'label': '',
-                'from': from_rect['id'],
-                'to': to_rect['id'],
-            },
-        )
+        output.append({
+            'id': arrow['id'],
+            'type': 'arrow',
+            'label': '',
+            'from': from_rect['id'],
+            'to': to_rect['id'],
+        })
 
     return output
 
@@ -173,35 +170,38 @@ def csp_solver(data):
 
     # Add variables
     for rect in rectangles:
-        problem.addVariable(rect['id'], [text['text'] for text in texts] + [''])
+        # Label variable can be any text that's inside the rectangle or empty
+        problem.addVariable(rect['id'], [text['text'] for text in texts if (
+            rect['x'] < text['x'] < rect['x'] + rect['width']
+            and rect['y'] < text['y'] < rect['y'] + rect['height']
+        )] + [''])
+
+        # Parent variable can be any rectangle that contains this one
         problem.addVariable(
             f"{rect['id']}_parent",
-            [r['id'] for r in rectangles if r['id'] != rect['id']] + [None],
+            [r['id'] for r in rectangles if r['id'] != rect['id'] and is_rectangle_inside(r, rect)] + [None],
         )
 
     # Add constraints
     for rect in rectangles:
-
-        def text_in_rectangle(label, rect=rect):
-            return (
-                any(
-                    label == text['text']
-                    and rect['x'] < text['x'] < rect['x'] + rect['width']
-                    and rect['y'] < text['y'] < rect['y'] + rect['height']
-                    for text in texts
-                )
-                or label == ''
+        # Each text can only be used once as a label
+        def unique_text(label, rect=rect):
+            if label == '':
+                return True
+            return not any(
+                solutions[0].get(r['id']) == label
+                for r in rectangles
+                if r['id'] != rect['id']
             )
+        problem.addConstraint(unique_text, [rect['id']])
 
-        problem.addConstraint(text_in_rectangle, [rect['id']])
-
+        # Parent must be a containing rectangle
         def valid_parent(parent, rect=rect):
             return parent is None or any(
                 r['id'] == parent and is_rectangle_inside(r, rect)
                 for r in rectangles
                 if r['id'] != rect['id']
             )
-
         problem.addConstraint(valid_parent, [f"{rect['id']}_parent"])
 
     # Solve the problem
@@ -223,20 +223,19 @@ def csp_solver(data):
             output_item['parent'] = parent
         output.append(output_item)
 
+    # Process arrows
     for arrow in arrows:
         start, end = arrow['points']
         from_rect = find_nearest_rectangle(start, rectangles)
         to_rect = find_nearest_rectangle(end, rectangles)
 
-        output.append(
-            {
-                'id': arrow['id'],
-                'type': 'arrow',
-                'label': '',
-                'from': from_rect['id'],
-                'to': to_rect['id'],
-            },
-        )
+        output.append({
+            'id': arrow['id'],
+            'type': 'arrow',
+            'label': '',
+            'from': from_rect['id'],
+            'to': to_rect['id'],
+        })
 
     return output
 
@@ -355,13 +354,12 @@ def quadtree_approach(data):
             (text['text'] for text in contained_items if text['type'] == 'text'), '',
         )
 
-        # Find parent rectangle
+        # Find parent rectangle (the smallest containing rectangle)
         parent = None
         for potential_parent in rectangles:
-            if potential_parent['id'] != rect['id'] and is_rectangle_inside(
-                potential_parent, rect,
-            ) and (parent is None or is_rectangle_inside(parent, potential_parent)):
-                parent = potential_parent
+            if potential_parent['id'] != rect['id'] and is_rectangle_inside(potential_parent, rect):
+                if parent is None or is_rectangle_inside(potential_parent, parent):
+                    parent = potential_parent
 
         output_item = {'id': rect['id'], 'type': 'rectangle', 'label': label}
         if parent:
@@ -369,21 +367,20 @@ def quadtree_approach(data):
 
         output.append(output_item)
 
-    arrows = [item for item in data if item['type'] == 'arrow']
-    for arrow in arrows:
-        start, end = arrow['points']
-        from_rect = find_nearest_rectangle(start, rectangles)
-        to_rect = find_nearest_rectangle(end, rectangles)
+    # Process arrows
+    for item in data:
+        if item['type'] == 'arrow':
+            start, end = item['points']
+            from_rect = find_nearest_rectangle(start, rectangles)
+            to_rect = find_nearest_rectangle(end, rectangles)
 
-        output.append(
-            {
-                'id': arrow['id'],
+            output.append({
+                'id': item['id'],
                 'type': 'arrow',
                 'label': '',
                 'from': from_rect['id'],
                 'to': to_rect['id'],
-            },
-        )
+            })
 
     return output
 
@@ -407,8 +404,9 @@ def graph_based_approach(data):
     # Sort rectangles by area (largest to smallest)
     rectangles.sort(key=lambda r: r['width'] * r['height'], reverse=True)
 
+    # Add containment edges between rectangles
     for i, outer in enumerate(rectangles):
-        for inner in rectangles[i + 1 :]:
+        for inner in rectangles[i + 1:]:
             if is_rectangle_inside(outer, inner):
                 G.add_edge(outer['id'], inner['id'], type='contains')
 
@@ -421,7 +419,7 @@ def graph_based_approach(data):
             ):
                 G.add_edge(rect['id'], text['id'], type='contains')
 
-    # Process arrows (unchanged)
+    # Process arrows
     for item in data:
         if item['type'] == 'arrow':
             start, end = item['points']
@@ -440,6 +438,7 @@ def generate_output(G):
     for node in G.nodes():
         item = G.nodes[node]
         if item['type'] == 'rectangle':
+            # Find label (text contained within this rectangle)
             label = next(
                 (
                     G.nodes[n]['text']
@@ -448,25 +447,29 @@ def generate_output(G):
                 ),
                 '',
             )
-            output_item = {'id': item['id'], 'type': 'rectangle', 'label': label}
-            # Find the parent (if any)
+
+            # Find parent (the smallest containing rectangle)
             parents = [
-                p for p in G.predecessors(node) if G.nodes[p]['type'] == 'rectangle'
+                p for p in G.predecessors(node)
+                if G.nodes[p]['type'] == 'rectangle'
+                and G.edges[p, node]['type'] == 'contains'
             ]
-            if parents:
-                output_item['parent'] = parents[0]  # Assume only one parent
+            parent = min(parents, key=lambda p: G.nodes[p]['width'] * G.nodes[p]['height']) if parents else None
+
+            output_item = {'id': item['id'], 'type': 'rectangle', 'label': label}
+            if parent:
+                output_item['parent'] = parent
             output.append(output_item)
 
+    # Add arrows
     for u, v, data in G.edges(data=True):
         if data['type'] == 'arrow':
-            output.append(
-                {
-                    'id': data['arrow_id'],
-                    'type': 'arrow',
-                    'label': '',
-                    'from': u,
-                    'to': v,
-                },
-            )
+            output.append({
+                'id': data['arrow_id'],
+                'type': 'arrow',
+                'label': '',
+                'from': u,
+                'to': v,
+            })
 
     return output
