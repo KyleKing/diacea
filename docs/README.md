@@ -2,6 +2,14 @@
 
 Convert between Excalidraw and PlantUML
 
+Proof of concept!
+
+a.k.a. pandoc for diagrams
+
+Relation:
+- https://github.com/BardOfCodes/procXD
+- https://github.com/RobertJN64/Excalidraw_Interface
+
 ## Installation
 
 1. `poetry add diacea`
