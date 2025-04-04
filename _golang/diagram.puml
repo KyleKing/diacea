@@ -1,0 +1,23 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+
+Person(Element_GYxi3kGD, "User")
+System_Boundary(Element_FzRoP4BP, "AWS Cloud") {
+    System_Boundary(Element_66fHx-01, "EKS") {
+        Container(Element_4PrGM9vp, "Study Companion")
+        Container(Element__KSwFqmd, "Ingestor")
+    }
+    Container(Element_NS92iwVt, "Event Bridge")
+    Container(Element_WepoXBEb, "Assets")
+    ComponentDb(Element_pKblq2ro, "Database")
+}
+
+Rel(Element_GYxi3kGD, Element_4PrGM9vp, "Queries Services")
+Rel(Element_4PrGM9vp, Element_pKblq2ro, "Saves")
+Rel(Element_NS92iwVt, Element__KSwFqmd, "")
+Rel(Element__KSwFqmd, Element_WepoXBEb, "Writes")
+Rel(Element_4PrGM9vp, Element_WepoXBEb, "Reads")
+
+@enduml
