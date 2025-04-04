@@ -1,0 +1,58 @@
+## Structure
+
+```
+/modules/_excalidraw
+/modules/_plantuml
+/solver/_solver
+interface
+schemas
+```
+
+## modules
+
+1. Each implements `to` and `from` functions
+1. `from` loads content into standard format objects, while `to` does the reverse from `objects+relations` format
+
+## interface
+
+1. Accepts `to: str, from: str, content: str`
+1. Calls appropriate `from`, solves, and then appropriate `to`
+
+## solver
+
+Naive `O(n^2)` solver
+
+1. Looks for *local* relations based on "collision" distance (each shape has a different collision function. Accepts point, returns distance)
+1. Then *globally* optimal relations
+
+```python
+from __future__ import annotations
+
+import math
+
+
+def collision_distance(rectangle: dict, point: tuple[int | float, int | float]) -> float:
+    # Unpack the coordinates of the rectangle
+    x1, y1 = rectangle['center']
+    w, h = rectangle['width'], rectangle['height']
+
+    # Calculate the distances between the point and each side of the rectangle
+    dx1 = min(max(point[0] - x1, 0), w) / 2
+    dy1 = min(max(point[1] - y1, 0), h) / 2
+
+    return round(math.sqrt(dx1**2 + dy1**2), 2)
+
+
+# Example usage:
+rectangle = {'center': (10, 20), 'width': 30, 'height': 40}
+point = (15, 25)
+print(collision_distance(rectangle, point))
+
+rectangle = {'center': (5, 5), 'width': 5, 'height': 5}
+for point in ((15, 15), (0, 7.5), (0, 0), (1, 1)):
+    print(collision_distance(rectangle, point), point)
+```
+
+## Other
+
+`interface` can be implemented as an API behind a website, CLI, etc.

@@ -1,0 +1,1764 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="diacea project documentation">
+      
+      
+        <meta name="author" content="Kyle King">
+      
+      
+        <link rel="canonical" href="https://diacea.kyleking.me/notes/Constraint%20satisfaction%20problems%20Combinatorial%20Optimization%20Class%20Notes%20Fiveable/">
+      
+      
+        <link rel="prev" href="../../docs/STYLE_GUIDE/">
+      
+      
+        <link rel="next" href="../../reference/diacea/experiments/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.48">
+    
+    
+      
+        <title>Constraint satisfaction problems | Combinatorial Optimization Class Notes | Fiveable - diacea</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.6f8fc17f.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../../_styles/mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="green">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#constraint-satisfaction-problems-combinatorial-optimization-class-notes-fiveable" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="diacea" class="md-header__button md-logo" aria-label="diacea" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            diacea
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Constraint satisfaction problems | Combinatorial Optimization Class Notes | Fiveable
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="green"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/kyleking/diacea" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.7.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    kyleking/diacea
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="diacea" class="md-nav__button md-logo" aria-label="diacea" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    diacea
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/kyleking/diacea" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.7.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    kyleking/diacea
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    diacea
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Docs
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Docs
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../docs/CHANGELOG/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    CHANGELOG
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../docs/DEVELOPER_GUIDE/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Developer Notes
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../docs/STYLE_GUIDE/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Personal Style Guides
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Notes
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Notes
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Constraint satisfaction problems | Combinatorial Optimization Class Notes | Fiveable
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Constraint satisfaction problems | Combinatorial Optimization Class Notes | Fiveable
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#excerpt" class="md-nav__link">
+    <span class="md-ellipsis">
+      Excerpt
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fundamentals-of-csps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Fundamentals of CSPs
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Fundamentals of CSPs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#definition-and-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      Definition and components
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#problem-representation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Problem representation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#constraint-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      Constraint types
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#variables-and-domains" class="md-nav__link">
+    <span class="md-ellipsis">
+      Variables and domains
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#constraint-propagation-techniques" class="md-nav__link">
+    <span class="md-ellipsis">
+      Constraint propagation techniques
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Constraint propagation techniques">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#arc-consistency" class="md-nav__link">
+    <span class="md-ellipsis">
+      Arc consistency
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#node-consistency" class="md-nav__link">
+    <span class="md-ellipsis">
+      Node consistency
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#path-consistency" class="md-nav__link">
+    <span class="md-ellipsis">
+      Path consistency
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#k-consistency" class="md-nav__link">
+    <span class="md-ellipsis">
+      K-consistency
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#search-algorithms-for-csps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Search algorithms for CSPs
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Search algorithms for CSPs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#backtracking-search" class="md-nav__link">
+    <span class="md-ellipsis">
+      Backtracking search
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#forward-checking" class="md-nav__link">
+    <span class="md-ellipsis">
+      Forward checking
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#look-ahead-techniques" class="md-nav__link">
+    <span class="md-ellipsis">
+      Look-ahead techniques
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#conflict-directed-backjumping" class="md-nav__link">
+    <span class="md-ellipsis">
+      Conflict-directed backjumping
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#local-search-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      Local search methods
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Local search methods">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#min-conflicts-algorithm" class="md-nav__link">
+    <span class="md-ellipsis">
+      Min-conflicts algorithm
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tabu-search-for-csps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tabu search for CSPs
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#simulated-annealing-in-csps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Simulated annealing in CSPs
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#constraint-optimization-problems" class="md-nav__link">
+    <span class="md-ellipsis">
+      Constraint optimization problems
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Constraint optimization problems">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#soft-constraints-vs-hard-constraints" class="md-nav__link">
+    <span class="md-ellipsis">
+      Soft constraints vs hard constraints
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#weighted-csps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Weighted CSPs
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#semiring-based-csps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Semiring-based CSPs
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-csp-concepts" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advanced CSP concepts
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Advanced CSP concepts">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#symmetry-breaking" class="md-nav__link">
+    <span class="md-ellipsis">
+      Symmetry breaking
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#global-constraints" class="md-nav__link">
+    <span class="md-ellipsis">
+      Global constraints
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#distributed-csps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Distributed CSPs
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#applications-of-csps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Applications of CSPs
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Applications of CSPs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#scheduling-problems" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scheduling problems
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#resource-allocation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Resource allocation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuration-problems" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration problems
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#temporal-reasoning" class="md-nav__link">
+    <span class="md-ellipsis">
+      Temporal reasoning
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#popular-csp-libraries" class="md-nav__link">
+    <span class="md-ellipsis">
+      Popular CSP libraries
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#modeling-languages-for-csps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Modeling languages for CSPs
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#benchmarking-and-evaluation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Benchmarking and evaluation
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#complexity-and-tractability" class="md-nav__link">
+    <span class="md-ellipsis">
+      Complexity and tractability
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Complexity and tractability">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#complexity-classes-of-csps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Complexity classes of CSPs
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Reference
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_1" id="__nav_4_1_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Diacea
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_1">
+            <span class="md-nav__icon md-icon"></span>
+            Diacea
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/diacea/experiments/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Experiments
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#excerpt" class="md-nav__link">
+    <span class="md-ellipsis">
+      Excerpt
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fundamentals-of-csps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Fundamentals of CSPs
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Fundamentals of CSPs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#definition-and-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      Definition and components
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#problem-representation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Problem representation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#constraint-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      Constraint types
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#variables-and-domains" class="md-nav__link">
+    <span class="md-ellipsis">
+      Variables and domains
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#constraint-propagation-techniques" class="md-nav__link">
+    <span class="md-ellipsis">
+      Constraint propagation techniques
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Constraint propagation techniques">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#arc-consistency" class="md-nav__link">
+    <span class="md-ellipsis">
+      Arc consistency
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#node-consistency" class="md-nav__link">
+    <span class="md-ellipsis">
+      Node consistency
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#path-consistency" class="md-nav__link">
+    <span class="md-ellipsis">
+      Path consistency
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#k-consistency" class="md-nav__link">
+    <span class="md-ellipsis">
+      K-consistency
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#search-algorithms-for-csps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Search algorithms for CSPs
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Search algorithms for CSPs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#backtracking-search" class="md-nav__link">
+    <span class="md-ellipsis">
+      Backtracking search
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#forward-checking" class="md-nav__link">
+    <span class="md-ellipsis">
+      Forward checking
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#look-ahead-techniques" class="md-nav__link">
+    <span class="md-ellipsis">
+      Look-ahead techniques
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#conflict-directed-backjumping" class="md-nav__link">
+    <span class="md-ellipsis">
+      Conflict-directed backjumping
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#local-search-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      Local search methods
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Local search methods">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#min-conflicts-algorithm" class="md-nav__link">
+    <span class="md-ellipsis">
+      Min-conflicts algorithm
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tabu-search-for-csps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tabu search for CSPs
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#simulated-annealing-in-csps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Simulated annealing in CSPs
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#constraint-optimization-problems" class="md-nav__link">
+    <span class="md-ellipsis">
+      Constraint optimization problems
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Constraint optimization problems">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#soft-constraints-vs-hard-constraints" class="md-nav__link">
+    <span class="md-ellipsis">
+      Soft constraints vs hard constraints
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#weighted-csps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Weighted CSPs
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#semiring-based-csps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Semiring-based CSPs
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-csp-concepts" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advanced CSP concepts
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Advanced CSP concepts">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#symmetry-breaking" class="md-nav__link">
+    <span class="md-ellipsis">
+      Symmetry breaking
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#global-constraints" class="md-nav__link">
+    <span class="md-ellipsis">
+      Global constraints
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#distributed-csps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Distributed CSPs
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#applications-of-csps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Applications of CSPs
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Applications of CSPs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#scheduling-problems" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scheduling problems
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#resource-allocation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Resource allocation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuration-problems" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration problems
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#temporal-reasoning" class="md-nav__link">
+    <span class="md-ellipsis">
+      Temporal reasoning
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#popular-csp-libraries" class="md-nav__link">
+    <span class="md-ellipsis">
+      Popular CSP libraries
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#modeling-languages-for-csps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Modeling languages for CSPs
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#benchmarking-and-evaluation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Benchmarking and evaluation
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#complexity-and-tractability" class="md-nav__link">
+    <span class="md-ellipsis">
+      Complexity and tractability
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Complexity and tractability">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#complexity-classes-of-csps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Complexity classes of CSPs
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="constraint-satisfaction-problems-combinatorial-optimization-class-notes-fiveable">Constraint satisfaction problems | Combinatorial Optimization Class Notes | Fiveable<a class="headerlink" href="#constraint-satisfaction-problems-combinatorial-optimization-class-notes-fiveable" title="Permanent link">⚓︎</a></h1>
+<blockquote>
+<h2 id="excerpt">Excerpt<a class="headerlink" href="#excerpt" title="Permanent link">⚓︎</a></h2>
+<p>Review 10.1 Constraint satisfaction problems for your test on Unit 10 – Constraint Programming in Optimization. For students taking Combinatorial Optimization</p>
+</blockquote>
+<hr />
+<p>Constraint satisfaction problems (CSPs) are a powerful framework for modeling complex problems with specific requirements. They involve finding solutions that meet a set of constraints over variables, playing a key role in various optimization scenarios.</p>
+<p>CSPs consist of variables, domains, and constraints. Solving techniques include constraint propagation, search algorithms, and local search methods. Advanced concepts like symmetry breaking and global constraints enhance efficiency, while applications span scheduling, resource allocation, and configuration problems.</p>
+<h2 id="fundamentals-of-csps">Fundamentals of CSPs<a class="headerlink" href="#fundamentals-of-csps" title="Permanent link">⚓︎</a></h2>
+<ul>
+<li>Constraint Satisfaction Problems (CSPs) form a crucial part of Combinatorial Optimization provides a framework for modeling and solving complex problems with constraints</li>
+<li>CSPs involve finding solutions that satisfy a set of constraints over a set of variables plays a significant role in various optimization scenarios, from scheduling to resource allocation</li>
+</ul>
+<h3 id="definition-and-components">Definition and components<a class="headerlink" href="#definition-and-components" title="Permanent link">⚓︎</a></h3>
+<h6 id="top-images-from-around-the-web-for-definition-and-components">Top images from around the web for Definition and components<a class="headerlink" href="#top-images-from-around-the-web-for-definition-and-components" title="Permanent link">⚓︎</a></h6>
+<ul>
+<li>
+<p><img alt="" src="https://fiveable.me/_next/image?url=https%3A%2F%2Fstorage.googleapis.com%2Fstatic.prod.fiveable.me%2Fsearch-images%252F%2522Constraint_satisfaction_problems_definition_components_variables_domains_constraints_constraint_graph_visualization%2522-constraint-system.png&amp;w=750&amp;q=75" /></p>
+<p>Constraint programming by example | Opensource.com <a href="https://opensource.com/article/19/9/constraint-programming-example">View original</a></p>
+<p>Is this image relevant?</p>
+</li>
+<li>
+<p><img alt="" src="https://fiveable.me/_next/image?url=https%3A%2F%2Fstorage.googleapis.com%2Fstatic.prod.fiveable.me%2Fsearch-images%252F%2522Constraint_satisfaction_problems_definition_components_variables_domains_constraints_constraint_graph_visualization%2522-frai-03-580607-g002.jpg&amp;w=750&amp;q=75" /></p>
+<p>Frontiers | Graph Neural Networks for Maximum Constraint Satisfaction <a href="https://www.frontiersin.org/articles/10.3389/frai.2020.580607/full">View original</a></p>
+<p>Is this image relevant?</p>
+</li>
+<li>
+<p><img alt="" src="https://fiveable.me/_next/image?url=https%3A%2F%2Fstorage.googleapis.com%2Fstatic.prod.fiveable.me%2Fsearch-images%252F%2522Constraint_satisfaction_problems_definition_components_variables_domains_constraints_constraint_graph_visualization%2522-fig-2-full.png&amp;w=1080&amp;q=75" /></p>
+<p>Finding the optimal Bayesian network given a constraint graph [PeerJ] <a href="https://peerj.com/articles/cs-122/">View original</a></p>
+<p>Is this image relevant?</p>
+</li>
+<li>
+<p><img alt="" src="https://fiveable.me/_next/image?url=https%3A%2F%2Fstorage.googleapis.com%2Fstatic.prod.fiveable.me%2Fsearch-images%252F%2522Constraint_satisfaction_problems_definition_components_variables_domains_constraints_constraint_graph_visualization%2522-constraint-system.png&amp;w=750&amp;q=75" /></p>
+<p>Constraint programming by example | Opensource.com <a href="https://opensource.com/article/19/9/constraint-programming-example">View original</a></p>
+<p>Is this image relevant?</p>
+</li>
+<li>
+<p><img alt="" src="https://fiveable.me/_next/image?url=https%3A%2F%2Fstorage.googleapis.com%2Fstatic.prod.fiveable.me%2Fsearch-images%252F%2522Constraint_satisfaction_problems_definition_components_variables_domains_constraints_constraint_graph_visualization%2522-frai-03-580607-g002.jpg&amp;w=750&amp;q=75" /></p>
+<p>Frontiers | Graph Neural Networks for Maximum Constraint Satisfaction <a href="https://www.frontiersin.org/articles/10.3389/frai.2020.580607/full">View original</a></p>
+<p>Is this image relevant?</p>
+</li>
+</ul>
+<p>1 of 3</p>
+<ul>
+<li>Formal definition of CSPs consists of a set of variables, their domains, and constraints that restrict the values variables can simultaneously take</li>
+<li>Components include variables (unknowns to be determined), domains (possible values for each variable), and constraints (conditions that must be satisfied)</li>
+<li>Constraint graph represents the structure of a CSP visually depicts variables as nodes and constraints as edges</li>
+<li>Solution to a CSP assigns values to all variables while satisfying all constraints</li>
+</ul>
+<h3 id="problem-representation">Problem representation<a class="headerlink" href="#problem-representation" title="Permanent link">⚓︎</a></h3>
+<ul>
+<li>Constraint networks provide a graphical representation of CSPs illustrate relationships between variables and constraints</li>
+<li>Matrix representation encodes CSP information in a tabular format facilitates efficient constraint checking and propagation</li>
+<li>Extensional representation explicitly lists all allowed or disallowed combinations of values for constrained variables</li>
+<li>Intensional representation uses mathematical or logical expressions to define constraints more compact for certain types of problems</li>
+</ul>
+<h3 id="constraint-types">Constraint types<a class="headerlink" href="#constraint-types" title="Permanent link">⚓︎</a></h3>
+<ul>
+<li>Unary constraints involve a single variable restrict the domain of that variable (age must be greater than 18)</li>
+<li>Binary constraints involve two variables most common type in many CSPs (A must be greater than B)</li>
+<li>Global constraints involve an arbitrary number of variables express complex relationships efficiently (all-different constraint)</li>
+<li>Soft constraints express preferences rather than strict requirements allow for optimization in over-constrained problems</li>
+</ul>
+<h3 id="variables-and-domains">Variables and domains<a class="headerlink" href="#variables-and-domains" title="Permanent link">⚓︎</a></h3>
+<ul>
+<li>Variables represent the unknowns in the problem can be discrete or continuous</li>
+<li>Domains define the set of possible values for each variable can be finite (integers, enumerated sets) or infinite (real numbers)</li>
+<li>Domain reduction techniques narrow down possible values for variables during problem-solving improve efficiency of search algorithms</li>
+<li>Variable ordering heuristics determine the sequence in which variables are assigned values during search can significantly impact solving speed</li>
+</ul>
+<h2 id="constraint-propagation-techniques">Constraint propagation techniques<a class="headerlink" href="#constraint-propagation-techniques" title="Permanent link">⚓︎</a></h2>
+<ul>
+<li>Constraint propagation forms a fundamental part of solving CSPs efficiently reduces the search space by eliminating inconsistent values</li>
+<li>These techniques work by enforcing local consistency conditions throughout the constraint network before or during the search process</li>
+</ul>
+<h3 id="arc-consistency">Arc consistency<a class="headerlink" href="#arc-consistency" title="Permanent link">⚓︎</a></h3>
+<ul>
+<li>Ensures consistency between pairs of variables connected by a constraint removes values from domains that cannot satisfy binary constraints</li>
+<li>AC-3 algorithm widely used method for achieving arc consistency iteratively revises arcs until no more changes occur</li>
+<li>Supports early detection of inconsistencies in CSPs can significantly prune the search space before backtracking</li>
+<li>Time complexity of AC-3 O(ed³) where e number of constraints and d maximum domain size</li>
+</ul>
+<h3 id="node-consistency">Node consistency<a class="headerlink" href="#node-consistency" title="Permanent link">⚓︎</a></h3>
+<ul>
+<li>Simplest form of consistency checking ensures unary constraints are satisfied for each variable</li>
+<li>Removes values from variable domains that violate unary constraints applied as a preprocessing step before more complex consistency checks</li>
+<li>Efficiently implemented with a single pass through all variables and their unary constraints</li>
+<li>Often combined with arc consistency to achieve stronger pruning of the search space</li>
+</ul>
+<h3 id="path-consistency">Path consistency<a class="headerlink" href="#path-consistency" title="Permanent link">⚓︎</a></h3>
+<ul>
+<li>Enforces consistency among triples of variables ensures any consistent assignment to two variables can be extended to a third</li>
+<li>More powerful than arc consistency but computationally more expensive rarely used in practice due to high time and space complexity</li>
+<li>PC-2 algorithm common method for achieving path consistency works by revising paths in the constraint graph</li>
+<li>Can detect inconsistencies missed by arc consistency useful for certain types of temporal reasoning problems</li>
+</ul>
+<h3 id="k-consistency">K-consistency<a class="headerlink" href="#k-consistency" title="Permanent link">⚓︎</a></h3>
+<ul>
+<li>Generalizes the concept of consistency to k variables ensures any consistent assignment to k-1 variables can be extended to the kth</li>
+<li>Strong k-consistency property achieved when problem is j-consistent for all j ≤ k</li>
+<li>Computational complexity increases rapidly with k rarely used for k &gt; 3 in practice</li>
+<li>Theoretical importance in understanding the structure and complexity of CSPs provides insights into problem difficulty</li>
+</ul>
+<h2 id="search-algorithms-for-csps">Search algorithms for CSPs<a class="headerlink" href="#search-algorithms-for-csps" title="Permanent link">⚓︎</a></h2>
+<ul>
+<li>Search algorithms for CSPs aim to find solutions by systematically exploring the space of possible variable assignments</li>
+<li>These techniques build upon general search algorithms but incorporate CSP-specific heuristics and optimizations to improve efficiency</li>
+</ul>
+<h3 id="backtracking-search">Backtracking search<a class="headerlink" href="#backtracking-search" title="Permanent link">⚓︎</a></h3>
+<ul>
+<li>Depth-first search algorithm assigns values to variables one at a time backtracks when a constraint violation is detected</li>
+<li>Variable ordering heuristics choose which variable to assign next (minimum remaining values, degree heuristic)</li>
+<li>Value ordering heuristics determine the order in which values are tried for a variable (least constraining value)</li>
+<li>Chronological backtracking simple but can be inefficient in highly constrained problems may revisit the same failed states multiple times</li>
+</ul>
+<h3 id="forward-checking">Forward checking<a class="headerlink" href="#forward-checking" title="Permanent link">⚓︎</a></h3>
+<ul>
+<li>Extends backtracking by checking constraints with unassigned variables after each assignment</li>
+<li>Maintains arc consistency between the current variable and future variables reduces future backtracking</li>
+<li>Prunes inconsistent values from the domains of unassigned variables as soon as they become inconsistent</li>
+<li>More efficient than simple backtracking for many problems but may still perform unnecessary work in highly constrained scenarios</li>
+</ul>
+<h3 id="look-ahead-techniques">Look-ahead techniques<a class="headerlink" href="#look-ahead-techniques" title="Permanent link">⚓︎</a></h3>
+<ul>
+<li>Full look-ahead (MAC) maintains arc consistency on all constraints after each assignment most powerful general-purpose CSP algorithm</li>
+<li>Partial look-ahead techniques (forward checking, maintaining arc consistency) balance between pruning and computational cost</li>
+<li>Variable ordering heuristics particularly effective with look-ahead techniques can significantly reduce the search tree size</li>
+<li>Dynamic variable ordering adapts the variable selection during search based on the current state of the problem</li>
+</ul>
+<h3 id="conflict-directed-backjumping">Conflict-directed backjumping<a class="headerlink" href="#conflict-directed-backjumping" title="Permanent link">⚓︎</a></h3>
+<ul>
+<li>Improves upon chronological backtracking by jumping back to the source of a conflict rather than the previous variable</li>
+<li>Maintains a conflict set for each variable records the reasons for failures</li>
+<li>Reduces redundant search by avoiding revisiting assignments that are known to fail</li>
+<li>Can be combined with other techniques (forward checking, look-ahead) for even greater efficiency</li>
+</ul>
+<h2 id="local-search-methods">Local search methods<a class="headerlink" href="#local-search-methods" title="Permanent link">⚓︎</a></h2>
+<ul>
+<li>Local search algorithms for CSPs start with a complete assignment and iteratively improve it by making local changes</li>
+<li>These methods are particularly useful for large-scale problems where complete search is impractical</li>
+</ul>
+<h3 id="min-conflicts-algorithm">Min-conflicts algorithm<a class="headerlink" href="#min-conflicts-algorithm" title="Permanent link">⚓︎</a></h3>
+<ul>
+<li>Starts with a complete assignment (possibly violating some constraints) iteratively selects a variable and changes its value to minimize conflicts</li>
+<li>Highly effective for certain types of problems (n-queens) can quickly find solutions for large instances</li>
+<li>May get stuck in local optima requires restart strategies or other techniques to escape</li>
+<li>Often used in conjunction with other methods as part of a hybrid approach</li>
+</ul>
+<h3 id="tabu-search-for-csps">Tabu search for CSPs<a class="headerlink" href="#tabu-search-for-csps" title="Permanent link">⚓︎</a></h3>
+<ul>
+<li>Extends local search by maintaining a tabu list of recently visited states prevents cycling and encourages exploration of new areas</li>
+<li>Aspiration criteria allow overriding tabu status for particularly good moves</li>
+<li>Effective for escaping local optima can find high-quality solutions for difficult problems</li>
+<li>Requires careful tuning of parameters (tabu list size, aspiration criteria) for optimal performance</li>
+</ul>
+<h3 id="simulated-annealing-in-csps">Simulated annealing in CSPs<a class="headerlink" href="#simulated-annealing-in-csps" title="Permanent link">⚓︎</a></h3>
+<ul>
+<li>Probabilistic technique for approximating the global optimum of a given function</li>
+<li>Accepts worse solutions with a probability that decreases over time allows escaping local optima</li>
+<li>Temperature parameter controls the probability of accepting worse solutions gradually decreased according to a cooling schedule</li>
+<li>Effective for large, complex CSPs where finding the global optimum is computationally infeasible</li>
+</ul>
+<h2 id="constraint-optimization-problems">Constraint optimization problems<a class="headerlink" href="#constraint-optimization-problems" title="Permanent link">⚓︎</a></h2>
+<ul>
+<li>Constraint optimization problems extend CSPs by adding an objective function to be optimized</li>
+<li>These problems combine the challenges of satisfying constraints with finding the best solution among feasible alternatives</li>
+</ul>
+<h3 id="soft-constraints-vs-hard-constraints">Soft constraints vs hard constraints<a class="headerlink" href="#soft-constraints-vs-hard-constraints" title="Permanent link">⚓︎</a></h3>
+<ul>
+<li>Hard constraints must be satisfied for a solution to be valid define the feasible region of the problem</li>
+<li>Soft constraints express preferences or penalties can be violated but at a cost</li>
+<li>Modeling with soft constraints allows for more flexible problem formulation captures real-world scenarios more accurately</li>
+<li>Solving techniques for problems with soft constraints often involve balancing constraint satisfaction with optimization</li>
+</ul>
+<h3 id="weighted-csps">Weighted CSPs<a class="headerlink" href="#weighted-csps" title="Permanent link">⚓︎</a></h3>
+<ul>
+<li>Assign weights or costs to constraint violations objective is to minimize the total weight of violated constraints</li>
+<li>Generalizes classical CSPs allows for modeling problems with conflicting objectives</li>
+<li>Branch and bound algorithms commonly used for solving weighted CSPs prune branches that exceed the current best solution</li>
+<li>Local search techniques (min-conflicts, tabu search) can be adapted for weighted CSPs by considering constraint weights in the objective function</li>
+</ul>
+<h3 id="semiring-based-csps">Semiring-based CSPs<a class="headerlink" href="#semiring-based-csps" title="Permanent link">⚓︎</a></h3>
+<ul>
+<li>Provides a unified framework for representing and solving various types of CSPs and constraint optimization problems</li>
+<li>Based on algebraic structures called semirings allows for modeling different types of preferences and constraints</li>
+<li>Generalizes classical, fuzzy, probabilistic, and weighted CSPs within a single framework</li>
+<li>Solving techniques for semiring-based CSPs often involve adaptations of classical CSP algorithms to work with the semiring operations</li>
+</ul>
+<h2 id="advanced-csp-concepts">Advanced CSP concepts<a class="headerlink" href="#advanced-csp-concepts" title="Permanent link">⚓︎</a></h2>
+<ul>
+<li>Advanced CSP concepts build upon the fundamental techniques to address more complex problem structures and improve solving efficiency</li>
+<li>These methods often exploit problem-specific properties or leverage sophisticated mathematical tools</li>
+</ul>
+<h3 id="symmetry-breaking">Symmetry breaking<a class="headerlink" href="#symmetry-breaking" title="Permanent link">⚓︎</a></h3>
+<ul>
+<li>Identifies and eliminates symmetric solutions reduces the search space without losing distinct solutions</li>
+<li>Static symmetry breaking adds constraints to the problem formulation before search begins</li>
+<li>Dynamic symmetry breaking detects and breaks symmetries during the search process</li>
+<li>Symmetry detection algorithms identify problem symmetries automatically crucial for complex problems with non-obvious symmetries</li>
+</ul>
+<h3 id="global-constraints">Global constraints<a class="headerlink" href="#global-constraints" title="Permanent link">⚓︎</a></h3>
+<ul>
+<li>Encapsulate complex relationships among a set of variables provide more efficient propagation than equivalent sets of simple constraints</li>
+<li>Common global constraints include all-different, cardinality, and cumulative constraints</li>
+<li>Specialized filtering algorithms for global constraints achieve stronger pruning than general-purpose consistency techniques</li>
+<li>Global constraint catalogs collect and categorize known global constraints facilitate problem modeling and solver implementation</li>
+</ul>
+<h3 id="distributed-csps">Distributed CSPs<a class="headerlink" href="#distributed-csps" title="Permanent link">⚓︎</a></h3>
+<ul>
+<li>Extension of CSPs where variables and constraints are distributed among multiple agents</li>
+<li>Applications in multi-agent systems, sensor networks, and distributed scheduling problems</li>
+<li>Algorithms for DisCSPs include asynchronous backtracking, asynchronous weak commitment search, and distributed breakout</li>
+<li>Privacy concerns in DisCSPs lead to the development of algorithms that minimize information sharing between agents</li>
+</ul>
+<h2 id="applications-of-csps">Applications of CSPs<a class="headerlink" href="#applications-of-csps" title="Permanent link">⚓︎</a></h2>
+<ul>
+<li>CSPs find applications in a wide range of real-world problems across various domains</li>
+<li>The flexibility of the CSP framework allows for modeling diverse problems with complex constraints</li>
+</ul>
+<h3 id="scheduling-problems">Scheduling problems<a class="headerlink" href="#scheduling-problems" title="Permanent link">⚓︎</a></h3>
+<ul>
+<li>Job shop scheduling assigns tasks to machines minimizes makespan or other objectives</li>
+<li>Timetabling creates schedules for schools, universities, or transportation systems satisfies various constraints (room capacity, teacher availability)</li>
+<li>Employee rostering assigns shifts to workers considers preferences, qualifications, and labor regulations</li>
+<li>Project scheduling determines start times for project activities respects precedence constraints and resource limitations</li>
+</ul>
+<h3 id="resource-allocation">Resource allocation<a class="headerlink" href="#resource-allocation" title="Permanent link">⚓︎</a></h3>
+<ul>
+<li>Frequency assignment in wireless networks assigns frequencies to transmitters minimizes interference</li>
+<li>Supply chain optimization allocates resources across a network of suppliers, manufacturers, and distributors</li>
+<li>Cloud computing resource allocation assigns virtual machines to physical servers optimizes performance and energy efficiency</li>
+<li>Portfolio optimization allocates financial resources across different investments balances risk and return</li>
+</ul>
+<h3 id="configuration-problems">Configuration problems<a class="headerlink" href="#configuration-problems" title="Permanent link">⚓︎</a></h3>
+<ul>
+<li>Product configuration determines valid combinations of product features satisfies customer requirements and manufacturing constraints</li>
+<li>Network configuration sets up network devices and connections ensures proper functionality and security</li>
+<li>Software configuration management manages dependencies between software components ensures consistent and valid configurations</li>
+</ul>
+<h3 id="temporal-reasoning">Temporal reasoning<a class="headerlink" href="#temporal-reasoning" title="Permanent link">⚓︎</a></h3>
+<ul>
+<li>Planning and scheduling with temporal constraints reasons about durations and deadlines</li>
+<li>Temporal constraint networks represent and reason about qualitative and quantitative temporal relations</li>
+<li>Medical treatment planning schedules treatments respecting temporal constraints between procedures</li>
+<li>
+<p>Logistics and transportation scheduling coordinates deliveries and pickups satisfies time windows and precedence constraints</p>
+</li>
+<li>
+<p>CSP solvers and tools provide implementations of various algorithms and techniques for modeling and solving CSPs</p>
+</li>
+<li>These tools range from low-level libraries to high-level modeling languages and integrated development environments</li>
+</ul>
+<h3 id="popular-csp-libraries">Popular CSP libraries<a class="headerlink" href="#popular-csp-libraries" title="Permanent link">⚓︎</a></h3>
+<ul>
+<li>Gecode open-source C++ library for developing constraint-based systems and applications</li>
+<li>OR-Tools Google&rsquo;s suite of optimization tools includes CSP solver along with other optimization algorithms</li>
+<li>Choco Java library for constraint programming and constraint-based local search</li>
+<li>MiniZinc constraint modeling language and toolchain supports various backend solvers</li>
+</ul>
+<h3 id="modeling-languages-for-csps">Modeling languages for CSPs<a class="headerlink" href="#modeling-languages-for-csps" title="Permanent link">⚓︎</a></h3>
+<ul>
+<li>AMPL algebraic modeling language for mathematical programming problems including CSPs</li>
+<li>OPL IBM&rsquo;s Optimization Programming Language designed for modeling optimization problems</li>
+<li>Essence abstract constraint specification language allows high-level problem descriptions</li>
+<li>XCSP3 XML-based format for representing constraint satisfaction and optimization problems</li>
+</ul>
+<h3 id="benchmarking-and-evaluation">Benchmarking and evaluation<a class="headerlink" href="#benchmarking-and-evaluation" title="Permanent link">⚓︎</a></h3>
+<ul>
+<li>CSPLib collection of CSP problem instances used for benchmarking and comparing algorithms</li>
+<li>XCSP3 competitions evaluate and compare CSP solvers on standardized problem sets</li>
+<li>Performance metrics include runtime, number of backtracks, and solution quality</li>
+<li>Visualization tools help analyze solver behavior and problem structure aid in algorithm development and tuning</li>
+</ul>
+<h2 id="complexity-and-tractability">Complexity and tractability<a class="headerlink" href="#complexity-and-tractability" title="Permanent link">⚓︎</a></h2>
+<ul>
+<li>Understanding the complexity of CSPs is crucial for developing efficient solving strategies and recognizing tractable problem classes</li>
+<li>Complexity analysis provides insights into the fundamental difficulty of different types of CSPs</li>
+</ul>
+<h3 id="complexity-classes-of-csps">Complexity classes of CSPs<a class="headerlink" href="#complexity-classes-of-csps" title="Permanent link">⚓︎</a></h3>
+<ul>
+<li>General CSPs are NP-complete decision problem is in NP, and all NP problems can be reduced to CSP</li>
+<li>Specific CSP instances may belong to different complexity classes depending on their structure and constraints</li>
+<li>
+<h1 id="csp-counting-version-of-csp-determines-the-number-of-solutions-typically-harder-than-the-decision-version">CSP counting version of CSP determines the number of solutions typically harder than the decision version<a class="headerlink" href="#csp-counting-version-of-csp-determines-the-number-of-solutions-typically-harder-than-the-decision-version" title="Permanent link">⚓︎</a></h1>
+</li>
+<li>Parameterized complexity analyzes CSP difficulty in terms of various problem parameters (treewidth, domain size)</li>
+</ul>
+<h3 id="tractable-subclasses">Tractable subclasses<a class="headerlink" href="#tractable-subclasses" title="Permanent link">⚓︎</a></h3>
+<ul>
+<li>Tree-structured CSPs can be solved in polynomial time using dynamic programming</li>
+<li>2-SAT boolean CSP with at most two variables per clause solvable in linear time</li>
+<li>Horn-SAT CSPs with Horn clauses efficiently solvable using unit propagation</li>
+<li>Max-closed CSPs closed under the max operation solvable in polynomial time</li>
+</ul>
+<h3 id="phase-transition-phenomenon">Phase transition phenomenon<a class="headerlink" href="#phase-transition-phenomenon" title="Permanent link">⚓︎</a></h3>
+<ul>
+<li>Describes the abrupt change in problem difficulty as a control parameter varies</li>
+<li>For random CSPs, phase transition occurs at a critical constraint density</li>
+<li>Easy-hard-easy pattern observed as the number of constraints increases</li>
+<li>Understanding phase transitions helps in algorithm design and problem generation for benchmarking</li>
+</ul>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": ["toc.autohide"], "search": "../../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.83f73b43.min.js"></script>
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/tablesort/5.2.1/tablesort.min.js"></script>
+      
+        <script src="../../_javascript/tables.js"></script>
+      
+    
+  </body>
+</html>

@@ -2,22 +2,26 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://diacea.kyleking.me/</loc>
-         <lastmod>2024-12-13</lastmod>
+         <lastmod>2025-04-04</lastmod>
     </url>
     <url>
          <loc>https://diacea.kyleking.me/docs/CHANGELOG/</loc>
-         <lastmod>2024-12-13</lastmod>
+         <lastmod>2025-04-04</lastmod>
     </url>
     <url>
          <loc>https://diacea.kyleking.me/docs/DEVELOPER_GUIDE/</loc>
-         <lastmod>2024-12-13</lastmod>
+         <lastmod>2025-04-04</lastmod>
     </url>
     <url>
          <loc>https://diacea.kyleking.me/docs/STYLE_GUIDE/</loc>
-         <lastmod>2024-12-13</lastmod>
+         <lastmod>2025-04-04</lastmod>
+    </url>
+    <url>
+         <loc>https://diacea.kyleking.me/notes/Constraint%20satisfaction%20problems%20Combinatorial%20Optimization%20Class%20Notes%20Fiveable/</loc>
+         <lastmod>2025-04-04</lastmod>
     </url>
     <url>
          <loc>https://diacea.kyleking.me/reference/diacea/experiments/</loc>
-         <lastmod>2024-12-13</lastmod>
+         <lastmod>2025-04-04</lastmod>
     </url>
 </urlset>
