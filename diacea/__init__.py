@@ -10,6 +10,6 @@ configure_runtime_type_checking_mode()
 
 # == Above code must always be first ==
 
-from .plantuml import generate_plantuml
+from .plantuml import generate_c4_plantuml, generate_plantuml
 
-__all__ = ('__version__', '__pkg_name__', 'generate_plantuml')
+__all__ = ('__version__', '__pkg_name__', 'generate_plantuml', 'generate_c4_plantuml')

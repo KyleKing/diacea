@@ -201,4 +201,5 @@ def test_cli_with_real_test_data(tmp_path: Path, capsys):
     content = output_file.read_text()
     assert '@startuml' in content
     assert '@enduml' in content
-    assert 'component' in content or 'rectangle' in content
+    # Default format is C4, so check for C4 elements
+    assert 'System_Boundary' in content or 'Container' in content or 'component' in content

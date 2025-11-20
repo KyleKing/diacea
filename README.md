@@ -28,11 +28,14 @@ pip install diacea
 ### Command Line
 
 ```bash
-# Basic usage
+# Basic usage (default: C4-PlantUML format)
 diacea -i diagram.json -o diagram.puml
 
-# Specify algorithm
-diacea -i diagram.json -a quadtree_approach
+# Use basic PlantUML format
+diacea -i diagram.json -f basic
+
+# Specify algorithm (for basic format)
+diacea -i diagram.json -f basic -a quadtree_approach
 
 # Output defaults to input filename with .puml extension
 diacea -i diagram.json
@@ -69,7 +72,7 @@ This project is in early development. Current capabilities:
 - ✅ Test coverage for core conversion logic
 - ✅ Basic PlantUML generation
 - ✅ CLI interface
-- 🚧 C4-PlantUML support (planned)
+- ✅ C4-PlantUML support
 
 See [SPEC.md](SPEC.md) for detailed use cases and limitations.
 

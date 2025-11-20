@@ -7,7 +7,7 @@ import json
 import sys
 from pathlib import Path
 
-from diacea import __version__, generate_plantuml
+from diacea import __version__, generate_c4_plantuml, generate_plantuml
 from diacea.experiments import (
     convert_to_relative,
     csp_solver,
@@ -60,6 +60,13 @@ def main(argv: list[str] | None = None) -> int:
         help='Conversion algorithm to use (default: graph_based_approach)',
     )
     parser.add_argument(
+        '-f',
+        '--format',
+        default='c4',
+        choices=['basic', 'c4'],
+        help='Output format: basic PlantUML or C4-PlantUML (default: c4)',
+    )
+    parser.add_argument(
         '--version',
         action='version',
         version=f'%(prog)s {__version__}',
@@ -95,17 +102,16 @@ def main(argv: list[str] | None = None) -> int:
     if not elements:
         print(f'Warning: No elements found in {args.input}', file=sys.stderr)
 
-    # Convert to relative format
-    algorithm_func = ALGORITHMS[args.algorithm]
+    # Generate PlantUML based on format
     try:
-        relative_data = algorithm_func(elements)
-    except Exception as e:
-        print(f'Error: Conversion failed with {args.algorithm}: {e}', file=sys.stderr)
-        return 1
-
-    # Generate PlantUML
-    try:
-        plantuml = generate_plantuml(relative_data)
+        if args.format == 'c4':
+            # C4 format works directly with Excalidraw elements
+            plantuml = generate_c4_plantuml(elements)
+        else:
+            # Basic format uses relative conversion first
+            algorithm_func = ALGORITHMS[args.algorithm]
+            relative_data = algorithm_func(elements)
+            plantuml = generate_plantuml(relative_data)
     except Exception as e:
         print(f'Error: PlantUML generation failed: {e}', file=sys.stderr)
         return 1
