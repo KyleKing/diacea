@@ -55,6 +55,9 @@ python-constraint2 = "^2.0.0b8"
 [tool.poetry.group.dev.dependencies]
 calcipy = {extras = ["doc", "lint", "nox", "tags", "test", "types"], version = ">=5.0.0"}
 
+[tool.poetry.scripts]
+diacea = "diacea.cli:main"
+
 [tool.poetry.urls]
 "Bug Tracker" = "https://github.com/kyleking/diacea/issues"
 "Changelog" = "https://github.com/kyleking/diacea/blob/main/docs/docs/CHANGELOG.md"

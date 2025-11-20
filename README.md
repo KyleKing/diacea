@@ -25,6 +25,21 @@ pip install diacea
 
 ## Quick Start
 
+### Command Line
+
+```bash
+# Basic usage
+diacea -i diagram.json -o diagram.puml
+
+# Specify algorithm
+diacea -i diagram.json -a quadtree_approach
+
+# Output defaults to input filename with .puml extension
+diacea -i diagram.json
+```
+
+### Python API
+
 ```python
 import json
 from diacea.experiments import graph_based_approach
@@ -53,7 +68,7 @@ This project is in early development. Current capabilities:
 - ✅ Multiple algorithm implementations for spatial analysis
 - ✅ Test coverage for core conversion logic
 - ✅ Basic PlantUML generation
-- 🚧 CLI interface (planned)
+- ✅ CLI interface
 - 🚧 C4-PlantUML support (planned)
 
 See [SPEC.md](SPEC.md) for detailed use cases and limitations.
