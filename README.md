@@ -28,6 +28,7 @@ pip install diacea
 ```python
 import json
 from diacea.experiments import graph_based_approach
+from diacea import generate_plantuml
 
 # Load Excalidraw JSON
 with open('diagram.json') as f:
@@ -36,7 +37,12 @@ with open('diagram.json') as f:
 # Convert to relative format
 relative_data = graph_based_approach(excalidraw_data['elements'])
 
-# TODO: Convert to PlantUML (coming soon)
+# Convert to PlantUML
+plantuml = generate_plantuml(relative_data)
+
+# Save to file
+with open('output.puml', 'w') as f:
+    f.write(plantuml)
 ```
 
 ## Project Status
@@ -46,7 +52,7 @@ This project is in early development. Current capabilities:
 - ✅ Convert Excalidraw absolute coordinates to relative relationships
 - ✅ Multiple algorithm implementations for spatial analysis
 - ✅ Test coverage for core conversion logic
-- 🚧 PlantUML generation (in progress)
+- ✅ Basic PlantUML generation
 - 🚧 CLI interface (planned)
 - 🚧 C4-PlantUML support (planned)
 
