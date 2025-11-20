@@ -283,7 +283,7 @@ def generate_plantuml(relative_data: list[dict]) -> str:
         label = rect.get('label', 'Box')
         rect_id = rect['id']
 
-        # Sanitize ID for PlantUML (use only first 8 chars to match golang style)
+        # Sanitize ID for PlantUML (use only first 8 chars)
         sanitized_id = _sanitize_id(rect_id)
 
         # For basic PlantUML, we use 'component' or 'rectangle'
@@ -323,6 +323,6 @@ def _sanitize_id(element_id: str) -> str:
     Returns:
         Sanitized ID suitable for PlantUML (first 8 chars, prefixed with Element_)
     """
-    # Take first 8 characters to match golang implementation
+    # Take first 8 characters for consistent ID format
     short_id = element_id[:8] if len(element_id) >= 8 else element_id
     return f'Element_{short_id}'

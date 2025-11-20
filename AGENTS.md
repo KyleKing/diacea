@@ -26,7 +26,6 @@ diacea/
 ├── docs/                      # Documentation
 │   ├── docs/                  # MkDocs documentation
 │   └── notes/                 # Development notes
-├── _golang/                   # Legacy Go implementation (to be removed)
 └── tickets/                   # Incremental project tickets
 ```
 
@@ -156,10 +155,10 @@ poetry run pytest
 
 ### Adding PlantUML Generation
 
-1. Create new module `diacea/plantuml.py`
+1. Create new module `diacea/plantuml.py` (already implemented)
 2. Implement function to convert relative format to PlantUML
-3. Reference golang implementation in `_golang/pkg/converter/converter.go` for logic
-4. Add tests with expected PlantUML output
+3. Add tests with expected PlantUML output
+4. Support both basic PlantUML and C4-PlantUML formats
 
 ## Common Tasks
 
@@ -184,17 +183,18 @@ Improvement: Better handling of arrow bindings, midpoint detection for labels
 4. Provide clear error messages
 5. Handle edge cases gracefully
 
-### Task: Port Golang Functionality
+### Task: Enhance PlantUML Generation
 
-The `_golang/pkg/converter/converter.go` file contains:
-- C4-PlantUML format generation
+The Python implementation in `diacea/plantuml.py` includes:
+- C4-PlantUML format generation (implemented)
 - System boundary detection (size > 500 or text contains "cloud"/"eks")
 - Person detection (diamond shapes)
 - Database detection (ellipses or text contains "database")
 - Arrow label detection (bound elements or nearby text)
 - Nested system boundary handling
+- Basic PlantUML format generation
 
-Port this logic to Python in `diacea/plantuml.py`.
+Future enhancements can improve detection logic or add new element types.
 
 ## Testing Strategy
 
@@ -230,10 +230,10 @@ Expected output is hardcoded in `tests/test_experiment.py` for regression testin
 - **Don't modify `experiments.py` algorithms** unless fixing bugs - they're working implementations
 - **Test all algorithms** when making changes - use `test_experiment.py` as reference
 - **Follow existing patterns** - the codebase has consistent style
-- **Check golang implementation** for PlantUML generation logic before implementing
 - **Maintain backward compatibility** - existing relative format output should continue working
 - **Use type hints** - the project uses strict type checking
 - **Run linting** - use `./run lint.fix` before committing
+- **PlantUML generation** is in `diacea/plantuml.py` with both basic and C4 formats
 
 ## Quick Reference
 
@@ -244,5 +244,6 @@ Expected output is hardcoded in `tests/test_experiment.py` for regression testin
 
 **Test data location**: `tests/data/excalidraw.json`
 **Main algorithms**: `diacea/experiments.py`
-**Golang reference**: `_golang/pkg/converter/converter.go` (to be removed)
+**PlantUML generation**: `diacea/plantuml.py`
+**CLI interface**: `diacea/cli.py`
 
