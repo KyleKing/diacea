@@ -1,0 +1,26 @@
+%% C4 Container Diagram - Mermaid C4
+%% Shows internal structure of the E-Commerce system
+
+C4Container
+    title E-Commerce System - Container Diagram
+
+    Person(customer, "Customer", "Online shopper")
+
+    Container_Boundary(ecommerce, "E-Commerce System") {
+        Container(web, "Web Application", "React, JavaScript", "Provides e-commerce functionality via web browser")
+        Container(api, "API Application", "Node.js, Express", "Provides e-commerce functionality via REST API")
+        ContainerDb(db, "Database", "PostgreSQL", "Stores product catalog, orders, customer data")
+        Container(cache, "Cache", "Redis", "Stores session data and frequently accessed data")
+        ContainerQueue(queue, "Message Queue", "RabbitMQ", "Handles async order processing")
+    }
+
+    System_Ext(payment, "Payment Gateway", "Stripe API")
+    System_Ext(email, "Email Service", "SendGrid")
+
+    Rel(customer, web, "Uses", "HTTPS")
+    Rel(web, api, "Makes API calls to", "JSON/HTTPS")
+    Rel(api, db, "Reads/Writes", "TCP/SQL")
+    Rel(api, cache, "Reads/Writes", "Redis Protocol")
+    Rel(api, queue, "Publishes messages to", "AMQP")
+    Rel(api, payment, "Processes payments via", "HTTPS/JSON")
+    Rel(api, email, "Sends emails via", "HTTPS/JSON")

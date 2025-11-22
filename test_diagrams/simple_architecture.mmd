@@ -1,0 +1,20 @@
+%% Simple Microservices Architecture - Mermaid Flowchart
+%% Use: mermaid-cli or online at https://mermaid.live/
+
+flowchart LR
+    User[User] --> API[API Gateway]
+    API --> Auth[Auth Service]
+    API --> Orders[Order Service]
+    API --> Products[Product Service]
+
+    Auth --> AuthDB[(Auth Database)]
+    Orders --> OrderDB[(Order Database)]
+    Products --> ProductDB[(Product Database)]
+
+    Orders --> Queue[Message Queue]
+    Queue --> Inventory[Inventory Service]
+    Inventory --> InvDB[(Inventory Database)]
+
+    style User fill:#87CEEB
+    style API fill:#90EE90
+    style Queue fill:#FFD700

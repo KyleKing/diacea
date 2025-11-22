@@ -1,0 +1,79 @@
+# Simple Microservices Architecture - D2 Format
+# Render with: d2 simple_architecture.d2 output.svg
+# Or online at: https://play.d2lang.com/
+
+direction: right
+
+user: User {
+  shape: person
+  style: {
+    fill: lightblue
+  }
+}
+
+api_gateway: API Gateway {
+  shape: hexagon
+  style: {
+    fill: lightgreen
+  }
+}
+
+user -> api_gateway: HTTP Requests
+
+services: Services {
+  auth: Auth Service {
+    shape: rectangle
+  }
+
+  orders: Order Service {
+    shape: rectangle
+  }
+
+  products: Product Service {
+    shape: rectangle
+  }
+
+  inventory: Inventory Service {
+    shape: rectangle
+  }
+}
+
+databases: Databases {
+  auth_db: Auth DB {
+    shape: cylinder
+  }
+
+  order_db: Order DB {
+    shape: cylinder
+  }
+
+  product_db: Product DB {
+    shape: cylinder
+  }
+
+  inventory_db: Inventory DB {
+    shape: cylinder
+  }
+}
+
+queue: Message Queue {
+  shape: queue
+  style: {
+    fill: gold
+  }
+}
+
+# Connections from API Gateway to Services
+api_gateway -> services.auth: Authenticate
+api_gateway -> services.orders: Place Order
+api_gateway -> services.products: Get Products
+
+# Service to Database connections
+services.auth -> databases.auth_db: Query
+services.orders -> databases.order_db: Query
+services.products -> databases.product_db: Query
+services.inventory -> databases.inventory_db: Query
+
+# Async messaging
+services.orders -> queue: Order Placed Event
+queue -> services.inventory: Process Order
