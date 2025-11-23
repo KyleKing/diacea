@@ -10,6 +10,8 @@ from typing import Optional
 
 from .generators import (
     C4PlantUMLGenerator,
+    D2Config,
+    D2Generator,
     GraphVizConfig,
     GraphVizGenerator,
     MermaidGenerator,
@@ -64,6 +66,13 @@ def main(argv: Optional[list[str]] = None) -> int:
             )
             graphviz_gen = GraphVizGenerator(config=config)
             output = graphviz_gen.generate(diagram)
+        elif args.format == "d2":
+            d2_config = D2Config(
+                direction=args.d2_direction,
+                sketch=args.d2_sketch,
+            )
+            d2_gen = D2Generator(config=d2_config)
+            output = d2_gen.generate(diagram)
         else:
             print(f"Error: Unknown format: {args.format}", file=sys.stderr)
             return 1
@@ -123,7 +132,7 @@ def create_parser() -> argparse.ArgumentParser:
         "-f",
         "--format",
         required=True,
-        choices=["plantuml", "c4", "mermaid", "graphviz"],
+        choices=["plantuml", "c4", "mermaid", "graphviz", "d2"],
         help="Output format",
     )
 
@@ -147,6 +156,19 @@ def create_parser() -> argparse.ArgumentParser:
         default="digraph",
         choices=["digraph", "graph"],
         help="GraphViz graph type: digraph=directed, graph=undirected (default: digraph)",
+    )
+
+    d2_group = parser.add_argument_group("d2 options")
+    d2_group.add_argument(
+        "--d2-direction",
+        choices=["up", "down", "left", "right"],
+        help="D2 layout direction (default: auto-detect)",
+    )
+
+    d2_group.add_argument(
+        "--d2-sketch",
+        action="store_true",
+        help="Use D2 sketch mode (hand-drawn look)",
     )
 
     # General options
