@@ -44,26 +44,39 @@ Make code changes and run specific tasks as needed:
 
 ```
 diacea/
-├── diacea/              # Main package
-│   ├── __init__.py      # Package initialization
-│   ├── experiments.py   # Conversion algorithms
-│   └── _runtime_type_check_setup.py  # Type checking config
-├── tests/               # Test suite
-│   ├── test_experiment.py  # Algorithm tests
-│   └── data/            # Test fixtures
-│       └── excalidraw.json
+├── diacea/
+│   ├── __init__.py           # Package version
+│   ├── cli.py                # Main CLI entry point
+│   ├── workspace_cli.py      # Workspace management CLI
+│   ├── workspace_format.py   # Workspace file format (YAML)
+│   ├── ir/                   # Intermediate Representation
+│   │   ├── elements.py       # Core IR elements (Shape, Connection, etc.)
+│   │   ├── semantic.py       # Semantic type inference
+│   │   └── workspace.py      # Workspace IR classes
+│   ├── parsers/              # Input format parsers
+│   │   ├── excalidraw.py     # Excalidraw JSON parser
+│   │   ├── tldraw.py         # TLDraw JSON parser
+│   │   └── svg.py            # SVG parser
+│   └── generators/           # Output format generators
+│       ├── plantuml.py       # PlantUML and C4-PlantUML
+│       ├── mermaid.py        # Mermaid diagrams
+│       ├── graphviz.py       # GraphViz DOT format
+│       └── d2.py             # D2 diagrams
+├── tests/
+│   ├── test_ir_integration.py    # IR and generator tests
+│   ├── test_tldraw_parser.py     # TLDraw parser tests
+│   ├── test_svg_parser.py        # SVG parser tests
+│   └── test_workspace.py         # Workspace tests
 ├── scripts/             # Utility scripts
 └── docs/                # Documentation
 ```
 
 ### Key Modules
 
-- **`diacea.experiments`**: Contains all conversion algorithms:
-  - `convert_to_relative()`: Imperative approach
-  - `rule_based_approach()`: Rule-based conversion
-  - `csp_solver()`: Constraint satisfaction problem solver
-  - `quadtree_approach()`: QuadTree spatial indexing
-  - `graph_based_approach()`: NetworkX graph-based conversion
+- **`diacea.ir`**: Intermediate Representation for format-agnostic diagram conversion
+- **`diacea.parsers`**: Input format parsers (Excalidraw, TLDraw, SVG)
+- **`diacea.generators`**: Output format generators (PlantUML, C4, Mermaid, GraphViz, D2)
+- **`diacea.cli`**: Command-line interface
 
 ## Testing
 
@@ -120,7 +133,7 @@ type(scope): description
 - Examples:
   - `fix(converter): bug in parent rectangle detection`
   - `feat(cli): add command-line interface`
-  - `refactor(experiments): consolidate algorithm implementations`
+  - `refactor(parsers): consolidate input format detection`
 
 ### Python Style
 
@@ -192,7 +205,7 @@ Use these scripts for prototyping or creating reference examples.
 Generated on: 2024-12-12
 <!-- {cte} -->
 
-Note: Coverage is currently limited as the main conversion logic in `experiments.py` is not yet fully covered.
+Note: Coverage table may be outdated. Run `./run test` for current coverage.
 
 ## Development Workflow
 
