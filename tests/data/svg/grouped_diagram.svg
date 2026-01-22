@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="700" height="500" viewBox="0 0 700 500">
+  <!-- System boundary group -->
+  <g id="system_boundary" data-label="Microservices System">
+    <!-- Container for services -->
+    <rect x="50" y="50" width="600" height="400"
+          fill="none" stroke="#1976D2" stroke-width="3" stroke-dasharray="10,5"/>
+
+    <!-- Service 1 -->
+    <rect id="service1" x="80" y="100" width="150" height="100"
+          fill="#E3F2FD" stroke="#1565C0" stroke-width="2"
+          data-semantic="service"/>
+    <text x="120" y="155" font-size="14" fill="#000">User Service</text>
+
+    <!-- Service 2 -->
+    <rect id="service2" x="280" y="100" width="150" height="100"
+          fill="#F3E5F5" stroke="#6A1B9A" stroke-width="2"
+          data-semantic="service"/>
+    <text x="310" y="155" font-size="14" fill="#000">Order Service</text>
+
+    <!-- Service 3 -->
+    <rect id="service3" x="480" y="100" width="150" height="100"
+          fill="#E8F5E9" stroke="#2E7D32" stroke-width="2"
+          data-semantic="service"/>
+    <text x="500" y="155" font-size="14" fill="#000">Payment Service</text>
+
+    <!-- Database group -->
+    <g id="data_layer" data-label="Data Layer">
+      <!-- Database 1 -->
+      <ellipse id="db1" cx="155" cy="320" rx="70" ry="40"
+               fill="#C8E6C9" stroke="#1B5E20" stroke-width="2"
+               data-semantic="database"/>
+      <text x="130" y="325" font-size="12" fill="#000">Users DB</text>
+
+      <!-- Database 2 -->
+      <ellipse id="db2" cx="355" cy="320" rx="70" ry="40"
+               fill="#C8E6C9" stroke="#1B5E20" stroke-width="2"
+               data-semantic="database"/>
+      <text x="325" y="325" font-size="12" fill="#000">Orders DB</text>
+
+      <!-- Database 3 -->
+      <ellipse id="db3" cx="555" cy="320" rx="70" ry="40"
+               fill="#C8E6C9" stroke="#1B5E20" stroke-width="2"
+               data-semantic="database"/>
+      <text x="515" y="325" font-size="12" fill="#000">Payments DB</text>
+    </g>
+  </g>
+
+  <!-- External user -->
+  <circle id="user" cx="350" cy="30" r="25"
+          fill="#FFCCBC" stroke="#BF360C" stroke-width="2"
+          data-semantic="person"/>
+  <text x="335" y="10" font-size="12" fill="#000">Customer</text>
+</svg>

@@ -17,21 +17,27 @@ from .generators import (
     MermaidGenerator,
     PlantUMLGenerator,
 )
-from .parsers import ExcalidrawParser, TLDrawParser
+from .parsers import ExcalidrawParser, SVGParser, TLDrawParser
 
 
-def detect_input_format(data: dict) -> str:
-    """Detect input format from JSON structure.
+def detect_input_format(data: dict | str) -> str:
+    """Detect input format from data structure.
 
     Args:
-        data: JSON data dictionary
+        data: JSON data dictionary or string content
 
     Returns:
-        Format name ('tldraw' or 'excalidraw')
+        Format name ('svg', 'tldraw', or 'excalidraw')
 
     Raises:
         ValueError: If format cannot be detected
     """
+    # Check if it's string content (SVG)
+    if isinstance(data, str):
+        if data.strip().startswith("<?xml") or data.strip().startswith("<svg"):
+            return "svg"
+        raise ValueError("Unknown string format - expected SVG XML")
+
     # TLDraw has "document" -> "pages" structure
     if "document" in data and "pages" in data.get("document", {}):
         return "tldraw"
@@ -40,7 +46,7 @@ def detect_input_format(data: dict) -> str:
     if "elements" in data or data.get("type") == "excalidraw/clipboard":
         return "excalidraw"
 
-    raise ValueError("Unknown input format - expected TLDraw or Excalidraw JSON")
+    raise ValueError("Unknown input format - expected SVG, TLDraw, or Excalidraw")
 
 
 def main(argv: Optional[list[str]] = None) -> int:
@@ -56,9 +62,9 @@ def main(argv: Optional[list[str]] = None) -> int:
     args = parser.parse_args(argv)
 
     try:
-        # Read input file
+        # Read input file (as text first to detect SVG)
         if args.input == "-":
-            input_data = json.load(sys.stdin)
+            content = sys.stdin.read()
         else:
             input_path = Path(args.input)
             if not input_path.exists():
@@ -66,16 +72,34 @@ def main(argv: Optional[list[str]] = None) -> int:
                 return 1
 
             with open(input_path) as f:
-                input_data = json.load(f)
+                content = f.read()
 
         # Detect or use specified input format
         if args.input_format == "auto":
-            input_format = detect_input_format(input_data)
+            # Try to detect format from content
+            if content.strip().startswith("<?xml") or content.strip().startswith("<svg"):
+                input_format = "svg"
+                input_data = content
+            else:
+                # Try parsing as JSON
+                try:
+                    input_data = json.loads(content)
+                    input_format = detect_input_format(input_data)
+                except json.JSONDecodeError:
+                    print("Error: Could not detect input format", file=sys.stderr)
+                    return 1
         else:
             input_format = args.input_format
+            if input_format == "svg":
+                input_data = content
+            else:
+                input_data = json.loads(content)
 
         # Parse input to IR based on format
-        if input_format == "tldraw":
+        if input_format == "svg":
+            input_parser = SVGParser()
+            diagram = input_parser.parse(input_data)
+        elif input_format == "tldraw":
             input_parser = TLDrawParser()
             diagram = input_parser.parse(input_data)
         elif input_format == "excalidraw":
@@ -154,7 +178,7 @@ def create_parser() -> argparse.ArgumentParser:
         "-i",
         "--input",
         required=True,
-        help="Input file (Excalidraw or TLDraw JSON) or - for stdin",
+        help="Input file (Excalidraw/TLDraw JSON, SVG) or - for stdin",
     )
 
     parser.add_argument(
@@ -167,7 +191,7 @@ def create_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--input-format",
         default="auto",
-        choices=["auto", "excalidraw", "tldraw"],
+        choices=["auto", "excalidraw", "tldraw", "svg"],
         help="Input format (default: auto-detect)",
     )
 
