@@ -1,0 +1,41 @@
+"""Intermediate Representation (IR) for diagrams.
+
+This package provides format-agnostic representation of diagrams.
+"""
+
+from .base import Generator, Parser
+from .elements import (
+    Connection,
+    Diagram,
+    Dimensions,
+    Element,
+    Group,
+    Point,
+    Shape,
+    Style,
+    Text,
+    IR_VERSION,
+)
+from .semantic import SemanticType, infer_semantic_type, validate_confidence
+
+__all__ = [
+    # Base classes
+    "Parser",
+    "Generator",
+    # Core elements
+    "Point",
+    "Dimensions",
+    "Style",
+    "Element",
+    "Shape",
+    "Connection",
+    "Text",
+    "Group",
+    "Diagram",
+    # Semantic
+    "SemanticType",
+    "infer_semantic_type",
+    "validate_confidence",
+    # Version
+    "IR_VERSION",
+]
