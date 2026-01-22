@@ -113,6 +113,9 @@ class PlantUMLGenerator(Generator):
         escaped = label.replace("\\", "\\\\")
         escaped = escaped.replace('"', '\\"')
         escaped = escaped.replace("\n", "\\n")
+        escaped = escaped.replace("<", "~<")
+        escaped = escaped.replace(">", "~>")
+        escaped = escaped.replace("&", "&amp;")
         return escaped
 
 
@@ -292,4 +295,7 @@ class C4PlantUMLGenerator(Generator):
         escaped = label.replace("\\", "\\\\")
         escaped = escaped.replace('"', '\\"')
         escaped = escaped.replace("\n", "\\n")
+        escaped = escaped.replace("<", "~<")
+        escaped = escaped.replace(">", "~>")
+        escaped = escaped.replace("&", "&amp;")
         return escaped

@@ -5,6 +5,7 @@ Excalidraw format: https://docs.excalidraw.com/
 
 from __future__ import annotations
 
+import logging
 from typing import Any
 
 from ..ir import (
@@ -20,6 +21,8 @@ from ..ir import (
     Text,
     infer_semantic_type,
 )
+
+_logger = logging.getLogger(__name__)
 
 
 class ExcalidrawParser(Parser):
@@ -182,9 +185,12 @@ class ExcalidrawParser(Parser):
 
     def _parse_arrow(self, elem: dict, shapes: list[Shape]) -> Connection | None:
         """Parse Excalidraw arrow to IR Connection."""
+        arrow_id = elem.get("id", "unknown")
+
         # Get arrow points
         points = elem.get("points", [])
         if len(points) < 2:
+            _logger.debug("Dropping arrow '%s': insufficient points (%d < 2)", arrow_id, len(points))
             return None
 
         # Calculate absolute start and end points
@@ -197,7 +203,13 @@ class ExcalidrawParser(Parser):
         from_id, to_id = self._find_arrow_connections(elem, shapes, start_point, end_point)
 
         if not from_id or not to_id:
-            return None  # Can't create connection without both endpoints
+            _logger.debug(
+                "Dropping arrow '%s': missing endpoint(s) (from_id=%s, to_id=%s)",
+                arrow_id,
+                from_id,
+                to_id,
+            )
+            return None
 
         # Determine connection type
         start_arrowhead = elem.get("startArrowhead")

@@ -312,7 +312,8 @@ class MermaidGenerator(Generator):
 
     def _escape_label(self, label: str) -> str:
         """Escape label for Mermaid flowchart node syntax."""
-        escaped = label.replace('"', "#quot;")
+        escaped = label.replace("&", "&amp;")
+        escaped = escaped.replace('"', "#quot;")
         escaped = escaped.replace("<", "&lt;")
         escaped = escaped.replace(">", "&gt;")
         escaped = escaped.replace("\n", "<br/>")
@@ -322,11 +323,17 @@ class MermaidGenerator(Generator):
         """Escape label for Mermaid quoted string contexts (C4, sequence)."""
         escaped = label.replace("\\", "\\\\")
         escaped = escaped.replace('"', '\\"')
+        escaped = escaped.replace("&", "&amp;")
+        escaped = escaped.replace("<", "&lt;")
+        escaped = escaped.replace(">", "&gt;")
         escaped = escaped.replace("\n", "<br/>")
         return escaped
 
     def _escape_pipe_label(self, label: str) -> str:
         """Escape label for Mermaid pipe-delimited connection labels."""
-        escaped = label.replace("|", "&#124;")
+        escaped = label.replace("&", "&amp;")
+        escaped = escaped.replace("|", "&#124;")
+        escaped = escaped.replace("<", "&lt;")
+        escaped = escaped.replace(">", "&gt;")
         escaped = escaped.replace("\n", "<br/>")
         return escaped

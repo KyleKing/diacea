@@ -242,6 +242,70 @@ class TestLabelEscaping:
         output = gen.generate(diagram)
         assert "\\n" in output
 
+    def test_plantuml_escapes_ampersand(self):
+        diagram = self._make_diagram_with_label("A & B")
+        gen = PlantUMLGenerator()
+        output = gen.generate(diagram)
+        assert "&amp;" in output
+
+    def test_plantuml_escapes_angle_brackets(self):
+        diagram = self._make_diagram_with_label("Test <html>")
+        gen = PlantUMLGenerator()
+        output = gen.generate(diagram)
+        assert "~<" in output
+        assert "~>" in output
+
+    def test_c4plantuml_escapes_ampersand(self):
+        diagram = self._make_diagram_with_label("A & B")
+        gen = C4PlantUMLGenerator()
+        output = gen.generate(diagram)
+        assert "&amp;" in output
+
+    def test_c4plantuml_escapes_angle_brackets(self):
+        diagram = self._make_diagram_with_label("Test <html>")
+        gen = C4PlantUMLGenerator()
+        output = gen.generate(diagram)
+        assert "~<" in output
+        assert "~>" in output
+
+    def test_mermaid_escapes_ampersand(self):
+        diagram = self._make_diagram_with_label("A & B")
+        gen = MermaidGenerator(diagram_type="flowchart")
+        output = gen.generate(diagram)
+        assert "&amp;" in output
+
+    def test_mermaid_c4_escapes_special_chars(self):
+        diagram = self._make_diagram_with_label('Test "quoted" & <xml>')
+        diagram.elements[0].semantic_type = "person"
+        gen = MermaidGenerator(diagram_type="c4")
+        output = gen.generate(diagram)
+        assert '\\"' in output
+        assert "&amp;" in output
+        assert "&lt;" in output
+        assert "&gt;" in output
+
+    def test_mermaid_connection_escapes_ampersand(self):
+        diagram = self._make_diagram_with_connection_label("A & B")
+        gen = MermaidGenerator(diagram_type="flowchart")
+        output = gen.generate(diagram)
+        assert "&amp;" in output
+
+    def test_combined_special_chars_plantuml(self):
+        diagram = self._make_diagram_with_label('Hello "World" & <Test>')
+        gen = PlantUMLGenerator()
+        output = gen.generate(diagram)
+        assert '\\"World\\"' in output
+        assert "&amp;" in output
+        assert "~<Test~>" in output
+
+    def test_combined_special_chars_mermaid(self):
+        diagram = self._make_diagram_with_label('Hello "World" & <Test>')
+        gen = MermaidGenerator(diagram_type="flowchart")
+        output = gen.generate(diagram)
+        assert "#quot;" in output
+        assert "&amp;" in output
+        assert "&lt;Test&gt;" in output
+
 
 class TestEdgeCases:
     """Test edge cases and boundary conditions."""
@@ -377,6 +441,89 @@ class TestEdgeCases:
 
         mermaid = MermaidGenerator(diagram_type="flowchart").generate(diagram)
         assert "<-->" in mermaid
+
+    def test_connections_only_diagram(self):
+        conn = Connection(
+            id="conn",
+            from_id="a",
+            to_id="b",
+            label="link",
+            connection_type="directed",
+            position=Point(x=100.0, y=25.0),
+            size=Dimensions(width=100.0, height=0.0),
+            style=Style(),
+        )
+        diagram = Diagram(id="test", elements=[conn])
+
+        plantuml = PlantUMLGenerator().generate(diagram)
+        assert "@startuml" in plantuml
+        assert "@enduml" in plantuml
+        assert "a --> b" in plantuml
+
+        mermaid = MermaidGenerator(diagram_type="flowchart").generate(diagram)
+        assert "flowchart" in mermaid
+        assert "a -->" in mermaid
+
+    def test_deeply_nested_groups(self):
+        from diacea.ir.elements import Group
+
+        innermost = Shape(
+            id="inner",
+            label="Inner",
+            shape_type="rectangle",
+            position=Point(x=50.0, y=50.0),
+            size=Dimensions(width=50.0, height=30.0),
+            style=Style(),
+        )
+        level2 = Group(
+            id="level2",
+            label="Level 2",
+            position=Point(x=30.0, y=30.0),
+            size=Dimensions(width=100.0, height=80.0),
+            style=Style(),
+            children=["inner"],
+        )
+        level1 = Group(
+            id="level1",
+            label="Level 1",
+            position=Point(x=10.0, y=10.0),
+            size=Dimensions(width=150.0, height=120.0),
+            style=Style(),
+            children=["level2"],
+        )
+        outer = Group(
+            id="outer",
+            label="Outer",
+            position=Point(x=0.0, y=0.0),
+            size=Dimensions(width=200.0, height=160.0),
+            style=Style(),
+            children=["level1"],
+        )
+        diagram = Diagram(id="test", elements=[innermost, level2, level1, outer])
+
+        plantuml = PlantUMLGenerator().generate(diagram)
+        assert "@startuml" in plantuml
+        assert "@enduml" in plantuml
+
+        mermaid = MermaidGenerator(diagram_type="flowchart").generate(diagram)
+        assert "flowchart" in mermaid
+
+    def test_unicode_labels(self):
+        shape = Shape(
+            id="unicode",
+            label="Hello \u4e16\u754c \u0420\u043e\u0441\u0441\u0438\u044f \ud83d\ude00",
+            shape_type="rectangle",
+            position=Point(x=0.0, y=0.0),
+            size=Dimensions(width=100.0, height=50.0),
+            style=Style(),
+        )
+        diagram = Diagram(id="test", elements=[shape])
+
+        plantuml = PlantUMLGenerator().generate(diagram)
+        assert "\u4e16\u754c" in plantuml
+
+        mermaid = MermaidGenerator(diagram_type="flowchart").generate(diagram)
+        assert "\u4e16\u754c" in mermaid
 
 
 class TestDuplicateElementFix:
