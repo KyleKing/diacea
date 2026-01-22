@@ -183,19 +183,19 @@ def csp_solver(data):
         )
 
     # Add constraints
-    for rect in rectangles:
-        # Each text can only be used once as a label
-        def unique_text(label, rect=rect):
-            if label == '':
-                return True
-            return not any(
-                solutions[0].get(r['id']) == label
-                for r in rectangles
-                if r['id'] != rect['id']
-            )
-        problem.addConstraint(unique_text, [rect['id']])
 
-        # Parent must be a containing rectangle
+    # Each non-empty text label can only be used once (pairwise constraint)
+    def labels_not_conflicting(label1, label2):
+        if label1 == '' or label2 == '':
+            return True
+        return label1 != label2
+
+    for i, rect1 in enumerate(rectangles):
+        for rect2 in rectangles[i + 1:]:
+            problem.addConstraint(labels_not_conflicting, [rect1['id'], rect2['id']])
+
+    # Parent must be a containing rectangle
+    for rect in rectangles:
         def valid_parent(parent, rect=rect):
             return parent is None or any(
                 r['id'] == parent and is_rectangle_inside(r, rect)

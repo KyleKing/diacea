@@ -15,10 +15,9 @@ Design decisions (from Phase 1 open questions):
 from __future__ import annotations
 
 from enum import Enum
-from typing import TYPE_CHECKING, Optional, Tuple
+from typing import Optional
 
-if TYPE_CHECKING:
-    from .elements import Dimensions, Style
+from .elements import Dimensions, Style
 
 
 # Confidence threshold for semantic inference warnings
@@ -159,7 +158,7 @@ def infer_semantic_type(
     size: Optional[Dimensions] = None,
     style: Optional[Style] = None,
     metadata: Optional[dict] = None,
-) -> Tuple[Optional[SemanticType], float]:
+) -> tuple[Optional[SemanticType], float]:
     """Infer semantic type using hybrid approach.
 
     Priority order:
@@ -247,7 +246,7 @@ def _parse_semantic_hint(hint: str) -> Optional[SemanticType]:
 
 def _infer_from_heuristics(
     shape_type: str, size: Optional[Dimensions]
-) -> Tuple[Optional[SemanticType], float]:
+) -> tuple[Optional[SemanticType], float]:
     """Infer semantic type from shape and size heuristics.
 
     Heuristic rules:
@@ -304,7 +303,7 @@ def _infer_from_heuristics(
     return (None, 0.0)
 
 
-def _infer_from_text(label: str) -> Tuple[Optional[SemanticType], float]:
+def _infer_from_text(label: str) -> tuple[Optional[SemanticType], float]:
     """Infer semantic type from label text keywords."""
     if not label:
         return (None, 0.0)

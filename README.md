@@ -1,23 +1,18 @@
 # diacea
 
-Convert between Excalidraw and PlantUML
+Universal diagram converter - the pandoc for diagrams
 
-**diacea** is a Python library that converts Excalidraw JSON exports to PlantUML diagrams. Think of it as "pandoc for diagrams" - bridging the gap between Excalidraw's visual diagramming and PlantUML's text-based diagramming.
+**diacea** converts between visual diagram formats using a format-agnostic intermediate representation. Convert Excalidraw, TLDraw, or SVG diagrams to PlantUML, C4-PlantUML, Mermaid, GraphViz DOT, or D2.
 
 ## Why diacea?
 
-- **Visual to Text**: Convert your hand-drawn Excalidraw diagrams into version-controllable PlantUML text
-- **Multiple Algorithms**: Choose from various conversion approaches (imperative, rule-based, CSP solver, quadtree, graph-based)
-- **C4 Model Support**: Generate C4-PlantUML diagrams for architecture documentation
-- **Python Native**: Pure Python implementation, no external dependencies on other languages
+- **Visual to Text**: Convert hand-drawn diagrams into version-controllable text formats
+- **Multiple Input Formats**: Excalidraw, TLDraw, SVG
+- **Multiple Output Formats**: PlantUML, C4-PlantUML, Mermaid, GraphViz DOT, D2
+- **Semantic Inference**: Automatically detects diagram element types (databases, people, systems)
+- **Python Native**: Pure Python implementation
 
 ## Installation
-
-```bash
-poetry add diacea
-```
-
-Or with pip:
 
 ```bash
 pip install diacea
@@ -25,37 +20,79 @@ pip install diacea
 
 ## Quick Start
 
-```python
-import json
-from diacea.experiments import graph_based_approach
+### CLI Usage
 
-# Load Excalidraw JSON
-with open('diagram.json') as f:
-    excalidraw_data = json.load(f)
+```bash
+# Convert Excalidraw to Mermaid
+diacea -i diagram.json -f mermaid -o output.mmd
 
-# Convert to relative format
-relative_data = graph_based_approach(excalidraw_data['elements'])
+# Convert to C4-PlantUML
+diacea -i diagram.json -f c4 -o architecture.puml
 
-# TODO: Convert to PlantUML (coming soon)
+# Convert TLDraw to GraphViz with custom direction
+diacea -i tldraw.json -f graphviz --graphviz-direction TB -o output.dot
+
+# Convert SVG to D2 with sketch mode
+diacea -i diagram.svg -f d2 --d2-sketch -o output.d2
+
+# Pipe from stdin
+cat diagram.json | diacea -i - -f mermaid
 ```
 
-## Project Status
+### Python API
 
-This project is in early development. Current capabilities:
+```python
+from diacea.parsers import ExcalidrawParser
+from diacea.generators import MermaidGenerator, C4PlantUMLGenerator
 
-- ✅ Convert Excalidraw absolute coordinates to relative relationships
-- ✅ Multiple algorithm implementations for spatial analysis
-- ✅ Test coverage for core conversion logic
-- 🚧 PlantUML generation (in progress)
-- 🚧 CLI interface (planned)
-- 🚧 C4-PlantUML support (planned)
+# Parse input
+parser = ExcalidrawParser()
+with open('diagram.json') as f:
+    import json
+    diagram = parser.parse(json.load(f))
 
-See [SPEC.md](SPEC.md) for detailed use cases and limitations.
+# Generate output
+mermaid_gen = MermaidGenerator()
+print(mermaid_gen.generate(diagram))
+
+c4_gen = C4PlantUMLGenerator()
+print(c4_gen.generate(diagram))
+```
+
+## Supported Formats
+
+### Input Formats
+| Format | Parser | Auto-detect |
+|--------|--------|-------------|
+| Excalidraw JSON | `ExcalidrawParser` | Yes |
+| TLDraw JSON | `TLDrawParser` | Yes |
+| SVG | `SVGParser` | Yes |
+
+### Output Formats
+| Format | Generator | Options |
+|--------|-----------|---------|
+| PlantUML | `PlantUMLGenerator` | - |
+| C4-PlantUML | `C4PlantUMLGenerator` | - |
+| Mermaid | `MermaidGenerator` | `--mermaid-type` (flowchart, c4, sequence) |
+| GraphViz DOT | `GraphVizGenerator` | `--graphviz-direction`, `--graphviz-type` |
+| D2 | `D2Generator` | `--d2-direction`, `--d2-sketch` |
+
+## Architecture
+
+```
+Input Formats          IR (Intermediate Repr)         Output Formats
+-------------         ----------------------         --------------
+Excalidraw  --+                                    +-- PlantUML
+TLDraw      --+--> Diagram -> Elements -> Semantic +--> C4-PlantUML
+SVG         --+         (with semantic types)      +--> Mermaid
+                                                   +--> GraphViz DOT
+                                                   +-- D2
+```
 
 ## Documentation
 
-- **[DEVELOPER.md](DEVELOPER.md)** - How to develop, test, and contribute
-- **[SPEC.md](SPEC.md)** - What the project does, use cases, and specifications
+- **[DEVELOPER.md](DEVELOPER.md)** - Development setup and contributing
+- **[SPEC.md](SPEC.md)** - Detailed specifications and use cases
 - **[AGENTS.md](AGENTS.md)** - AI assistant guide to the codebase
 
 ## Related Projects
@@ -70,10 +107,6 @@ We welcome pull requests! For your pull request to be accepted smoothly, we sugg
 ## Code of Conduct
 
 We follow the [Contributor Covenant Code of Conduct](https://www.contributor-covenant.org).
-
-## Responsible Disclosure
-
-If you have any security issue to report, please contact the project maintainers privately. You can reach us at [dev.act.kyle@gmail.com](mailto:dev.act.kyle@gmail.com).
 
 ## License
 

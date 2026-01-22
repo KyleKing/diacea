@@ -51,6 +51,7 @@ python = ">=3.10,<3.14"
 corallium = ">=2.0.1"
 networkx = "^3.4.2"
 python-constraint2 = "^2.0.0b8"
+pyyaml = "^6.0"
 
 [tool.poetry.group.dev.dependencies]
 calcipy = {extras = ["doc", "lint", "nox", "tags", "test", "types"], version = ">=5.0.0"}
