@@ -17,7 +17,30 @@ from .generators import (
     MermaidGenerator,
     PlantUMLGenerator,
 )
-from .parsers import ExcalidrawParser
+from .parsers import ExcalidrawParser, TLDrawParser
+
+
+def detect_input_format(data: dict) -> str:
+    """Detect input format from JSON structure.
+
+    Args:
+        data: JSON data dictionary
+
+    Returns:
+        Format name ('tldraw' or 'excalidraw')
+
+    Raises:
+        ValueError: If format cannot be detected
+    """
+    # TLDraw has "document" -> "pages" structure
+    if "document" in data and "pages" in data.get("document", {}):
+        return "tldraw"
+
+    # Excalidraw has "elements" or "type": "excalidraw/clipboard"
+    if "elements" in data or data.get("type") == "excalidraw/clipboard":
+        return "excalidraw"
+
+    raise ValueError("Unknown input format - expected TLDraw or Excalidraw JSON")
 
 
 def main(argv: Optional[list[str]] = None) -> int:
@@ -45,9 +68,22 @@ def main(argv: Optional[list[str]] = None) -> int:
             with open(input_path) as f:
                 input_data = json.load(f)
 
-        # Parse input to IR (currently only Excalidraw supported)
-        input_parser = ExcalidrawParser()
-        diagram = input_parser.parse(input_data)
+        # Detect or use specified input format
+        if args.input_format == "auto":
+            input_format = detect_input_format(input_data)
+        else:
+            input_format = args.input_format
+
+        # Parse input to IR based on format
+        if input_format == "tldraw":
+            input_parser = TLDrawParser()
+            diagram = input_parser.parse(input_data)
+        elif input_format == "excalidraw":
+            input_parser = ExcalidrawParser()
+            diagram = input_parser.parse(input_data)
+        else:
+            print(f"Error: Unsupported input format: {input_format}", file=sys.stderr)
+            return 1
 
         # Generate output based on format
         if args.format == "plantuml":
@@ -118,7 +154,7 @@ def create_parser() -> argparse.ArgumentParser:
         "-i",
         "--input",
         required=True,
-        help="Input file (Excalidraw JSON) or - for stdin",
+        help="Input file (Excalidraw or TLDraw JSON) or - for stdin",
     )
 
     parser.add_argument(
@@ -126,6 +162,13 @@ def create_parser() -> argparse.ArgumentParser:
         "--output",
         default="-",
         help="Output file or - for stdout (default: stdout)",
+    )
+
+    parser.add_argument(
+        "--input-format",
+        default="auto",
+        choices=["auto", "excalidraw", "tldraw"],
+        help="Input format (default: auto-detect)",
     )
 
     parser.add_argument(
