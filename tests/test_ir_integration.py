@@ -5,7 +5,13 @@ from pathlib import Path
 
 import pytest
 
-from diacea.generators import C4PlantUMLGenerator, PlantUMLGenerator
+from diacea.generators import (
+    C4PlantUMLGenerator,
+    D2Generator,
+    GraphVizGenerator,
+    MermaidGenerator,
+    PlantUMLGenerator,
+)
 from diacea.ir import Diagram, SemanticType
 from diacea.parsers import ExcalidrawParser
 
@@ -162,6 +168,130 @@ class TestC4PlantUMLGenerator:
         assert "Rel(" in output
 
 
+class TestMermaidGenerator:
+    """Test Mermaid generator."""
+
+    def test_generate_mermaid(self, excalidraw_data):
+        """Test generating Mermaid diagram."""
+        parser = ExcalidrawParser()
+        diagram = parser.parse(excalidraw_data)
+
+        generator = MermaidGenerator()
+        output = generator.generate(diagram)
+
+        assert "flowchart" in output or "C4Context" in output or "sequenceDiagram" in output
+
+    def test_mermaid_has_nodes(self, excalidraw_data):
+        """Test that Mermaid output includes nodes."""
+        parser = ExcalidrawParser()
+        diagram = parser.parse(excalidraw_data)
+
+        generator = MermaidGenerator(diagram_type="flowchart")
+        output = generator.generate(diagram)
+
+        # Should have node declarations
+        assert len(output.split("\n")) > 2
+
+    def test_mermaid_has_connections(self, excalidraw_data):
+        """Test that Mermaid output includes connections."""
+        parser = ExcalidrawParser()
+        diagram = parser.parse(excalidraw_data)
+
+        generator = MermaidGenerator(diagram_type="flowchart")
+        output = generator.generate(diagram)
+
+        # Should have arrows
+        assert "-->" in output or "<-->" in output or "-.." in output
+
+
+class TestGraphVizGenerator:
+    """Test GraphViz generator."""
+
+    def test_generate_graphviz(self, excalidraw_data):
+        """Test generating GraphViz DOT."""
+        parser = ExcalidrawParser()
+        diagram = parser.parse(excalidraw_data)
+
+        generator = GraphVizGenerator()
+        output = generator.generate(diagram)
+
+        assert "digraph" in output or "graph" in output
+        assert output.strip().endswith("}")
+
+    def test_graphviz_has_nodes(self, excalidraw_data):
+        """Test that GraphViz output includes nodes."""
+        parser = ExcalidrawParser()
+        diagram = parser.parse(excalidraw_data)
+
+        generator = GraphVizGenerator()
+        output = generator.generate(diagram)
+
+        # Should have node declarations with attributes
+        assert "[" in output and "]" in output
+
+    def test_graphviz_has_edges(self, excalidraw_data):
+        """Test that GraphViz output includes edges."""
+        parser = ExcalidrawParser()
+        diagram = parser.parse(excalidraw_data)
+
+        generator = GraphVizGenerator()
+        output = generator.generate(diagram)
+
+        # Should have arrows
+        assert "->" in output or "--" in output
+
+
+class TestD2Generator:
+    """Test D2 generator."""
+
+    def test_generate_d2(self, excalidraw_data):
+        """Test generating D2 diagram."""
+        parser = ExcalidrawParser()
+        diagram = parser.parse(excalidraw_data)
+
+        generator = D2Generator()
+        output = generator.generate(diagram)
+
+        # D2 output should have content
+        assert len(output) > 0
+        assert len(output.split("\n")) > 1
+
+    def test_d2_has_shapes(self, excalidraw_data):
+        """Test that D2 output includes shapes."""
+        parser = ExcalidrawParser()
+        diagram = parser.parse(excalidraw_data)
+
+        generator = D2Generator()
+        output = generator.generate(diagram)
+
+        # Should have shape declarations with labels
+        assert ":" in output
+
+    def test_d2_has_connections(self, excalidraw_data):
+        """Test that D2 output includes connections."""
+        parser = ExcalidrawParser()
+        diagram = parser.parse(excalidraw_data)
+
+        generator = D2Generator()
+        output = generator.generate(diagram)
+
+        # Should have arrows
+        assert "->" in output or "<->" in output
+
+    def test_d2_with_direction(self, excalidraw_data):
+        """Test D2 with explicit direction."""
+        parser = ExcalidrawParser()
+        diagram = parser.parse(excalidraw_data)
+
+        from diacea.generators.d2 import D2Config
+
+        config = D2Config(direction="right")
+        generator = D2Generator(config=config)
+        output = generator.generate(diagram)
+
+        assert "direction: right" in output
+
+
 class TestEndToEndConversion:
     """Test complete end-to-end conversion workflow."""
 
@@ -199,3 +329,39 @@ class TestEndToEndConversion:
         assert c4_plantuml.endswith("@enduml")
         assert "!include" in c4_plantuml
         assert len(c4_plantuml.split("\n")) > 5  # Has content
+
+    def test_excalidraw_to_mermaid(self, excalidraw_data):
+        """Test Excalidraw → IR → Mermaid conversion."""
+        parser = ExcalidrawParser()
+        diagram = parser.parse(excalidraw_data)
+
+        generator = MermaidGenerator()
+        mermaid = generator.generate(diagram)
+
+        # Verify output
+        assert len(mermaid.split("\n")) > 2
+        assert "flowchart" in mermaid or "C4Context" in mermaid or "sequenceDiagram" in mermaid
+
+    def test_excalidraw_to_graphviz(self, excalidraw_data):
+        """Test Excalidraw → IR → GraphViz conversion."""
+        parser = ExcalidrawParser()
+        diagram = parser.parse(excalidraw_data)
+
+        generator = GraphVizGenerator()
+        graphviz = generator.generate(diagram)
+
+        # Verify output
+        assert "digraph" in graphviz or "graph" in graphviz
+        assert graphviz.strip().endswith("}")
+
+    def test_excalidraw_to_d2(self, excalidraw_data):
+        """Test Excalidraw → IR → D2 conversion."""
+        parser = ExcalidrawParser()
+        diagram = parser.parse(excalidraw_data)
+
+        generator = D2Generator()
+        d2 = generator.generate(diagram)
+
+        # Verify output
+        assert len(d2.split("\n")) > 1
+        assert "->" in d2 or "<->" in d2

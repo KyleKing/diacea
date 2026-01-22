@@ -59,6 +59,9 @@ calcipy = {extras = ["doc", "lint", "nox", "tags", "test", "types"], version = "
 "Bug Tracker" = "https://github.com/kyleking/diacea/issues"
 "Changelog" = "https://github.com/kyleking/diacea/blob/main/docs/docs/CHANGELOG.md"
 
+[tool.poetry.scripts]
+diacea = "diacea.cli:main"
+
 [tool.pyright]
 include = ["diacea", "tests"]
 pythonVersion = "3.10"

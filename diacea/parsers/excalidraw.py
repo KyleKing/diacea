@@ -102,10 +102,11 @@ class ExcalidrawParser(Parser):
         size = Dimensions(width=elem.get("width", 0), height=elem.get("height", 0))
 
         # Style
+        stroke_width = elem.get("strokeWidth")
         style = Style(
             fill_color=elem.get("backgroundColor") if elem.get("backgroundColor") != "transparent" else None,
             stroke_color=elem.get("strokeColor"),
-            stroke_width=elem.get("strokeWidth"),
+            stroke_width=float(stroke_width) if stroke_width is not None else None,
             stroke_style="dashed" if elem.get("strokeStyle") == "dashed" else "solid",
             opacity=elem.get("opacity", 100) / 100.0,
         )
@@ -208,9 +209,10 @@ class ExcalidrawParser(Parser):
             connection_type = "directed"
 
         # Style
+        stroke_width = elem.get("strokeWidth")
         style = Style(
             stroke_color=elem.get("strokeColor"),
-            stroke_width=elem.get("strokeWidth"),
+            stroke_width=float(stroke_width) if stroke_width is not None else None,
             stroke_style="dashed" if elem.get("strokeStyle") == "dashed" else "solid",
         )
 
