@@ -1,0 +1,20 @@
+%% C4 Architecture Diagram - Mermaid C4
+%% Use: mermaid-cli or online at https://mermaid.live/
+
+C4Context
+    title E-Commerce System - System Context
+
+    Person(customer, "Customer", "A customer of the online store")
+    Person(admin, "Administrator", "Store administrator")
+
+    System(ecommerce, "E-Commerce System", "Allows customers to browse and purchase products")
+    System_Ext(payment, "Payment Gateway", "External payment processing")
+    System_Ext(shipping, "Shipping Service", "External shipping provider")
+
+    Rel(customer, ecommerce, "Browses products, places orders")
+    Rel(admin, ecommerce, "Manages products, views analytics")
+    Rel(ecommerce, payment, "Processes payments via")
+    Rel(ecommerce, shipping, "Tracks shipments via")
+
+    UpdateRelStyle(customer, ecommerce, $offsetY="-40")
+    UpdateRelStyle(ecommerce, payment, $offsetX="-50")

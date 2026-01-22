@@ -1,0 +1,68 @@
+// Microservices Architecture - GraphViz DOT Format
+// Render with: dot -Tsvg architecture_system.dot -o output.svg
+// Or online at: https://graphvizonline.net/
+
+digraph "Microservices_Architecture" {
+    rankdir=LR;
+    node [fontname="Helvetica", fontsize=10];
+    edge [fontname="Helvetica", fontsize=9];
+
+    // External actors
+    user [shape=ellipse, label="User", style=filled, fillcolor=lightblue];
+    admin [shape=ellipse, label="Administrator", style=filled, fillcolor=lightblue];
+
+    // API Gateway
+    api_gateway [shape=hexagon, label="API Gateway", style=filled, fillcolor=lightgreen];
+
+    // Services cluster
+    subgraph cluster_services {
+        label="Microservices";
+        style=filled;
+        color=lightgrey;
+
+        auth_service [shape=box, label="Auth\nService"];
+        order_service [shape=box, label="Order\nService"];
+        product_service [shape=box, label="Product\nService"];
+        inventory_service [shape=box, label="Inventory\nService"];
+    }
+
+    // Databases cluster
+    subgraph cluster_databases {
+        label="Databases";
+        style=filled;
+        color=lavender;
+
+        auth_db [shape=cylinder, label="Auth DB"];
+        order_db [shape=cylinder, label="Order DB"];
+        product_db [shape=cylinder, label="Product DB"];
+        inventory_db [shape=cylinder, label="Inventory DB"];
+    }
+
+    // Message queue
+    message_queue [shape=folder, label="Message\nQueue", style=filled, fillcolor=gold];
+
+    // External systems
+    payment_gateway [shape=octagon, label="Payment\nGateway", style=filled, fillcolor=lightyellow];
+
+    // User interactions
+    user -> api_gateway [label="HTTP"];
+    admin -> api_gateway [label="HTTPS"];
+
+    // API Gateway to Services
+    api_gateway -> auth_service [label="auth"];
+    api_gateway -> order_service [label="orders"];
+    api_gateway -> product_service [label="products"];
+
+    // Service to Database
+    auth_service -> auth_db [label="SQL"];
+    order_service -> order_db [label="SQL"];
+    product_service -> product_db [label="SQL"];
+    inventory_service -> inventory_db [label="SQL"];
+
+    // Async messaging
+    order_service -> message_queue [label="publish", style=dashed];
+    message_queue -> inventory_service [label="subscribe", style=dashed];
+
+    // External integrations
+    order_service -> payment_gateway [label="charge", color=red];
+}
