@@ -17,6 +17,7 @@ from .elements import (
     IR_VERSION,
 )
 from .semantic import SemanticType, infer_semantic_type, validate_confidence
+from .workspace import DiagramView, ElementDefinition, Workspace
 
 __all__ = [
     # Base classes
@@ -36,6 +37,10 @@ __all__ = [
     "SemanticType",
     "infer_semantic_type",
     "validate_confidence",
+    # Workspace
+    "Workspace",
+    "ElementDefinition",
+    "DiagramView",
     # Version
     "IR_VERSION",
 ]

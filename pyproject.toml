@@ -61,6 +61,7 @@ calcipy = {extras = ["doc", "lint", "nox", "tags", "test", "types"], version = "
 
 [tool.poetry.scripts]
 diacea = "diacea.cli:main"
+diacea-workspace = "diacea.workspace_cli:main_workspace"
 
 [tool.pyright]
 include = ["diacea", "tests"]
