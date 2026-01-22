@@ -2,22 +2,22 @@
 
 TLDraw is a modern infinite canvas diagramming tool with a structured JSON format.
 
-Design decisions (from Phase 5 open questions):
-1. Multi-page handling: Process first page by default
+Design decisions:
+1. Multi-page handling: Process all pages or specific page by index/id
 2. Custom shapes: Map unknown types to rectangle, log warning
 3. Version compatibility: Support v15+ (latest stable)
-4. Freehand elements: Skip for now, don't map well to structured diagrams
+4. Freehand elements: Convert to polygon shapes with bounding box
 """
 
 from __future__ import annotations
 
-from typing import Any, Optional
+import logging
+from typing import Any
 
 from ..ir import (
     Connection,
     Diagram,
     Dimensions,
-    Generator,
     Group,
     Parser,
     Point,
@@ -27,9 +27,28 @@ from ..ir import (
 )
 from ..ir.semantic import infer_semantic_type
 
+_logger = logging.getLogger(__name__)
+
 
 class TLDrawParser(Parser):
-    """Parse TLDraw JSON to IR."""
+    """Parse TLDraw JSON to IR.
+
+    Args:
+        page_index: Index of page to process (0-based), or None for all pages
+        page_id: ID of specific page to process, or None for all pages
+        include_freehand: Whether to convert freehand drawings to shapes
+    """
+
+    def __init__(
+        self,
+        page_index: int | None = 0,
+        page_id: str | None = None,
+        include_freehand: bool = False,
+    ):
+        """Initialize parser with options."""
+        self.page_index = page_index
+        self.page_id = page_id
+        self.include_freehand = include_freehand
 
     def parse(self, data: Any) -> Diagram:
         """Parse TLDraw document to IR diagram.
@@ -38,80 +57,104 @@ class TLDrawParser(Parser):
             data: TLDraw JSON data (full document structure)
 
         Returns:
-            IR Diagram object
+            IR Diagram object (merged if multiple pages)
         """
-        elements: list = []
-
-        # TLDraw has pages - process the first page
-        pages = data.get("document", {}).get("pages", {})
+        pages = data.get('document', {}).get('pages', {})
 
         if not pages:
-            return Diagram(id="empty", name="Empty Diagram", elements=[])
+            return Diagram(id='empty', name='Empty Diagram', elements=[])
 
-        # Get first page
-        first_page_id = next(iter(pages.keys()))
-        page = pages[first_page_id]
+        pages_to_process = self._select_pages(pages)
 
-        shapes = page.get("shapes", {})
-        bindings = page.get("bindings", {})
+        if not pages_to_process:
+            return Diagram(id='empty', name='Empty Diagram', elements=[])
 
-        # Parse shapes first (excluding arrows)
+        all_elements: list = []
+        diagram_name = 'TLDraw Diagram'
+        diagram_id = 'diagram'
+
+        for page_id, page in pages_to_process:
+            elements = self._parse_page(page)
+            all_elements.extend(elements)
+
+            if len(pages_to_process) == 1:
+                diagram_name = page.get('name', 'TLDraw Diagram')
+                diagram_id = page.get('id', 'diagram')
+
+        if len(pages_to_process) > 1:
+            diagram_name = f'TLDraw Diagram ({len(pages_to_process)} pages)'
+
+        return Diagram(id=diagram_id, name=diagram_name, elements=all_elements)
+
+    def _select_pages(self, pages: dict) -> list[tuple[str, dict]]:
+        """Select pages to process based on parser options."""
+        page_list = list(pages.items())
+
+        if self.page_id:
+            if self.page_id in pages:
+                return [(self.page_id, pages[self.page_id])]
+            _logger.warning('Page ID %s not found, processing first page', self.page_id)
+            return [page_list[0]] if page_list else []
+
+        if self.page_index is not None:
+            if 0 <= self.page_index < len(page_list):
+                return [page_list[self.page_index]]
+            _logger.warning('Page index %d out of range, processing first page', self.page_index)
+            return [page_list[0]] if page_list else []
+
+        return page_list
+
+    def _parse_page(self, page: dict) -> list:
+        """Parse a single TLDraw page to IR elements."""
+        elements: list = []
+
+        shapes = page.get('shapes', {})
+        bindings = page.get('bindings', {})
+
         for shape_id, shape_data in shapes.items():
-            if shape_data.get("type") != "arrow":
-                parsed = self._parse_shape(shape_id, shape_data)
-                if parsed:
-                    elements.append(parsed)
+            shape_type = shape_data.get('type')
+            if shape_type == 'arrow':
+                continue
+            if shape_type == 'draw' and not self.include_freehand:
+                continue
 
-        # Parse arrows/connections
+            parsed = self._parse_shape(shape_id, shape_data)
+            if parsed:
+                elements.append(parsed)
+
         for shape_id, shape_data in shapes.items():
-            if shape_data.get("type") == "arrow":
+            if shape_data.get('type') == 'arrow':
                 conn = self._parse_arrow(shape_id, shape_data, bindings)
                 if conn:
                     elements.append(conn)
 
-        return Diagram(
-            id=page.get("id", "diagram"),
-            name=page.get("name", "TLDraw Diagram"),
-            elements=elements,
-        )
+        return elements
 
     def _parse_shape(
         self, shape_id: str, shape_data: dict
     ) -> Shape | Group | Text | None:
-        """Parse a TLDraw shape to IR element.
+        """Parse a TLDraw shape to IR element."""
+        shape_type = shape_data.get('type')
 
-        Args:
-            shape_id: Shape identifier
-            shape_data: Shape data from TLDraw
-
-        Returns:
-            Parsed IR element (Shape, Group, or Text) or None if skipped
-        """
-        shape_type = shape_data.get("type")
-
-        # Skip arrows and freehand - handled separately
-        if shape_type in ["arrow", "draw"]:
+        if shape_type == 'arrow':
             return None
 
-        # Get position (TLDraw uses point array)
-        point = shape_data.get("point", [0.0, 0.0])
+        if shape_type == 'draw':
+            return self._parse_freehand(shape_id, shape_data)
+
+        point = shape_data.get('point', [0.0, 0.0])
         position = Point(x=float(point[0]), y=float(point[1]))
 
-        # Get size
-        size_data = shape_data.get("size", [100.0, 100.0])
+        size_data = shape_data.get('size', [100.0, 100.0])
         size = Dimensions(width=float(size_data[0]), height=float(size_data[1]))
 
-        # Get label
-        label = shape_data.get("label", shape_data.get("name", ""))
+        label = shape_data.get('label', shape_data.get('name', ''))
 
-        # Parse style
-        style = self._parse_style(shape_data.get("style", {}))
+        style = self._parse_style(shape_data.get('style', {}))
 
-        # Determine IR shape type
         ir_shape_type = self._map_shape_type(shape_type)
 
-        # Check if it's a group (has children)
-        children_ids = shape_data.get("children", [])
+        children_ids = shape_data.get('children', [])
         if children_ids:
             return Group(
                 id=shape_id,
@@ -122,8 +165,7 @@ class TLDrawParser(Parser):
                 children=children_ids,
             )
 
-        # Check if it's text
-        if shape_type == "text":
+        if shape_type == 'text':
             return Text(
                 id=shape_id,
                 content=label,
@@ -132,7 +174,6 @@ class TLDrawParser(Parser):
                 style=style,
             )
 
-        # Regular shape
         shape = Shape(
             id=shape_id,
             label=label,
@@ -142,7 +183,6 @@ class TLDrawParser(Parser):
             style=style,
         )
 
-        # Infer semantic type
         shape.semantic_type, shape.semantic_confidence = infer_semantic_type(
             shape_type=ir_shape_type,
             label=label,
@@ -150,9 +190,49 @@ class TLDrawParser(Parser):
             style=style,
         )
 
-        # Store as string to avoid enum serialization issues
         if shape.semantic_type:
             shape.semantic_type = shape.semantic_type.value
+
+        return shape
+
+    def _parse_freehand(self, shape_id: str, shape_data: dict) -> Shape | None:
+        """Parse TLDraw freehand drawing to IR Shape (polygon bounding box)."""
+        point = shape_data.get('point', [0.0, 0.0])
+        base_x, base_y = float(point[0]), float(point[1])
+
+        points = shape_data.get('points', [])
+        if not points:
+            return None
+
+        xs = [base_x + p[0] for p in points]
+        ys = [base_y + p[1] for p in points]
+
+        min_x, max_x = min(xs), max(xs)
+        min_y, max_y = min(ys), max(ys)
+
+        width = max_x - min_x
+        height = max_y - min_y
+
+        if width < 5 and height < 5:
+            return None
+
+        position = Point(x=min_x, y=min_y)
+        size = Dimensions(width=width, height=height)
+        style = self._parse_style(shape_data.get('style', {}))
+
+        shape = Shape(
+            id=shape_id,
+            label='',
+            shape_type='freehand',
+            position=position,
+            size=size,
+            style=style,
+        )
+
+        shape.metadata['freehand'] = {
+            'point_count': len(points),
+            'is_complete': shape_data.get('isComplete', False),
+        }
 
         return shape
 

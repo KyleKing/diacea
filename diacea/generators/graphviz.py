@@ -223,6 +223,7 @@ class GraphVizGenerator(Generator):
         to_id = self._sanitize_id(conn.to_id)
 
         # Determine arrow type
+        dir_attr = None
         if self.config.graph_type == "graph":  # Undirected
             arrow = "--"
         elif conn.connection_type == "bidirectional":
@@ -230,7 +231,6 @@ class GraphVizGenerator(Generator):
             dir_attr = 'dir="both"'
         else:
             arrow = "->"
-            dir_attr = None
 
         # Build attribute list
         attrs = []

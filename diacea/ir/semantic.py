@@ -67,18 +67,30 @@ class SemanticType(str, Enum):
 
 # Keyword mappings for text-based inference
 # Format: {semantic_type: [keywords]}
+# More specific keywords listed first for priority matching
 SEMANTIC_KEYWORDS = {
     SemanticType.DATABASE: [
         "database",
         "db",
         "sql",
         "postgres",
+        "postgresql",
         "mysql",
+        "mariadb",
         "mongodb",
         "redis",
         "dynamodb",
+        "cassandra",
+        "elasticsearch",
+        "sqlite",
+        "oracle",
+        "mssql",
+        "cockroachdb",
+        "neo4j",
         "data store",
         "datastore",
+        "cache",
+        "memcached",
     ],
     SemanticType.PERSON: [
         "user",
@@ -86,8 +98,15 @@ SEMANTIC_KEYWORDS = {
         "actor",
         "customer",
         "admin",
+        "administrator",
         "operator",
         "developer",
+        "engineer",
+        "manager",
+        "client",
+        "visitor",
+        "member",
+        "staff",
     ],
     SemanticType.QUEUE: [
         "queue",
@@ -95,9 +114,17 @@ SEMANTIC_KEYWORDS = {
         "kafka",
         "rabbitmq",
         "sqs",
+        "sns",
         "pubsub",
-        "message",
+        "pub/sub",
+        "message broker",
+        "message bus",
         "event bus",
+        "event stream",
+        "kinesis",
+        "nats",
+        "activemq",
+        "zeromq",
     ],
     SemanticType.STORAGE: [
         "storage",
@@ -106,13 +133,36 @@ SEMANTIC_KEYWORDS = {
         "bucket",
         "file storage",
         "object store",
+        "file system",
+        "filesystem",
+        "cdn",
+        "cloudfront",
+        "gcs",
+        "minio",
     ],
     SemanticType.SERVICE: [
         "service",
         "api",
+        "rest api",
+        "graphql",
+        "grpc",
         "microservice",
         "endpoint",
         "handler",
+        "controller",
+        "gateway",
+        "proxy",
+        "load balancer",
+        "balancer",
+        "nginx",
+        "envoy",
+        "backend",
+        "frontend",
+        "server",
+        "worker",
+        "lambda",
+        "function",
+        "serverless",
     ],
     SemanticType.CLOUD: [
         "cloud",
@@ -123,6 +173,20 @@ SEMANTIC_KEYWORDS = {
         "k8s",
         "eks",
         "gke",
+        "aks",
+        "ecs",
+        "fargate",
+        "heroku",
+        "vercel",
+        "netlify",
+        "digitalocean",
+        "linode",
+        "infrastructure",
+        "infra",
+        "cluster",
+        "region",
+        "vpc",
+        "network",
     ],
     SemanticType.EXTERNAL: [
         "external",
@@ -130,25 +194,181 @@ SEMANTIC_KEYWORDS = {
         "3rd party",
         "vendor",
         "saas",
+        "partner",
+        "integration",
+        "legacy",
+        "existing",
+        "payment",
+        "stripe",
+        "paypal",
+        "twilio",
+        "sendgrid",
+        "auth0",
+        "okta",
+        "oauth",
+        "sso",
     ],
     SemanticType.SYSTEM: [
         "system",
         "platform",
         "application",
         "app",
+        "product",
+        "solution",
+        "enterprise",
+        "monolith",
+        "core",
+        "main",
     ],
     SemanticType.CONTAINER: [
         "container",
         "docker",
         "pod",
         "instance",
+        "replica",
+        "runtime",
+        "image",
+        "registry",
     ],
     SemanticType.COMPONENT: [
         "component",
         "module",
         "library",
         "package",
+        "class",
+        "util",
+        "utility",
+        "helper",
+        "adapter",
+        "connector",
+        "repository",
+        "repo",
+        "dao",
+        "orm",
+        "model",
+        "entity",
     ],
+    SemanticType.INTERFACE: [
+        "interface",
+        "ui",
+        "gui",
+        "cli",
+        "console",
+        "terminal",
+        "web app",
+        "webapp",
+        "website",
+        "portal",
+        "dashboard",
+        "panel",
+        "form",
+    ],
+    SemanticType.SCREEN: [
+        "screen",
+        "page",
+        "view",
+        "dialog",
+        "modal",
+        "window",
+        "tab",
+    ],
+    SemanticType.DOCUMENT: [
+        "document",
+        "doc",
+        "report",
+        "pdf",
+        "export",
+        "template",
+        "config",
+        "configuration",
+        "settings",
+        "yaml",
+        "json",
+        "xml",
+    ],
+    SemanticType.FILE: [
+        "file",
+        "log",
+        "logs",
+        "artifact",
+        "asset",
+        "upload",
+        "download",
+    ],
+    SemanticType.PROCESS: [
+        "process",
+        "workflow",
+        "pipeline",
+        "flow",
+        "step",
+        "task",
+        "job",
+        "batch",
+        "cron",
+        "scheduler",
+        "action",
+        "operation",
+    ],
+    SemanticType.DECISION: [
+        "decision",
+        "condition",
+        "check",
+        "validate",
+        "if",
+        "branch",
+        "switch",
+        "route",
+        "filter",
+    ],
+    SemanticType.NOTE: [
+        "note",
+        "comment",
+        "annotation",
+        "todo",
+        "fixme",
+        "warning",
+        "info",
+        "hint",
+        "tip",
+    ],
+}
+
+# Shape type to semantic type mapping for strong inference
+SHAPE_SEMANTIC_MAP = {
+    "note": SemanticType.NOTE,
+    "sticky": SemanticType.NOTE,
+    "cylinder": SemanticType.DATABASE,
+    "database": SemanticType.DATABASE,
+    "cloud": SemanticType.CLOUD,
+    "person": SemanticType.PERSON,
+    "actor": SemanticType.PERSON,
+    "queue": SemanticType.QUEUE,
+    "document": SemanticType.DOCUMENT,
+    "file": SemanticType.FILE,
+    "parallelogram": SemanticType.INTERFACE,
+    "hexagon": SemanticType.PROCESS,
+    "stadium": SemanticType.START_END,
+    "rounded_rectangle": SemanticType.PROCESS,
+}
+
+# Icon/emoji to semantic type mapping
+ICON_SEMANTIC_MAP = {
+    "👤": SemanticType.PERSON,
+    "👥": SemanticType.PERSON,
+    "🧑": SemanticType.PERSON,
+    "🗄️": SemanticType.DATABASE,
+    "💾": SemanticType.DATABASE,
+    "📦": SemanticType.CONTAINER,
+    "☁️": SemanticType.CLOUD,
+    "🌐": SemanticType.EXTERNAL,
+    "📄": SemanticType.DOCUMENT,
+    "📁": SemanticType.FILE,
+    "⚙️": SemanticType.SERVICE,
+    "🔧": SemanticType.SERVICE,
+    "📝": SemanticType.NOTE,
+    "💬": SemanticType.NOTE,
+    "❓": SemanticType.DECISION,
+    "🔀": SemanticType.DECISION,
 }
 
 
@@ -163,9 +383,10 @@ def infer_semantic_type(
 
     Priority order:
     1. Explicit user hints (metadata)
-    2. Strong heuristics (shape + size)
-    3. Text-based hints (label keywords)
-    4. Fallback to generic
+    2. Strong heuristics (shape + size + style)
+    3. Icon/emoji detection in label
+    4. Text-based hints (label keywords)
+    5. Fallback to generic
 
     Args:
         shape_type: Geometric shape type (rectangle, ellipse, etc.)
@@ -196,12 +417,17 @@ def infer_semantic_type(
             if semantic:
                 return (semantic, 0.95)
 
-    # Priority 2: Strong heuristics (shape + size patterns)
-    heuristic_result = _infer_from_heuristics(shape_type, size)
+    # Priority 2: Strong heuristics (shape + size + style patterns)
+    heuristic_result = _infer_from_heuristics(shape_type, size, style)
     if heuristic_result[0] and heuristic_result[1] >= 0.8:
         return heuristic_result
 
-    # Priority 3: Text-based hints (label keywords)
+    # Priority 3: Icon/emoji detection in label
+    icon_result = _infer_from_icons(label)
+    if icon_result[0] and icon_result[1] >= 0.8:
+        return icon_result
+
+    # Priority 4: Text-based hints (label keywords)
     text_result = _infer_from_text(label)
     if text_result[0]:
         # If heuristics also found something, combine confidences
@@ -215,7 +441,7 @@ def infer_semantic_type(
             return text_result
         return heuristic_result
 
-    # Priority 4: Fallback - return heuristic result or generic
+    # Priority 5: Fallback - return heuristic result or generic
     if heuristic_result[0]:
         return heuristic_result
 
@@ -244,21 +470,45 @@ def _parse_semantic_hint(hint: str) -> Optional[SemanticType]:
     return alias_map.get(hint_lower)
 
 
+def _infer_from_icons(label: str) -> tuple[Optional[SemanticType], float]:
+    """Infer semantic type from icons/emojis in label."""
+    if not label:
+        return (None, 0.0)
+
+    for icon, semantic_type in ICON_SEMANTIC_MAP.items():
+        if icon in label:
+            return (semantic_type, 0.85)
+
+    return (None, 0.0)
+
+
 def _infer_from_heuristics(
-    shape_type: str, size: Optional[Dimensions]
+    shape_type: str,
+    size: Optional[Dimensions],
+    style: Optional[Style] = None,
 ) -> tuple[Optional[SemanticType], float]:
-    """Infer semantic type from shape and size heuristics.
+    """Infer semantic type from shape, size, and style heuristics.
 
     Heuristic rules:
+    - Direct shape mapping (note, cylinder, cloud, etc.) → High confidence
     - Ellipse → likely Person (if small-medium) or Database (if wider than tall)
     - Diamond → Decision node
     - Large rectangles → System boundary
     - Medium rectangles → Container
     - Small rectangles → Component
     - Very wide, short rectangles → Storage/Database
+    - Yellow fill → Note
+    - Gray/dashed border → External system
     """
     if not shape_type:
         return (None, 0.0)
+
+    # Direct shape type mapping (highest confidence)
+    if shape_type in SHAPE_SEMANTIC_MAP:
+        return (SHAPE_SEMANTIC_MAP[shape_type], 0.9)
+
+    # Style-based hints
+    style_result = _infer_from_style(style)
 
     # Shape-based inference
     if shape_type == "ellipse" or shape_type == "circle":
@@ -273,7 +523,14 @@ def _infer_from_heuristics(
     elif shape_type == "diamond":
         return (SemanticType.DECISION, 0.9)
 
+    elif shape_type == "triangle":
+        return (SemanticType.DECISION, 0.6)
+
     elif shape_type == "rectangle":
+        # Check style hints first
+        if style_result[0] and style_result[1] > 0.6:
+            return style_result
+
         if size:
             area = size.area
             aspect_ratio = size.width / size.height if size.height > 0 else 1.0
@@ -300,7 +557,60 @@ def _infer_from_heuristics(
 
         return (SemanticType.COMPONENT, 0.4)
 
+    # Unknown shape - return style-based result if any
+    if style_result[0]:
+        return style_result
+
     return (None, 0.0)
+
+
+def _infer_from_style(style: Optional[Style]) -> tuple[Optional[SemanticType], float]:
+    """Infer semantic type from visual style.
+
+    Color conventions:
+    - Yellow/amber fill → Note
+    - Gray fill or dashed → External system
+    - Blue fill → System/Container
+    - Green fill → Service/Component
+    """
+    if not style:
+        return (None, 0.0)
+
+    fill = (style.fill_color or "").lower()
+
+    # Yellow/amber → Note
+    if fill and _is_yellow_color(fill):
+        return (SemanticType.NOTE, 0.7)
+
+    # Gray + dashed → External
+    if style.stroke_style == "dashed":
+        if fill and _is_gray_color(fill):
+            return (SemanticType.EXTERNAL, 0.65)
+        return (SemanticType.EXTERNAL, 0.5)
+
+    return (None, 0.0)
+
+
+def _is_yellow_color(color: str) -> bool:
+    """Check if color is in yellow/amber range."""
+    yellow_hints = ["yellow", "ffff", "fff3", "ffc", "ffb", "ffa", "ff9", "amber", "gold"]
+    return any(hint in color for hint in yellow_hints)
+
+
+def _is_gray_color(color: str) -> bool:
+    """Check if color is gray."""
+    if "gray" in color or "grey" in color:
+        return True
+    # Check for hex gray (r=g=b approximately)
+    if color.startswith("#") and len(color) >= 7:
+        try:
+            r = int(color[1:3], 16)
+            g = int(color[3:5], 16)
+            b = int(color[5:7], 16)
+            return abs(r - g) < 20 and abs(g - b) < 20 and abs(r - b) < 20
+        except ValueError:
+            pass
+    return False
 
 
 def _infer_from_text(label: str) -> tuple[Optional[SemanticType], float]:

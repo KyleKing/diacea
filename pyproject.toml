@@ -64,6 +64,11 @@ calcipy = {extras = ["doc", "lint", "nox", "tags", "test", "types"], version = "
 diacea = "diacea.cli:main"
 diacea-workspace = "diacea.workspace_cli:main_workspace"
 
+[tool.pytest.ini_options]
+markers = [
+  "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+]
+
 [tool.pyright]
 include = ["diacea", "tests"]
 pythonVersion = "3.10"

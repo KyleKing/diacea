@@ -1,18 +1,22 @@
 """SVG parser - converts basic SVG to IR.
 
-Supports basic SVG shapes, text, and groups. Does NOT support complex
-paths, gradients, filters, or masks.
+Supports basic SVG shapes, text, groups, simple paths, and common transforms.
+Does NOT support complex paths with curves, gradients, filters, or masks.
 
-Design decisions (from Phase 6 open questions):
-1. Path support: Not in v1 (too complex)
-2. Transform support: Basic translate only, skip rotate/scale for v1
-3. Connection detection: Low priority, spatial analysis needed
+Design decisions:
+1. Path support: Basic paths (M, L, H, V, Z commands) - curves skipped
+2. Transform support: translate, scale, rotate (basic)
+3. Connection detection: Line elements can become connections
 """
 
 from __future__ import annotations
 
+import logging
+import math
+import re
 import xml.etree.ElementTree as ET
-from typing import Any, Optional
+from dataclasses import dataclass
+from typing import Any
 
 from ..ir import (
     Connection,
@@ -27,21 +31,91 @@ from ..ir import (
 )
 from ..ir.semantic import SemanticType, infer_semantic_type
 
+_logger = logging.getLogger(__name__)
+
+
+@dataclass
+class Transform:
+    """2D transformation matrix representation."""
+
+    translate_x: float = 0.0
+    translate_y: float = 0.0
+    scale_x: float = 1.0
+    scale_y: float = 1.0
+    rotate: float = 0.0
+    rotate_cx: float = 0.0
+    rotate_cy: float = 0.0
+
+    def apply_point(self, x: float, y: float) -> tuple[float, float]:
+        """Apply transformation to a point."""
+        if self.rotate != 0:
+            rad = math.radians(self.rotate)
+            cos_r, sin_r = math.cos(rad), math.sin(rad)
+            rx = x - self.rotate_cx
+            ry = y - self.rotate_cy
+            x = rx * cos_r - ry * sin_r + self.rotate_cx
+            y = rx * sin_r + ry * cos_r + self.rotate_cy
+
+        x = x * self.scale_x + self.translate_x
+        y = y * self.scale_y + self.translate_y
+        return (x, y)
+
+    def apply_size(self, width: float, height: float) -> tuple[float, float]:
+        """Apply scale transformation to dimensions."""
+        return (width * abs(self.scale_x), height * abs(self.scale_y))
+
+    def combine(self, other: 'Transform') -> 'Transform':
+        """Combine with another transform (self applied first, then other)."""
+        return Transform(
+            translate_x=self.translate_x * other.scale_x + other.translate_x,
+            translate_y=self.translate_y * other.scale_y + other.translate_y,
+            scale_x=self.scale_x * other.scale_x,
+            scale_y=self.scale_y * other.scale_y,
+            rotate=self.rotate + other.rotate,
+        )
+
+
+def _parse_transform(transform_str: str | None) -> Transform:
+    """Parse SVG transform attribute into Transform object."""
+    if not transform_str:
+        return Transform()
+
+    result = Transform()
+
+    translate_match = re.search(r'translate\(\s*([^,\s]+)(?:[,\s]+([^)]+))?\s*\)', transform_str)
+    if translate_match:
+        result.translate_x = float(translate_match.group(1))
+        result.translate_y = float(translate_match.group(2) or 0)
+
+    scale_match = re.search(r'scale\(\s*([^,\s]+)(?:[,\s]+([^)]+))?\s*\)', transform_str)
+    if scale_match:
+        result.scale_x = float(scale_match.group(1))
+        result.scale_y = float(scale_match.group(2) or result.scale_x)
+
+    rotate_match = re.search(r'rotate\(\s*([^,\s]+)(?:[,\s]+([^,\s]+)[,\s]+([^)]+))?\s*\)', transform_str)
+    if rotate_match:
+        result.rotate = float(rotate_match.group(1))
+        if rotate_match.group(2):
+            result.rotate_cx = float(rotate_match.group(2))
+            result.rotate_cy = float(rotate_match.group(3))
+
+    return result
+
 
 class SVGParser(Parser):
     """Parse basic SVG to IR.
 
-    Supports: rect, circle, ellipse, polygon, text, groups
-    Does NOT support: complex paths, gradients, transforms
+    Supports: rect, circle, ellipse, polygon, path (basic), line, text, groups
+    Does NOT support: complex path curves (C, S, Q, T, A), gradients, filters
     """
 
-    # SVG namespace
-    SVG_NS = "{http://www.w3.org/2000/svg}"
+    SVG_NS = '{http://www.w3.org/2000/svg}'
 
     def __init__(self):
         """Initialize parser."""
         self._id_counter = 0
         self._text_elements: dict[str, Text] = {}
+        self._lines: list[tuple[str, Point, Point, Style]] = []
 
     def parse(self, data: Any) -> Diagram:
         """Parse SVG content to IR diagram.
@@ -57,17 +131,20 @@ class SVGParser(Parser):
         else:
             root = data
 
+        self._lines = []
+        self._text_elements = {}
         elements: list = []
 
-        # Process all child elements
-        self._process_element(root, elements, transform=None, parent_id=None)
+        self._process_element(root, elements, transform=Transform(), parent_id=None)
 
-        # Post-process: associate text with nearby shapes
         self._associate_text_labels(elements)
 
+        connections = self._detect_connections_from_lines(elements)
+        elements.extend(connections)
+
         return Diagram(
-            id=root.get("id", "svg-diagram"),
-            name="SVG Diagram",
+            id=root.get('id', 'svg-diagram'),
+            name='SVG Diagram',
             elements=elements,
         )
 
@@ -75,7 +152,7 @@ class SVGParser(Parser):
         self,
         elem: ET.Element,
         elements: list,
-        transform: Any | None,
+        transform: Transform | None,
         parent_id: str | None,
     ) -> None:
         """Process SVG element recursively.
@@ -83,227 +160,214 @@ class SVGParser(Parser):
         Args:
             elem: SVG element to process
             elements: List to append parsed elements to
-            transform: Current transform matrix (not fully supported)
+            transform: Current transformation
             parent_id: Parent element ID for grouping
         """
-        tag = elem.tag.replace(self.SVG_NS, "")
+        tag = elem.tag.replace(self.SVG_NS, '')
 
-        if tag == "rect":
-            shape = self._parse_rect(elem, transform)
+        elem_transform = _parse_transform(elem.get('transform'))
+        current_transform = transform.combine(elem_transform) if transform else elem_transform
+
+        if tag == 'rect':
+            shape = self._parse_rect(elem, current_transform)
             if shape:
                 elements.append(shape)
 
-        elif tag == "circle":
-            shape = self._parse_circle(elem, transform)
+        elif tag == 'circle':
+            shape = self._parse_circle(elem, current_transform)
             if shape:
                 elements.append(shape)
 
-        elif tag == "ellipse":
-            shape = self._parse_ellipse(elem, transform)
+        elif tag == 'ellipse':
+            shape = self._parse_ellipse(elem, current_transform)
             if shape:
                 elements.append(shape)
 
-        elif tag == "polygon":
-            shape = self._parse_polygon(elem, transform)
+        elif tag == 'polygon':
+            shape = self._parse_polygon(elem, current_transform)
             if shape:
                 elements.append(shape)
 
-        elif tag == "text":
-            text = self._parse_text(elem, transform)
+        elif tag == 'path':
+            result = self._parse_path(elem, current_transform)
+            if result:
+                if isinstance(result, Shape):
+                    elements.append(result)
+
+        elif tag == 'line':
+            self._parse_line(elem, current_transform)
+
+        elif tag == 'polyline':
+            self._parse_polyline(elem, current_transform)
+
+        elif tag == 'text':
+            text = self._parse_text(elem, current_transform)
             if text:
                 self._text_elements[text.id] = text
                 elements.append(text)
 
-        elif tag == "g":
-            self._parse_group(elem, elements, transform)
+        elif tag == 'g':
+            self._parse_group(elem, elements, current_transform)
 
-        # Process children for non-group elements
-        if tag != "g":
+        if tag != 'g':
             for child in elem:
-                self._process_element(child, elements, transform, parent_id)
+                self._process_element(child, elements, current_transform, parent_id)
 
-    def _parse_rect(self, elem: ET.Element, transform: Any | None) -> Shape | None:
-        """Parse SVG rect to IR Shape.
-
-        Args:
-            elem: rect element
-            transform: Transform matrix (not used in v1)
-
-        Returns:
-            Shape or None if invalid
-        """
-        x = float(elem.get("x", 0))
-        y = float(elem.get("y", 0))
-        width = float(elem.get("width", 0))
-        height = float(elem.get("height", 0))
+    def _parse_rect(self, elem: ET.Element, transform: Transform) -> Shape | None:
+        """Parse SVG rect to IR Shape."""
+        x = float(elem.get('x', 0))
+        y = float(elem.get('y', 0))
+        width = float(elem.get('width', 0))
+        height = float(elem.get('height', 0))
 
         if width == 0 or height == 0:
             return None
 
-        position = Point(x=x, y=y)
-        size = Dimensions(width=width, height=height)
+        tx, ty = transform.apply_point(x, y)
+        tw, th = transform.apply_size(width, height)
+
+        position = Point(x=tx, y=ty)
+        size = Dimensions(width=tw, height=th)
         style = self._parse_style_attrs(elem)
 
-        shape_id = elem.get("id") or self._generate_id()
-        label = elem.get("data-label", "")
+        shape_id = elem.get('id') or self._generate_id()
+        label = elem.get('data-label', '')
 
         shape = Shape(
             id=shape_id,
             label=label,
-            shape_type="rectangle",
+            shape_type='rectangle',
             position=position,
             size=size,
             style=style,
         )
 
-        # Check for semantic hints
-        semantic_hint = elem.get("data-semantic") or elem.get("class", "")
+        semantic_hint = elem.get('data-semantic') or elem.get('class', '')
         if semantic_hint:
             shape.semantic_type = self._parse_semantic_hint(semantic_hint)
             shape.semantic_confidence = 0.9
         else:
             shape.semantic_type, shape.semantic_confidence = infer_semantic_type(
-                shape_type="rectangle",
+                shape_type='rectangle',
                 label=label,
                 size=size,
                 style=style,
             )
 
-        # Store as string to avoid enum serialization issues
         if shape.semantic_type:
             shape.semantic_type = shape.semantic_type.value
 
         return shape
 
-    def _parse_circle(self, elem: ET.Element, transform: Any | None) -> Shape | None:
-        """Parse SVG circle to IR Shape.
-
-        Args:
-            elem: circle element
-            transform: Transform matrix (not used in v1)
-
-        Returns:
-            Shape or None if invalid
-        """
-        cx = float(elem.get("cx", 0))
-        cy = float(elem.get("cy", 0))
-        r = float(elem.get("r", 0))
+    def _parse_circle(self, elem: ET.Element, transform: Transform) -> Shape | None:
+        """Parse SVG circle to IR Shape."""
+        cx = float(elem.get('cx', 0))
+        cy = float(elem.get('cy', 0))
+        r = float(elem.get('r', 0))
 
         if r == 0:
             return None
 
-        # Convert circle to bounding box
-        position = Point(x=cx - r, y=cy - r)
-        size = Dimensions(width=r * 2, height=r * 2)
+        tcx, tcy = transform.apply_point(cx, cy)
+        tr = r * max(abs(transform.scale_x), abs(transform.scale_y))
+
+        position = Point(x=tcx - tr, y=tcy - tr)
+        size = Dimensions(width=tr * 2, height=tr * 2)
         style = self._parse_style_attrs(elem)
 
-        shape_id = elem.get("id") or self._generate_id()
-        label = elem.get("data-label", "")
+        shape_id = elem.get('id') or self._generate_id()
+        label = elem.get('data-label', '')
 
         shape = Shape(
             id=shape_id,
             label=label,
-            shape_type="ellipse",
+            shape_type='ellipse',
             position=position,
             size=size,
             style=style,
         )
 
-        # Infer semantic type
-        semantic_hint = elem.get("data-semantic")
+        semantic_hint = elem.get('data-semantic')
         if semantic_hint:
             shape.semantic_type = self._parse_semantic_hint(semantic_hint)
             shape.semantic_confidence = 0.9
         else:
             shape.semantic_type, shape.semantic_confidence = infer_semantic_type(
-                shape_type="ellipse",
+                shape_type='ellipse',
                 label=label,
                 size=size,
                 style=style,
             )
 
-        # Store as string
         if shape.semantic_type:
             shape.semantic_type = shape.semantic_type.value
 
         return shape
 
-    def _parse_ellipse(self, elem: ET.Element, transform: Any | None) -> Shape | None:
-        """Parse SVG ellipse to IR Shape.
-
-        Args:
-            elem: ellipse element
-            transform: Transform matrix (not used in v1)
-
-        Returns:
-            Shape or None if invalid
-        """
-        cx = float(elem.get("cx", 0))
-        cy = float(elem.get("cy", 0))
-        rx = float(elem.get("rx", 0))
-        ry = float(elem.get("ry", 0))
+    def _parse_ellipse(self, elem: ET.Element, transform: Transform) -> Shape | None:
+        """Parse SVG ellipse to IR Shape."""
+        cx = float(elem.get('cx', 0))
+        cy = float(elem.get('cy', 0))
+        rx = float(elem.get('rx', 0))
+        ry = float(elem.get('ry', 0))
 
         if rx == 0 or ry == 0:
             return None
 
-        position = Point(x=cx - rx, y=cy - ry)
-        size = Dimensions(width=rx * 2, height=ry * 2)
+        tcx, tcy = transform.apply_point(cx, cy)
+        trx = rx * abs(transform.scale_x)
+        try_ = ry * abs(transform.scale_y)
+
+        position = Point(x=tcx - trx, y=tcy - try_)
+        size = Dimensions(width=trx * 2, height=try_ * 2)
         style = self._parse_style_attrs(elem)
 
-        shape_id = elem.get("id") or self._generate_id()
-        label = elem.get("data-label", "")
+        shape_id = elem.get('id') or self._generate_id()
+        label = elem.get('data-label', '')
 
         shape = Shape(
             id=shape_id,
             label=label,
-            shape_type="ellipse",
+            shape_type='ellipse',
             position=position,
             size=size,
             style=style,
         )
 
-        semantic_hint = elem.get("data-semantic")
+        semantic_hint = elem.get('data-semantic')
         if semantic_hint:
             shape.semantic_type = self._parse_semantic_hint(semantic_hint)
             shape.semantic_confidence = 0.9
         else:
             shape.semantic_type, shape.semantic_confidence = infer_semantic_type(
-                shape_type="ellipse",
+                shape_type='ellipse',
                 label=label,
                 size=size,
                 style=style,
             )
 
-        # Store as string
         if shape.semantic_type:
             shape.semantic_type = shape.semantic_type.value
 
         return shape
 
-    def _parse_polygon(self, elem: ET.Element, transform: Any | None) -> Shape | None:
-        """Parse SVG polygon to IR Shape.
-
-        Simplified: 4 points → diamond, otherwise → polygon
-
-        Args:
-            elem: polygon element
-            transform: Transform matrix (not used in v1)
-
-        Returns:
-            Shape or None if invalid
-        """
-        points_str = elem.get("points", "")
+    def _parse_polygon(self, elem: ET.Element, transform: Transform) -> Shape | None:
+        """Parse SVG polygon to IR Shape (4 points = diamond, otherwise polygon)."""
+        points_str = elem.get('points', '')
         if not points_str:
             return None
 
-        # Parse points
-        coords = [float(x) for x in points_str.replace(",", " ").split()]
-        if len(coords) < 6:  # Need at least 3 points (6 coordinates)
+        coords = [float(x) for x in points_str.replace(',', ' ').split()]
+        if len(coords) < 6:
             return None
 
-        # Calculate bounding box
-        xs = coords[0::2]
-        ys = coords[1::2]
+        transformed_points = []
+        for i in range(0, len(coords), 2):
+            tx, ty = transform.apply_point(coords[i], coords[i + 1])
+            transformed_points.extend([tx, ty])
+
+        xs = transformed_points[0::2]
+        ys = transformed_points[1::2]
 
         min_x, max_x = min(xs), max(xs)
         min_y, max_y = min(ys), max(ys)
@@ -311,12 +375,11 @@ class SVGParser(Parser):
         position = Point(x=min_x, y=min_y)
         size = Dimensions(width=max_x - min_x, height=max_y - min_y)
 
-        # Determine if it's a diamond (4 points = 8 coordinates)
-        shape_type = "diamond" if len(coords) == 8 else "polygon"
+        shape_type = 'diamond' if len(coords) == 8 else 'polygon'
 
         style = self._parse_style_attrs(elem)
-        shape_id = elem.get("id") or self._generate_id()
-        label = elem.get("data-label", "")
+        shape_id = elem.get('id') or self._generate_id()
+        label = elem.get('data-label', '')
 
         shape = Shape(
             id=shape_id,
@@ -327,7 +390,7 @@ class SVGParser(Parser):
             style=style,
         )
 
-        semantic_hint = elem.get("data-semantic")
+        semantic_hint = elem.get('data-semantic')
         if semantic_hint:
             shape.semantic_type = self._parse_semantic_hint(semantic_hint)
             shape.semantic_confidence = 0.9
@@ -339,42 +402,262 @@ class SVGParser(Parser):
                 style=style,
             )
 
-        # Store as string
         if shape.semantic_type:
             shape.semantic_type = shape.semantic_type.value
 
         return shape
 
-    def _parse_text(self, elem: ET.Element, transform: Any | None) -> Text | None:
-        """Parse SVG text to IR Text.
+    def _parse_path(self, elem: ET.Element, transform: Transform) -> Shape | None:
+        """Parse SVG path to IR Shape (basic commands only: M, L, H, V, Z)."""
+        d = elem.get('d', '')
+        if not d:
+            return None
 
-        Args:
-            elem: text element
-            transform: Transform matrix (not used in v1)
+        points = self._parse_path_commands(d)
+        if len(points) < 2:
+            _logger.debug('Skipping path with < 2 points: %s', elem.get('id', 'unknown'))
+            return None
 
-        Returns:
-            Text or None if invalid
-        """
-        x = float(elem.get("x", 0))
-        y = float(elem.get("y", 0))
+        transformed = [transform.apply_point(p[0], p[1]) for p in points]
 
-        # Get text content
-        content = "".join(elem.itertext()).strip()
+        xs = [p[0] for p in transformed]
+        ys = [p[1] for p in transformed]
+
+        min_x, max_x = min(xs), max(xs)
+        min_y, max_y = min(ys), max(ys)
+
+        width = max_x - min_x
+        height = max_y - min_y
+
+        if width < 5 and height < 5:
+            return None
+
+        position = Point(x=min_x, y=min_y)
+        size = Dimensions(width=width, height=height)
+
+        if len(points) == 2:
+            start = Point(x=transformed[0][0], y=transformed[0][1])
+            end = Point(x=transformed[1][0], y=transformed[1][1])
+            style = self._parse_style_attrs(elem)
+            line_id = elem.get('id') or self._generate_id()
+            self._lines.append((line_id, start, end, style))
+            return None
+
+        style = self._parse_style_attrs(elem)
+        shape_id = elem.get('id') or self._generate_id()
+        label = elem.get('data-label', '')
+
+        shape_type = 'polygon'
+        if len(points) == 4:
+            shape_type = 'diamond'
+        elif len(points) == 5 and self._is_rectangle_path(points):
+            shape_type = 'rectangle'
+
+        shape = Shape(
+            id=shape_id,
+            label=label,
+            shape_type=shape_type,
+            position=position,
+            size=size,
+            style=style,
+        )
+
+        semantic_hint = elem.get('data-semantic')
+        if semantic_hint:
+            shape.semantic_type = self._parse_semantic_hint(semantic_hint)
+            shape.semantic_confidence = 0.9
+        else:
+            shape.semantic_type, shape.semantic_confidence = infer_semantic_type(
+                shape_type=shape_type,
+                label=label,
+                size=size,
+                style=style,
+            )
+
+        if shape.semantic_type:
+            shape.semantic_type = shape.semantic_type.value
+
+        return shape
+
+    def _parse_path_commands(self, d: str) -> list[tuple[float, float]]:
+        """Parse SVG path d attribute into list of points (basic commands only)."""
+        points: list[tuple[float, float]] = []
+        current_x, current_y = 0.0, 0.0
+        start_x, start_y = 0.0, 0.0
+
+        tokens = re.findall(r'[MmLlHhVvZz]|[-+]?[0-9]*\.?[0-9]+', d)
+
+        i = 0
+        command = 'M'
+        while i < len(tokens):
+            token = tokens[i]
+
+            if token.isalpha():
+                command = token
+                i += 1
+                if command in ('Z', 'z'):
+                    if points and (current_x != start_x or current_y != start_y):
+                        points.append((start_x, start_y))
+                    current_x, current_y = start_x, start_y
+                continue
+
+            match command:
+                case 'M':
+                    current_x, current_y = float(tokens[i]), float(tokens[i + 1])
+                    start_x, start_y = current_x, current_y
+                    points.append((current_x, current_y))
+                    command = 'L'
+                    i += 2
+                case 'm':
+                    current_x += float(tokens[i])
+                    current_y += float(tokens[i + 1])
+                    start_x, start_y = current_x, current_y
+                    points.append((current_x, current_y))
+                    command = 'l'
+                    i += 2
+                case 'L':
+                    current_x, current_y = float(tokens[i]), float(tokens[i + 1])
+                    points.append((current_x, current_y))
+                    i += 2
+                case 'l':
+                    current_x += float(tokens[i])
+                    current_y += float(tokens[i + 1])
+                    points.append((current_x, current_y))
+                    i += 2
+                case 'H':
+                    current_x = float(tokens[i])
+                    points.append((current_x, current_y))
+                    i += 1
+                case 'h':
+                    current_x += float(tokens[i])
+                    points.append((current_x, current_y))
+                    i += 1
+                case 'V':
+                    current_y = float(tokens[i])
+                    points.append((current_x, current_y))
+                    i += 1
+                case 'v':
+                    current_y += float(tokens[i])
+                    points.append((current_x, current_y))
+                    i += 1
+                case _:
+                    _logger.debug('Skipping unsupported path command: %s', command)
+                    i += 1
+
+        return points
+
+    def _is_rectangle_path(self, points: list[tuple[float, float]]) -> bool:
+        """Check if path points form a rectangle."""
+        if len(points) != 5:
+            return False
+        if points[0] != points[4]:
+            return False
+
+        xs = sorted({p[0] for p in points[:4]})
+        ys = sorted({p[1] for p in points[:4]})
+
+        return len(xs) == 2 and len(ys) == 2
+
+    def _parse_line(self, elem: ET.Element, transform: Transform) -> None:
+        """Parse SVG line element and store for connection detection."""
+        x1 = float(elem.get('x1', 0))
+        y1 = float(elem.get('y1', 0))
+        x2 = float(elem.get('x2', 0))
+        y2 = float(elem.get('y2', 0))
+
+        tx1, ty1 = transform.apply_point(x1, y1)
+        tx2, ty2 = transform.apply_point(x2, y2)
+
+        style = self._parse_style_attrs(elem)
+        line_id = elem.get('id') or self._generate_id()
+
+        self._lines.append((line_id, Point(x=tx1, y=ty1), Point(x=tx2, y=ty2), style))
+
+    def _parse_polyline(self, elem: ET.Element, transform: Transform) -> None:
+        """Parse SVG polyline element and store segments for connection detection."""
+        points_str = elem.get('points', '')
+        if not points_str:
+            return
+
+        coords = [float(x) for x in points_str.replace(',', ' ').split()]
+        if len(coords) < 4:
+            return
+
+        style = self._parse_style_attrs(elem)
+        base_id = elem.get('id') or self._generate_id()
+
+        for i in range(0, len(coords) - 2, 2):
+            x1, y1 = coords[i], coords[i + 1]
+            x2, y2 = coords[i + 2], coords[i + 3]
+
+            tx1, ty1 = transform.apply_point(x1, y1)
+            tx2, ty2 = transform.apply_point(x2, y2)
+
+            segment_id = f'{base_id}_seg{i // 2}'
+            self._lines.append((segment_id, Point(x=tx1, y=ty1), Point(x=tx2, y=ty2), style))
+
+    def _detect_connections_from_lines(self, elements: list) -> list[Connection]:
+        """Detect connections from line elements that connect shapes."""
+        connections = []
+        shapes = [e for e in elements if isinstance(e, Shape)]
+
+        for line_id, start, end, style in self._lines:
+            from_shape = self._find_shape_at_point(start, shapes)
+            to_shape = self._find_shape_at_point(end, shapes)
+
+            if from_shape and to_shape and from_shape.id != to_shape.id:
+                conn = Connection(
+                    id=line_id,
+                    from_id=from_shape.id,
+                    to_id=to_shape.id,
+                    label='',
+                    connection_type='directed',
+                    position=Point(x=(start.x + end.x) / 2, y=(start.y + end.y) / 2),
+                    size=Dimensions(width=abs(end.x - start.x), height=abs(end.y - start.y)),
+                    style=style,
+                    start_point=start,
+                    end_point=end,
+                )
+                connections.append(conn)
+
+        return connections
+
+    def _find_shape_at_point(self, point: Point, shapes: list[Shape], tolerance: float = 10.0) -> Shape | None:
+        """Find a shape that contains or is near a point."""
+        for shape in shapes:
+            if self._point_near_shape(point, shape, tolerance):
+                return shape
+        return None
+
+    def _point_near_shape(self, point: Point, shape: Shape, tolerance: float) -> bool:
+        """Check if point is inside or near shape bounds."""
+        return (
+            shape.position.x - tolerance <= point.x <= shape.position.x + shape.size.width + tolerance
+            and shape.position.y - tolerance <= point.y <= shape.position.y + shape.size.height + tolerance
+        )
+
+    def _parse_text(self, elem: ET.Element, transform: Transform) -> Text | None:
+        """Parse SVG text to IR Text."""
+        x = float(elem.get('x', 0))
+        y = float(elem.get('y', 0))
+
+        content = ''.join(elem.itertext()).strip()
         if not content:
             return None
 
-        position = Point(x=x, y=y)
+        tx, ty = transform.apply_point(x, y)
+        position = Point(x=tx, y=ty)
 
-        # Estimate size based on font size and text length
         font_size = self._parse_font_size(elem)
-        width = len(content) * font_size * 0.6  # Rough estimate
-        height = font_size * 1.2
+        scaled_font = font_size * max(abs(transform.scale_x), abs(transform.scale_y))
+        width = len(content) * scaled_font * 0.6
+        height = scaled_font * 1.2
 
         size = Dimensions(width=width, height=height)
         style = self._parse_style_attrs(elem)
-        style.font_size = font_size
+        style.font_size = scaled_font
 
-        text_id = elem.get("id") or self._generate_id()
+        text_id = elem.get('id') or self._generate_id()
 
         return Text(
             id=text_id,
@@ -388,35 +671,22 @@ class SVGParser(Parser):
         self,
         elem: ET.Element,
         elements: list,
-        transform: Any | None,
+        transform: Transform,
     ) -> Group | None:
-        """Parse SVG group to IR Group.
+        """Parse SVG group to IR Group."""
+        group_id = elem.get('id') or self._generate_id()
 
-        Args:
-            elem: g element
-            elements: List to append elements to
-            transform: Transform matrix (not used in v1)
-
-        Returns:
-            Group or None if invalid
-        """
-        group_id = elem.get("id") or self._generate_id()
-
-        # Collect child elements
-        child_elements = []
+        child_elements: list = []
         for child in elem:
             self._process_element(child, child_elements, transform, parent_id=group_id)
 
         child_ids = [e.id for e in child_elements]
 
-        # Calculate bounding box
         if not child_elements:
             return None
 
-        # Get bounds from shapes only
         shapes = [e for e in child_elements if isinstance(e, Shape)]
         if not shapes:
-            # No shapes, just add children directly
             elements.extend(child_elements)
             return None
 
@@ -428,8 +698,7 @@ class SVGParser(Parser):
         position = Point(x=min_x, y=min_y)
         size = Dimensions(width=max_x - min_x, height=max_y - min_y)
 
-        # Get label from data attribute
-        label = elem.get("data-label", "")
+        label = elem.get('data-label', '')
 
         group = Group(
             id=group_id,

@@ -236,6 +236,132 @@ class TestSVGParser:
         assert inner is not None
 
 
+class TestSVGTransforms:
+    """Test SVG transform support."""
+
+    def test_translate_transform(self):
+        svg = '''<svg xmlns="http://www.w3.org/2000/svg">
+            <rect id="r1" x="0" y="0" width="100" height="50" transform="translate(50, 100)"/>
+        </svg>'''
+        parser = SVGParser()
+        diagram = parser.parse(svg)
+
+        shapes = diagram.get_shapes()
+        assert len(shapes) == 1
+        assert shapes[0].position.x == 50.0
+        assert shapes[0].position.y == 100.0
+
+    def test_scale_transform(self):
+        svg = '''<svg xmlns="http://www.w3.org/2000/svg">
+            <rect id="r1" x="10" y="10" width="100" height="50" transform="scale(2)"/>
+        </svg>'''
+        parser = SVGParser()
+        diagram = parser.parse(svg)
+
+        shapes = diagram.get_shapes()
+        assert len(shapes) == 1
+        assert shapes[0].position.x == 20.0
+        assert shapes[0].position.y == 20.0
+        assert shapes[0].size.width == 200.0
+        assert shapes[0].size.height == 100.0
+
+    def test_combined_transform(self):
+        svg = '''<svg xmlns="http://www.w3.org/2000/svg">
+            <rect id="r1" x="0" y="0" width="100" height="50" transform="translate(10, 20) scale(2)"/>
+        </svg>'''
+        parser = SVGParser()
+        diagram = parser.parse(svg)
+
+        shapes = diagram.get_shapes()
+        assert len(shapes) == 1
+        assert shapes[0].size.width == 200.0
+
+    def test_group_transform_inheritance(self):
+        svg = '''<svg xmlns="http://www.w3.org/2000/svg">
+            <g transform="translate(100, 100)">
+                <rect id="r1" x="0" y="0" width="50" height="50"/>
+            </g>
+        </svg>'''
+        parser = SVGParser()
+        diagram = parser.parse(svg)
+
+        shapes = diagram.get_shapes()
+        assert len(shapes) == 1
+        assert shapes[0].position.x == 100.0
+        assert shapes[0].position.y == 100.0
+
+
+class TestSVGPathSupport:
+    """Test SVG path element support."""
+
+    def test_simple_path_rectangle(self):
+        svg = '''<svg xmlns="http://www.w3.org/2000/svg">
+            <path id="p1" d="M 0 0 L 100 0 L 100 50 L 0 50 Z"/>
+        </svg>'''
+        parser = SVGParser()
+        diagram = parser.parse(svg)
+
+        shapes = diagram.get_shapes()
+        assert len(shapes) == 1
+        assert shapes[0].shape_type == 'rectangle'
+        assert shapes[0].size.width == 100.0
+        assert shapes[0].size.height == 50.0
+
+    def test_path_with_relative_commands(self):
+        svg = '''<svg xmlns="http://www.w3.org/2000/svg">
+            <path id="p1" d="M 10 10 l 100 0 l 0 50 l -100 0 z"/>
+        </svg>'''
+        parser = SVGParser()
+        diagram = parser.parse(svg)
+
+        shapes = diagram.get_shapes()
+        assert len(shapes) == 1
+        assert shapes[0].size.width == 100.0
+
+    def test_path_with_h_v_commands(self):
+        svg = '''<svg xmlns="http://www.w3.org/2000/svg">
+            <path id="p1" d="M 0 0 H 100 V 50 H 0 Z"/>
+        </svg>'''
+        parser = SVGParser()
+        diagram = parser.parse(svg)
+
+        shapes = diagram.get_shapes()
+        assert len(shapes) == 1
+        assert shapes[0].size.width == 100.0
+        assert shapes[0].size.height == 50.0
+
+
+class TestSVGLineElements:
+    """Test SVG line and polyline elements."""
+
+    def test_line_element(self):
+        svg = '''<svg xmlns="http://www.w3.org/2000/svg">
+            <rect id="r1" x="0" y="0" width="50" height="50"/>
+            <rect id="r2" x="100" y="0" width="50" height="50"/>
+            <line id="l1" x1="50" y1="25" x2="100" y2="25"/>
+        </svg>'''
+        parser = SVGParser()
+        diagram = parser.parse(svg)
+
+        connections = diagram.get_connections()
+        assert len(connections) == 1
+        assert connections[0].from_id == 'r1'
+        assert connections[0].to_id == 'r2'
+
+    def test_polyline_element(self):
+        svg = '''<svg xmlns="http://www.w3.org/2000/svg">
+            <rect id="r1" x="0" y="0" width="50" height="50"/>
+            <rect id="r2" x="100" y="0" width="50" height="50"/>
+            <rect id="r3" x="200" y="0" width="50" height="50"/>
+            <polyline points="50,25 100,25 150,25 200,25"/>
+        </svg>'''
+        parser = SVGParser()
+        diagram = parser.parse(svg)
+
+        connections = diagram.get_connections()
+        assert len(connections) >= 2
+
+
 class TestSVGCLI:
     """Test SVG CLI integration."""
 

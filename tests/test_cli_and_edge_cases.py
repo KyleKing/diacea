@@ -57,6 +57,28 @@ class TestCLIBasics:
         result = main(["-i", str(unknown_file), "-f", "mermaid"])
         assert result == 1
 
+    def test_cli_verbose_error(self, tmp_path, capsys):
+        bad_file = tmp_path / "bad.json"
+        bad_file.write_text("not valid json")
+        result = main(["-i", str(bad_file), "-f", "mermaid", "-v"])
+        assert result == 1
+        captured = capsys.readouterr()
+        assert "Traceback" in captured.err or "Error" in captured.err
+
+    def test_cli_creates_output_directory(self, tmp_path):
+        data = {
+            "elements": [
+                {"id": "a", "type": "rectangle", "x": 0.0, "y": 0.0, "width": 100.0, "height": 50.0}
+            ]
+        }
+        input_file = tmp_path / "input.json"
+        input_file.write_text(json.dumps(data))
+
+        nested_output = tmp_path / "nested" / "dir" / "output.puml"
+        result = main(["-i", str(input_file), "-f", "plantuml", "-o", str(nested_output)])
+        assert result == 0
+        assert nested_output.exists()
+
 
 class TestCLIFormats:
     """Test CLI with different input/output formats."""
@@ -110,6 +132,166 @@ class TestCLIFormats:
         assert result == 0
         captured = capsys.readouterr()
         assert "@startuml" in captured.out
+
+
+class TestCLIInputFormats:
+    """Test CLI with explicit input format selection."""
+
+    def test_explicit_excalidraw_format(self, tmp_path, capsys):
+        data = {
+            "elements": [
+                {"id": "a", "type": "rectangle", "x": 0.0, "y": 0.0, "width": 100.0, "height": 50.0}
+            ]
+        }
+        f = tmp_path / "test.json"
+        f.write_text(json.dumps(data))
+        result = main(["-i", str(f), "--input-format", "excalidraw", "-f", "plantuml"])
+        assert result == 0
+        captured = capsys.readouterr()
+        assert "@startuml" in captured.out
+
+    def test_explicit_svg_format(self, tmp_path, capsys):
+        svg_content = """<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="100">
+    <rect x="10" y="10" width="80" height="40" fill="blue"/>
+</svg>"""
+        f = tmp_path / "test.svg"
+        f.write_text(svg_content)
+        result = main(["-i", str(f), "--input-format", "svg", "-f", "plantuml"])
+        assert result == 0
+        captured = capsys.readouterr()
+        assert "@startuml" in captured.out
+
+    def test_explicit_tldraw_format(self, tmp_path, capsys):
+        data = {
+            "document": {
+                "pages": {
+                    "page1": {
+                        "id": "page1",
+                        "name": "Test Page",
+                        "shapes": {
+                            "shape1": {
+                                "id": "shape1",
+                                "type": "rectangle",
+                                "point": [0.0, 0.0],
+                                "size": [100.0, 50.0],
+                            }
+                        },
+                        "bindings": {},
+                    }
+                }
+            }
+        }
+        f = tmp_path / "test.json"
+        f.write_text(json.dumps(data))
+        result = main(["-i", str(f), "--input-format", "tldraw", "-f", "d2"])
+        assert result == 0
+        captured = capsys.readouterr()
+        assert "shape1" in captured.out
+
+    def test_svg_auto_detection(self, tmp_path, capsys):
+        svg_content = "<svg><rect x='0' y='0' width='100' height='50'/></svg>"
+        f = tmp_path / "test.svg"
+        f.write_text(svg_content)
+        result = main(["-i", str(f), "-f", "graphviz"])
+        assert result == 0
+        captured = capsys.readouterr()
+        assert "digraph" in captured.out
+
+
+class TestCLIFormatOptions:
+    """Test CLI format-specific options."""
+
+    @pytest.fixture
+    def simple_excalidraw_file(self, tmp_path):
+        data = {
+            "elements": [
+                {"id": "a", "type": "rectangle", "x": 0.0, "y": 0.0, "width": 100.0, "height": 50.0},
+                {"id": "b", "type": "rectangle", "x": 200.0, "y": 0.0, "width": 100.0, "height": 50.0},
+                {
+                    "id": "arr",
+                    "type": "arrow",
+                    "x": 100.0,
+                    "y": 25.0,
+                    "points": [[0.0, 0.0], [100.0, 0.0]],
+                    "startBinding": {"elementId": "a"},
+                    "endBinding": {"elementId": "b"},
+                },
+            ]
+        }
+        f = tmp_path / "test.json"
+        f.write_text(json.dumps(data))
+        return f
+
+    def test_mermaid_type_c4(self, simple_excalidraw_file, capsys):
+        result = main([
+            "-i", str(simple_excalidraw_file),
+            "-f", "mermaid",
+            "--mermaid-type", "c4",
+        ])
+        assert result == 0
+        captured = capsys.readouterr()
+        assert "C4" in captured.out
+
+    def test_mermaid_type_flowchart(self, simple_excalidraw_file, capsys):
+        result = main([
+            "-i", str(simple_excalidraw_file),
+            "-f", "mermaid",
+            "--mermaid-type", "flowchart",
+        ])
+        assert result == 0
+        captured = capsys.readouterr()
+        assert "flowchart" in captured.out
+
+    def test_graphviz_direction_tb(self, simple_excalidraw_file, capsys):
+        result = main([
+            "-i", str(simple_excalidraw_file),
+            "-f", "graphviz",
+            "--graphviz-direction", "TB",
+        ])
+        assert result == 0
+        captured = capsys.readouterr()
+        assert 'rankdir="TB"' in captured.out
+
+    def test_graphviz_direction_lr(self, simple_excalidraw_file, capsys):
+        result = main([
+            "-i", str(simple_excalidraw_file),
+            "-f", "graphviz",
+            "--graphviz-direction", "LR",
+        ])
+        assert result == 0
+        captured = capsys.readouterr()
+        assert 'rankdir="LR"' in captured.out
+
+    def test_graphviz_type_graph(self, simple_excalidraw_file, capsys):
+        result = main([
+            "-i", str(simple_excalidraw_file),
+            "-f", "graphviz",
+            "--graphviz-type", "graph",
+        ])
+        assert result == 0
+        captured = capsys.readouterr()
+        assert captured.out.strip().startswith("graph")
+
+    def test_d2_direction_up(self, simple_excalidraw_file, capsys):
+        result = main([
+            "-i", str(simple_excalidraw_file),
+            "-f", "d2",
+            "--d2-direction", "up",
+        ])
+        assert result == 0
+        captured = capsys.readouterr()
+        assert "direction: up" in captured.out
+
+    def test_d2_sketch_mode(self, simple_excalidraw_file, capsys):
+        result = main([
+            "-i", str(simple_excalidraw_file),
+            "-f", "d2",
+            "--d2-sketch",
+        ])
+        assert result == 0
+        captured = capsys.readouterr()
+        assert "a:" in captured.out or "a ->" in captured.out
 
 
 class TestFormatDetection:
@@ -574,4 +756,149 @@ class TestDuplicateElementFix:
         inner2_declarations = [l for l in lines if "rectangle" in l and "inner2" in l]
         assert len(inner1_declarations) == 1
         assert len(inner2_declarations) == 1
+
+
+class TestSemanticInference:
+    """Test semantic type inference heuristics."""
+
+    def test_diamond_shape_is_decision(self):
+        from diacea.ir.semantic import SemanticType, infer_semantic_type
+
+        semantic, confidence = infer_semantic_type(shape_type="diamond")
+        assert semantic == SemanticType.DECISION
+        assert confidence >= 0.9
+
+    def test_note_shape_is_note(self):
+        from diacea.ir.semantic import SemanticType, infer_semantic_type
+
+        semantic, confidence = infer_semantic_type(shape_type="note")
+        assert semantic == SemanticType.NOTE
+        assert confidence >= 0.8
+
+    def test_sticky_shape_is_note(self):
+        from diacea.ir.semantic import SemanticType, infer_semantic_type
+
+        semantic, confidence = infer_semantic_type(shape_type="sticky")
+        assert semantic == SemanticType.NOTE
+        assert confidence >= 0.8
+
+    def test_cylinder_shape_is_database(self):
+        from diacea.ir.semantic import SemanticType, infer_semantic_type
+
+        semantic, confidence = infer_semantic_type(shape_type="cylinder")
+        assert semantic == SemanticType.DATABASE
+        assert confidence >= 0.8
+
+    def test_label_database_keyword(self):
+        from diacea.ir.semantic import SemanticType, infer_semantic_type
+
+        semantic, confidence = infer_semantic_type(
+            shape_type="rectangle", label="PostgreSQL Database"
+        )
+        assert semantic == SemanticType.DATABASE
+        assert confidence >= 0.6
+
+    def test_label_api_keyword(self):
+        from diacea.ir.semantic import SemanticType, infer_semantic_type
+
+        semantic, confidence = infer_semantic_type(
+            shape_type="rectangle", label="REST API Service"
+        )
+        assert semantic == SemanticType.SERVICE
+        assert confidence >= 0.6
+
+    def test_label_user_keyword(self):
+        from diacea.ir.semantic import SemanticType, infer_semantic_type
+
+        semantic, confidence = infer_semantic_type(shape_type="ellipse", label="Admin User")
+        assert semantic == SemanticType.PERSON
+        assert confidence >= 0.6
+
+    def test_label_queue_keyword(self):
+        from diacea.ir.semantic import SemanticType, infer_semantic_type
+
+        semantic, confidence = infer_semantic_type(shape_type="rectangle", label="Kafka Queue")
+        assert semantic == SemanticType.QUEUE
+        assert confidence >= 0.6
+
+    def test_icon_person_emoji(self):
+        from diacea.ir.semantic import SemanticType, infer_semantic_type
+
+        semantic, confidence = infer_semantic_type(shape_type="rectangle", label="👤 Customer")
+        assert semantic == SemanticType.PERSON
+        assert confidence >= 0.8
+
+    def test_icon_database_emoji(self):
+        from diacea.ir.semantic import SemanticType, infer_semantic_type
+
+        semantic, confidence = infer_semantic_type(shape_type="rectangle", label="🗄️ Storage")
+        assert semantic == SemanticType.DATABASE
+        assert confidence >= 0.8
+
+    def test_icon_cloud_emoji(self):
+        from diacea.ir.semantic import SemanticType, infer_semantic_type
+
+        semantic, confidence = infer_semantic_type(shape_type="rectangle", label="☁️ AWS")
+        assert semantic == SemanticType.CLOUD
+        assert confidence >= 0.8
+
+    def test_yellow_fill_is_note(self):
+        from diacea.ir.semantic import SemanticType, infer_semantic_type
+
+        style = Style(fill_color="#ffff00")
+        semantic, confidence = infer_semantic_type(
+            shape_type="rectangle", label="", style=style
+        )
+        assert semantic == SemanticType.NOTE
+        assert confidence >= 0.6
+
+    def test_gray_dashed_is_external(self):
+        from diacea.ir.semantic import SemanticType, infer_semantic_type
+
+        style = Style(fill_color="#808080", stroke_style="dashed")
+        semantic, confidence = infer_semantic_type(
+            shape_type="rectangle", label="", style=style
+        )
+        assert semantic == SemanticType.EXTERNAL
+        assert confidence >= 0.5
+
+    def test_explicit_metadata_hint(self):
+        from diacea.ir.semantic import SemanticType, infer_semantic_type
+
+        semantic, confidence = infer_semantic_type(
+            shape_type="rectangle",
+            label="Box",
+            metadata={"semantic_type": "database"},
+        )
+        assert semantic == SemanticType.DATABASE
+        assert confidence == 1.0
+
+    def test_large_rectangle_is_system(self):
+        from diacea.ir.semantic import SemanticType, infer_semantic_type
+
+        size = Dimensions(width=500.0, height=300.0)
+        semantic, confidence = infer_semantic_type(
+            shape_type="rectangle", label="", size=size
+        )
+        assert semantic == SemanticType.SYSTEM
+        assert confidence >= 0.6
+
+    def test_wide_ellipse_is_database(self):
+        from diacea.ir.semantic import SemanticType, infer_semantic_type
+
+        size = Dimensions(width=200.0, height=50.0)
+        semantic, confidence = infer_semantic_type(
+            shape_type="ellipse", label="", size=size
+        )
+        assert semantic == SemanticType.DATABASE
+        assert confidence >= 0.6
+
+    def test_combined_shape_and_label(self):
+        from diacea.ir.semantic import SemanticType, infer_semantic_type
+
+        semantic, confidence = infer_semantic_type(
+            shape_type="ellipse", label="Customer", size=Dimensions(width=60.0, height=60.0)
+        )
+        assert semantic == SemanticType.PERSON
+        assert confidence >= 0.6
 
