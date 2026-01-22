@@ -24,12 +24,12 @@ class PlantUMLGenerator(Generator):
         connections = diagram.get_connections()
         groups = diagram.get_groups()
 
-        # Generate shapes
+        group_source_ids = {g.id.removeprefix("group-") for g in groups}
         for shape in shapes:
-            # Skip shapes that are part of groups (will be handled in group blocks)
             if any(shape.id in group.children for group in groups):
                 continue
-
+            if shape.id in group_source_ids:
+                continue
             lines.append(self._generate_shape(shape))
 
         # Generate groups/packages
@@ -45,22 +45,16 @@ class PlantUMLGenerator(Generator):
 
     def _generate_shape(self, shape: Shape) -> str:
         """Generate PlantUML for a shape."""
-        # Determine PlantUML shape type
         plantuml_type = self._map_shape_type(shape)
-
-        # Sanitize ID for PlantUML
         safe_id = self._sanitize_id(shape.id)
-        label = shape.label or safe_id
-
-        # Basic rectangle/component
+        label = self._escape_label(shape.label or safe_id)
         return f'{plantuml_type} "{label}" as {safe_id}'
 
     def _generate_group(self, group: Group, all_shapes: list[Shape]) -> list[str]:
         """Generate PlantUML package/rectangle for a group."""
         lines = []
         safe_id = self._sanitize_id(group.id)
-        label = group.label or safe_id
-
+        label = self._escape_label(group.label or safe_id)
         lines.append(f'rectangle "{label}" as {safe_id} {{')
 
         # Add child shapes
@@ -83,9 +77,9 @@ class PlantUMLGenerator(Generator):
         else:
             arrow = "-->"
 
-        # Add label if present
         if conn.label:
-            return f'{from_id} {arrow} {to_id} : "{conn.label}"'
+            label = self._escape_label(conn.label)
+            return f'{from_id} {arrow} {to_id} : "{label}"'
         return f"{from_id} {arrow} {to_id}"
 
     def _map_shape_type(self, shape: Shape) -> str:
@@ -112,8 +106,14 @@ class PlantUMLGenerator(Generator):
 
     def _sanitize_id(self, id_str: str) -> str:
         """Sanitize ID for PlantUML (alphanumeric and underscore only)."""
-        # Replace invalid characters with underscore
         return "".join(c if c.isalnum() or c == "_" else "_" for c in id_str)
+
+    def _escape_label(self, label: str) -> str:
+        """Escape label for PlantUML format."""
+        escaped = label.replace("\\", "\\\\")
+        escaped = escaped.replace('"', '\\"')
+        escaped = escaped.replace("\n", "\\n")
+        return escaped
 
 
 class C4PlantUMLGenerator(Generator):
@@ -141,19 +141,18 @@ class C4PlantUMLGenerator(Generator):
         connections = diagram.get_connections()
         groups = diagram.get_groups()
 
-        # Categorize elements by semantic type
         systems = []
         containers = []
         components = []
         databases = []
         people = []
-        other = []
 
+        group_source_ids = {g.id.removeprefix("group-") for g in groups}
         for shape in shapes:
-            # Skip shapes in groups for now (will handle with boundaries)
             if any(shape.id in group.children for group in groups):
                 continue
-
+            if shape.id in group_source_ids:
+                continue
             semantic = shape.semantic_type
             if semantic == SemanticType.SYSTEM.value:
                 systems.append(shape)
@@ -207,43 +206,38 @@ class C4PlantUMLGenerator(Generator):
     def _generate_person(self, shape: Shape) -> str:
         """Generate C4 Person element."""
         safe_id = self._sanitize_id(shape.id)
-        label = shape.label or "Person"
+        label = self._escape_label(shape.label or "Person")
         return f'Person({safe_id}, "{label}")'
 
     def _generate_system(self, shape: Shape) -> str:
         """Generate C4 System element."""
         safe_id = self._sanitize_id(shape.id)
-        label = shape.label or "System"
+        label = self._escape_label(shape.label or "System")
         return f'System({safe_id}, "{label}")'
 
     def _generate_container(self, shape: Shape) -> str:
         """Generate C4 Container element."""
         safe_id = self._sanitize_id(shape.id)
-        label = shape.label or "Container"
-
-        # Try to infer technology from metadata
-        tech = ""
-        if "technology" in shape.metadata:
-            tech = shape.metadata["technology"]
-
+        label = self._escape_label(shape.label or "Container")
+        tech = shape.metadata.get("technology", "")
         if tech:
+            tech = self._escape_label(tech)
             return f'Container({safe_id}, "{label}", "{tech}")'
         return f'Container({safe_id}, "{label}")'
 
     def _generate_component(self, shape: Shape) -> str:
         """Generate C4 Component element."""
         safe_id = self._sanitize_id(shape.id)
-        label = shape.label or "Component"
+        label = self._escape_label(shape.label or "Component")
         return f'Component({safe_id}, "{label}")'
 
     def _generate_database(self, shape: Shape) -> str:
         """Generate C4 Database element."""
         safe_id = self._sanitize_id(shape.id)
-        label = shape.label or "Database"
-
-        # Try to get database type from label
+        raw_label = shape.label or "Database"
+        label = self._escape_label(raw_label)
+        label_lower = raw_label.lower()
         tech = ""
-        label_lower = label.lower()
         if "postgres" in label_lower:
             tech = "PostgreSQL"
         elif "mysql" in label_lower:
@@ -261,8 +255,7 @@ class C4PlantUMLGenerator(Generator):
         """Generate C4 System_Boundary for a group."""
         lines = []
         safe_id = self._sanitize_id(group.id)
-        label = group.label or "System"
-
+        label = self._escape_label(group.label or "System")
         lines.append(f'System_Boundary({safe_id}, "{label}") {{')
 
         # Add child elements
@@ -287,11 +280,16 @@ class C4PlantUMLGenerator(Generator):
         """Generate C4 Rel (relationship)."""
         from_id = self._sanitize_id(conn.from_id)
         to_id = self._sanitize_id(conn.to_id)
-        label = conn.label or "uses"
-
+        label = self._escape_label(conn.label or "uses")
         return f'Rel({from_id}, {to_id}, "{label}")'
 
     def _sanitize_id(self, id_str: str) -> str:
         """Sanitize ID for C4-PlantUML."""
-        # Replace invalid characters with underscore
         return "".join(c if c.isalnum() or c == "_" else "_" for c in id_str)
+
+    def _escape_label(self, label: str) -> str:
+        """Escape label for C4-PlantUML format."""
+        escaped = label.replace("\\", "\\\\")
+        escaped = escaped.replace('"', '\\"')
+        escaped = escaped.replace("\n", "\\n")
+        return escaped

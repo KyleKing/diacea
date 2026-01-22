@@ -137,12 +137,13 @@ class GraphVizGenerator(Generator):
     def _get_standalone_shapes(
         self, shapes: list[Shape], groups: list[Group]
     ) -> list[Shape]:
-        """Get shapes that are not in any group."""
+        """Get shapes that are not in any group and haven't become groups."""
         grouped_ids = set()
         for group in groups:
             grouped_ids.update(group.children)
 
-        return [s for s in shapes if s.id not in grouped_ids]
+        group_source_ids = {g.id.removeprefix("group-") for g in groups}
+        return [s for s in shapes if s.id not in grouped_ids and s.id not in group_source_ids]
 
     def _write_clusters(
         self, groups: list[Group], all_shapes: list[Shape], lines: list[str], depth: int

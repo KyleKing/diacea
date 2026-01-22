@@ -146,12 +146,12 @@ class D2Generator(Generator):
         for group in groups:
             self._write_group(group, shapes, lines)
 
-        # Write standalone shapes (not in groups)
         grouped_ids = set()
         for group in groups:
             grouped_ids.update(group.children)
 
-        standalone_shapes = [s for s in shapes if s.id not in grouped_ids]
+        group_source_ids = {g.id.removeprefix("group-") for g in groups}
+        standalone_shapes = [s for s in shapes if s.id not in grouped_ids and s.id not in group_source_ids]
         for shape in standalone_shapes:
             lines.append(self._format_shape(shape))
 

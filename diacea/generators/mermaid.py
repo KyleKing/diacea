@@ -91,12 +91,13 @@ class MermaidGenerator(Generator):
         connections = diagram.get_connections()
         groups = diagram.get_groups()
 
-        # Filter out shapes that are in groups (will be in subgraphs)
+        group_source_ids = {g.id.removeprefix("group-") for g in groups}
         top_level_shapes = [
-            s for s in shapes if not any(s.id in g.children for g in groups)
+            s for s in shapes
+            if not any(s.id in g.children for g in groups)
+            and s.id not in group_source_ids
         ]
 
-        # Generate top-level shapes
         for shape in top_level_shapes:
             lines.append(self._format_flowchart_node(shape))
 
@@ -120,11 +121,8 @@ class MermaidGenerator(Generator):
     def _format_flowchart_node(self, shape: Shape) -> str:
         """Format a Mermaid flowchart node."""
         node_id = self._sanitize_id(shape.id)
-        label = shape.label or node_id
-
-        # Determine node shape based on semantic type or geometric shape
+        label = self._escape_label(shape.label or node_id)
         brackets = self._get_node_brackets(shape)
-
         return f"    {node_id}{brackets[0]}{label}{brackets[1]}"
 
     def _get_node_brackets(self, shape: Shape) -> tuple[str, str]:
@@ -167,11 +165,9 @@ class MermaidGenerator(Generator):
         else:
             arrow = "-->"
 
-        # Add label if present
         if conn.label:
-            label = conn.label.replace('"', "'")  # Escape quotes
+            label = self._escape_pipe_label(conn.label)
             return f"    {from_id} {arrow}|{label}| {to_id}"
-
         return f"    {from_id} {arrow} {to_id}"
 
     def _generate_subgraph(
@@ -184,8 +180,7 @@ class MermaidGenerator(Generator):
         lines = []
         indent = "    " * depth
         subgraph_id = self._sanitize_id(group.id)
-        label = group.label or subgraph_id
-
+        label = self._escape_label(group.label or subgraph_id)
         lines.append(f"{indent}subgraph {subgraph_id}[{label}]")
 
         # Add child shapes
@@ -230,62 +225,56 @@ class MermaidGenerator(Generator):
         connections = diagram.get_connections()
         groups = diagram.get_groups()
 
-        # Categorize by semantic type
-        people = [s for s in shapes if s.semantic_type == SemanticType.PERSON.value]
-        systems = [s for s in shapes if s.semantic_type == SemanticType.SYSTEM.value]
-        containers = [
-            s for s in shapes if s.semantic_type == SemanticType.CONTAINER.value
-        ]
-        components = [
-            s for s in shapes if s.semantic_type == SemanticType.COMPONENT.value
-        ]
+        group_source_ids = {g.id.removeprefix("group-") for g in groups}
+        child_ids = {cid for g in groups for cid in g.children}
 
-        # Generate people
+        def _is_top_level(s: Shape) -> bool:
+            return s.id not in child_ids and s.id not in group_source_ids
+
+        people = [s for s in shapes if s.semantic_type == SemanticType.PERSON.value and _is_top_level(s)]
+        systems = [s for s in shapes if s.semantic_type == SemanticType.SYSTEM.value and _is_top_level(s)]
+        containers = [s for s in shapes if s.semantic_type == SemanticType.CONTAINER.value and _is_top_level(s)]
+        components = [s for s in shapes if s.semantic_type == SemanticType.COMPONENT.value and _is_top_level(s)]
+
         for person in people:
-            label = person.label or "Person"
+            label = self._escape_quoted_label(person.label or "Person")
             node_id = self._sanitize_id(person.id)
-            lines.append(f"    Person({node_id}, \"{label}\")")
+            lines.append(f'    Person({node_id}, "{label}")')
 
-        # Generate systems
         for system in systems:
-            label = system.label or "System"
+            label = self._escape_quoted_label(system.label or "System")
             node_id = self._sanitize_id(system.id)
-            lines.append(f"    System({node_id}, \"{label}\")")
+            lines.append(f'    System({node_id}, "{label}")')
 
-        # Generate containers
         for container in containers:
-            label = container.label or "Container"
+            label = self._escape_quoted_label(container.label or "Container")
             node_id = self._sanitize_id(container.id)
-            lines.append(f"    Container({node_id}, \"{label}\")")
+            lines.append(f'    Container({node_id}, "{label}")')
 
-        # Generate components
         for component in components:
-            label = component.label or "Component"
+            label = self._escape_quoted_label(component.label or "Component")
             node_id = self._sanitize_id(component.id)
-            lines.append(f"    Component({node_id}, \"{label}\")")
+            lines.append(f'    Component({node_id}, "{label}")')
 
-        # Generate boundaries (groups)
         for group in groups:
-            label = group.label or "System"
+            label = self._escape_quoted_label(group.label or "System")
             boundary_id = self._sanitize_id(group.id)
-            lines.append(f"    Boundary({boundary_id}, \"{label}\") {{")
+            lines.append(f'    Boundary({boundary_id}, "{label}") {{')
 
-            # Add children
             for child_id in group.children:
                 child = next((s for s in shapes if s.id == child_id), None)
                 if child:
                     child_node_id = self._sanitize_id(child.id)
-                    child_label = child.label or child_node_id
-                    lines.append(f"        Container({child_node_id}, \"{child_label}\")")
+                    child_label = self._escape_quoted_label(child.label or child_node_id)
+                    lines.append(f'        Container({child_node_id}, "{child_label}")')
 
             lines.append("    }")
 
-        # Generate relationships
         for conn in connections:
             from_id = self._sanitize_id(conn.from_id)
             to_id = self._sanitize_id(conn.to_id)
-            label = conn.label or "uses"
-            lines.append(f"    Rel({from_id}, {to_id}, \"{label}\")")
+            label = self._escape_quoted_label(conn.label or "uses")
+            lines.append(f'    Rel({from_id}, {to_id}, "{label}")')
 
         return "\n".join(lines)
 
@@ -296,18 +285,15 @@ class MermaidGenerator(Generator):
         shapes = diagram.get_shapes()
         connections = diagram.get_connections()
 
-        # Declare participants
         for shape in shapes:
             participant_id = self._sanitize_id(shape.id)
-            label = shape.label or participant_id
+            label = self._escape_label(shape.label or participant_id)
             lines.append(f"    participant {participant_id} as {label}")
 
-        # Generate interactions (connections in order)
         for conn in connections:
             from_id = self._sanitize_id(conn.from_id)
             to_id = self._sanitize_id(conn.to_id)
 
-            # Determine arrow type
             if conn.connection_type == "bidirectional":
                 arrow = "->>"
             elif conn.style.stroke_style == "dashed":
@@ -315,8 +301,7 @@ class MermaidGenerator(Generator):
             else:
                 arrow = "->>"
 
-            # Add message
-            label = conn.label or ""
+            label = self._escape_label(conn.label or "")
             lines.append(f"    {from_id}{arrow}{to_id}: {label}")
 
         return "\n".join(lines)
@@ -324,3 +309,24 @@ class MermaidGenerator(Generator):
     def _sanitize_id(self, id_str: str) -> str:
         """Sanitize ID for Mermaid (alphanumeric and underscore)."""
         return "".join(c if c.isalnum() or c == "_" else "_" for c in id_str)
+
+    def _escape_label(self, label: str) -> str:
+        """Escape label for Mermaid flowchart node syntax."""
+        escaped = label.replace('"', "#quot;")
+        escaped = escaped.replace("<", "&lt;")
+        escaped = escaped.replace(">", "&gt;")
+        escaped = escaped.replace("\n", "<br/>")
+        return escaped
+
+    def _escape_quoted_label(self, label: str) -> str:
+        """Escape label for Mermaid quoted string contexts (C4, sequence)."""
+        escaped = label.replace("\\", "\\\\")
+        escaped = escaped.replace('"', '\\"')
+        escaped = escaped.replace("\n", "<br/>")
+        return escaped
+
+    def _escape_pipe_label(self, label: str) -> str:
+        """Escape label for Mermaid pipe-delimited connection labels."""
+        escaped = label.replace("|", "&#124;")
+        escaped = escaped.replace("\n", "<br/>")
+        return escaped
