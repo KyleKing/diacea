@@ -1,0 +1,50 @@
+diff a/pyproject.toml b/pyproject.toml	(rejected hunks)
+@@ -34,21 +34,24 @@ classifiers = [
+   "Programming Language :: Python :: 3.10",
+   "Programming Language :: Python :: 3.11",
+   "Programming Language :: Python :: 3.12",
+-  "Programming Language :: Python :: 3.9",
++  "Programming Language :: Python :: 3.10",
+ ] # https://pypi.org/classifiers/
+-description = "TBD"
++description = "Convert between Excalidraw and PlantUML"
+ documentation = "https://diacea.kyleking.me"
+ keywords = ["calcipy_template"]
+ license = "MIT"
+ maintainers = []
+ name = "diacea"
+-readme = "docs/README.md"
++readme = "README.md"
+ repository = "https://github.com/kyleking/diacea"
+ version = "0.0.1"
+ 
+ [tool.poetry.dependencies]
+-python = "^3.9.13"
++python = ">=3.10,<3.14"
+ corallium = ">=2.0.1"
++networkx = "^3.4.2"
++python-constraint2 = "^2.0.0b8"
++pyyaml = "^6.0"
+ 
+ [tool.poetry.group.dev.dependencies]
+ calcipy = {extras = ["doc", "lint", "nox", "tags", "test", "types"], version = ">=5.0.0"}
+@@ -57,9 +60,18 @@ calcipy = {extras = ["doc", "lint", "nox", "tags", "test", "types"], version = "
+ "Bug Tracker" = "https://github.com/kyleking/diacea/issues"
+ "Changelog" = "https://github.com/kyleking/diacea/blob/main/docs/docs/CHANGELOG.md"
+ 
++[tool.poetry.scripts]
++diacea = "diacea.cli:main"
++diacea-workspace = "diacea.workspace_cli:main_workspace"
++
++[tool.pytest.ini_options]
++markers = [
++  "slow: marks tests as slow (deselect with '-m \"not slow\"')",
++]
++
+ [tool.pyright]
+ include = ["diacea", "tests"]
+-pythonVersion = "3.9"
++pythonVersion = "3.10"
+ 
+ [tool.ruff]
+ # Docs: https://github.com/charliermarsh/ruff

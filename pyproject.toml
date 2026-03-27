@@ -1,6 +1,38 @@
 [build-system]
-build-backend = "poetry.core.masonry.api"
-requires = ["poetry-core"]
+build-backend = "uv_build"
+requires = ["uv_build>=0.9.26,<2.0"]
+
+[dependency-groups]
+dev = ['calcipy[recommended]>=6.0.0b3', 'calcipy[dev]>=5.0.0']
+
+[project]
+authors = [
+  {email = "dev.act.kyle@gmail.com", name = "Kyle King"},
+]
+classifiers = [
+  "Development Status :: 1 - Planning",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+] # https://pypi.org/classifiers/
+dependencies = ['corallium>=2.2.0', 'networkx>=3.4.2,<4', 'python-constraint2>=2.0.0b8,<3', 'pyyaml>=6.0,<7']
+description = "TBD"
+keywords = ["calcipy_template"]
+license = "MIT"
+maintainers = []
+name = "diacea"
+readme = "docs/README.md"
+requires-python = ">=3.10.11"
+version = "0.0.1"
+
+[project.urls]
+"Bug Tracker" = "https://github.com/kyleking/diacea/issues"
+"Changelog" = "https://github.com/kyleking/diacea/blob/main/docs/docs/CHANGELOG.md"
+"Documentation" = "https://diacea.kyleking.me"
+"Repository" = "https://github.com/kyleking/diacea"
 
 [tool.commitizen]
 version = "0.0.1"
@@ -25,59 +57,18 @@ warn_unreachable = true
 warn_unused_configs = true
 warn_unused_ignores = true
 
-[tool.poetry]
-authors = ["Kyle King <dev.act.kyle@gmail.com>"]
-classifiers = [
-  "Development Status :: 1 - Planning",
-  "License :: OSI Approved :: MIT License",
-  "Operating System :: OS Independent",
-  "Programming Language :: Python :: 3.10",
-  "Programming Language :: Python :: 3.11",
-  "Programming Language :: Python :: 3.12",
-  "Programming Language :: Python :: 3.10",
-] # https://pypi.org/classifiers/
-description = "Convert between Excalidraw and PlantUML"
-documentation = "https://diacea.kyleking.me"
-keywords = ["calcipy_template"]
-license = "MIT"
-maintainers = []
-name = "diacea"
-readme = "README.md"
-repository = "https://github.com/kyleking/diacea"
-version = "0.0.1"
-
-[tool.poetry.dependencies]
-python = ">=3.10,<3.14"
-corallium = ">=2.0.1"
-networkx = "^3.4.2"
-python-constraint2 = "^2.0.0b8"
-pyyaml = "^6.0"
-
-[tool.poetry.group.dev.dependencies]
-calcipy = {extras = ["doc", "lint", "nox", "tags", "test", "types"], version = ">=5.0.0"}
-
-[tool.poetry.urls]
-"Bug Tracker" = "https://github.com/kyleking/diacea/issues"
-"Changelog" = "https://github.com/kyleking/diacea/blob/main/docs/docs/CHANGELOG.md"
-
-[tool.poetry.scripts]
-diacea = "diacea.cli:main"
-diacea-workspace = "diacea.workspace_cli:main_workspace"
-
-[tool.pytest.ini_options]
-markers = [
-  "slow: marks tests as slow (deselect with '-m \"not slow\"')",
-]
-
 [tool.pyright]
 include = ["diacea", "tests"]
-pythonVersion = "3.10"
+pythonVersion = "3.9"
 
 [tool.ruff]
 # Docs: https://github.com/charliermarsh/ruff
-# Tip: poetry run python -m ruff rule RUF100
+# Tip: uv run ruff rule RUF100
 line-length = 120
 target-version = 'py39'
+
+[tool.ruff.format]
+quote-style = 'single'
 
 [tool.ruff.lint]
 ignore = [
@@ -85,14 +76,18 @@ ignore = [
   'ANN003', # Missing type annotation for `**kwargs`
   'ANN401', # Dynamically typed expressions (typing.Any) are disallowed in `pop_key`
   'BLE001', # Do not catch blind exception: `Exception`
+  'COM812', # Conflicts with formatter
   'CPY001', # Missing copyright notice at top of file
   'D203', # "1 blank line required before class docstring" (Conflicts with D211)
   'D213', # "Multi-line docstring summary should start at the second line" (Conflicts with D212)
+  'DOC201', # Missing "Returns" in docstring; prefer minimal docstrings
+  'DOC501', # Raised exception `RuntimeError` missing from docstring
   'EM101', # Exception must not use a string literal, assign to variable first
   'FIX001', # Line contains FIXME
   'FIX002', # Line contains TODO
   'FIX004', # Line contains HACK
   'PLR0913', # Too many arguments in function definition (6 > 5)
+  'RUF067', # `__init__` module should only contain docstrings and re-exports
   'TC001', # Move application import `tail_jsonl.config.Config` into a type-checking block (Conflicts with Beartype)
   'TC002', # Move third-party import `rich.console.Console` into a type-checking block (Conflicts with Beartype)
   'TC003', # Move standard library import `argparse` into a type-checking block (Conflicts with Beartype)
@@ -143,6 +138,7 @@ known-first-party = ['diacea']
   'D100', # Missing docstring in public module
   'D103', # Missing docstring in public function
   'PLC2701', # Private name import `_<>` from external module
+  'PLR0917', # Too many positional arguments (6/5)
   'PT004', # flake8-pytest-style: fixture does not return
   'S101', # Use of `assert` detected
 ]
@@ -153,5 +149,12 @@ convention = "google"
 [tool.tomlsort]
 all = true
 in_place = true
-sort_first = ["python"]
 trailing_comma_inline_array = true
+
+[tool.uv]
+default-groups = ["dev"]
+required-version = ">=0.9.0"
+
+[tool.uv.build-backend]
+module-name = "diacea"
+module-root = ""
