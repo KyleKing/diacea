@@ -30,17 +30,17 @@ class GraphVizConfig:
         """Initialize default node shape mappings."""
         if not self.node_shape_map:
             self.node_shape_map = {
-                SemanticType.COMPONENT.value: "box",
-                SemanticType.SYSTEM.value: "box3d",
-                SemanticType.DATABASE.value: "cylinder",
-                SemanticType.PERSON.value: "ellipse",
-                SemanticType.QUEUE.value: "folder",
-                SemanticType.CONTAINER.value: "component",
-                SemanticType.SERVICE.value: "box",
-                SemanticType.DECISION.value: "diamond",
-                SemanticType.EXTERNAL.value: "octagon",
-                SemanticType.STORAGE.value: "cylinder",
-                SemanticType.CLOUD.value: "cloud",
+                SemanticType.COMPONENT: "box",
+                SemanticType.SYSTEM: "box3d",
+                SemanticType.DATABASE: "cylinder",
+                SemanticType.PERSON: "ellipse",
+                SemanticType.QUEUE: "folder",
+                SemanticType.CONTAINER: "component",
+                SemanticType.SERVICE: "box",
+                SemanticType.DECISION: "diamond",
+                SemanticType.EXTERNAL: "octagon",
+                SemanticType.STORAGE: "cylinder",
+                SemanticType.CLOUD: "cloud",
             }
 
 
@@ -142,7 +142,7 @@ class GraphVizGenerator(Generator):
         for group in groups:
             grouped_ids.update(group.children)
 
-        group_source_ids = {g.id.removeprefix("group-") for g in groups}
+        group_source_ids = {g.source_shape_id for g in groups}
         return [s for s in shapes if s.id not in grouped_ids and s.id not in group_source_ids]
 
     def _write_clusters(

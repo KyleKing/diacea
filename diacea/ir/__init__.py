@@ -9,6 +9,7 @@ from .elements import (
     Diagram,
     Dimensions,
     Element,
+    GROUP_ID_PREFIX,
     Group,
     Point,
     Shape,
@@ -31,6 +32,7 @@ __all__ = [
     "Shape",
     "Connection",
     "Text",
+    "GROUP_ID_PREFIX",
     "Group",
     "Diagram",
     # Semantic

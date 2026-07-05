@@ -3,6 +3,17 @@
 from __future__ import annotations
 
 from ..ir import Connection, Diagram, Generator, Group, SemanticType, Shape
+from ._text import sanitize_alnum_id
+
+
+def _escape_plantuml_label(label: str) -> str:
+    escaped = label.replace("\\", "\\\\")
+    escaped = escaped.replace('"', '\\"')
+    escaped = escaped.replace("\n", "\\n")
+    escaped = escaped.replace("<", "~<")
+    escaped = escaped.replace(">", "~>")
+    escaped = escaped.replace("&", "&amp;")
+    return escaped
 
 
 class PlantUMLGenerator(Generator):
@@ -24,7 +35,7 @@ class PlantUMLGenerator(Generator):
         connections = diagram.get_connections()
         groups = diagram.get_groups()
 
-        group_source_ids = {g.id.removeprefix("group-") for g in groups}
+        group_source_ids = {g.source_shape_id for g in groups}
         for shape in shapes:
             if any(shape.id in group.children for group in groups):
                 continue
@@ -87,13 +98,13 @@ class PlantUMLGenerator(Generator):
         # Use semantic type if available
         if shape.semantic_type:
             semantic = shape.semantic_type
-            if semantic == SemanticType.DATABASE.value:
+            if semantic == SemanticType.DATABASE:
                 return "database"
-            elif semantic == SemanticType.QUEUE.value:
+            elif semantic == SemanticType.QUEUE:
                 return "queue"
-            elif semantic == SemanticType.STORAGE.value:
+            elif semantic == SemanticType.STORAGE:
                 return "storage"
-            elif semantic == SemanticType.CLOUD.value:
+            elif semantic == SemanticType.CLOUD:
                 return "cloud"
 
         # Fallback to geometric shape
@@ -104,19 +115,8 @@ class PlantUMLGenerator(Generator):
         }
         return shape_map.get(shape.shape_type, "rectangle")
 
-    def _sanitize_id(self, id_str: str) -> str:
-        """Sanitize ID for PlantUML (alphanumeric and underscore only)."""
-        return "".join(c if c.isalnum() or c == "_" else "_" for c in id_str)
-
-    def _escape_label(self, label: str) -> str:
-        """Escape label for PlantUML format."""
-        escaped = label.replace("\\", "\\\\")
-        escaped = escaped.replace('"', '\\"')
-        escaped = escaped.replace("\n", "\\n")
-        escaped = escaped.replace("<", "~<")
-        escaped = escaped.replace(">", "~>")
-        escaped = escaped.replace("&", "&amp;")
-        return escaped
+    _sanitize_id = staticmethod(sanitize_alnum_id)
+    _escape_label = staticmethod(_escape_plantuml_label)
 
 
 class C4PlantUMLGenerator(Generator):
@@ -150,22 +150,22 @@ class C4PlantUMLGenerator(Generator):
         databases = []
         people = []
 
-        group_source_ids = {g.id.removeprefix("group-") for g in groups}
+        group_source_ids = {g.source_shape_id for g in groups}
         for shape in shapes:
             if any(shape.id in group.children for group in groups):
                 continue
             if shape.id in group_source_ids:
                 continue
             semantic = shape.semantic_type
-            if semantic == SemanticType.SYSTEM.value:
+            if semantic == SemanticType.SYSTEM:
                 systems.append(shape)
-            elif semantic == SemanticType.CONTAINER.value:
+            elif semantic == SemanticType.CONTAINER:
                 containers.append(shape)
-            elif semantic == SemanticType.COMPONENT.value:
+            elif semantic == SemanticType.COMPONENT:
                 components.append(shape)
-            elif semantic == SemanticType.DATABASE.value:
+            elif semantic == SemanticType.DATABASE:
                 databases.append(shape)
-            elif semantic == SemanticType.PERSON.value:
+            elif semantic == SemanticType.PERSON:
                 people.append(shape)
             else:
                 # Default to container for unknown types
@@ -266,11 +266,11 @@ class C4PlantUMLGenerator(Generator):
             child_shape = next((s for s in all_shapes if s.id == child_id), None)
             if child_shape:
                 semantic = child_shape.semantic_type
-                if semantic == SemanticType.CONTAINER.value:
+                if semantic == SemanticType.CONTAINER:
                     lines.append(f"  {self._generate_container(child_shape)}")
-                elif semantic == SemanticType.COMPONENT.value:
+                elif semantic == SemanticType.COMPONENT:
                     lines.append(f"  {self._generate_component(child_shape)}")
-                elif semantic == SemanticType.DATABASE.value:
+                elif semantic == SemanticType.DATABASE:
                     lines.append(f"  {self._generate_database(child_shape)}")
                 else:
                     # Default to container
@@ -286,16 +286,5 @@ class C4PlantUMLGenerator(Generator):
         label = self._escape_label(conn.label or "uses")
         return f'Rel({from_id}, {to_id}, "{label}")'
 
-    def _sanitize_id(self, id_str: str) -> str:
-        """Sanitize ID for C4-PlantUML."""
-        return "".join(c if c.isalnum() or c == "_" else "_" for c in id_str)
-
-    def _escape_label(self, label: str) -> str:
-        """Escape label for C4-PlantUML format."""
-        escaped = label.replace("\\", "\\\\")
-        escaped = escaped.replace('"', '\\"')
-        escaped = escaped.replace("\n", "\\n")
-        escaped = escaped.replace("<", "~<")
-        escaped = escaped.replace(">", "~>")
-        escaped = escaped.replace("&", "&amp;")
-        return escaped
+    _sanitize_id = staticmethod(sanitize_alnum_id)
+    _escape_label = staticmethod(_escape_plantuml_label)

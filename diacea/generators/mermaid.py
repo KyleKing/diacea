@@ -13,6 +13,7 @@ from __future__ import annotations
 from typing import Optional
 
 from ..ir import Connection, Diagram, Generator, Group, SemanticType, Shape
+from ._text import sanitize_alnum_id
 
 
 class MermaidGenerator(Generator):
@@ -60,10 +61,10 @@ class MermaidGenerator(Generator):
 
         # Check for C4 semantic types
         c4_types = {
-            SemanticType.PERSON.value,
-            SemanticType.SYSTEM.value,
-            SemanticType.CONTAINER.value,
-            SemanticType.COMPONENT.value,
+            SemanticType.PERSON,
+            SemanticType.SYSTEM,
+            SemanticType.CONTAINER,
+            SemanticType.COMPONENT,
         }
 
         semantic_types = {s.semantic_type for s in shapes if s.semantic_type}
@@ -91,7 +92,7 @@ class MermaidGenerator(Generator):
         connections = diagram.get_connections()
         groups = diagram.get_groups()
 
-        group_source_ids = {g.id.removeprefix("group-") for g in groups}
+        group_source_ids = {g.source_shape_id for g in groups}
         top_level_shapes = [
             s for s in shapes
             if not any(s.id in g.children for g in groups)
@@ -133,13 +134,13 @@ class MermaidGenerator(Generator):
         # Check semantic type first
         if shape.semantic_type:
             semantic = shape.semantic_type
-            if semantic == SemanticType.DECISION.value:
+            if semantic == SemanticType.DECISION:
                 return ("{", "}")  # Diamond
-            elif semantic == SemanticType.DATABASE.value:
+            elif semantic == SemanticType.DATABASE:
                 return ("[(", ")]")  # Cylindrical
-            elif semantic == SemanticType.PERSON.value:
+            elif semantic == SemanticType.PERSON:
                 return ("([", "])")  # Stadium/rounded
-            elif semantic == SemanticType.START_END.value:
+            elif semantic == SemanticType.START_END:
                 return ("([", "])")  # Stadium
 
         # Fall back to geometric shape
@@ -225,16 +226,16 @@ class MermaidGenerator(Generator):
         connections = diagram.get_connections()
         groups = diagram.get_groups()
 
-        group_source_ids = {g.id.removeprefix("group-") for g in groups}
+        group_source_ids = {g.source_shape_id for g in groups}
         child_ids = {cid for g in groups for cid in g.children}
 
         def _is_top_level(s: Shape) -> bool:
             return s.id not in child_ids and s.id not in group_source_ids
 
-        people = [s for s in shapes if s.semantic_type == SemanticType.PERSON.value and _is_top_level(s)]
-        systems = [s for s in shapes if s.semantic_type == SemanticType.SYSTEM.value and _is_top_level(s)]
-        containers = [s for s in shapes if s.semantic_type == SemanticType.CONTAINER.value and _is_top_level(s)]
-        components = [s for s in shapes if s.semantic_type == SemanticType.COMPONENT.value and _is_top_level(s)]
+        people = [s for s in shapes if s.semantic_type == SemanticType.PERSON and _is_top_level(s)]
+        systems = [s for s in shapes if s.semantic_type == SemanticType.SYSTEM and _is_top_level(s)]
+        containers = [s for s in shapes if s.semantic_type == SemanticType.CONTAINER and _is_top_level(s)]
+        components = [s for s in shapes if s.semantic_type == SemanticType.COMPONENT and _is_top_level(s)]
 
         for person in people:
             label = self._escape_quoted_label(person.label or "Person")
@@ -306,9 +307,7 @@ class MermaidGenerator(Generator):
 
         return "\n".join(lines)
 
-    def _sanitize_id(self, id_str: str) -> str:
-        """Sanitize ID for Mermaid (alphanumeric and underscore)."""
-        return "".join(c if c.isalnum() or c == "_" else "_" for c in id_str)
+    _sanitize_id = staticmethod(sanitize_alnum_id)
 
     def _escape_label(self, label: str) -> str:
         """Escape label for Mermaid flowchart node syntax."""

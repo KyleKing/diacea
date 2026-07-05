@@ -375,8 +375,6 @@ class TLDrawParser(Parser):
             size=size,
             style=style,
         )
-        if shape.semantic_type:
-            shape.semantic_type = shape.semantic_type.value
 
         return shape
 
@@ -624,8 +622,6 @@ class TLDrawParser(Parser):
             style=style,
         )
 
-        if shape.semantic_type:
-            shape.semantic_type = shape.semantic_type.value
 
         return shape
 

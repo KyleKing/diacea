@@ -11,6 +11,7 @@ from typing import Any
 
 import yaml
 
+from .ingestion import IngestionSummary, ingest_diagrams
 from .ir.workspace import DiagramView, ElementDefinition, Workspace
 
 
@@ -182,8 +183,12 @@ def create_workspace_from_diagrams(
     workspace_id: str,
     workspace_name: str,
     diagram_files: dict[str, tuple[str, str]],  # view_id: (file_path, view_type)
-) -> Workspace:
-    """Create workspace from existing diagram files.
+) -> tuple[Workspace, IngestionSummary]:
+    """Create workspace by parsing existing diagram files.
+
+    Each diagram file is parsed with format auto-detection, labeled shapes are
+    extracted into the shared element library (de-duplicated by normalized
+    label), and each registered view references the element IDs it uses.
 
     Args:
         workspace_id: Workspace identifier
@@ -191,24 +196,14 @@ def create_workspace_from_diagrams(
         diagram_files: Dictionary mapping view IDs to (file_path, view_type) tuples
 
     Returns:
-        Workspace object with views registered
+        Tuple of (Workspace, IngestionSummary with counts and conflict warnings)
 
-    Note:
-        This creates a workspace structure but does not parse the diagram files.
-        Use with CLI to extract elements from actual diagrams.
+    Raises:
+        DiagramIngestionError: If a diagram file is missing or unparseable
     """
     workspace = Workspace(
         id=workspace_id,
         name=workspace_name,
     )
-
-    for view_id, (file_path, view_type) in diagram_files.items():
-        view = DiagramView(
-            id=view_id,
-            name=view_id.replace("-", " ").replace("_", " ").title(),
-            view_type=view_type,
-            file=file_path,
-        )
-        workspace.add_view(view)
-
-    return workspace
+    summary = ingest_diagrams(workspace, diagram_files)
+    return workspace, summary

@@ -7,12 +7,13 @@ import sys
 from pathlib import Path
 from typing import Optional
 
+from .ingestion import DiagramIngestionError, view_id_from_path
 from .ir.workspace import DiagramView, ElementDefinition, Workspace
 from .workspace_format import create_workspace_from_diagrams, load_workspace, save_workspace
 
 
 def workspace_create(args: argparse.Namespace) -> int:
-    """Create a new workspace from diagram files.
+    """Create a new workspace by ingesting diagram files.
 
     Args:
         args: Command-line arguments
@@ -36,12 +37,23 @@ def workspace_create(args: argparse.Namespace) -> int:
 
         diagram_files[view_id] = (file_path, view_type)
 
-    # Create workspace
-    workspace = create_workspace_from_diagrams(
-        workspace_id=args.id or args.name.lower().replace(" ", "-"),
-        workspace_name=args.name,
-        diagram_files=diagram_files,
-    )
+    for file_path in args.from_diagrams or []:
+        view_id = view_id_from_path(file_path)
+        if view_id in diagram_files:
+            print(f"Error: Duplicate view ID '{view_id}' derived from '{file_path}'", file=sys.stderr)
+            return 1
+        diagram_files[view_id] = (file_path, "diagram")
+
+    # Create workspace (parses each diagram file and extracts elements)
+    try:
+        workspace, summary = create_workspace_from_diagrams(
+            workspace_id=args.id or args.name.lower().replace(" ", "-"),
+            workspace_name=args.name,
+            diagram_files=diagram_files,
+        )
+    except DiagramIngestionError as err:
+        print(f"Error: {err}", file=sys.stderr)
+        return 1
 
     workspace.description = args.description or ""
     workspace.author = args.author or ""
@@ -51,6 +63,13 @@ def workspace_create(args: argparse.Namespace) -> int:
     save_workspace(workspace, args.output, format=format_type)
 
     print(f"Created workspace '{workspace.name}' with {len(workspace.views)} views")
+    if summary.diagrams_parsed:
+        print(
+            f"Ingested {summary.elements_added} elements from {summary.diagrams_parsed} diagrams "
+            f"({summary.deduplicated} deduplicated)"
+        )
+    for warning in summary.warnings:
+        print(f"Warning: {warning}", file=sys.stderr)
     print(f"Saved to: {args.output}")
 
     return 0
@@ -243,6 +262,13 @@ def add_workspace_subcommands(subparsers: argparse._SubParsersAction) -> None:
         default=[],
         metavar="FILE:VIEW_ID[:TYPE]",
         help="Add diagram file (format: file.json:view_id or file.json:view_id:context)",
+    )
+    create_parser.add_argument(
+        "--from-diagrams",
+        nargs="+",
+        default=[],
+        metavar="FILE",
+        help="Diagram files to ingest (view IDs derived from file names)",
     )
     create_parser.add_argument("-o", "--output", required=True, help="Output workspace file (.yml or .json)")
     create_parser.set_defaults(func=workspace_create)

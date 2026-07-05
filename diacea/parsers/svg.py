@@ -254,9 +254,6 @@ class SVGParser(Parser):
                 style=style,
             )
 
-        if shape.semantic_type:
-            shape.semantic_type = shape.semantic_type.value
-
         return shape
 
     def _parse_circle(self, elem: ET.Element, transform: Transform) -> Shape | None:
@@ -298,9 +295,6 @@ class SVGParser(Parser):
                 size=size,
                 style=style,
             )
-
-        if shape.semantic_type:
-            shape.semantic_type = shape.semantic_type.value
 
         return shape
 
@@ -345,9 +339,6 @@ class SVGParser(Parser):
                 size=size,
                 style=style,
             )
-
-        if shape.semantic_type:
-            shape.semantic_type = shape.semantic_type.value
 
         return shape
 
@@ -401,9 +392,6 @@ class SVGParser(Parser):
                 size=size,
                 style=style,
             )
-
-        if shape.semantic_type:
-            shape.semantic_type = shape.semantic_type.value
 
         return shape
 
@@ -473,9 +461,6 @@ class SVGParser(Parser):
                 size=size,
                 style=style,
             )
-
-        if shape.semantic_type:
-            shape.semantic_type = shape.semantic_type.value
 
         return shape
 

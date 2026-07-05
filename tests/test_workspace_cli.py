@@ -17,6 +17,8 @@ from diacea.workspace_cli import (
 )
 from diacea.workspace_format import load_workspace, save_workspace
 
+from .configuration import TEST_DATA_DIR
+
 
 class TestWorkspaceCreate:
     """Test workspace create command."""
@@ -30,6 +32,7 @@ class TestWorkspaceCreate:
             description='A test workspace',
             author='Test Author',
             add=[],
+            from_diagrams=[],
             output=str(output_file),
         )
 
@@ -52,6 +55,7 @@ class TestWorkspaceCreate:
             description='',
             author='',
             add=[],
+            from_diagrams=[],
             output=str(output_file),
         )
 
@@ -63,15 +67,18 @@ class TestWorkspaceCreate:
             data = json.load(f)
         assert data['workspace']['name'] == 'JSON Workspace'
 
-    def test_create_with_diagram_files(self, tmp_path):
+    def test_create_with_diagram_files(self, tmp_path, capsys):
         output_file = tmp_path / 'workspace.yml'
+        context_file = TEST_DATA_DIR / 'excalidraw.json'
+        detail_file = TEST_DATA_DIR / 'tldraw_v2.tldr'
 
         args = argparse.Namespace(
             name='With Diagrams',
             id=None,
             description='',
             author='',
-            add=['diagram.json:context-view:context', 'detail.json:detail-view'],
+            add=[f'{context_file}:context-view:context', f'{detail_file}:detail-view'],
+            from_diagrams=[],
             output=str(output_file),
         )
 
@@ -81,10 +88,61 @@ class TestWorkspaceCreate:
         workspace = load_workspace(output_file)
         assert workspace.id == 'with-diagrams'
         assert len(workspace.views) == 2
-        assert 'context-view' in workspace.views
-        assert 'detail-view' in workspace.views
         assert workspace.views['context-view'].view_type == 'context'
         assert workspace.views['detail-view'].view_type == 'diagram'
+        assert workspace.views['context-view'].element_refs == ['left-box', 'right-box', 'moat']
+        assert workspace.views['detail-view'].element_refs == ['api-server', 'database']
+        assert workspace.validate_references() == []
+
+        captured = capsys.readouterr()
+        assert 'Ingested 5 elements from 2 diagrams (0 deduplicated)' in captured.out
+
+    def test_create_from_diagrams(self, tmp_path, capsys):
+        output_file = tmp_path / 'workspace.yml'
+
+        args = argparse.Namespace(
+            name='Ingested',
+            id=None,
+            description='',
+            author='',
+            add=[],
+            from_diagrams=[
+                str(TEST_DATA_DIR / 'tldraw_v2.tldr'),
+                str(TEST_DATA_DIR / 'obsidian_plain.excalidraw.md'),
+            ],
+            output=str(output_file),
+        )
+
+        result = workspace_create(args)
+        assert result == 0
+
+        workspace = load_workspace(output_file)
+        assert set(workspace.views) == {'tldraw-v2', 'obsidian-plain'}
+        assert set(workspace.elements) == {'api-server', 'database', 'client', 'server'}
+        assert workspace.elements['database'].element_type == 'database'
+
+        captured = capsys.readouterr()
+        assert 'Ingested 4 elements from 2 diagrams (0 deduplicated)' in captured.out
+
+    def test_create_missing_diagram_file(self, tmp_path, capsys):
+        output_file = tmp_path / 'workspace.yml'
+
+        args = argparse.Namespace(
+            name='Missing',
+            id=None,
+            description='',
+            author='',
+            add=[],
+            from_diagrams=[str(tmp_path / 'missing.excalidraw')],
+            output=str(output_file),
+        )
+
+        result = workspace_create(args)
+        assert result == 1
+        assert not output_file.exists()
+
+        captured = capsys.readouterr()
+        assert 'missing.excalidraw' in captured.err
 
     def test_create_invalid_diagram_spec(self, tmp_path, capsys):
         output_file = tmp_path / 'workspace.yml'
@@ -95,6 +153,7 @@ class TestWorkspaceCreate:
             description='',
             author='',
             add=['invalid-spec-no-colon'],
+            from_diagrams=[],
             output=str(output_file),
         )
 
@@ -357,6 +416,26 @@ class TestMainWorkspace:
         ])
         assert result == 0
         assert output_file.exists()
+
+    def test_create_from_diagrams_subcommand(self, tmp_path, capsys):
+        output_file = tmp_path / 'workspace.yml'
+
+        result = main_workspace([
+            'create',
+            '--name', 'CLI Ingest',
+            '--from-diagrams',
+            str(TEST_DATA_DIR / 'excalidraw.json'),
+            str(TEST_DATA_DIR / 'obsidian_plain.excalidraw.md'),
+            '-o', str(output_file),
+        ])
+        assert result == 0
+
+        workspace = load_workspace(output_file)
+        assert set(workspace.views) == {'excalidraw', 'obsidian-plain'}
+        assert len(workspace.elements) == 5
+
+        captured = capsys.readouterr()
+        assert 'Ingested 5 elements from 2 diagrams' in captured.out
 
     def test_validate_subcommand(self, tmp_path, capsys):
         workspace_file = tmp_path / 'workspace.yml'

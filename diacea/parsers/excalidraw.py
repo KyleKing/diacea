@@ -12,6 +12,7 @@ from ..ir import (
     Connection,
     Diagram,
     Dimensions,
+    GROUP_ID_PREFIX,
     Group,
     Parser,
     Point,
@@ -147,10 +148,6 @@ class ExcalidrawParser(Parser):
             style=style,
             metadata=shape.metadata,
         )
-
-        # Store as string to avoid enum serialization issues
-        if shape.semantic_type:
-            shape.semantic_type = shape.semantic_type.value
 
         return shape
 
@@ -340,10 +337,6 @@ class ExcalidrawParser(Parser):
                         metadata=shape.metadata,
                     )
 
-                    # Store as string
-                    if shape.semantic_type:
-                        shape.semantic_type = shape.semantic_type.value
-
                     break  # Each text belongs to at most one shape
 
     def _detect_groups(self, shapes: list[Shape]) -> list[Group]:
@@ -391,7 +384,7 @@ class ExcalidrawParser(Parser):
 
                 if is_smallest_container:
                     group = Group(
-                        id=f"group-{outer_shape.id}",
+                        id=f"{GROUP_ID_PREFIX}{outer_shape.id}",
                         label=outer_shape.label,
                         position=outer_shape.position,
                         size=outer_shape.size,

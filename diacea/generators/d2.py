@@ -28,13 +28,13 @@ class D2Config:
         """Initialize default shape mappings."""
         if not self.shape_map:
             self.shape_map = {
-                SemanticType.DATABASE.value: "cylinder",
-                SemanticType.PERSON.value: "person",
-                SemanticType.QUEUE.value: "queue",
-                SemanticType.STORAGE.value: "cylinder",
-                SemanticType.DOCUMENT.value: "document",
-                SemanticType.CLOUD.value: "cloud",
-                SemanticType.DECISION.value: "diamond",
+                SemanticType.DATABASE: "cylinder",
+                SemanticType.PERSON: "person",
+                SemanticType.QUEUE: "queue",
+                SemanticType.STORAGE: "cylinder",
+                SemanticType.DOCUMENT: "document",
+                SemanticType.CLOUD: "cloud",
+                SemanticType.DECISION: "diamond",
             }
 
 
@@ -150,7 +150,7 @@ class D2Generator(Generator):
         for group in groups:
             grouped_ids.update(group.children)
 
-        group_source_ids = {g.id.removeprefix("group-") for g in groups}
+        group_source_ids = {g.source_shape_id for g in groups}
         standalone_shapes = [s for s in shapes if s.id not in grouped_ids and s.id not in group_source_ids]
         for shape in standalone_shapes:
             lines.append(self._format_shape(shape))

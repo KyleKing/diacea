@@ -1,12 +1,22 @@
 """Tests for workspace functionality."""
 
+import json
 import tempfile
 from pathlib import Path
 
 import pytest
 
+from diacea.ingestion import DiagramIngestionError, ingest_diagrams, view_id_from_path
 from diacea.ir.workspace import DiagramView, ElementDefinition, Workspace
-from diacea.workspace_format import from_dict, load_workspace, save_workspace, to_dict
+from diacea.workspace_format import (
+    create_workspace_from_diagrams,
+    from_dict,
+    load_workspace,
+    save_workspace,
+    to_dict,
+)
+
+from .configuration import TEST_DATA_DIR
 
 
 class TestElementDefinition:
@@ -458,3 +468,186 @@ class TestWorkspaceIntegration:
         # Check element usage
         usage = workspace.get_element_usage("api")
         assert "container" in usage
+
+
+def _write_excalidraw(path, shapes):
+    elements = []
+    for idx, (label, width, height) in enumerate(shapes):
+        x = idx * 1000.0
+        elements.append({
+            "id": f"shape{idx}",
+            "type": "rectangle",
+            "x": x,
+            "y": 0.0,
+            "width": float(width),
+            "height": float(height),
+        })
+        elements.append({
+            "id": f"text{idx}",
+            "type": "text",
+            "x": x + 10.0,
+            "y": 10.0,
+            "width": 50.0,
+            "height": 20.0,
+            "text": label,
+            "containerId": f"shape{idx}",
+        })
+    path.write_text(json.dumps({"elements": elements}))
+
+
+class TestWorkspaceIngestion:
+    """Test diagram ingestion into the workspace element library."""
+
+    def test_extracts_elements_from_excalidraw(self):
+        workspace, summary = create_workspace_from_diagrams(
+            workspace_id="test",
+            workspace_name="Test",
+            diagram_files={"ctx": (str(TEST_DATA_DIR / "excalidraw.json"), "context")},
+        )
+
+        assert summary.diagrams_parsed == 1
+        assert summary.elements_added == 3
+        assert summary.deduplicated == 0
+        assert summary.warnings == []
+
+        assert set(workspace.elements) == {"left-box", "right-box", "moat"}
+        right_box = workspace.elements["right-box"]
+        assert right_box.label == "Right Box"
+        assert right_box.element_type == "system"
+        assert right_box.metadata["semantic_confidence"] == pytest.approx(0.7)
+        assert right_box.metadata["source_file"].endswith("excalidraw.json")
+
+        view = workspace.views["ctx"]
+        assert view.view_type == "context"
+        assert view.element_refs == ["left-box", "right-box", "moat"]
+        assert workspace.validate_references() == []
+
+    def test_extracts_semantic_types_across_formats(self):
+        workspace, summary = create_workspace_from_diagrams(
+            workspace_id="test",
+            workspace_name="Test",
+            diagram_files={
+                "containers": (str(TEST_DATA_DIR / "tldraw_v2.tldr"), "container"),
+                "flow": (str(TEST_DATA_DIR / "obsidian_plain.excalidraw.md"), "diagram"),
+            },
+        )
+
+        assert summary.diagrams_parsed == 2
+        assert summary.elements_added == 4
+        assert workspace.elements["api-server"].element_type == "service"
+        assert workspace.elements["database"].element_type == "database"
+        assert workspace.elements["client"].element_type == "person"
+        assert workspace.views["containers"].element_refs == ["api-server", "database"]
+        assert workspace.views["flow"].element_refs == ["client", "server"]
+        assert workspace.get_element_usage("database") == ["containers"]
+
+    def test_dedup_across_two_files(self, tmp_path):
+        file_a = tmp_path / "a.excalidraw"
+        file_b = tmp_path / "b.excalidraw"
+        _write_excalidraw(file_a, [("Moat", 600, 500), ("Alpha", 600, 500)])
+        _write_excalidraw(file_b, [("Moat", 600, 500), ("Beta", 600, 500)])
+
+        workspace, summary = create_workspace_from_diagrams(
+            workspace_id="test",
+            workspace_name="Test",
+            diagram_files={
+                "view-a": (str(file_a), "diagram"),
+                "view-b": (str(file_b), "diagram"),
+            },
+        )
+
+        assert summary.elements_added == 3
+        assert summary.deduplicated == 1
+        assert summary.warnings == []
+        assert set(workspace.elements) == {"moat", "alpha", "beta"}
+        assert workspace.views["view-a"].element_refs == ["moat", "alpha"]
+        assert workspace.views["view-b"].element_refs == ["moat", "beta"]
+        assert sorted(workspace.get_element_usage("moat")) == ["view-a", "view-b"]
+
+    def test_dedup_normalizes_case_and_whitespace(self, tmp_path):
+        file_a = tmp_path / "a.excalidraw"
+        file_b = tmp_path / "b.excalidraw"
+        _write_excalidraw(file_a, [("Left Box", 600, 500)])
+        _write_excalidraw(file_b, [("left\nbox", 600, 500)])
+
+        workspace, summary = create_workspace_from_diagrams(
+            workspace_id="test",
+            workspace_name="Test",
+            diagram_files={
+                "view-a": (str(file_a), "diagram"),
+                "view-b": (str(file_b), "diagram"),
+            },
+        )
+
+        assert summary.deduplicated == 1
+        assert set(workspace.elements) == {"left-box"}
+        assert workspace.elements["left-box"].label == "Left Box"
+
+    def test_conflict_keeps_higher_confidence(self, tmp_path):
+        low_conf = tmp_path / "low.excalidraw"
+        high_conf = tmp_path / "high.excalidraw"
+        _write_excalidraw(low_conf, [("Moat", 200, 100)])
+        _write_excalidraw(high_conf, [("Moat", 600, 500)])
+
+        for order in (["low", "high"], ["high", "low"]):
+            diagram_files = {
+                name: (str(tmp_path / f"{name}.excalidraw"), "diagram") for name in order
+            }
+            workspace, summary = create_workspace_from_diagrams(
+                workspace_id="test",
+                workspace_name="Test",
+                diagram_files=diagram_files,
+            )
+
+            assert len(summary.warnings) == 1
+            assert "Moat" in summary.warnings[0]
+            assert "conflicting semantic types" in summary.warnings[0]
+            element = workspace.elements["moat"]
+            assert element.element_type == "system"
+            assert element.metadata["semantic_confidence"] == pytest.approx(0.7)
+
+    def test_ingest_into_existing_workspace_dedups(self, tmp_path):
+        diagram = tmp_path / "d.excalidraw"
+        _write_excalidraw(diagram, [("Moat", 600, 500)])
+
+        workspace = Workspace(id="test", name="Test")
+        workspace.add_element(
+            ElementDefinition(
+                id="moat",
+                label="Moat",
+                element_type="system",
+                metadata={"semantic_confidence": 0.9},
+            )
+        )
+
+        summary = ingest_diagrams(workspace, {"view": (str(diagram), "diagram")})
+
+        assert summary.elements_added == 0
+        assert summary.deduplicated == 1
+        assert workspace.views["view"].element_refs == ["moat"]
+
+    def test_missing_file_errors_with_file_name(self, tmp_path):
+        missing = tmp_path / "missing.excalidraw"
+
+        with pytest.raises(DiagramIngestionError, match="missing.excalidraw"):
+            create_workspace_from_diagrams(
+                workspace_id="test",
+                workspace_name="Test",
+                diagram_files={"view": (str(missing), "diagram")},
+            )
+
+    def test_unparseable_file_errors_with_file_name(self, tmp_path):
+        garbage = tmp_path / "garbage.excalidraw"
+        garbage.write_text("this is not a diagram")
+
+        with pytest.raises(DiagramIngestionError, match="garbage.excalidraw"):
+            create_workspace_from_diagrams(
+                workspace_id="test",
+                workspace_name="Test",
+                diagram_files={"view": (str(garbage), "diagram")},
+            )
+
+    def test_view_id_from_path(self):
+        assert view_id_from_path("a.excalidraw") == "a"
+        assert view_id_from_path("obsidian_plain.excalidraw.md") == "obsidian-plain"
+        assert view_id_from_path("/tmp/System Context.tldr") == "system-context"

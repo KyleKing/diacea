@@ -22,6 +22,9 @@ from typing import Any, Optional
 # Version of the IR format
 IR_VERSION = "1.0.0"
 
+# Prefix used for group IDs derived from container shapes
+GROUP_ID_PREFIX = "group-"
+
 
 @dataclass
 class Point:
@@ -149,6 +152,11 @@ class Group(Element):
     def __post_init__(self):
         """Set element type."""
         self.element_type = "group"
+
+    @property
+    def source_shape_id(self) -> str:
+        """ID of the container shape this group was derived from, if any."""
+        return self.id.removeprefix(GROUP_ID_PREFIX)
 
 
 @dataclass
