@@ -169,7 +169,7 @@ class D2Generator(Generator):
             if child_shape:
                 # For children, use relative path (just the ID)
                 child_line = self._format_shape(child_shape, use_relative_path=True)
-                lines.append(f"  {child_line}")
+                lines.extend(f"  {line}" for line in child_line.split("\n"))
 
         # Close container
         lines.append("}")

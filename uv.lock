@@ -480,21 +480,32 @@ dependencies = [
     { name = "pyyaml" },
 ]
 
+[package.optional-dependencies]
+obsidian = [
+    { name = "lzstring" },
+]
+
 [package.dev-dependencies]
 dev = [
     { name = "calcipy", extra = ["recommended"] },
+    { name = "lzstring" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "corallium", specifier = ">=2.2.0" },
+    { name = "lzstring", marker = "extra == 'obsidian'", specifier = ">=1.0.4" },
     { name = "networkx", specifier = ">=3.4.2,<4" },
     { name = "python-constraint2", specifier = ">=2.0.0b8,<3" },
     { name = "pyyaml", specifier = ">=6.0,<7" },
 ]
+provides-extras = ["obsidian"]
 
 [package.metadata.requires-dev]
-dev = [{ name = "calcipy", extras = ["recommended"], specifier = ">=6.0.1" }]
+dev = [
+    { name = "calcipy", extras = ["recommended"], specifier = ">=6.0.1" },
+    { name = "lzstring", specifier = ">=1.0.4" },
+]
 
 [[package]]
 name = "distlib"
@@ -524,6 +535,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/94/b8/00651a0f559862f3bb7d6f7477b192afe3f583cc5e26403b44e59a55ab34/filelock-3.25.2.tar.gz", hash = "sha256:b64ece2b38f4ca29dd3e810287aa8c48182bbecd1ae6e9ae126c9b35f1382694", size = 40480, upload-time = "2026-03-11T20:45:38.487Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/a4/a5/842ae8f0c08b61d6484b52f99a03510a3a72d23141942d216ebe81fefbce/filelock-3.25.2-py3-none-any.whl", hash = "sha256:ca8afb0da15f229774c9ad1b455ed96e85a81373065fb10446672f64444ddf70", size = 26759, upload-time = "2026-03-11T20:45:37.437Z" },
+]
+
+[[package]]
+name = "future"
+version = "1.0.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/a7/b2/4140c69c6a66432916b26158687e821ba631a4c9273c474343badf84d3ba/future-1.0.0.tar.gz", hash = "sha256:bd2968309307861edae1458a4f8a4f3598c03be43b97521076aebf5d94c07b05", size = 1228490, upload-time = "2024-02-21T11:52:38.461Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/da/71/ae30dadffc90b9006d77af76b393cb9dfbfc9629f339fc1574a1c52e6806/future-1.0.0-py3-none-any.whl", hash = "sha256:929292d34f5872e70396626ef385ec22355a1fae8ad29e1a734c3e43f9fbc216", size = 491326, upload-time = "2024-02-21T11:52:35.956Z" },
 ]
 
 [[package]]
@@ -717,6 +737,15 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/7c/72/34bf2eb7a15414a23e5e70ecb9440c1d3179f393d9349338a91e2781c0fb/librt-0.8.1-cp314-cp314t-win_amd64.whl", hash = "sha256:89815a22daf9c51884fb5dbe4f1ef65ee6a146e0b6a8df05f753e2e4a9359bf4", size = 58722, upload-time = "2026-02-17T16:12:46.85Z" },
     { url = "https://files.pythonhosted.org/packages/b2/c8/d148e041732d631fc76036f8b30fae4e77b027a1e95b7a84bb522481a940/librt-0.8.1-cp314-cp314t-win_arm64.whl", hash = "sha256:bf512a71a23504ed08103a13c941f763db13fb11177beb3d9244c98c29fb4a61", size = 48755, upload-time = "2026-02-17T16:12:47.943Z" },
 ]
+
+[[package]]
+name = "lzstring"
+version = "1.0.4"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "future" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/ab/0c/28347673b45e5f0975cdf1f6d69ede6ad049be873194c4e164d79aecd34c/lzstring-1.0.4.tar.gz", hash = "sha256:1afa61e598193fbcc211e0899f09a9679e33f9102bccc37fbfda0b7fef4d9ea2", size = 4256, upload-time = "2018-06-01T02:32:12.639Z" }
 
 [[package]]
 name = "markdown"

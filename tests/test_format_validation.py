@@ -108,12 +108,12 @@ class TestPlantUMLValidation:
         puml_file.write_text(output)
 
         result = subprocess.run(
-            ['plantuml', '-syntax', str(puml_file)],
+            ['plantuml', '-checkonly', str(puml_file)],
             capture_output=True,
             text=True,
         )
 
-        assert result.returncode == 0, f'PlantUML syntax error:\n{result.stderr}'
+        assert result.returncode == 0, f'PlantUML syntax error:\n{result.stdout}\n{result.stderr}'
 
     def test_c4plantuml_syntax_valid(self, tmp_path):
         diagram = _make_test_diagram()
@@ -124,12 +124,12 @@ class TestPlantUMLValidation:
         puml_file.write_text(output)
 
         result = subprocess.run(
-            ['plantuml', '-syntax', str(puml_file)],
+            ['plantuml', '-checkonly', str(puml_file)],
             capture_output=True,
             text=True,
         )
 
-        assert result.returncode == 0, f'C4 PlantUML syntax error:\n{result.stderr}'
+        assert result.returncode == 0, f'C4 PlantUML syntax error:\n{result.stdout}\n{result.stderr}'
 
 
 @pytest.mark.skipif(not HAS_MERMAID, reason='mermaid-cli (mmdc) not installed')

@@ -100,7 +100,7 @@ class PlantUMLGenerator(Generator):
         shape_map = {
             "rectangle": "rectangle",
             "ellipse": "actor",  # PlantUML uses 'actor' for people
-            "diamond": "diamond",
+            "diamond": "hexagon",
         }
         return shape_map.get(shape.shape_type, "rectangle")
 

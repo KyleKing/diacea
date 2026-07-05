@@ -17,7 +17,14 @@ from .generators import (
     MermaidGenerator,
     PlantUMLGenerator,
 )
-from .parsers import ExcalidrawParser, SVGParser, TLDrawParser
+from .parsers import (
+    ExcalidrawParser,
+    SVGParser,
+    TLDrawParser,
+    extract_excalidraw_json,
+    is_obsidian_excalidraw,
+    is_tldraw_v2,
+)
 
 
 def detect_input_format(data: dict | str) -> str:
@@ -27,18 +34,24 @@ def detect_input_format(data: dict | str) -> str:
         data: JSON data dictionary or string content
 
     Returns:
-        Format name ('svg', 'tldraw', or 'excalidraw')
+        Format name ('svg', 'obsidian', 'tldraw', or 'excalidraw')
 
     Raises:
         ValueError: If format cannot be detected
     """
-    # Check if it's string content (SVG)
+    # Check if it's string content (SVG or Obsidian Excalidraw markdown)
     if isinstance(data, str):
         if data.strip().startswith("<?xml") or data.strip().startswith("<svg"):
             return "svg"
-        raise ValueError("Unknown string format - expected SVG XML")
+        if is_obsidian_excalidraw(data):
+            return "obsidian"
+        raise ValueError("Unknown string format - expected SVG XML or Obsidian Excalidraw markdown")
 
-    # TLDraw has "document" -> "pages" structure
+    # Modern TLDraw v2 .tldr files have "tldrawFileFormatVersion" + flat "records"
+    if is_tldraw_v2(data):
+        return "tldraw"
+
+    # Legacy TLDraw has "document" -> "pages" structure
     if "document" in data and "pages" in data.get("document", {}):
         return "tldraw"
 
@@ -80,6 +93,9 @@ def main(argv: Optional[list[str]] = None) -> int:
             if content.strip().startswith("<?xml") or content.strip().startswith("<svg"):
                 input_format = "svg"
                 input_data = content
+            elif is_obsidian_excalidraw(content):
+                input_format = "excalidraw"
+                input_data = extract_excalidraw_json(content)
             else:
                 # Try parsing as JSON
                 try:
@@ -92,6 +108,9 @@ def main(argv: Optional[list[str]] = None) -> int:
             input_format = args.input_format
             if input_format == "svg":
                 input_data = content
+            elif input_format == "obsidian":
+                input_format = "excalidraw"
+                input_data = extract_excalidraw_json(content)
             else:
                 input_data = json.loads(content)
 
@@ -178,7 +197,7 @@ def create_parser() -> argparse.ArgumentParser:
         "-i",
         "--input",
         required=True,
-        help="Input file (Excalidraw/TLDraw JSON, SVG) or - for stdin",
+        help="Input file (Excalidraw/TLDraw JSON, Obsidian .excalidraw.md, SVG) or - for stdin",
     )
 
     parser.add_argument(
@@ -191,7 +210,7 @@ def create_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--input-format",
         default="auto",
-        choices=["auto", "excalidraw", "tldraw", "svg"],
+        choices=["auto", "excalidraw", "obsidian", "tldraw", "svg"],
         help="Input format (default: auto-detect)",
     )
 

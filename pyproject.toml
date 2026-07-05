@@ -5,6 +5,7 @@ requires = ["uv_build>=0.9.26,<2.0"]
 [dependency-groups]
 dev = [
   "calcipy[recommended]>=6.0.1",
+  "lzstring>=1.0.4",
 ]
 
 [project]
@@ -34,6 +35,11 @@ name = "diacea"
 readme = "docs/README.md"
 requires-python = ">=3.10.11"
 version = "0.0.1"
+
+[project.optional-dependencies]
+obsidian = [
+  "lzstring>=1.0.4",
+]
 
 [project.scripts]
 diacea = "diacea.cli:main"
