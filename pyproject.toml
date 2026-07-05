@@ -3,7 +3,9 @@ build-backend = "uv_build"
 requires = ["uv_build>=0.9.26,<2.0"]
 
 [dependency-groups]
-dev = ['calcipy[recommended]>=6.0.0b3', 'calcipy[dev]>=5.0.0']
+dev = [
+  "calcipy[recommended]>=6.0.1",
+]
 
 [project]
 authors = [
@@ -18,8 +20,13 @@ classifiers = [
   "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: 3.14",
 ] # https://pypi.org/classifiers/
-dependencies = ['corallium>=2.2.0', 'networkx>=3.4.2,<4', 'python-constraint2>=2.0.0b8,<3', 'pyyaml>=6.0,<7']
-description = "TBD"
+dependencies = [
+  "corallium>=2.2.0",
+  "networkx>=3.4.2,<4",
+  "python-constraint2>=2.0.0b8,<3",
+  "pyyaml>=6.0,<7",
+]
+description = "Convert between Excalidraw and PlantUML"
 keywords = ["calcipy_template"]
 license = "MIT"
 maintainers = []
@@ -27,6 +34,10 @@ name = "diacea"
 readme = "docs/README.md"
 requires-python = ">=3.10.11"
 version = "0.0.1"
+
+[project.scripts]
+diacea = "diacea.cli:main"
+diacea-workspace = "diacea.workspace_cli:main_workspace"
 
 [project.urls]
 "Bug Tracker" = "https://github.com/kyleking/diacea/issues"
@@ -59,13 +70,13 @@ warn_unused_ignores = true
 
 [tool.pyright]
 include = ["diacea", "tests"]
-pythonVersion = "3.9"
+pythonVersion = "3.10"
 
 [tool.ruff]
 # Docs: https://github.com/charliermarsh/ruff
 # Tip: uv run ruff rule RUF100
 line-length = 120
-target-version = 'py39'
+target-version = 'py310'
 
 [tool.ruff.format]
 quote-style = 'single'
