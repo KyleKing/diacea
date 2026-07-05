@@ -196,6 +196,7 @@ class TLDrawParser(Parser):
         self.page_index = page_index
         self.page_id = page_id
         self.include_freehand = include_freehand
+        self.warnings: list[str] = []
 
     def parse(self, data: Any) -> Diagram:
         """Parse TLDraw document to IR diagram.
@@ -206,6 +207,8 @@ class TLDrawParser(Parser):
         Returns:
             IR Diagram object (merged if multiple pages)
         """
+        self.warnings = []
+
         if isinstance(data, dict) and is_tldraw_v2(data):
             return self._parse_v2(data)
 
@@ -215,6 +218,7 @@ class TLDrawParser(Parser):
             return Diagram(id='empty', name='Empty Diagram', elements=[])
 
         pages_to_process = self._select_pages(pages)
+        self._warn_skipped_pages(len(pages), len(pages_to_process))
 
         if not pages_to_process:
             return Diagram(id='empty', name='Empty Diagram', elements=[])
@@ -243,6 +247,7 @@ class TLDrawParser(Parser):
             key=lambda r: str(r.get('index', '')),
         )
         selected_pages = self._select_v2_pages(pages)
+        self._warn_skipped_pages(len(pages), len(selected_pages))
 
         metadata = {
             'tldraw': {
@@ -309,6 +314,13 @@ class TLDrawParser(Parser):
         return Diagram(
             id=diagram_id, name=diagram_name, elements=elements, metadata=metadata
         )
+
+    def _warn_skipped_pages(self, total_pages: int, selected_pages: int) -> None:
+        if 0 < selected_pages < total_pages:
+            self.warnings.append(
+                f'TLDraw document has {total_pages} pages; only {selected_pages} '
+                'was converted (use page_index=None to merge all pages)'
+            )
 
     def _select_v2_pages(self, pages: list[dict]) -> list[dict]:
         if self.page_id:

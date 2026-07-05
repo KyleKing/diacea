@@ -29,6 +29,10 @@ _logger = logging.getLogger(__name__)
 class ExcalidrawParser(Parser):
     """Parse Excalidraw JSON format to IR."""
 
+    def __init__(self):
+        """Initialize parser."""
+        self.warnings: list[str] = []
+
     def parse(self, data: Any) -> Diagram:
         """Parse Excalidraw JSON to IR Diagram.
 
@@ -41,6 +45,8 @@ class ExcalidrawParser(Parser):
         Raises:
             ValueError: If data format is invalid
         """
+        self.warnings = []
+
         # Handle both full Excalidraw format and just elements list
         if isinstance(data, dict):
             elements = data.get("elements", [])
@@ -188,6 +194,7 @@ class ExcalidrawParser(Parser):
         points = elem.get("points", [])
         if len(points) < 2:
             _logger.debug("Dropping arrow '%s': insufficient points (%d < 2)", arrow_id, len(points))
+            self.warnings.append(f"Dropped arrow '{arrow_id}': fewer than 2 points")
             return None
 
         # Calculate absolute start and end points
@@ -205,6 +212,9 @@ class ExcalidrawParser(Parser):
                 arrow_id,
                 from_id,
                 to_id,
+            )
+            self.warnings.append(
+                f"Dropped arrow '{arrow_id}': could not resolve both endpoints"
             )
             return None
 

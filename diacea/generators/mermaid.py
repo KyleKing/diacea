@@ -27,6 +27,7 @@ class MermaidGenerator(Generator):
                          or None for auto-detection
         """
         self.diagram_type = diagram_type
+        self.detected_type: Optional[str] = None
         self.max_subgraph_depth = 3
 
     def generate(self, diagram: Diagram) -> str:
@@ -40,6 +41,7 @@ class MermaidGenerator(Generator):
         """
         # Auto-detect diagram type if not specified
         diagram_type = self.diagram_type or self._detect_diagram_type(diagram)
+        self.detected_type = diagram_type
 
         if diagram_type == "c4":
             return self._generate_c4(diagram)

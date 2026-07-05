@@ -33,6 +33,12 @@ from ..ir.semantic import SemanticType, infer_semantic_type
 
 _logger = logging.getLogger(__name__)
 
+_CURVE_COMMANDS_RE = re.compile(r'[CcSsQqTtAa]')
+_CURVE_WARNING = (
+    'SVG path curve commands (C/S/Q/T/A) are not supported; '
+    'curved paths were flattened to straight segments and bounding boxes'
+)
+
 
 @dataclass
 class Transform:
@@ -116,6 +122,7 @@ class SVGParser(Parser):
         self._id_counter = 0
         self._text_elements: dict[str, Text] = {}
         self._lines: list[tuple[str, Point, Point, Style]] = []
+        self.warnings: list[str] = []
 
     def parse(self, data: Any) -> Diagram:
         """Parse SVG content to IR diagram.
@@ -133,6 +140,7 @@ class SVGParser(Parser):
 
         self._lines = []
         self._text_elements = {}
+        self.warnings = []
         elements: list = []
 
         self._process_element(root, elements, transform=Transform(), parent_id=None)
@@ -400,6 +408,9 @@ class SVGParser(Parser):
         d = elem.get('d', '')
         if not d:
             return None
+
+        if _CURVE_COMMANDS_RE.search(d) and _CURVE_WARNING not in self.warnings:
+            self.warnings.append(_CURVE_WARNING)
 
         points = self._parse_path_commands(d)
         if len(points) < 2:

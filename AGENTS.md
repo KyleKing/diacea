@@ -6,7 +6,7 @@ This document provides AI assistants with an overview of the diacea codebase, it
 
 **diacea** is a universal diagram converter - the "pandoc for diagrams". It converts between visual diagram formats using a format-agnostic intermediate representation (IR).
 
-**Supported Input Formats**: Excalidraw, TLDraw, SVG
+**Supported Input Formats**: Excalidraw, Obsidian Excalidraw markdown, TLDraw (legacy and v2), SVG
 **Supported Output Formats**: PlantUML, C4-PlantUML, Mermaid, GraphViz DOT, D2
 
 ## Architecture
@@ -27,7 +27,8 @@ SVG         --+         (with semantic types)      +--> Mermaid
 diacea/
 ├── diacea/
 │   ├── __init__.py           # Package version
-│   ├── cli.py                # Main CLI entry point
+│   ├── cli.py                # Main CLI (convert, inspect, formats)
+│   ├── ingestion.py          # Parse diagram files into workspace elements
 │   ├── workspace_cli.py      # Workspace management CLI
 │   ├── workspace_format.py   # Workspace file format (YAML)
 │   ├── ir/                   # Intermediate Representation
@@ -39,14 +40,16 @@ diacea/
 │   ├── parsers/              # Input format parsers
 │   │   ├── __init__.py
 │   │   ├── excalidraw.py     # Excalidraw JSON parser
-│   │   ├── tldraw.py         # TLDraw JSON parser
-│   │   └── svg.py            # SVG parser
+│   │   ├── obsidian.py       # Obsidian .excalidraw.md extraction
+│   │   ├── svg.py            # SVG parser
+│   │   └── tldraw.py         # TLDraw JSON parser (v1 and v2)
 │   └── generators/           # Output format generators
 │       ├── __init__.py
-│       ├── plantuml.py       # PlantUML and C4-PlantUML
-│       ├── mermaid.py        # Mermaid diagrams
+│       ├── _text.py          # Shared text helpers (ID sanitization)
+│       ├── d2.py             # D2 diagrams
 │       ├── graphviz.py       # GraphViz DOT format
-│       └── d2.py             # D2 diagrams
+│       ├── mermaid.py        # Mermaid diagrams
+│       └── plantuml.py       # PlantUML and C4-PlantUML
 ├── tests/
 │   ├── test_ir_integration.py    # IR and generator tests
 │   ├── test_tldraw_parser.py     # TLDraw parser tests
@@ -80,8 +83,11 @@ diacea/
 All parsers implement the `Parser` base class with a `parse(data) -> Diagram` method.
 
 - **`ExcalidrawParser`**: Parses Excalidraw JSON, extracts shapes/arrows/text, infers semantics
-- **`TLDrawParser`**: Parses TLDraw JSON (v15+), handles multi-page documents
-- **`SVGParser`**: Parses SVG XML, extracts shapes from rect/circle/ellipse/polygon elements
+- **`parsers/obsidian.py`**: Detects Obsidian `.excalidraw.md` notes and extracts the embedded Excalidraw JSON (compressed blocks need the `diacea[obsidian]` extra)
+- **`TLDrawParser`**: Parses TLDraw JSON (legacy v1 and v2 `.tldr`), handles multi-page documents
+- **`SVGParser`**: Parses SVG XML, extracts shapes from rect/circle/ellipse/polygon/path elements
+
+Parsers expose a `warnings` list after `parse()` with any conversion losses detected (e.g. flattened SVG curves); the CLI surfaces these.
 
 ### Generators
 
@@ -108,6 +114,48 @@ diacea -i diagram.svg -f d2 --d2-sketch
 # Pipe from stdin
 cat diagram.json | diacea -i - -f c4
 ```
+
+## CLI Usage for Agents
+
+The conversion CLI is designed to be driven programmatically. Bare invocations (`diacea -i file -f mermaid`) are equivalent to the `convert` subcommand.
+
+### JSON envelope
+
+`--json` on conversion emits a machine-readable envelope to stdout instead of the bare converted text:
+
+```json
+{
+  "output": "flowchart LR\n    ...",
+  "input_format": "excalidraw",
+  "output_format": "mermaid",
+  "diagram_type": "flowchart",
+  "elements": [
+    {"id": "web", "label": "Web Server", "semantic_type": "service", "confidence": 0.8}
+  ],
+  "warnings": []
+}
+```
+
+`diagram_type` is the Mermaid type that auto-detection chose (`flowchart`, `c4`, or `sequence`); it is `null` for other output formats. `warnings` lists known conversion losses detected at parse time (SVG curves flattened, TLDraw pages skipped, dropped arrows). In text mode the same warnings print to stderr as `Warning: ...` lines.
+
+### Preview and discovery
+
+```bash
+# Parse without converting: detected format, element count, per-element
+# semantic inference with confidence
+diacea inspect diagram.json --json
+
+# List input formats (with detection method) and output formats (with options)
+diacea formats --json
+```
+
+### Exit codes
+
+- `0`: success
+- `1`: error (file not found, unrecognized input format, parse/generation failure)
+- `2`: the file parsed but produced 0 elements (likely an unsupported schema)
+
+With `--json`, errors are written to stderr as JSON: `{"error": "...", "exit_code": 1}`. `inspect` reports 0 elements as a warning with exit code 0 so agents can still read the report.
 
 ## Data Flow
 

@@ -5,8 +5,9 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+import traceback
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 from .generators import (
     C4PlantUMLGenerator,
@@ -17,6 +18,7 @@ from .generators import (
     MermaidGenerator,
     PlantUMLGenerator,
 )
+from .ir.elements import Diagram
 from .parsers import (
     ExcalidrawParser,
     SVGParser,
@@ -25,6 +27,63 @@ from .parsers import (
     is_obsidian_excalidraw,
     is_tldraw_v2,
 )
+
+EXIT_OK = 0
+EXIT_ERROR = 1
+EXIT_EMPTY_DIAGRAM = 2
+
+_INPUT_FORMAT_CHOICES = ["auto", "excalidraw", "obsidian", "tldraw", "svg"]
+
+_INPUT_FORMATS = [
+    {
+        "name": "excalidraw",
+        "description": "Excalidraw JSON scene",
+        "detection": "JSON with an 'elements' key or type 'excalidraw/clipboard'",
+    },
+    {
+        "name": "obsidian",
+        "description": "Obsidian Excalidraw plugin markdown (.excalidraw.md); compressed-json Drawing blocks require the diacea[obsidian] extra",
+        "detection": "markdown with 'excalidraw-plugin' frontmatter or a '# Drawing' code block",
+    },
+    {
+        "name": "svg",
+        "description": "SVG with basic shapes, text, and groups (curves are flattened to bounding boxes)",
+        "detection": "content starting with '<?xml' or '<svg'",
+    },
+    {
+        "name": "tldraw",
+        "description": "TLDraw JSON (legacy v1 documents and v2 .tldr files)",
+        "detection": "JSON with 'tldrawFileFormatVersion'/'records' (v2) or 'document.pages' (legacy)",
+    },
+]
+
+_OUTPUT_FORMATS = [
+    {"name": "c4", "description": "C4-PlantUML", "options": []},
+    {
+        "name": "d2",
+        "description": "D2",
+        "options": ["--d2-direction {up,down,left,right}", "--d2-sketch"],
+    },
+    {
+        "name": "graphviz",
+        "description": "GraphViz DOT",
+        "options": ["--graphviz-direction {LR,TB,RL,BT}", "--graphviz-type {digraph,graph}"],
+    },
+    {
+        "name": "mermaid",
+        "description": "Mermaid (flowchart, c4, or sequence; auto-detected by default)",
+        "options": ["--mermaid-type {flowchart,c4,sequence}"],
+    },
+    {"name": "plantuml", "description": "PlantUML", "options": []},
+]
+
+
+class _CLIError(Exception):
+    """CLI failure with an associated exit code."""
+
+    def __init__(self, message: str, exit_code: int = EXIT_ERROR):
+        super().__init__(message)
+        self.exit_code = exit_code
 
 
 def detect_input_format(data: dict | str) -> str:
@@ -65,119 +124,271 @@ def detect_input_format(data: dict | str) -> str:
 def main(argv: Optional[list[str]] = None) -> int:
     """Main CLI entry point.
 
+    Dispatches to the `formats`, `inspect`, or `convert` subcommands. For
+    backward compatibility, bare conversion invocations without a subcommand
+    (`diacea -i file -f mermaid`) are treated as `convert`.
+
     Args:
         argv: Command-line arguments (None = sys.argv)
 
     Returns:
-        Exit code (0 = success)
+        Exit code (0 = success, 1 = error, 2 = parsed 0 elements)
     """
-    parser = create_parser()
-    args = parser.parse_args(argv)
+    args_list = list(sys.argv[1:] if argv is None else argv)
+    match args_list:
+        case ["convert", *rest]:
+            return _run_convert(rest)
+        case ["formats", *rest]:
+            return _run_formats(rest)
+        case ["inspect", *rest]:
+            return _run_inspect(rest)
+        case _:
+            return _run_convert(args_list)
 
+
+def _read_content(input_arg: str) -> str:
+    if input_arg == "-":
+        return sys.stdin.read()
+    input_path = Path(input_arg)
+    if not input_path.exists():
+        raise _CLIError(f"Input file not found: {input_arg}")
+    return input_path.read_text()
+
+
+def _resolve_input_format(content: str, requested: str) -> tuple[str, Any]:
+    """Resolve the input format name and parser-ready data for content."""
+    if requested == "svg":
+        return ("svg", content)
+    if requested == "obsidian":
+        return ("obsidian", extract_excalidraw_json(content))
+    if requested != "auto":
+        return (requested, json.loads(content))
+
+    stripped = content.strip()
+    if stripped.startswith(("<?xml", "<svg")):
+        return ("svg", content)
+    if is_obsidian_excalidraw(content):
+        return ("obsidian", extract_excalidraw_json(content))
     try:
-        # Read input file (as text first to detect SVG)
-        if args.input == "-":
-            content = sys.stdin.read()
-        else:
-            input_path = Path(args.input)
-            if not input_path.exists():
-                print(f"Error: Input file not found: {args.input}", file=sys.stderr)
-                return 1
+        data = json.loads(content)
+    except json.JSONDecodeError as err:
+        raise _CLIError(
+            "Could not detect input format: not SVG, Obsidian Excalidraw markdown, or valid JSON"
+        ) from err
+    try:
+        return (detect_input_format(data), data)
+    except ValueError as err:
+        raise _CLIError(f"Unrecognized input format: {err}") from err
 
-            with open(input_path) as f:
-                content = f.read()
 
-        # Detect or use specified input format
-        if args.input_format == "auto":
-            # Try to detect format from content
-            if content.strip().startswith("<?xml") or content.strip().startswith("<svg"):
-                input_format = "svg"
-                input_data = content
-            elif is_obsidian_excalidraw(content):
-                input_format = "excalidraw"
-                input_data = extract_excalidraw_json(content)
-            else:
-                # Try parsing as JSON
-                try:
-                    input_data = json.loads(content)
-                    input_format = detect_input_format(input_data)
-                except json.JSONDecodeError:
-                    print("Error: Could not detect input format", file=sys.stderr)
-                    return 1
-        else:
-            input_format = args.input_format
-            if input_format == "svg":
-                input_data = content
-            elif input_format == "obsidian":
-                input_format = "excalidraw"
-                input_data = extract_excalidraw_json(content)
-            else:
-                input_data = json.loads(content)
-
-        # Parse input to IR based on format
-        if input_format == "svg":
+def _parse_to_diagram(input_format: str, input_data: Any) -> tuple[Diagram, list[str]]:
+    """Parse input data to IR and collect parser conversion-loss warnings."""
+    match input_format:
+        case "svg":
             input_parser = SVGParser()
-            diagram = input_parser.parse(input_data)
-        elif input_format == "tldraw":
+        case "tldraw":
             input_parser = TLDrawParser()
-            diagram = input_parser.parse(input_data)
-        elif input_format == "excalidraw":
+        case "excalidraw" | "obsidian":
             input_parser = ExcalidrawParser()
-            diagram = input_parser.parse(input_data)
-        else:
-            print(f"Error: Unsupported input format: {input_format}", file=sys.stderr)
-            return 1
+        case _:
+            raise _CLIError(f"Unsupported input format: {input_format}")
 
-        # Generate output based on format
-        if args.format == "plantuml":
-            generator = PlantUMLGenerator()
-            output = generator.generate(diagram)
-        elif args.format == "c4":
-            generator = C4PlantUMLGenerator()
-            output = generator.generate(diagram)
-        elif args.format == "mermaid":
+    diagram = input_parser.parse(input_data)
+    return diagram, list(getattr(input_parser, "warnings", []))
+
+
+def _generate_output(diagram: Diagram, args: argparse.Namespace) -> tuple[str, Optional[str]]:
+    """Generate output text; returns (output, mermaid diagram type when applicable)."""
+    match args.format:
+        case "plantuml":
+            return (PlantUMLGenerator().generate(diagram), None)
+        case "c4":
+            return (C4PlantUMLGenerator().generate(diagram), None)
+        case "mermaid":
             mermaid_gen = MermaidGenerator(diagram_type=args.mermaid_type)
             output = mermaid_gen.generate(diagram)
-        elif args.format == "graphviz":
+            return (output, mermaid_gen.detected_type)
+        case "graphviz":
             config = GraphVizConfig(
                 direction=args.graphviz_direction,
                 graph_type=args.graphviz_type,
             )
-            graphviz_gen = GraphVizGenerator(config=config)
-            output = graphviz_gen.generate(diagram)
-        elif args.format == "d2":
+            return (GraphVizGenerator(config=config).generate(diagram), None)
+        case "d2":
             d2_config = D2Config(
                 direction=args.d2_direction,
                 sketch=args.d2_sketch,
             )
-            d2_gen = D2Generator(config=d2_config)
-            output = d2_gen.generate(diagram)
-        else:
-            print(f"Error: Unknown format: {args.format}", file=sys.stderr)
-            return 1
+            return (D2Generator(config=d2_config).generate(diagram), None)
+        case _:
+            raise _CLIError(f"Unknown format: {args.format}")
 
-        # Write output
-        if args.output == "-":
-            print(output)
-        else:
-            output_path = Path(args.output)
-            output_path.parent.mkdir(parents=True, exist_ok=True)
-            output_path.write_text(output)
-            print(f"Generated {args.format} diagram: {args.output}", file=sys.stderr)
 
-        return 0
+def _semantic_type_name(semantic_type: Any) -> Optional[str]:
+    if semantic_type is None:
+        return None
+    return getattr(semantic_type, "value", semantic_type)
 
-    except Exception as e:
-        print(f"Error: {e}", file=sys.stderr)
+
+def _element_summaries(diagram: Diagram) -> list[dict[str, Any]]:
+    summaries = []
+    for element in diagram.elements:
+        label = getattr(element, "label", "") or getattr(element, "content", "")
+        summaries.append(
+            {
+                "id": element.id,
+                "label": label,
+                "semantic_type": _semantic_type_name(element.semantic_type),
+                "confidence": round(element.semantic_confidence, 3),
+            }
+        )
+    return summaries
+
+
+def _emit_error(message: str, exit_code: int, as_json: bool) -> int:
+    if as_json:
+        print(json.dumps({"error": message, "exit_code": exit_code}), file=sys.stderr)
+    else:
+        print(f"Error: {message}", file=sys.stderr)
+    return exit_code
+
+
+def _write_output_file(output: str, output_arg: str) -> None:
+    output_path = Path(output_arg)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(output)
+
+
+def _run_convert(argv: list[str]) -> int:
+    parser = create_parser()
+    args = parser.parse_args(argv)
+
+    try:
+        content = _read_content(args.input)
+        input_format, input_data = _resolve_input_format(content, args.input_format)
+        diagram, warnings = _parse_to_diagram(input_format, input_data)
+        if not diagram.elements:
+            raise _CLIError(
+                "parsed 0 elements; the file may use an unsupported schema",
+                EXIT_EMPTY_DIAGRAM,
+            )
+        output, diagram_type = _generate_output(diagram, args)
+    except _CLIError as err:
+        return _emit_error(str(err), err.exit_code, args.json)
+    except Exception as err:
         if args.verbose:
-            import traceback
-
             traceback.print_exc()
-        return 1
+        return _emit_error(str(err), EXIT_ERROR, args.json)
+
+    if args.output != "-":
+        _write_output_file(output, args.output)
+
+    if args.json:
+        envelope = {
+            "output": output,
+            "input_format": input_format,
+            "output_format": args.format,
+            "diagram_type": diagram_type,
+            "elements": _element_summaries(diagram),
+            "warnings": warnings,
+        }
+        print(json.dumps(envelope, indent=2))
+        return EXIT_OK
+
+    for warning in warnings:
+        print(f"Warning: {warning}", file=sys.stderr)
+
+    if args.output == "-":
+        print(output)
+    else:
+        print(f"Generated {args.format} diagram: {args.output}", file=sys.stderr)
+
+    return EXIT_OK
+
+
+def _run_inspect(argv: list[str]) -> int:
+    parser = argparse.ArgumentParser(
+        prog="diacea inspect",
+        description="Parse a diagram file and report detected format, element count, and semantic inference without converting",
+    )
+    parser.add_argument("input", help="Input file or - for stdin")
+    parser.add_argument(
+        "--input-format",
+        default="auto",
+        choices=_INPUT_FORMAT_CHOICES,
+        help="Input format (default: auto-detect)",
+    )
+    parser.add_argument("--json", action="store_true", help="Emit the report as JSON to stdout")
+    args = parser.parse_args(argv)
+
+    try:
+        content = _read_content(args.input)
+        input_format, input_data = _resolve_input_format(content, args.input_format)
+        diagram, warnings = _parse_to_diagram(input_format, input_data)
+    except _CLIError as err:
+        return _emit_error(str(err), err.exit_code, args.json)
+    except Exception as err:
+        return _emit_error(str(err), EXIT_ERROR, args.json)
+
+    elements = _element_summaries(diagram)
+    if not elements:
+        warnings.append("parsed 0 elements; the file may use an unsupported schema")
+
+    if args.json:
+        report = {
+            "input_format": input_format,
+            "element_count": len(elements),
+            "elements": elements,
+            "warnings": warnings,
+        }
+        print(json.dumps(report, indent=2))
+        return EXIT_OK
+
+    print(f"Format: {input_format}")
+    print(f"Elements: {len(elements)}")
+    for summary in elements:
+        semantic = summary["semantic_type"] or "-"
+        print(
+            f"  {summary['id']}: label={summary['label']!r}"
+            f" semantic={semantic} confidence={summary['confidence']:.2f}"
+        )
+    for warning in warnings:
+        print(f"Warning: {warning}", file=sys.stderr)
+    return EXIT_OK
+
+
+def _run_formats(argv: list[str]) -> int:
+    parser = argparse.ArgumentParser(
+        prog="diacea formats",
+        description="List supported input and output formats",
+    )
+    parser.add_argument("--json", action="store_true", help="Emit the listing as JSON to stdout")
+    args = parser.parse_args(argv)
+
+    if args.json:
+        print(
+            json.dumps(
+                {"input_formats": _INPUT_FORMATS, "output_formats": _OUTPUT_FORMATS},
+                indent=2,
+            )
+        )
+        return EXIT_OK
+
+    print("Input formats:")
+    for input_format in _INPUT_FORMATS:
+        print(f"  {input_format['name']:<12}{input_format['description']}")
+        print(f"  {'':<12}detection: {input_format['detection']}")
+    print()
+    print("Output formats:")
+    for output_format in _OUTPUT_FORMATS:
+        options = ", ".join(output_format["options"]) or "-"
+        print(f"  {output_format['name']:<12}{output_format['description']}")
+        print(f"  {'':<12}options: {options}")
+    return EXIT_OK
 
 
 def create_parser() -> argparse.ArgumentParser:
-    """Create argument parser for CLI.
+    """Create argument parser for the convert command.
 
     Returns:
         Configured ArgumentParser
@@ -187,8 +398,11 @@ def create_parser() -> argparse.ArgumentParser:
         description="Universal diagram converter - the pandoc for diagrams",
         epilog="Examples:\n"
         "  diacea -i diagram.json -f mermaid -o output.mmd\n"
+        "  diacea -i diagram.json -f mermaid --json\n"
         "  diacea -i diagram.json -f graphviz --graphviz-direction TB\n"
-        "  cat diagram.json | diacea -i - -f c4",
+        "  cat diagram.json | diacea -i - -f c4\n"
+        "  diacea inspect diagram.json --json\n"
+        "  diacea formats --json",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
 
@@ -210,7 +424,7 @@ def create_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--input-format",
         default="auto",
-        choices=["auto", "excalidraw", "obsidian", "tldraw", "svg"],
+        choices=_INPUT_FORMAT_CHOICES,
         help="Input format (default: auto-detect)",
     )
 
@@ -220,6 +434,12 @@ def create_parser() -> argparse.ArgumentParser:
         required=True,
         choices=["plantuml", "c4", "mermaid", "graphviz", "d2"],
         help="Output format",
+    )
+
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Emit a JSON envelope (output, formats, elements, warnings) to stdout; errors go to stderr as JSON",
     )
 
     # Format-specific options
