@@ -46,6 +46,7 @@ diacea-workspace = "diacea.workspace_cli:main_workspace"
 "Repository" = "https://github.com/kyleking/diacea"
 
 [tool.commitizen]
+pre_bump_hooks = ["uv lock"]
 version = "0.0.1"
 version_files = ["pyproject.toml:^version", "diacea/__init__.py:^__version"]
 
