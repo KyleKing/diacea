@@ -79,7 +79,14 @@ class MermaidGenerator(Generator):
         - If has Person/System/Container semantic types → C4
         - If connections form sequential flow → Sequence
         - Default → Flowchart
+
+        A parser-provided ``metadata["mermaid"]["diagram_type"]`` wins over
+        the heuristics.
         """
+        source_type = diagram.metadata.get("mermaid", {}).get("diagram_type")
+        if source_type in {"c4", "flowchart", "sequence"}:
+            return source_type
+
         shapes = diagram.get_shapes()
         connections = diagram.get_connections()
 

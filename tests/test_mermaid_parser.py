@@ -9,7 +9,12 @@ from diacea.generators.mermaid import MermaidGenerator
 from diacea.ir import Connection, Group, Shape
 from diacea.ir.semantic import SemanticType
 from diacea.parsers.excalidraw import ExcalidrawParser
-from diacea.parsers.mermaid import MermaidParser, is_mermaid, is_mermaid_flowchart
+from diacea.parsers.mermaid import (
+    MermaidParser,
+    is_mermaid,
+    is_mermaid_flowchart,
+    is_mermaid_sequence,
+)
 
 from .configuration import TEST_DATA_DIR
 
@@ -79,8 +84,8 @@ class TestFrontmatter:
 
 
 class TestRejection:
-    @pytest.mark.parametrize('header', ['sequenceDiagram', 'C4Context', 'classDiagram', 'gantt'])
-    def test_non_flowchart_rejected(self, header):
+    @pytest.mark.parametrize('header', ['C4Context', 'classDiagram', 'gantt'])
+    def test_unsupported_diagram_types_rejected(self, header):
         with pytest.raises(ValueError, match=header):
             MermaidParser().parse(f'{header}\n    A->>B: hi')
 
@@ -532,3 +537,132 @@ class TestRoundTrip:
         reparsed_group = reparsed.get_groups()[0]
         assert reparsed_group.label == source_group.label
         assert set(reparsed_group.children) == set(source_group.children)
+
+
+class TestSequenceDiagrams:
+    def test_participants_and_messages(self):
+        content = textwrap.dedent('''
+            sequenceDiagram
+                participant web as Web App
+                actor alice as Alice
+                web->>api: GET /orders
+                api-->>web: 200 OK
+        ''')
+        parser = MermaidParser()
+        diagram = parser.parse(content)
+
+        shapes = diagram.get_shapes()
+        assert [s.id for s in shapes] == ['web', 'alice', 'api']
+        assert shapes[0].label == 'Web App'
+        assert shapes[1].semantic_type == SemanticType.PERSON
+        assert shapes[1].semantic_confidence == 1.0
+
+        connections = diagram.get_connections()
+        assert [(c.from_id, c.to_id, c.label) for c in connections] == [
+            ('web', 'api', 'GET /orders'),
+            ('api', 'web', '200 OK'),
+        ]
+        assert connections[0].style.stroke_style == 'solid'
+        assert connections[1].style.stroke_style == 'dashed'
+        assert diagram.metadata['mermaid']['diagram_type'] == 'sequence'
+        assert diagram.metadata['synthesized_layout'] is True
+
+    def test_implicit_participants_declared_in_order(self):
+        diagram = MermaidParser().parse('sequenceDiagram\n    A->>B: hi\n    B->>C: bye')
+        assert [s.id for s in diagram.get_shapes()] == ['A', 'B', 'C']
+
+    @pytest.mark.parametrize(
+        ('arrow', 'connection_type', 'stroke_style'),
+        [
+            ('->>', 'directed', 'solid'),
+            ('-->>', 'directed', 'dashed'),
+            ('->', 'directed', 'solid'),
+            ('-->', 'directed', 'dashed'),
+            ('-x', 'directed', 'solid'),
+            ('--x', 'directed', 'dashed'),
+            ('-)', 'directed', 'solid'),
+            ('--)', 'directed', 'dashed'),
+            ('<<->>', 'bidirectional', 'solid'),
+            ('<<-->>', 'bidirectional', 'dashed'),
+        ],
+    )
+    def test_arrow_variants(self, arrow, connection_type, stroke_style):
+        diagram = MermaidParser().parse(f'sequenceDiagram\n    A{arrow}B: msg')
+        connection = diagram.get_connections()[0]
+        assert connection.connection_type == connection_type
+        assert connection.style.stroke_style == stroke_style
+        assert connection.metadata['mermaid']['arrow'] == arrow
+
+    def test_activation_shorthand(self):
+        diagram = MermaidParser().parse(
+            'sequenceDiagram\n    A->>+B: start\n    B-->>-A: done'
+        )
+        edges = [(c.from_id, c.to_id) for c in diagram.get_connections()]
+        assert edges == [('A', 'B'), ('B', 'A')]
+
+    def test_blocks_and_notes_skipped_but_messages_kept(self):
+        content = textwrap.dedent('''
+            sequenceDiagram
+                autonumber
+                A->>B: request
+                alt success
+                    B-->>A: ok
+                else failure
+                    B-->>A: error
+                end
+                Note over A,B: retries not shown
+                loop every minute
+                    A->>B: poll
+                end
+        ''')
+        parser = MermaidParser()
+        diagram = parser.parse(content)
+
+        assert len(diagram.get_connections()) == 4
+        skipped = [w for w in parser.warnings if 'sequence directive' in w]
+        assert len(skipped) == 7
+
+    def test_self_message(self):
+        diagram = MermaidParser().parse('sequenceDiagram\n    A->>A: think')
+        connection = diagram.get_connections()[0]
+        assert connection.from_id == connection.to_id == 'A'
+
+    def test_frontmatter_title(self):
+        content = '---\ntitle: Checkout Flow\n---\nsequenceDiagram\n    A->>B: hi'
+        diagram = MermaidParser().parse(content)
+        assert diagram.name == 'Checkout Flow'
+
+    def test_inline_title(self):
+        diagram = MermaidParser().parse('sequenceDiagram\n    title Checkout\n    A->>B: hi')
+        assert diagram.name == 'Checkout'
+
+    def test_layout_places_participants_along_x(self):
+        diagram = MermaidParser().parse('sequenceDiagram\n    A->>B: hi\n    B->>C: bye')
+        xs = [s.position.x for s in diagram.get_shapes()]
+        assert xs == sorted(xs)
+        assert len(set(xs)) == 3
+
+    def test_sniffers(self):
+        assert is_mermaid_sequence('sequenceDiagram\n    A->>B: hi')
+        assert not is_mermaid_sequence('flowchart LR\n    A --> B')
+        assert is_mermaid('sequenceDiagram\n    A->>B: hi')
+
+    def test_generator_honors_sequence_metadata(self):
+        diagram = MermaidParser().parse('sequenceDiagram\n    A->>B: hi\n    A->>C: also')
+        generator = MermaidGenerator()
+        output = generator.generate(diagram)
+        assert generator.detected_type == 'sequence'
+        assert output.startswith('sequenceDiagram')
+
+    def test_round_trip_is_fixpoint(self):
+        content = textwrap.dedent('''
+            sequenceDiagram
+                participant web as Web App
+                actor alice as Alice
+                web->>api: GET /orders
+                api-->>web: 200 OK
+                alice->>web: click
+        ''')
+        first = MermaidGenerator().generate(MermaidParser().parse(content))
+        second = MermaidGenerator().generate(MermaidParser().parse(first))
+        assert second == first

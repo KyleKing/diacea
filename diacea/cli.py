@@ -46,7 +46,7 @@ _INPUT_FORMATS = [
     },
     {
         "name": "mermaid",
-        "description": "Mermaid flowchart text (flowchart/graph diagrams only)",
+        "description": "Mermaid text (flowchart/graph and sequence diagrams)",
         "detection": "text starting with 'flowchart' or 'graph'",
     },
     {

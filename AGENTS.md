@@ -6,7 +6,7 @@ This document provides AI assistants with an overview of the diacea codebase, it
 
 **diacea** is a universal diagram converter - the "pandoc for diagrams". It converts between visual diagram formats using a format-agnostic intermediate representation (IR).
 
-**Supported Input Formats**: Excalidraw, Obsidian Excalidraw markdown, TLDraw (legacy and v2), SVG, Mermaid flowcharts, PlantUML (including C4 macros)
+**Supported Input Formats**: Excalidraw, Obsidian Excalidraw markdown, TLDraw (legacy and v2), SVG, Mermaid flowcharts and sequence diagrams, PlantUML (including C4 macros)
 **Supported Output Formats**: PlantUML, C4-PlantUML, Mermaid, GraphViz DOT, D2
 
 ## Architecture
@@ -40,7 +40,7 @@ diacea/
 │   ├── parsers/              # Input format parsers
 │   │   ├── __init__.py
 │   │   ├── excalidraw.py     # Excalidraw JSON parser
-│   │   ├── mermaid.py        # Mermaid flowchart text parser
+│   │   ├── mermaid.py        # Mermaid flowchart/sequence text parser
 │   │   ├── obsidian.py       # Obsidian .excalidraw.md extraction
 │   │   ├── plantuml.py       # PlantUML/C4-PlantUML text parser
 │   │   ├── svg.py            # SVG parser
@@ -88,7 +88,7 @@ All parsers implement the `Parser` base class with a `parse(data) -> Diagram` me
 - **`parsers/obsidian.py`**: Detects Obsidian `.excalidraw.md` notes and extracts the embedded Excalidraw JSON (compressed blocks need the `diacea[obsidian]` extra)
 - **`TLDrawParser`**: Parses TLDraw JSON (legacy v1 and v2 `.tldr`), handles multi-page documents
 - **`SVGParser`**: Parses SVG XML, extracts shapes from rect/circle/ellipse/polygon/path elements
-- **`MermaidParser`**: Parses Mermaid flowchart/graph text (bracket shapes, edges, subgraphs); rejects other Mermaid diagram types; synthesizes a layered layout since text has no coordinates
+- **`MermaidParser`**: Parses Mermaid flowchart/graph text (bracket shapes, edges, subgraphs) and sequence diagrams (participants, actors, messages; control blocks and notes skipped with warnings); rejects other Mermaid diagram types; synthesizes a layout since text has no coordinates
 - **`PlantUMLParser`**: Parses PlantUML deployment/component elements, relationships, and the C4-PlantUML macro dialect; synthesizes layout; round-trips diacea's own PlantUML/C4 output exactly
 
 Parsers expose a `warnings` list after `parse()` with any conversion losses detected (e.g. SVG curved outlines reduced to polygons); the CLI surfaces these.

@@ -1,9 +1,11 @@
-"""Mermaid flowchart parser - converts Mermaid flowchart/graph text to IR.
+"""Mermaid parser - converts Mermaid flowchart/graph and sequence text to IR.
 
-Supports a deliberate subset of Mermaid: flowchart and graph diagrams only.
-Other Mermaid diagram types (sequenceDiagram, C4Context, ...) are rejected
-with a ValueError. Styling directives (classDef, style, click, linkStyle)
-and unrecognized lines are skipped with a warning instead of failing.
+Supports a deliberate subset of Mermaid: flowchart/graph and sequence
+diagrams. Other Mermaid diagram types (C4Context, classDiagram, ...) are
+rejected with a ValueError. Styling directives (classDef, style, click,
+linkStyle) and unrecognized lines are skipped with a warning instead of
+failing. Sequence control blocks (loop, alt, par, ...) and notes are
+skipped with warnings while the messages inside them are still parsed.
 
 Since Mermaid text has no coordinates, a simple layered layout is
 synthesized (topological layers along the declared direction) and flagged
@@ -31,6 +33,8 @@ from ..ir.semantic import SemanticType, infer_semantic_type
 
 _HEADER_RE = re.compile(r"^(?:flowchart|graph)\b\s*(LR|RL|TD|TB|BT)?\s*;?\s*$", re.IGNORECASE)
 
+_SEQUENCE_HEADER_RE = re.compile(r"^sequenceDiagram\s*;?\s*$")
+
 _FRONTMATTER_TITLE_RE = re.compile(r"^title:\s*(.+?)\s*$")
 
 _OTHER_DIAGRAM_KEYWORDS = (
@@ -51,7 +55,6 @@ _OTHER_DIAGRAM_KEYWORDS = (
     "quadrantChart",
     "requirementDiagram",
     "sankey-beta",
-    "sequenceDiagram",
     "stateDiagram",
     "stateDiagram-v2",
     "timeline",
@@ -60,6 +63,37 @@ _OTHER_DIAGRAM_KEYWORDS = (
 )
 
 _SKIPPED_DIRECTIVES = ("class", "classDef", "click", "direction", "linkStyle", "style")
+
+_SEQUENCE_BLOCK_KEYWORDS = (
+    "alt",
+    "and",
+    "box",
+    "break",
+    "critical",
+    "else",
+    "end",
+    "loop",
+    "opt",
+    "option",
+    "par",
+    "rect",
+)
+
+_SEQUENCE_SKIPPED_DIRECTIVES = (
+    "activate",
+    "autonumber",
+    "deactivate",
+    "link",
+    "links",
+    "note",
+    "properties",
+)
+
+_SEQ_PARTICIPANT_RE = re.compile(r"^(participant|actor)\s+([\w.-]+)(?:\s+as\s+(.+))?$")
+
+_SEQ_MESSAGE_RE = re.compile(
+    r"^([\w.]+)\s*(<<-->>|<<->>|-->>|->>|--[>x)]|-[>x)])\s*([+-]?)\s*([\w.]+)\s*(?::\s*(.*))?$"
+)
 
 _LINK_RE = re.compile(
     r"\s*(<?(?:={2,}|-{2,}|-\.+-*)[>xo]?)"
@@ -119,7 +153,7 @@ def is_mermaid(content: str) -> bool:
     first = _first_meaningful_line(content)
     if first is None:
         return False
-    if _HEADER_RE.match(first):
+    if _HEADER_RE.match(first) or _SEQUENCE_HEADER_RE.match(first):
         return True
     keyword = first.split()[0].rstrip(":;")
     return keyword in _OTHER_DIAGRAM_KEYWORDS
@@ -129,6 +163,12 @@ def is_mermaid_flowchart(content: str) -> bool:
     """Whether the content is a Mermaid flowchart/graph diagram."""
     first = _first_meaningful_line(content)
     return first is not None and _HEADER_RE.match(first) is not None
+
+
+def is_mermaid_sequence(content: str) -> bool:
+    """Whether the content is a Mermaid sequence diagram."""
+    first = _first_meaningful_line(content)
+    return first is not None and _SEQUENCE_HEADER_RE.match(first) is not None
 
 
 def _split_frontmatter(content: str) -> tuple[str, Optional[str]]:
@@ -231,12 +271,14 @@ class MermaidParser(Parser):
         self.warnings: list[str] = []
 
     def parse(self, data: Any) -> Diagram:
-        """Parse Mermaid flowchart text to an IR Diagram."""
+        """Parse Mermaid flowchart or sequence text to an IR Diagram."""
         if not isinstance(data, str):
             raise ValueError("Mermaid parser expects a string input")
 
         self.warnings = []
         data, title = _split_frontmatter(data)
+        if is_mermaid_sequence(data):
+            return self._parse_sequence(data, title)
         self._shapes: dict[str, Shape] = {}
         self._shape_order: list[Shape] = []
         self._connections: list[Connection] = []
@@ -312,11 +354,135 @@ class MermaidParser(Parser):
         if keyword in _OTHER_DIAGRAM_KEYWORDS:
             raise ValueError(
                 f"Unsupported Mermaid diagram type '{keyword}': "
-                "only flowchart/graph diagrams are supported"
+                "only flowchart/graph and sequence diagrams are supported"
             )
         raise ValueError(
             f"line {line_number}: not a Mermaid flowchart (expected 'flowchart' or 'graph' header)"
         )
+
+    def _parse_sequence(self, data: str, title: Optional[str]) -> Diagram:
+        self._shapes = {}
+        self._shape_order = []
+        self._connections = []
+        self._groups = []
+        self._group_stack = []
+        self._sequence_title: Optional[str] = None
+
+        header_seen = False
+        for line_number, raw in enumerate(data.splitlines(), start=1):
+            line = raw.strip()
+            if not line or line.startswith("```"):
+                continue
+            if line.startswith("%%"):
+                self.warnings.append(f"line {line_number}: skipped comment")
+                continue
+            if not header_seen:
+                header_seen = True
+                continue
+            self._parse_sequence_statement(line.rstrip(";").strip(), line_number)
+
+        for shape in self._shape_order:
+            shape.semantic_type, shape.semantic_confidence = infer_semantic_type(
+                shape_type=shape.shape_type,
+                label=shape.label,
+                size=None,
+                style=shape.style,
+                metadata=shape.metadata,
+            )
+
+        self._layout_sequence()
+
+        diagram = Diagram(
+            id="mermaid-sequence",
+            name=title or self._sequence_title,
+            metadata={
+                "mermaid": {"diagram_type": "sequence"},
+                "synthesized_layout": True,
+            },
+        )
+        for shape in self._shape_order:
+            diagram.add_element(shape)
+        for connection in self._connections:
+            diagram.add_element(connection)
+        return diagram
+
+    def _parse_sequence_statement(self, statement: str, line_number: int) -> None:
+        if not statement:
+            return
+        if match := _SEQ_PARTICIPANT_RE.match(statement):
+            kind, participant_id, label = match.groups()
+            self._declare_participant(
+                participant_id,
+                label=_unescape_label(label) if label else None,
+                is_actor=kind == "actor",
+            )
+            return
+        if match := _SEQ_MESSAGE_RE.match(statement):
+            from_id, arrow, _activation, to_id, label = match.groups()
+            self._declare_participant(from_id)
+            self._declare_participant(to_id)
+            connection_type = "bidirectional" if arrow.startswith("<<") else "directed"
+            stroke_style = "dashed" if "--" in arrow else "solid"
+            self._connections.append(
+                Connection(
+                    id=f"message-{len(self._connections)}",
+                    position=Point(0.0, 0.0),
+                    size=Dimensions(1.0, 1.0),
+                    from_id=from_id,
+                    to_id=to_id,
+                    label=_unescape_label(label) if label else "",
+                    connection_type=connection_type,
+                    style=Style(stroke_style=stroke_style),
+                    metadata={"mermaid": {"arrow": arrow}},
+                )
+            )
+            return
+
+        keyword = statement.split(maxsplit=1)[0].rstrip(":").lower()
+        if keyword == "title":
+            self._sequence_title = statement.split(maxsplit=1)[1].strip() if " " in statement else None
+            return
+        if keyword in _SEQUENCE_BLOCK_KEYWORDS or keyword in _SEQUENCE_SKIPPED_DIRECTIVES:
+            self.warnings.append(f"line {line_number}: skipped '{keyword}' sequence directive")
+            return
+        self.warnings.append(f"line {line_number}: unrecognized line skipped: {statement!r}")
+
+    def _declare_participant(
+        self,
+        participant_id: str,
+        label: Optional[str] = None,
+        is_actor: bool = False,
+    ) -> None:
+        if (shape := self._shapes.get(participant_id)) is not None:
+            if label is not None:
+                shape.label = label
+            if is_actor:
+                shape.metadata["semantic_type"] = SemanticType.PERSON.value
+            return
+        metadata = {"semantic_type": SemanticType.PERSON.value} if is_actor else None
+        self._create_shape(
+            participant_id,
+            label=label or participant_id,
+            shape_type="rectangle",
+            metadata=metadata,
+        )
+
+    def _layout_sequence(self) -> None:
+        for index, shape in enumerate(self._shape_order):
+            shape.position = Point(index * _LAYER_PITCH, 0.0)
+
+        for order, connection in enumerate(self._connections):
+            source = self._shapes.get(connection.from_id)
+            target = self._shapes.get(connection.to_id)
+            if not source or not target:
+                continue
+            message_y = _NODE_HEIGHT_BASE + (order + 1) * 40.0
+            start = Point(source.position.x + source.size.width / 2, message_y)
+            end = Point(target.position.x + target.size.width / 2, message_y)
+            connection.start_point = start
+            connection.end_point = end
+            connection.position = Point(min(start.x, end.x), min(start.y, end.y))
+            connection.size = Dimensions(max(abs(end.x - start.x), 1.0), 1.0)
 
     def _parse_statement(self, statement: str, line_number: int) -> None:
         if not statement:

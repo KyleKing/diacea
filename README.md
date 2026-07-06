@@ -8,7 +8,7 @@ Universal diagram converter - the pandoc for diagrams
 
 - **Visual to Text**: Convert hand-drawn diagrams into version-controllable text formats
 - **Text to Text**: Convert between Mermaid, PlantUML/C4, GraphViz DOT, and D2
-- **Multiple Input Formats**: Excalidraw, Obsidian Excalidraw markdown, TLDraw (legacy and v2 `.tldr`), SVG, Mermaid flowcharts, PlantUML (including C4 macros)
+- **Multiple Input Formats**: Excalidraw, Obsidian Excalidraw markdown, TLDraw (legacy and v2 `.tldr`), SVG, Mermaid flowcharts and sequence diagrams, PlantUML (including C4 macros)
 - **Multiple Output Formats**: PlantUML, C4-PlantUML, Mermaid, GraphViz DOT, D2
 - **Semantic Inference**: Automatically detects diagram element types (databases, people, systems)
 - **Agent Friendly**: `--json` envelopes, `inspect`/`formats` subcommands, and structured exit codes
@@ -93,7 +93,7 @@ print(c4_gen.generate(diagram))
 | Obsidian Excalidraw (`.excalidraw.md`) | `ExcalidrawParser` | Yes | Compressed notes need the `[obsidian]` extra |
 | TLDraw JSON | `TLDrawParser` | Yes | Legacy v1 documents and v2 `.tldr` files |
 | SVG | `SVGParser` | Yes | Basic shapes; curves sampled for accurate bounding boxes |
-| Mermaid | `MermaidParser` | Yes | Flowchart/graph diagrams only; layout synthesized |
+| Mermaid | `MermaidParser` | Yes | Flowchart/graph and sequence diagrams; layout synthesized |
 | PlantUML | `PlantUMLParser` | Yes | Deployment/component elements and C4 macros; layout synthesized |
 
 ### Output Formats

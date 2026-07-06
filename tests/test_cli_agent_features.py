@@ -320,12 +320,14 @@ class TestTextFormatInputs:
         assert 'Person(user, "User")' in output
         assert "Rel(user, db" in output
 
-    def test_mermaid_sequence_rejected_cleanly(self, tmp_path, capsys):
+    def test_mermaid_sequence_converts(self, tmp_path, capsys):
         f = tmp_path / "seq.mmd"
         f.write_text("sequenceDiagram\n    A->>B: hi\n")
-        result = main(["-i", str(f), "-f", "d2"])
-        assert result == EXIT_ERROR
-        assert "sequence" in capsys.readouterr().err.lower()
+        result = main(["-i", str(f), "-f", "d2", "--json"])
+        assert result == EXIT_OK
+        envelope = json.loads(capsys.readouterr().out)
+        assert envelope["input_format"] == "mermaid"
+        assert "A -> B: hi" in envelope["output"]
 
     def test_explicit_input_format_flag(self, tmp_path, capsys):
         f = tmp_path / "flow.txt"
