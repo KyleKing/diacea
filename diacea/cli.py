@@ -163,6 +163,8 @@ def main(argv: Optional[list[str]] = None) -> int:
             return _run_formats(rest)
         case ["inspect", *rest]:
             return _run_inspect(rest)
+        case ["sync", *rest]:
+            return _run_sync(rest)
         case _:
             return _run_convert(args_list)
 
@@ -420,6 +422,77 @@ def _run_formats(argv: list[str]) -> int:
     return EXIT_OK
 
 
+_SYNC_SUFFIXES = {"c4": ".puml", "d2": ".d2", "graphviz": ".dot", "mermaid": ".mmd", "plantuml": ".puml"}
+
+
+def _sync_output_path(source: Path, output_format: str, output_dir: Optional[str]) -> Path:
+    name = source.name
+    if name.endswith(".excalidraw.md"):
+        stem = name.removesuffix(".excalidraw.md")
+    else:
+        stem = source.stem
+    directory = Path(output_dir) if output_dir else source.parent
+    return directory / f"{stem}{_SYNC_SUFFIXES[output_format]}"
+
+
+def _run_sync(argv: list[str]) -> int:
+    parser = argparse.ArgumentParser(
+        prog="diacea sync",
+        description="Regenerate text diagrams from their sources, writing outputs next to each source",
+    )
+    parser.add_argument("sources", nargs="+", help="Diagram source files")
+    parser.add_argument(
+        "-f",
+        "--format",
+        default="mermaid",
+        choices=["plantuml", "c4", "mermaid", "graphviz", "d2"],
+        help="Output format (default: mermaid)",
+    )
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="Report stale outputs and exit 1 instead of writing",
+    )
+    parser.add_argument(
+        "--output-dir",
+        help="Directory for generated files (default: next to each source)",
+    )
+    _add_format_options(parser)
+    args = parser.parse_args(argv)
+
+    failed = False
+    for source in args.sources:
+        source_path = Path(source)
+        target = _sync_output_path(source_path, args.format, args.output_dir)
+        if target == source_path:
+            print(f"Error: {source}: output path equals the source; skipping", file=sys.stderr)
+            failed = True
+            continue
+        try:
+            content = _read_content(source)
+            input_format, input_data = _resolve_input_format(content, "auto")
+            diagram, _warnings = _parse_to_diagram(input_format, input_data)
+            if not diagram.elements:
+                raise _CLIError("parsed 0 elements; the file may use an unsupported schema")
+            output, _diagram_type = _generate_output(diagram, args)
+        except (_CLIError, ValueError, json.JSONDecodeError) as err:
+            print(f"Error: {source}: {err}", file=sys.stderr)
+            failed = True
+            continue
+        text = output if output.endswith("\n") else output + "\n"
+        if target.exists() and target.read_text() == text:
+            continue
+        if args.check:
+            print(f"stale: {target}", file=sys.stderr)
+            failed = True
+        else:
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text(text)
+            print(f"wrote {target}", file=sys.stderr)
+
+    return EXIT_ERROR if failed else EXIT_OK
+
+
 def create_parser() -> argparse.ArgumentParser:
     """Create argument parser for the convert command.
 
@@ -435,7 +508,8 @@ def create_parser() -> argparse.ArgumentParser:
         "  diacea -i diagram.json -f graphviz --graphviz-direction TB\n"
         "  cat diagram.json | diacea -i - -f c4\n"
         "  diacea inspect diagram.json --json\n"
-        "  diacea formats --json",
+        "  diacea formats --json\n"
+        "  diacea sync docs/arch.excalidraw -f mermaid",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
 
@@ -475,7 +549,26 @@ def create_parser() -> argparse.ArgumentParser:
         help="Emit a JSON envelope (output, formats, elements, warnings) to stdout; errors go to stderr as JSON",
     )
 
-    # Format-specific options
+    _add_format_options(parser)
+
+    # General options
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Verbose output (show stack traces)",
+    )
+
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=f"%(prog)s {_get_version()}",
+    )
+
+    return parser
+
+
+def _add_format_options(parser: argparse.ArgumentParser) -> None:
     mermaid_group = parser.add_argument_group("mermaid options")
     mermaid_group.add_argument(
         "--mermaid-type",
@@ -509,22 +602,6 @@ def create_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Use D2 sketch mode (hand-drawn look)",
     )
-
-    # General options
-    parser.add_argument(
-        "-v",
-        "--verbose",
-        action="store_true",
-        help="Verbose output (show stack traces)",
-    )
-
-    parser.add_argument(
-        "--version",
-        action="version",
-        version=f"%(prog)s {_get_version()}",
-    )
-
-    return parser
 
 
 def _get_version() -> str:

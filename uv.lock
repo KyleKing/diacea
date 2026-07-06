@@ -481,6 +481,9 @@ dependencies = [
 ]
 
 [package.optional-dependencies]
+mkdocs = [
+    { name = "mkdocs" },
+]
 obsidian = [
     { name = "lzstring" },
 ]
@@ -495,11 +498,12 @@ dev = [
 requires-dist = [
     { name = "corallium", specifier = ">=2.2.0" },
     { name = "lzstring", marker = "extra == 'obsidian'", specifier = ">=1.0.4" },
+    { name = "mkdocs", marker = "extra == 'mkdocs'", specifier = ">=1.5" },
     { name = "networkx", specifier = ">=3.4.2,<4" },
     { name = "python-constraint2", specifier = ">=2.0.0b8,<3" },
     { name = "pyyaml", specifier = ">=6.0,<7" },
 ]
-provides-extras = ["obsidian"]
+provides-extras = ["mkdocs", "obsidian"]
 
 [package.metadata.requires-dev]
 dev = [

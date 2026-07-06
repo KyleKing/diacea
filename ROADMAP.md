@@ -23,10 +23,11 @@ Also shipped beyond the original phase plans:
 - Obsidian Excalidraw markdown input (`.excalidraw.md`), with `compressed-json` support via the `diacea[obsidian]` extra
 - Agent-friendly CLI: `--json` envelopes, `diacea inspect`, `diacea formats`, structured exit codes, and conversion-loss warnings
 - Text-format input parsers enabling text-to-text conversion: Mermaid flowcharts and sequence diagrams (`MermaidParser`) and PlantUML including the C4 macro dialect (`PlantUMLParser`), both with synthesized layouts and exact round-trips of diacea's own output
+- Sync tooling: `diacea sync` (with `--check`), `diacea-sync`/`diacea-check` pre-commit hooks, and an MkDocs plugin replacing ```diacea fences with generated diagram blocks (`diacea[mkdocs]` extra)
 
 ### Next
 
-- MkDocs and pre-commit integrations for keeping generated diagrams in sync
+- Nothing scheduled; see Ideas below
 
 ### Ideas (unscheduled)
 
@@ -60,4 +61,4 @@ Example diagrams live in `test_diagrams/` (Mermaid, D2, GraphViz, SVG at simple/
 
 ---
 
-**Last Updated**: 2026-07-05
+**Last Updated**: 2026-07-06

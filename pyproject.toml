@@ -36,7 +36,13 @@ readme = "docs/README.md"
 requires-python = ">=3.10.11"
 version = "0.0.1"
 
+[project.entry-points."mkdocs.plugins"]
+diacea = "diacea.mkdocs_plugin:DiaceaPlugin"
+
 [project.optional-dependencies]
+mkdocs = [
+  "mkdocs>=1.5",
+]
 obsidian = [
   "lzstring>=1.0.4",
 ]

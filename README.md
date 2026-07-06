@@ -12,6 +12,7 @@ Universal diagram converter - the pandoc for diagrams
 - **Multiple Output Formats**: PlantUML, C4-PlantUML, Mermaid, GraphViz DOT, D2
 - **Semantic Inference**: Automatically detects diagram element types (databases, people, systems)
 - **Agent Friendly**: `--json` envelopes, `inspect`/`formats` subcommands, and structured exit codes
+- **Docs Integrations**: `diacea sync` with pre-commit hooks and an MkDocs plugin keep generated diagrams current
 - **Python Native**: Pure Python implementation
 
 ## Installation
@@ -63,6 +64,54 @@ diacea formats --json
 # Build a workspace from existing diagram files
 diacea-workspace create --name "My System" --from-diagrams a.json b.svg -o workspace.yml
 ```
+
+### Keeping Generated Diagrams in Sync
+
+`diacea sync` regenerates text diagrams next to their sources, writing only when the output is stale:
+
+```bash
+# Write arch.mmd next to arch.excalidraw (default format: mermaid)
+diacea sync docs/diagrams/arch.excalidraw
+
+# Other formats and a dedicated output directory
+diacea sync docs/diagrams/*.excalidraw -f d2 --output-dir docs/generated
+
+# CI-friendly: report stale outputs and exit 1 without writing
+diacea sync --check docs/diagrams/*.excalidraw
+```
+
+#### pre-commit
+
+The repo ships `diacea-sync` (rewrites stale outputs) and `diacea-check` (fails without writing) hooks:
+
+```yaml
+repos:
+  - repo: https://github.com/kyleking/diacea
+    rev: main  # prefer a release tag
+    hooks:
+      - id: diacea-sync
+        args: [-f, mermaid]
+```
+
+#### MkDocs
+
+Install `diacea[mkdocs]` and register the plugin:
+
+```yaml
+plugins:
+  - diacea
+```
+
+Then reference diagram sources from markdown with a `diacea` fence, which is replaced at build time by a code block in the target language (so mkdocs-material's Mermaid support renders it):
+
+````markdown
+```diacea
+source: diagrams/architecture.excalidraw
+format: mermaid
+```
+````
+
+`source` is resolved relative to the page, then the docs directory. `format` defaults to `mermaid`; `mermaid-type` optionally forces `flowchart`, `c4`, or `sequence`.
 
 ### Python API
 

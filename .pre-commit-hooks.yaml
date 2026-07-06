@@ -1,0 +1,12 @@
+- id: diacea-sync
+  name: diacea sync generated diagrams
+  description: Regenerate text diagrams from diagram sources (defaults to Mermaid output; override with args like ["-f", "d2"])
+  entry: diacea sync
+  language: python
+  files: '\.(excalidraw|tldr)$|\.excalidraw\.md$'
+- id: diacea-check
+  name: diacea check generated diagrams
+  description: Fail when generated text diagrams are stale, without rewriting them
+  entry: diacea sync --check
+  language: python
+  files: '\.(excalidraw|tldr)$|\.excalidraw\.md$'

@@ -27,8 +27,10 @@ SVG         --+         (with semantic types)      +--> Mermaid
 diacea/
 ├── diacea/
 │   ├── __init__.py           # Package version
-│   ├── cli.py                # Main CLI (convert, inspect, formats)
+│   ├── cli.py                # Main CLI (convert, inspect, formats, sync)
 │   ├── ingestion.py          # Parse diagram files into workspace elements
+│   ├── markdown_fences.py    # Replace ```diacea fences with generated diagram blocks
+│   ├── mkdocs_plugin.py      # MkDocs plugin wrapping markdown_fences (diacea[mkdocs] extra)
 │   ├── workspace_cli.py      # Workspace management CLI
 │   ├── workspace_format.py   # Workspace file format (YAML)
 │   ├── ir/                   # Intermediate Representation
@@ -151,6 +153,11 @@ diacea inspect diagram.json --json
 
 # List input formats (with detection method) and output formats (with options)
 diacea formats --json
+
+# Regenerate text outputs next to diagram sources; --check reports stale
+# outputs with exit 1 instead of writing (used by the pre-commit hooks in
+# .pre-commit-hooks.yaml)
+diacea sync docs/diagrams/*.excalidraw -f mermaid
 ```
 
 ### Exit codes
