@@ -2,12 +2,13 @@
 
 Universal diagram converter - the pandoc for diagrams
 
-**diacea** converts between visual diagram formats using a format-agnostic intermediate representation. Convert Excalidraw (including Obsidian `.excalidraw.md`), TLDraw, or SVG diagrams to PlantUML, C4-PlantUML, Mermaid, GraphViz DOT, or D2.
+**diacea** converts between diagram formats using a format-agnostic intermediate representation. Convert Excalidraw (including Obsidian `.excalidraw.md`), TLDraw, SVG, Mermaid, or PlantUML diagrams to PlantUML, C4-PlantUML, Mermaid, GraphViz DOT, or D2.
 
 ## Why diacea?
 
 - **Visual to Text**: Convert hand-drawn diagrams into version-controllable text formats
-- **Multiple Input Formats**: Excalidraw, Obsidian Excalidraw markdown, TLDraw (legacy and v2 `.tldr`), SVG
+- **Text to Text**: Convert between Mermaid, PlantUML/C4, GraphViz DOT, and D2
+- **Multiple Input Formats**: Excalidraw, Obsidian Excalidraw markdown, TLDraw (legacy and v2 `.tldr`), SVG, Mermaid flowcharts, PlantUML (including C4 macros)
 - **Multiple Output Formats**: PlantUML, C4-PlantUML, Mermaid, GraphViz DOT, D2
 - **Semantic Inference**: Automatically detects diagram element types (databases, people, systems)
 - **Agent Friendly**: `--json` envelopes, `inspect`/`formats` subcommands, and structured exit codes
@@ -41,6 +42,10 @@ diacea -i notes/architecture.excalidraw.md -f mermaid
 
 # Convert SVG to D2 with sketch mode
 diacea -i diagram.svg -f d2 --d2-sketch -o output.d2
+
+# Text-to-text: Mermaid flowchart to D2, PlantUML to Mermaid
+diacea -i flow.mmd -f d2
+diacea -i architecture.puml -f mermaid --mermaid-type flowchart
 
 # Pipe from stdin
 cat diagram.json | diacea -i - -f mermaid
@@ -88,6 +93,8 @@ print(c4_gen.generate(diagram))
 | Obsidian Excalidraw (`.excalidraw.md`) | `ExcalidrawParser` | Yes | Compressed notes need the `[obsidian]` extra |
 | TLDraw JSON | `TLDrawParser` | Yes | Legacy v1 documents and v2 `.tldr` files |
 | SVG | `SVGParser` | Yes | Basic shapes; curves flattened to bounding boxes |
+| Mermaid | `MermaidParser` | Yes | Flowchart/graph diagrams only; layout synthesized |
+| PlantUML | `PlantUMLParser` | Yes | Deployment/component elements and C4 macros; layout synthesized |
 
 ### Output Formats
 | Format | Generator | Options |
@@ -104,10 +111,10 @@ print(c4_gen.generate(diagram))
 Input Formats          IR (Intermediate Repr)         Output Formats
 -------------         ----------------------         --------------
 Excalidraw  --+                                    +-- PlantUML
-TLDraw      --+--> Diagram -> Elements -> Semantic +--> C4-PlantUML
-SVG         --+         (with semantic types)      +--> Mermaid
-                                                   +--> GraphViz DOT
-                                                   +-- D2
+TLDraw      --+                                    +--> C4-PlantUML
+SVG         --+--> Diagram -> Elements -> Semantic +--> Mermaid
+Mermaid     --+         (with semantic types)      +--> GraphViz DOT
+PlantUML/C4 --+                                    +-- D2
 ```
 
 ## Documentation

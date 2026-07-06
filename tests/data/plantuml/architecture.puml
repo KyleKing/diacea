@@ -1,0 +1,34 @@
+@startuml web_architecture
+left to right direction
+skinparam shadowing false
+title Web Platform Architecture
+
+actor "Customer" as customer
+person "Support Agent" as agent_support
+cloud "CDN" as cdn
+
+rectangle "Web Platform" as platform {
+  component "Frontend SPA" as frontend
+  component "API Gateway" as gateway
+  node "Order Service" as orders
+  node "Billing Service" as billing
+  queue "Event Bus" as events
+  database "Orders DB" as orders_db
+}
+
+storage "Object Storage" as blobs
+database "Analytics Warehouse" as warehouse
+
+customer --> cdn : browses
+cdn --> frontend
+customer --> frontend
+agent_support --> gateway : admin API
+frontend --> gateway : HTTPS/JSON
+gateway --> orders
+gateway --> billing
+orders --> orders_db : SQL
+orders ..> events : publishes
+billing ..> events : publishes
+events --> warehouse : streams
+orders --> blobs : invoices
+@enduml

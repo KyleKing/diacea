@@ -21,10 +21,14 @@ from .generators import (
 from .ir.elements import Diagram
 from .parsers import (
     ExcalidrawParser,
+    MermaidParser,
+    PlantUMLParser,
     SVGParser,
     TLDrawParser,
     extract_excalidraw_json,
+    is_mermaid,
     is_obsidian_excalidraw,
+    is_plantuml,
     is_tldraw_v2,
 )
 
@@ -32,7 +36,7 @@ EXIT_OK = 0
 EXIT_ERROR = 1
 EXIT_EMPTY_DIAGRAM = 2
 
-_INPUT_FORMAT_CHOICES = ["auto", "excalidraw", "obsidian", "tldraw", "svg"]
+_INPUT_FORMAT_CHOICES = ["auto", "excalidraw", "mermaid", "obsidian", "plantuml", "tldraw", "svg"]
 
 _INPUT_FORMATS = [
     {
@@ -41,9 +45,19 @@ _INPUT_FORMATS = [
         "detection": "JSON with an 'elements' key or type 'excalidraw/clipboard'",
     },
     {
+        "name": "mermaid",
+        "description": "Mermaid flowchart text (flowchart/graph diagrams only)",
+        "detection": "text starting with 'flowchart' or 'graph'",
+    },
+    {
         "name": "obsidian",
         "description": "Obsidian Excalidraw plugin markdown (.excalidraw.md); compressed-json Drawing blocks require the diacea[obsidian] extra",
         "detection": "markdown with 'excalidraw-plugin' frontmatter or a '# Drawing' code block",
+    },
+    {
+        "name": "plantuml",
+        "description": "PlantUML deployment/component text, including the C4-PlantUML macro dialect",
+        "detection": "text containing '@startuml'",
     },
     {
         "name": "svg",
@@ -98,13 +112,20 @@ def detect_input_format(data: dict | str) -> str:
     Raises:
         ValueError: If format cannot be detected
     """
-    # Check if it's string content (SVG or Obsidian Excalidraw markdown)
+    # Check if it's string content (SVG, Obsidian Excalidraw markdown, PlantUML, or Mermaid)
     if isinstance(data, str):
         if data.strip().startswith("<?xml") or data.strip().startswith("<svg"):
             return "svg"
         if is_obsidian_excalidraw(data):
             return "obsidian"
-        raise ValueError("Unknown string format - expected SVG XML or Obsidian Excalidraw markdown")
+        if is_plantuml(data):
+            return "plantuml"
+        if is_mermaid(data):
+            return "mermaid"
+        raise ValueError(
+            "Unknown string format - expected SVG XML, Obsidian Excalidraw markdown, "
+            "PlantUML, or Mermaid"
+        )
 
     # Modern TLDraw v2 .tldr files have "tldrawFileFormatVersion" + flat "records"
     if is_tldraw_v2(data):
@@ -157,8 +178,8 @@ def _read_content(input_arg: str) -> str:
 
 def _resolve_input_format(content: str, requested: str) -> tuple[str, Any]:
     """Resolve the input format name and parser-ready data for content."""
-    if requested == "svg":
-        return ("svg", content)
+    if requested in ("svg", "mermaid", "plantuml"):
+        return (requested, content)
     if requested == "obsidian":
         return ("obsidian", extract_excalidraw_json(content))
     if requested != "auto":
@@ -169,11 +190,16 @@ def _resolve_input_format(content: str, requested: str) -> tuple[str, Any]:
         return ("svg", content)
     if is_obsidian_excalidraw(content):
         return ("obsidian", extract_excalidraw_json(content))
+    if is_plantuml(content):
+        return ("plantuml", content)
+    if is_mermaid(content):
+        return ("mermaid", content)
     try:
         data = json.loads(content)
     except json.JSONDecodeError as err:
         raise _CLIError(
-            "Could not detect input format: not SVG, Obsidian Excalidraw markdown, or valid JSON"
+            "Could not detect input format: not SVG, Obsidian Excalidraw markdown, "
+            "PlantUML, Mermaid, or valid JSON"
         ) from err
     try:
         return (detect_input_format(data), data)
@@ -190,10 +216,17 @@ def _parse_to_diagram(input_format: str, input_data: Any) -> tuple[Diagram, list
             input_parser = TLDrawParser()
         case "excalidraw" | "obsidian":
             input_parser = ExcalidrawParser()
+        case "mermaid":
+            input_parser = MermaidParser()
+        case "plantuml":
+            input_parser = PlantUMLParser()
         case _:
             raise _CLIError(f"Unsupported input format: {input_format}")
 
-    diagram = input_parser.parse(input_data)
+    try:
+        diagram = input_parser.parse(input_data)
+    except ValueError as err:
+        raise _CLIError(f"Failed to parse {input_format} input: {err}") from err
     return diagram, list(getattr(input_parser, "warnings", []))
 
 

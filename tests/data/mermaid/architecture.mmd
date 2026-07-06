@@ -1,0 +1,12 @@
+graph TD
+    client["Web Client"] --> lb[/Load Balancer/]
+    lb --> api & worker
+    subgraph backend[Backend Services]
+        api[API Service] --> db[(PostgreSQL)]
+        api --> cache[(Redis Cache)]
+        worker[Worker] --> queue[(Message Queue)]
+    end
+    classDef svc fill:#e1f5fe
+    class api,worker svc
+    click api "https://example.com/api-docs"
+    linkStyle 0 stroke:#ff3,stroke-width:4px

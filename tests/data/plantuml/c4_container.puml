@@ -1,0 +1,21 @@
+@startuml
+!include <C4/C4_Container>
+
+LAYOUT_WITH_LEGEND()
+
+Person(customer, "Customer", "Buys products")
+System_Ext(payments, "Payment Provider")
+
+System_Boundary(shop, "Web Shop") {
+  Container(web, "Web App", "React")
+  Container(api, "API", "FastAPI", "Handles business logic")
+  ContainerDb(db, "Orders DB", "PostgreSQL")
+  ContainerQueue(bus, "Event Bus", "Kafka")
+}
+
+Rel(customer, web, "Uses", "HTTPS")
+Rel(web, api, "Calls", "JSON/HTTPS")
+Rel_R(api, db, "Reads/Writes")
+Rel_D(api, bus, "Publishes")
+Rel(api, payments, "Charges", "HTTPS")
+@enduml

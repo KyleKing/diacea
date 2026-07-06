@@ -1,0 +1,10 @@
+%% CI pipeline overview (README-style snippet)
+flowchart LR
+    dev[Developer] -->|git push| gh[GitHub]
+    gh --> ci{CI Checks}
+    ci -->|pass| build[Build Image]
+    ci -->|fail| notify[Notify Author]
+    build --> registry[(Container Registry)]
+    registry --> deploy([Deploy to Staging])
+    deploy -.-> smoke{{Smoke Tests}}
+    smoke ==> prod[Production]

@@ -219,7 +219,7 @@ class TestFormatsSubcommand:
         listing = json.loads(capsys.readouterr().out)
         assert set(listing) == {"input_formats", "output_formats"}
         input_names = {f["name"] for f in listing["input_formats"]}
-        assert input_names == {"excalidraw", "obsidian", "svg", "tldraw"}
+        assert input_names == {"excalidraw", "mermaid", "obsidian", "plantuml", "svg", "tldraw"}
         for input_format in listing["input_formats"]:
             assert input_format["detection"]
         output_names = {f["name"] for f in listing["output_formats"]}
@@ -284,3 +284,52 @@ class TestBackwardCompatibility:
         result = main(["-i", str(excalidraw_file), "-f", "plantuml"])
         assert result == EXIT_OK
         assert "@startuml" in capsys.readouterr().out
+
+
+class TestTextFormatInputs:
+    def test_mermaid_autodetect_to_d2(self, tmp_path, capsys):
+        f = tmp_path / "flow.mmd"
+        f.write_text("flowchart LR\n    a[(Orders DB)]\n    b[API]\n    b -->|reads| a\n")
+        result = main(["-i", str(f), "-f", "d2", "--json"])
+        assert result == EXIT_OK
+        envelope = json.loads(capsys.readouterr().out)
+        assert envelope["input_format"] == "mermaid"
+        assert "->" in envelope["output"]
+        semantic_types = {e["semantic_type"] for e in envelope["elements"]}
+        assert "database" in semantic_types
+
+    def test_plantuml_autodetect_to_mermaid(self, tmp_path, capsys):
+        f = tmp_path / "arch.puml"
+        f.write_text('@startuml\ndatabase "Orders" as db\nrectangle "API" as api\napi --> db : reads\n@enduml\n')
+        result = main(["-i", str(f), "-f", "mermaid", "--json"])
+        assert result == EXIT_OK
+        envelope = json.loads(capsys.readouterr().out)
+        assert envelope["input_format"] == "plantuml"
+        assert "reads" in envelope["output"]
+
+    def test_c4_plantuml_roundtrip_via_cli(self, tmp_path, capsys):
+        f = tmp_path / "c4.puml"
+        f.write_text(
+            "@startuml\n!include https://raw.githubusercontent.com/plantuml-stdlib/"
+            "C4-PlantUML/master/C4_Container.puml\n"
+            'Person(user, "User")\nContainerDb(db, "Orders")\nRel(user, db, "queries")\n@enduml\n'
+        )
+        result = main(["-i", str(f), "-f", "c4"])
+        assert result == EXIT_OK
+        output = capsys.readouterr().out
+        assert 'Person(user, "User")' in output
+        assert "Rel(user, db" in output
+
+    def test_mermaid_sequence_rejected_cleanly(self, tmp_path, capsys):
+        f = tmp_path / "seq.mmd"
+        f.write_text("sequenceDiagram\n    A->>B: hi\n")
+        result = main(["-i", str(f), "-f", "d2"])
+        assert result == EXIT_ERROR
+        assert "sequence" in capsys.readouterr().err.lower()
+
+    def test_explicit_input_format_flag(self, tmp_path, capsys):
+        f = tmp_path / "flow.txt"
+        f.write_text("flowchart TD\n    a --> b\n")
+        result = main(["-i", str(f), "--input-format", "mermaid", "-f", "graphviz"])
+        assert result == EXIT_OK
+        assert "digraph" in capsys.readouterr().out
