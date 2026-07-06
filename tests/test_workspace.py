@@ -541,6 +541,35 @@ class TestWorkspaceIngestion:
         assert workspace.views["flow"].element_refs == ["client", "server"]
         assert workspace.get_element_usage("database") == ["containers"]
 
+    def test_ingests_mermaid_text(self):
+        workspace, summary = create_workspace_from_diagrams(
+            workspace_id="test",
+            workspace_name="Test",
+            diagram_files={"pipeline": (str(TEST_DATA_DIR / "mermaid" / "ci_pipeline.mmd"), "diagram")},
+        )
+
+        assert summary.diagrams_parsed == 1
+        assert summary.warnings == []
+        assert {"developer", "github", "ci-checks", "production"} <= set(workspace.elements)
+        assert workspace.elements["developer"].element_type == "person"
+        assert workspace.views["pipeline"].element_refs
+        assert workspace.validate_references() == []
+
+    def test_ingests_plantuml_text(self):
+        workspace, summary = create_workspace_from_diagrams(
+            workspace_id="test",
+            workspace_name="Test",
+            diagram_files={"arch": (str(TEST_DATA_DIR / "plantuml" / "architecture.puml"), "container")},
+        )
+
+        assert summary.diagrams_parsed == 1
+        assert summary.warnings == []
+        assert {"customer", "event-bus", "orders-db"} <= set(workspace.elements)
+        assert workspace.elements["customer"].element_type == "person"
+        assert workspace.elements["orders-db"].element_type == "database"
+        assert workspace.views["arch"].element_refs
+        assert workspace.validate_references() == []
+
     def test_dedup_across_two_files(self, tmp_path):
         file_a = tmp_path / "a.excalidraw"
         file_b = tmp_path / "b.excalidraw"
@@ -651,3 +680,5 @@ class TestWorkspaceIngestion:
         assert view_id_from_path("a.excalidraw") == "a"
         assert view_id_from_path("obsidian_plain.excalidraw.md") == "obsidian-plain"
         assert view_id_from_path("/tmp/System Context.tldr") == "system-context"
+        assert view_id_from_path("ci_pipeline.mmd") == "ci-pipeline"
+        assert view_id_from_path("architecture.puml") == "architecture"

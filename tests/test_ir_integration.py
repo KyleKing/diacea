@@ -1,6 +1,7 @@
 """Integration tests for IR-based parsing and generation."""
 
 import json
+import re
 from pathlib import Path
 
 import pytest
@@ -12,8 +13,33 @@ from diacea.generators import (
     MermaidGenerator,
     PlantUMLGenerator,
 )
-from diacea.ir import Diagram, SemanticType
+from diacea.ir import Connection, Diagram, Dimensions, Group, Point, SemanticType, Shape
 from diacea.parsers import ExcalidrawParser
+
+_ORIGIN = Point(x=0.0, y=0.0)
+_SIZE = Dimensions(width=100.0, height=60.0)
+
+
+def _make_shape(shape_id, label, shape_type="rectangle", semantic_type=None):
+    return Shape(
+        id=shape_id,
+        label=label,
+        shape_type=shape_type,
+        position=_ORIGIN,
+        size=_SIZE,
+        semantic_type=semantic_type,
+    )
+
+
+def _make_connection(from_id, to_id, label=""):
+    return Connection(
+        id=f"{from_id}-{to_id}",
+        from_id=from_id,
+        to_id=to_id,
+        label=label,
+        position=_ORIGIN,
+        size=_SIZE,
+    )
 
 
 @pytest.fixture
@@ -202,6 +228,64 @@ class TestMermaidGenerator:
 
         # Should have arrows
         assert "-->" in output or "<-->" in output or "-.." in output
+
+    def test_c4_declares_all_rel_aliases(self):
+        """Every alias referenced by a Rel() must have a declaration."""
+        diagram = Diagram(id="c4-test")
+        diagram.elements = [
+            _make_shape("customer", "Customer", semantic_type=SemanticType.PERSON),
+            _make_shape("api", "API", semantic_type=SemanticType.CONTAINER),
+            _make_shape("db", "Database", semantic_type=SemanticType.DATABASE),
+            _make_shape("bus", "Event Bus", semantic_type=SemanticType.QUEUE),
+            _make_shape("warehouse", "Warehouse", semantic_type=SemanticType.DATABASE),
+            Group(
+                id="platform",
+                label="Platform",
+                children=["api", "db", "bus"],
+                position=_ORIGIN,
+                size=_SIZE,
+            ),
+            _make_connection("customer", "api", "Uses"),
+            _make_connection("api", "db", "Reads"),
+            _make_connection("api", "bus", "Publishes"),
+            _make_connection("bus", "warehouse", "Streams"),
+        ]
+
+        output = MermaidGenerator(diagram_type="c4").generate(diagram)
+
+        declared = re.findall(
+            r"^\s*(?:Person|System|SystemDb|SystemQueue|Container|ContainerDb|"
+            r"ContainerQueue|Component)\((\w+),",
+            output,
+            flags=re.MULTILINE,
+        )
+        rel_aliases = {
+            alias
+            for match in re.findall(r"Rel\((\w+), (\w+),", output)
+            for alias in match
+        }
+        assert sorted(declared) == sorted(set(declared))
+        assert rel_aliases <= set(declared)
+        assert '        ContainerDb(db, "Database")' in output
+        assert '        ContainerQueue(bus, "Event Bus")' in output
+        assert '    SystemDb(warehouse, "Warehouse")' in output
+
+    def test_flowchart_quotes_labels_with_special_chars(self):
+        """Labels containing Mermaid-special characters use the quoted form."""
+        diagram = Diagram(id="quote-test")
+        diagram.elements = [
+            _make_shape("check", "Valid (yes/no)?", shape_type="diamond"),
+            _make_shape("note", 'Say "hi" [now]'),
+            _make_shape("pipe", "a|b{c}", shape_type="circle"),
+            _make_shape("plain", "Plain label"),
+        ]
+
+        output = MermaidGenerator(diagram_type="flowchart").generate(diagram)
+
+        assert '    check{"Valid (yes/no)?"}' in output
+        assert '    note["Say #quot;hi#quot; [now]"]' in output
+        assert '    pipe(("a|b{c}"))' in output
+        assert "    plain[Plain label]" in output
 
 
 class TestGraphVizGenerator:

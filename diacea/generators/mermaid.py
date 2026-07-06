@@ -15,6 +15,28 @@ from typing import Optional
 from ..ir import Connection, Diagram, Generator, Group, SemanticType, Shape
 from ._text import sanitize_alnum_id
 
+_C4_BOUNDARY_KEYWORDS = {
+    SemanticType.COMPONENT: "Component",
+    SemanticType.CONTAINER: "Container",
+    SemanticType.DATABASE: "ContainerDb",
+    SemanticType.PERSON: "Person",
+    SemanticType.QUEUE: "ContainerQueue",
+    SemanticType.STORAGE: "ContainerDb",
+    SemanticType.SYSTEM: "System",
+}
+
+_C4_TOP_LEVEL_KEYWORDS = {
+    SemanticType.COMPONENT: "Component",
+    SemanticType.CONTAINER: "Container",
+    SemanticType.DATABASE: "SystemDb",
+    SemanticType.PERSON: "Person",
+    SemanticType.QUEUE: "SystemQueue",
+    SemanticType.STORAGE: "SystemDb",
+    SemanticType.SYSTEM: "System",
+}
+
+_LABEL_CHARS_REQUIRING_QUOTES = frozenset('"()[]{}|')
+
 
 class MermaidGenerator(Generator):
     """Generate Mermaid diagrams from IR with auto-detection."""
@@ -124,9 +146,15 @@ class MermaidGenerator(Generator):
     def _format_flowchart_node(self, shape: Shape) -> str:
         """Format a Mermaid flowchart node."""
         node_id = self._sanitize_id(shape.id)
-        label = self._escape_label(shape.label or node_id)
+        label = self._format_bracket_label(shape.label or node_id)
         brackets = self._get_node_brackets(shape)
         return f"    {node_id}{brackets[0]}{label}{brackets[1]}"
+
+    def _format_bracket_label(self, label: str) -> str:
+        escaped = self._escape_label(label)
+        if _LABEL_CHARS_REQUIRING_QUOTES & set(label):
+            return f'"{escaped}"'
+        return escaped
 
     def _get_node_brackets(self, shape: Shape) -> tuple[str, str]:
         """Get Mermaid node brackets based on shape type.
@@ -183,7 +211,7 @@ class MermaidGenerator(Generator):
         lines = []
         indent = "    " * depth
         subgraph_id = self._sanitize_id(group.id)
-        label = self._escape_label(group.label or subgraph_id)
+        label = self._format_bracket_label(group.label or subgraph_id)
         lines.append(f"{indent}subgraph {subgraph_id}[{label}]")
 
         # Add child shapes
@@ -230,34 +258,15 @@ class MermaidGenerator(Generator):
 
         group_source_ids = {g.source_shape_id for g in groups}
         child_ids = {cid for g in groups for cid in g.children}
+        declared_ids: set[str] = set()
 
-        def _is_top_level(s: Shape) -> bool:
-            return s.id not in child_ids and s.id not in group_source_ids
-
-        people = [s for s in shapes if s.semantic_type == SemanticType.PERSON and _is_top_level(s)]
-        systems = [s for s in shapes if s.semantic_type == SemanticType.SYSTEM and _is_top_level(s)]
-        containers = [s for s in shapes if s.semantic_type == SemanticType.CONTAINER and _is_top_level(s)]
-        components = [s for s in shapes if s.semantic_type == SemanticType.COMPONENT and _is_top_level(s)]
-
-        for person in people:
-            label = self._escape_quoted_label(person.label or "Person")
-            node_id = self._sanitize_id(person.id)
-            lines.append(f'    Person({node_id}, "{label}")')
-
-        for system in systems:
-            label = self._escape_quoted_label(system.label or "System")
-            node_id = self._sanitize_id(system.id)
-            lines.append(f'    System({node_id}, "{label}")')
-
-        for container in containers:
-            label = self._escape_quoted_label(container.label or "Container")
-            node_id = self._sanitize_id(container.id)
-            lines.append(f'    Container({node_id}, "{label}")')
-
-        for component in components:
-            label = self._escape_quoted_label(component.label or "Component")
-            node_id = self._sanitize_id(component.id)
-            lines.append(f'    Component({node_id}, "{label}")')
+        for shape in shapes:
+            if shape.id in child_ids or shape.id in group_source_ids:
+                continue
+            if shape.id in declared_ids:
+                continue
+            lines.append(self._format_c4_element(shape, in_boundary=False))
+            declared_ids.add(shape.id)
 
         for group in groups:
             label = self._escape_quoted_label(group.label or "System")
@@ -266,12 +275,17 @@ class MermaidGenerator(Generator):
 
             for child_id in group.children:
                 child = next((s for s in shapes if s.id == child_id), None)
-                if child:
-                    child_node_id = self._sanitize_id(child.id)
-                    child_label = self._escape_quoted_label(child.label or child_node_id)
-                    lines.append(f'        Container({child_node_id}, "{child_label}")')
+                if child and child.id not in declared_ids:
+                    lines.append(self._format_c4_element(child, in_boundary=True))
+                    declared_ids.add(child.id)
 
             lines.append("    }")
+
+        for shape in shapes:
+            if shape.id in declared_ids or shape.id in group_source_ids:
+                continue
+            lines.append(self._format_c4_element(shape, in_boundary=False))
+            declared_ids.add(shape.id)
 
         for conn in connections:
             from_id = self._sanitize_id(conn.from_id)
@@ -280,6 +294,15 @@ class MermaidGenerator(Generator):
             lines.append(f'    Rel({from_id}, {to_id}, "{label}")')
 
         return "\n".join(lines)
+
+    def _format_c4_element(self, shape: Shape, in_boundary: bool) -> str:
+        keywords = _C4_BOUNDARY_KEYWORDS if in_boundary else _C4_TOP_LEVEL_KEYWORDS
+        default = "Container" if in_boundary else "System"
+        keyword = keywords.get(shape.semantic_type, default)
+        node_id = self._sanitize_id(shape.id)
+        label = self._escape_quoted_label(shape.label or node_id)
+        indent = "        " if in_boundary else "    "
+        return f'{indent}{keyword}({node_id}, "{label}")'
 
     def _generate_sequence(self, diagram: Diagram) -> str:
         """Generate Mermaid sequence diagram."""

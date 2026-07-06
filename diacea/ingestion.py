@@ -10,7 +10,14 @@ from pathlib import Path
 from .cli import detect_input_format
 from .ir.elements import Diagram
 from .ir.workspace import DiagramView, ElementDefinition, Workspace
-from .parsers import ExcalidrawParser, SVGParser, TLDrawParser, extract_excalidraw_json
+from .parsers import (
+    ExcalidrawParser,
+    MermaidParser,
+    PlantUMLParser,
+    SVGParser,
+    TLDrawParser,
+    extract_excalidraw_json,
+)
 
 
 class DiagramIngestionError(Exception):
@@ -54,7 +61,7 @@ def parse_diagram_file(file_path: str | Path) -> Diagram:
             except json.JSONDecodeError as err:
                 raise DiagramIngestionError(
                     f"Could not detect diagram format of '{path}': not SVG, "
-                    f"Obsidian Excalidraw markdown, or valid JSON"
+                    f"Obsidian Excalidraw markdown, PlantUML, Mermaid, or valid JSON"
                 ) from err
             try:
                 input_format = detect_input_format(input_data)
@@ -68,6 +75,10 @@ def parse_diagram_file(file_path: str | Path) -> Diagram:
             return SVGParser().parse(input_data)
         if input_format == "obsidian":
             return ExcalidrawParser().parse(extract_excalidraw_json(input_data))
+        if input_format == "mermaid":
+            return MermaidParser().parse(input_data)
+        if input_format == "plantuml":
+            return PlantUMLParser().parse(input_data)
         if input_format == "tldraw":
             return TLDrawParser().parse(input_data)
         return ExcalidrawParser().parse(input_data)
@@ -159,7 +170,7 @@ def ingest_diagrams(
 def view_id_from_path(file_path: str | Path) -> str:
     """Derive a view ID from a diagram file name (e.g. 'a.excalidraw.md' -> 'a')."""
     name = Path(file_path).name
-    known_suffixes = (".md", ".excalidraw", ".tldr", ".json", ".svg")
+    known_suffixes = (".md", ".mmd", ".excalidraw", ".puml", ".tldr", ".json", ".svg")
     while name.lower().endswith(known_suffixes):
         name = name[: name.rfind(".")]
     return _slugify(name.lower())
