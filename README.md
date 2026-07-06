@@ -92,7 +92,7 @@ print(c4_gen.generate(diagram))
 | Excalidraw JSON | `ExcalidrawParser` | Yes | Scenes and clipboard exports |
 | Obsidian Excalidraw (`.excalidraw.md`) | `ExcalidrawParser` | Yes | Compressed notes need the `[obsidian]` extra |
 | TLDraw JSON | `TLDrawParser` | Yes | Legacy v1 documents and v2 `.tldr` files |
-| SVG | `SVGParser` | Yes | Basic shapes; curves flattened to bounding boxes |
+| SVG | `SVGParser` | Yes | Basic shapes; curves sampled for accurate bounding boxes |
 | Mermaid | `MermaidParser` | Yes | Flowchart/graph diagrams only; layout synthesized |
 | PlantUML | `PlantUMLParser` | Yes | Deployment/component elements and C4 macros; layout synthesized |
 

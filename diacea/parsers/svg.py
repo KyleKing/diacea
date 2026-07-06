@@ -1,10 +1,12 @@
 """SVG parser - converts basic SVG to IR.
 
-Supports basic SVG shapes, text, groups, simple paths, and common transforms.
-Does NOT support complex paths with curves, gradients, filters, or masks.
+Supports basic SVG shapes, text, groups, paths (including curve commands,
+approximated by sampled points), and common transforms.
+Does NOT support gradients, filters, or masks.
 
 Design decisions:
-1. Path support: Basic paths (M, L, H, V, Z commands) - curves skipped
+1. Path support: all commands; curves (C/S/Q/T/A) are sampled so bounding
+   boxes are accurate, but curved outlines still reduce to polygons/boxes
 2. Transform support: translate, scale, rotate (basic)
 3. Connection detection: Line elements can become connections
 """
@@ -36,12 +38,99 @@ _logger = logging.getLogger(__name__)
 
 _CURVE_COMMANDS_RE = re.compile(r'[CcSsQqTtAa]')
 _CURVE_WARNING = (
-    'SVG path curve commands (C/S/Q/T/A) are not supported; '
-    'curved paths were flattened to straight segments and bounding boxes'
+    'SVG path curve commands (C/S/Q/T/A) are approximated by sampled points; '
+    'curved outlines are reduced to polygons and bounding boxes'
 )
 
 _PATH_TOKEN_RE = re.compile(r'[MmLlHhVvCcSsQqTtAaZz]|[-+]?(?:\d*\.\d+|\d+\.?)(?:[eE][-+]?\d+)?')
 _PATH_COMMAND_ARITY = {'A': 7, 'C': 6, 'H': 1, 'L': 2, 'M': 2, 'Q': 4, 'S': 4, 'T': 2, 'V': 1, 'Z': 0}
+
+_CURVE_SAMPLES = 16
+
+_XY = tuple[float, float]
+
+
+def _sample_cubic(p0: _XY, p1: _XY, p2: _XY, p3: _XY) -> list[_XY]:
+    points = []
+    for step in range(1, _CURVE_SAMPLES + 1):
+        t = step / _CURVE_SAMPLES
+        mt = 1.0 - t
+        points.append((
+            mt**3 * p0[0] + 3 * mt**2 * t * p1[0] + 3 * mt * t**2 * p2[0] + t**3 * p3[0],
+            mt**3 * p0[1] + 3 * mt**2 * t * p1[1] + 3 * mt * t**2 * p2[1] + t**3 * p3[1],
+        ))
+    return points
+
+
+def _sample_quadratic(p0: _XY, p1: _XY, p2: _XY) -> list[_XY]:
+    points = []
+    for step in range(1, _CURVE_SAMPLES + 1):
+        t = step / _CURVE_SAMPLES
+        mt = 1.0 - t
+        points.append((
+            mt**2 * p0[0] + 2 * mt * t * p1[0] + t**2 * p2[0],
+            mt**2 * p0[1] + 2 * mt * t * p1[1] + t**2 * p2[1],
+        ))
+    return points
+
+
+def _sample_arc(  # noqa: PLR0913
+    start: _XY,
+    rx: float,
+    ry: float,
+    rotation_deg: float,
+    large_arc: bool,
+    sweep: bool,
+    end: _XY,
+) -> list[_XY]:
+    """Sample an elliptical arc via the SVG endpoint-to-center conversion (spec F.6.5)."""
+    if start == end:
+        return []
+    rx, ry = abs(rx), abs(ry)
+    if rx == 0 or ry == 0:
+        return [end]
+
+    phi = math.radians(rotation_deg % 360)
+    cos_phi, sin_phi = math.cos(phi), math.sin(phi)
+    dx2 = (start[0] - end[0]) / 2
+    dy2 = (start[1] - end[1]) / 2
+    x1p = cos_phi * dx2 + sin_phi * dy2
+    y1p = -sin_phi * dx2 + cos_phi * dy2
+
+    lam = x1p**2 / rx**2 + y1p**2 / ry**2
+    if lam > 1:
+        scale = math.sqrt(lam)
+        rx *= scale
+        ry *= scale
+
+    numerator = rx**2 * ry**2 - rx**2 * y1p**2 - ry**2 * x1p**2
+    denominator = rx**2 * y1p**2 + ry**2 * x1p**2
+    coefficient = math.sqrt(max(numerator / denominator, 0.0))
+    if large_arc == sweep:
+        coefficient = -coefficient
+    cxp = coefficient * rx * y1p / ry
+    cyp = -coefficient * ry * x1p / rx
+    cx = cos_phi * cxp - sin_phi * cyp + (start[0] + end[0]) / 2
+    cy = sin_phi * cxp + cos_phi * cyp + (start[1] + end[1]) / 2
+
+    theta1 = math.atan2((y1p - cyp) / ry, (x1p - cxp) / rx)
+    theta2 = math.atan2((-y1p - cyp) / ry, (-x1p - cxp) / rx)
+    delta = theta2 - theta1
+    if sweep and delta < 0:
+        delta += 2 * math.pi
+    elif not sweep and delta > 0:
+        delta -= 2 * math.pi
+
+    points = []
+    for step in range(1, _CURVE_SAMPLES + 1):
+        theta = theta1 + delta * step / _CURVE_SAMPLES
+        cos_t, sin_t = math.cos(theta), math.sin(theta)
+        points.append((
+            cx + rx * cos_t * cos_phi - ry * sin_t * sin_phi,
+            cy + rx * cos_t * sin_phi + ry * sin_t * cos_phi,
+        ))
+    points[-1] = end
+    return points
 
 
 def _tokenize_path(d: str) -> Iterator[tuple[str, list[float]]]:
@@ -142,8 +231,8 @@ def _parse_transform(transform_str: str | None) -> Transform:
 class SVGParser(Parser):
     """Parse basic SVG to IR.
 
-    Supports: rect, circle, ellipse, polygon, path (basic), line, text, groups
-    Does NOT support: complex path curves (C, S, Q, T, A), gradients, filters
+    Supports: rect, circle, ellipse, polygon, path (curves sampled), line, text, groups
+    Does NOT support: gradients, filters
     """
 
     SVG_NS = '{http://www.w3.org/2000/svg}'
@@ -435,7 +524,7 @@ class SVGParser(Parser):
         return shape
 
     def _parse_path(self, elem: ET.Element, transform: Transform) -> Shape | None:
-        """Parse SVG path to IR Shape (curves contribute control/end points to the bounding box)."""
+        """Parse SVG path to IR Shape (curves are sampled so bounding boxes are accurate)."""
         d = elem.get('d', '')
         if not d:
             return None
@@ -507,21 +596,24 @@ class SVGParser(Parser):
         return shape
 
     def _parse_path_commands(self, d: str) -> list[tuple[float, float]]:
-        """Parse SVG path d attribute into a list of points for bounding-box computation."""
+        """Parse SVG path d attribute into sampled points for bounding-box computation."""
         points: list[tuple[float, float]] = []
         current_x, current_y = 0.0, 0.0
         start_x, start_y = 0.0, 0.0
+        prev_cubic_ctrl: _XY | None = None
+        prev_quad_ctrl: _XY | None = None
 
         for command, ops in _tokenize_path(d):
             relative = command.islower()
             ox, oy = (current_x, current_y) if relative else (0.0, 0.0)
+            upper = command.upper()
 
-            match command.upper():
+            match upper:
                 case 'M':
                     current_x, current_y = ox + ops[0], oy + ops[1]
                     start_x, start_y = current_x, current_y
                     points.append((current_x, current_y))
-                case 'L' | 'T':
+                case 'L':
                     current_x, current_y = ox + ops[0], oy + ops[1]
                     points.append((current_x, current_y))
                 case 'H':
@@ -530,17 +622,51 @@ class SVGParser(Parser):
                 case 'V':
                     current_y = oy + ops[0]
                     points.append((current_x, current_y))
-                case 'C' | 'S' | 'Q':
-                    for j in range(0, len(ops), 2):
-                        points.append((ox + ops[j], oy + ops[j + 1]))
-                    current_x, current_y = points[-1]
+                case 'C' | 'S':
+                    if upper == 'C':
+                        ctrl1 = (ox + ops[0], oy + ops[1])
+                        ctrl2 = (ox + ops[2], oy + ops[3])
+                        end = (ox + ops[4], oy + ops[5])
+                    else:
+                        ctrl1 = (
+                            (2 * current_x - prev_cubic_ctrl[0], 2 * current_y - prev_cubic_ctrl[1])
+                            if prev_cubic_ctrl
+                            else (current_x, current_y)
+                        )
+                        ctrl2 = (ox + ops[0], oy + ops[1])
+                        end = (ox + ops[2], oy + ops[3])
+                    points.extend(_sample_cubic((current_x, current_y), ctrl1, ctrl2, end))
+                    prev_cubic_ctrl = ctrl2
+                    current_x, current_y = end
+                case 'Q' | 'T':
+                    if upper == 'Q':
+                        ctrl = (ox + ops[0], oy + ops[1])
+                        end = (ox + ops[2], oy + ops[3])
+                    else:
+                        ctrl = (
+                            (2 * current_x - prev_quad_ctrl[0], 2 * current_y - prev_quad_ctrl[1])
+                            if prev_quad_ctrl
+                            else (current_x, current_y)
+                        )
+                        end = (ox + ops[0], oy + ops[1])
+                    points.extend(_sample_quadratic((current_x, current_y), ctrl, end))
+                    prev_quad_ctrl = ctrl
+                    current_x, current_y = end
                 case 'A':
-                    current_x, current_y = ox + ops[5], oy + ops[6]
-                    points.append((current_x, current_y))
+                    end = (ox + ops[5], oy + ops[6])
+                    points.extend(
+                        _sample_arc((current_x, current_y), ops[0], ops[1], ops[2], bool(ops[3]), bool(ops[4]), end),
+                    )
+                    current_x, current_y = end
                 case 'Z':
                     if points and (current_x != start_x or current_y != start_y):
                         points.append((start_x, start_y))
                     current_x, current_y = start_x, start_y
+
+            if upper not in {'C', 'S'}:
+                prev_cubic_ctrl = None
+            if upper not in {'Q', 'T'}:
+                prev_quad_ctrl = None
 
         return points
 

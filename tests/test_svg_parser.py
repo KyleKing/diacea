@@ -332,7 +332,7 @@ class TestSVGPathSupport:
 
 
 class TestSVGPathCurves:
-    """Regression tests: curve commands must not desync the path tokenizer."""
+    """Curve commands must not desync the tokenizer and must sample true curve extents."""
 
     def test_curve_then_line_no_desync(self):
         svg = '''<svg xmlns="http://www.w3.org/2000/svg">
@@ -347,7 +347,7 @@ class TestSVGPathCurves:
         assert shapes[0].size.height == 60.0
         assert any('curve' in w for w in parser.warnings)
 
-    def test_curve_control_points_in_bbox(self):
+    def test_cubic_bbox_uses_curve_extremum_not_control_points(self):
         svg = '''<svg xmlns="http://www.w3.org/2000/svg">
             <path id="p1" d="M 0 0 C 0 100 100 100 100 0 Z"/>
         </svg>'''
@@ -357,7 +357,7 @@ class TestSVGPathCurves:
         shapes = diagram.get_shapes()
         assert len(shapes) == 1
         assert shapes[0].size.width == 100.0
-        assert shapes[0].size.height == 100.0
+        assert shapes[0].size.height == 75.0
 
     def test_implicit_curve_repetition(self):
         svg = '''<svg xmlns="http://www.w3.org/2000/svg">
@@ -368,11 +368,11 @@ class TestSVGPathCurves:
 
         shapes = diagram.get_shapes()
         assert len(shapes) == 1
-        assert shapes[0].position.y == -50.0
+        assert shapes[0].position.y == -37.5
         assert shapes[0].size.width == 150.0
-        assert shapes[0].size.height == 100.0
+        assert shapes[0].size.height == 75.0
 
-    def test_arc_command_consumes_seven_operands(self):
+    def test_arc_bulge_included_in_bbox(self):
         svg = '''<svg xmlns="http://www.w3.org/2000/svg">
             <path id="p1" d="M 0 0 A 50 50 0 0 1 100 0 L 100 40 L 0 40 Z"/>
         </svg>'''
@@ -381,8 +381,9 @@ class TestSVGPathCurves:
 
         shapes = diagram.get_shapes()
         assert len(shapes) == 1
+        assert shapes[0].position.y == -50.0
         assert shapes[0].size.width == 100.0
-        assert shapes[0].size.height == 40.0
+        assert shapes[0].size.height == 90.0
 
     def test_quadratic_and_smooth_commands(self):
         svg = '''<svg xmlns="http://www.w3.org/2000/svg">
@@ -393,8 +394,34 @@ class TestSVGPathCurves:
 
         shapes = diagram.get_shapes()
         assert len(shapes) == 1
+        assert shapes[0].position.y == -40.0
         assert shapes[0].size.width == 200.0
         assert shapes[0].size.height == 80.0
+
+    def test_smooth_cubic_reflects_previous_control(self):
+        svg = '''<svg xmlns="http://www.w3.org/2000/svg">
+            <path id="p1" d="M 0 0 C 0 40 50 40 50 0 S 100 -40 100 0 L 100 20 L 0 20 Z"/>
+        </svg>'''
+        parser = SVGParser()
+        diagram = parser.parse(svg)
+
+        shapes = diagram.get_shapes()
+        assert len(shapes) == 1
+        assert shapes[0].position.y == -30.0
+        assert shapes[0].size.width == 100.0
+        assert shapes[0].size.height == 60.0
+
+    def test_full_circle_from_two_arcs(self):
+        svg = '''<svg xmlns="http://www.w3.org/2000/svg">
+            <path id="p1" d="M 0 50 A 50 50 0 0 1 100 50 A 50 50 0 0 1 0 50 Z"/>
+        </svg>'''
+        parser = SVGParser()
+        diagram = parser.parse(svg)
+
+        shapes = diagram.get_shapes()
+        assert len(shapes) == 1
+        assert shapes[0].size.width == 100.0
+        assert shapes[0].size.height == 100.0
 
     def test_real_llm_proxy_component_fixture(self):
         svg_path = Path(__file__).parent / "data" / "real" / "llm_proxy_component.svg"

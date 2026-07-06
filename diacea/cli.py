@@ -61,7 +61,7 @@ _INPUT_FORMATS = [
     },
     {
         "name": "svg",
-        "description": "SVG with basic shapes, text, and groups (curves are flattened to bounding boxes)",
+        "description": "SVG with basic shapes, text, and groups (curves are sampled for accurate bounding boxes)",
         "detection": "content starting with '<?xml' or '<svg'",
     },
     {

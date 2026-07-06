@@ -91,7 +91,7 @@ All parsers implement the `Parser` base class with a `parse(data) -> Diagram` me
 - **`MermaidParser`**: Parses Mermaid flowchart/graph text (bracket shapes, edges, subgraphs); rejects other Mermaid diagram types; synthesizes a layered layout since text has no coordinates
 - **`PlantUMLParser`**: Parses PlantUML deployment/component elements, relationships, and the C4-PlantUML macro dialect; synthesizes layout; round-trips diacea's own PlantUML/C4 output exactly
 
-Parsers expose a `warnings` list after `parse()` with any conversion losses detected (e.g. flattened SVG curves); the CLI surfaces these.
+Parsers expose a `warnings` list after `parse()` with any conversion losses detected (e.g. SVG curved outlines reduced to polygons); the CLI surfaces these.
 
 ### Generators
 
@@ -140,7 +140,7 @@ The conversion CLI is designed to be driven programmatically. Bare invocations (
 }
 ```
 
-`diagram_type` is the Mermaid type that auto-detection chose (`flowchart`, `c4`, or `sequence`); it is `null` for other output formats. `warnings` lists known conversion losses detected at parse time (SVG curves flattened, TLDraw pages skipped, dropped arrows). In text mode the same warnings print to stderr as `Warning: ...` lines.
+`diagram_type` is the Mermaid type that auto-detection chose (`flowchart`, `c4`, or `sequence`); it is `null` for other output formats. `warnings` lists known conversion losses detected at parse time (SVG curved outlines reduced to polygons, TLDraw pages skipped, dropped arrows). In text mode the same warnings print to stderr as `Warning: ...` lines.
 
 ### Preview and discovery
 

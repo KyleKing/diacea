@@ -15,7 +15,7 @@ Detailed phase plans are in the `phases/` directory. All seven phases are implem
 | 3 | GraphViz DOT output | Clusters, direction auto-detection, `digraph`/`graph`; layout is delegated to the engine (positions dropped) |
 | 4 | D2 output | Nested containers, sketch mode, direction auto-detection |
 | 5 | TLDraw input | Legacy v1 documents and v2 `.tldr` files; single page by default (multi-page emits a conversion warning) |
-| 6 | SVG input | rect/circle/ellipse/polygon/path/line/text/groups with `data-semantic` hints; curve commands (C/S/Q/T/A) are flattened to bounding boxes with a runtime warning |
+| 6 | SVG input | rect/circle/ellipse/polygon/path/line/text/groups with `data-semantic` hints; curve commands (C/S/Q/T/A) are sampled for accurate bounding boxes, with a runtime warning that curved outlines still reduce to polygons |
 | 7 | Multi-diagram workspaces | `diacea-workspace` CLI: create (including `--from-diagrams` ingestion with element deduplication), validate, info, add-element, add-view |
 
 Also shipped beyond the original phase plans:
@@ -26,7 +26,6 @@ Also shipped beyond the original phase plans:
 
 ### Next
 
-- SVG curve fidelity: approximate C/S/Q/T/A commands instead of flattening to bounding boxes
 - Mermaid sequence-diagram parsing (flowcharts only today)
 - MkDocs and pre-commit integrations for keeping generated diagrams in sync
 
@@ -47,7 +46,7 @@ Also shipped beyond the original phase plans:
 Conversions are one-way (visual to text). Documented losses, tracked in `tests/test_roundtrip_limitations.py`:
 
 - Exact positions are dropped; text formats delegate layout to their renderers
-- SVG curves become bounding boxes
+- SVG curves are sampled for accurate bounding boxes, but curved outlines still become polygons/boxes
 - Hand-drawn styling (Excalidraw roughness, seeds) is not preserved
 
 ## Test Data
