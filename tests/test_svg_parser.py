@@ -331,6 +331,81 @@ class TestSVGPathSupport:
         assert shapes[0].size.height == 50.0
 
 
+class TestSVGPathCurves:
+    """Regression tests: curve commands must not desync the path tokenizer."""
+
+    def test_curve_then_line_no_desync(self):
+        svg = '''<svg xmlns="http://www.w3.org/2000/svg">
+            <path id="p1" d="M 0 0 c 10 20 30 40 50 60 l 50 0 Z"/>
+        </svg>'''
+        parser = SVGParser()
+        diagram = parser.parse(svg)
+
+        shapes = diagram.get_shapes()
+        assert len(shapes) == 1
+        assert shapes[0].size.width == 100.0
+        assert shapes[0].size.height == 60.0
+        assert any('curve' in w for w in parser.warnings)
+
+    def test_curve_control_points_in_bbox(self):
+        svg = '''<svg xmlns="http://www.w3.org/2000/svg">
+            <path id="p1" d="M 0 0 C 0 100 100 100 100 0 Z"/>
+        </svg>'''
+        parser = SVGParser()
+        diagram = parser.parse(svg)
+
+        shapes = diagram.get_shapes()
+        assert len(shapes) == 1
+        assert shapes[0].size.width == 100.0
+        assert shapes[0].size.height == 100.0
+
+    def test_implicit_curve_repetition(self):
+        svg = '''<svg xmlns="http://www.w3.org/2000/svg">
+            <path id="p1" d="M 0 0 C 0 50 50 50 50 0 100 -50 150 -50 150 0"/>
+        </svg>'''
+        parser = SVGParser()
+        diagram = parser.parse(svg)
+
+        shapes = diagram.get_shapes()
+        assert len(shapes) == 1
+        assert shapes[0].position.y == -50.0
+        assert shapes[0].size.width == 150.0
+        assert shapes[0].size.height == 100.0
+
+    def test_arc_command_consumes_seven_operands(self):
+        svg = '''<svg xmlns="http://www.w3.org/2000/svg">
+            <path id="p1" d="M 0 0 A 50 50 0 0 1 100 0 L 100 40 L 0 40 Z"/>
+        </svg>'''
+        parser = SVGParser()
+        diagram = parser.parse(svg)
+
+        shapes = diagram.get_shapes()
+        assert len(shapes) == 1
+        assert shapes[0].size.width == 100.0
+        assert shapes[0].size.height == 40.0
+
+    def test_quadratic_and_smooth_commands(self):
+        svg = '''<svg xmlns="http://www.w3.org/2000/svg">
+            <path id="p1" d="M 0 0 Q 50 80 100 0 T 200 0 Z"/>
+        </svg>'''
+        parser = SVGParser()
+        diagram = parser.parse(svg)
+
+        shapes = diagram.get_shapes()
+        assert len(shapes) == 1
+        assert shapes[0].size.width == 200.0
+        assert shapes[0].size.height == 80.0
+
+    def test_real_llm_proxy_component_fixture(self):
+        svg_path = Path(__file__).parent / "data" / "real" / "llm_proxy_component.svg"
+
+        parser = SVGParser()
+        diagram = parser.parse(svg_path.read_text())
+
+        assert len(diagram.elements) > 0
+        assert any('curve' in w for w in parser.warnings)
+
+
 class TestSVGLineElements:
     """Test SVG line and polyline elements."""
 

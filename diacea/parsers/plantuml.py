@@ -32,6 +32,24 @@ _GAP_Y = 100.0
 _GROUP_PADDING = 20.0
 _KEYWORD_CONFIDENCE = 0.9
 
+_ACTIVITY_KEYWORDS = frozenset({
+    'detach',
+    'end fork',
+    'endif',
+    'endwhile',
+    'fork',
+    'fork again',
+    'kill',
+    'repeat',
+    'start',
+    'stop',
+})
+
+_ACTIVITY_LINE_RE = re.compile(
+    r'^\(\*\)|^if\s*\(.*\)\s*then\b|^while\s*\(.*\)|^:[^;{}]*;$',
+    re.IGNORECASE,
+)
+
 _SEQUENCE_KEYWORDS = frozenset({
     'activate',
     'alt',
@@ -282,6 +300,13 @@ class PlantUMLParser(Parser):
             raise ValueError(
                 f'Line {lineno}: sequence diagrams are not supported '
                 f'(found "{token}")'
+            )
+
+        if line.lower() in _ACTIVITY_KEYWORDS or _ACTIVITY_LINE_RE.match(line):
+            raise ValueError(
+                f'Line {lineno}: PlantUML activity diagrams are not supported '
+                f'(found "{line}"); only deployment/component and C4 diagrams '
+                'are supported'
             )
 
         if (m := re.match(r'^(left to right|top to bottom) direction$', line.lower())):

@@ -108,8 +108,8 @@ class ExcalidrawParser(Parser):
     def _parse_shape(self, elem: dict) -> Shape:
         """Parse Excalidraw shape to IR Shape."""
         # Position and size
-        position = Point(x=elem.get("x", 0), y=elem.get("y", 0))
-        size = Dimensions(width=elem.get("width", 0), height=elem.get("height", 0))
+        position = Point(x=float(elem.get("x", 0)), y=float(elem.get("y", 0)))
+        size = Dimensions(width=float(elem.get("width", 0)), height=float(elem.get("height", 0)))
 
         # Style
         stroke_width = elem.get("strokeWidth")
@@ -118,7 +118,7 @@ class ExcalidrawParser(Parser):
             stroke_color=elem.get("strokeColor"),
             stroke_width=float(stroke_width) if stroke_width is not None else None,
             stroke_style="dashed" if elem.get("strokeStyle") == "dashed" else "solid",
-            opacity=elem.get("opacity", 100) / 100.0,
+            opacity=float(elem.get("opacity", 100)) / 100.0,
         )
 
         # Map Excalidraw type to IR shape type
@@ -159,13 +159,14 @@ class ExcalidrawParser(Parser):
 
     def _parse_text(self, elem: dict) -> Text:
         """Parse Excalidraw text to IR Text."""
-        position = Point(x=elem.get("x", 0), y=elem.get("y", 0))
-        size = Dimensions(width=elem.get("width", 0), height=elem.get("height", 0))
+        position = Point(x=float(elem.get("x", 0)), y=float(elem.get("y", 0)))
+        size = Dimensions(width=float(elem.get("width", 0)), height=float(elem.get("height", 0)))
 
+        font_size = elem.get("fontSize")
         style = Style(
             stroke_color=elem.get("strokeColor"),
             font_family=str(elem.get("fontFamily", "default")),
-            font_size=elem.get("fontSize"),
+            font_size=float(font_size) if font_size is not None else None,
         )
 
         text = Text(
@@ -198,10 +199,10 @@ class ExcalidrawParser(Parser):
             return None
 
         # Calculate absolute start and end points
-        arrow_x = elem.get("x", 0)
-        arrow_y = elem.get("y", 0)
-        start_point = Point(x=arrow_x + points[0][0], y=arrow_y + points[0][1])
-        end_point = Point(x=arrow_x + points[-1][0], y=arrow_y + points[-1][1])
+        arrow_x = float(elem.get("x", 0))
+        arrow_y = float(elem.get("y", 0))
+        start_point = Point(x=arrow_x + float(points[0][0]), y=arrow_y + float(points[0][1]))
+        end_point = Point(x=arrow_x + float(points[-1][0]), y=arrow_y + float(points[-1][1]))
 
         # Find connected shapes using bindings or nearest rectangle
         from_id, to_id = self._find_arrow_connections(elem, shapes, start_point, end_point)
@@ -256,7 +257,7 @@ class ExcalidrawParser(Parser):
         )
 
         # Preserve waypoints for complex routing
-        waypoints = [Point(x=arrow_x + p[0], y=arrow_y + p[1]) for p in points[1:-1]]
+        waypoints = [Point(x=arrow_x + float(p[0]), y=arrow_y + float(p[1])) for p in points[1:-1]]
         connection.waypoints = waypoints
 
         # Preserve Excalidraw metadata

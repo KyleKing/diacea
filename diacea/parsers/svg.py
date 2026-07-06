@@ -15,6 +15,7 @@ import logging
 import math
 import re
 import xml.etree.ElementTree as ET
+from collections.abc import Iterator
 from dataclasses import dataclass
 from typing import Any
 
@@ -38,6 +39,36 @@ _CURVE_WARNING = (
     'SVG path curve commands (C/S/Q/T/A) are not supported; '
     'curved paths were flattened to straight segments and bounding boxes'
 )
+
+_PATH_TOKEN_RE = re.compile(r'[MmLlHhVvCcSsQqTtAaZz]|[-+]?(?:\d*\.\d+|\d+\.?)(?:[eE][-+]?\d+)?')
+_PATH_COMMAND_ARITY = {'A': 7, 'C': 6, 'H': 1, 'L': 2, 'M': 2, 'Q': 4, 'S': 4, 'T': 2, 'V': 1, 'Z': 0}
+
+
+def _tokenize_path(d: str) -> Iterator[tuple[str, list[float]]]:
+    tokens = _PATH_TOKEN_RE.findall(d)
+    i = 0
+    command: str | None = None
+    while i < len(tokens):
+        if tokens[i].isalpha():
+            command = tokens[i]
+            i += 1
+        if command is None:
+            i += 1
+            continue
+        arity = _PATH_COMMAND_ARITY[command.upper()]
+        if arity == 0:
+            yield (command, [])
+            command = None
+            continue
+        if i + arity > len(tokens) or any(tokens[i + j].isalpha() for j in range(arity)):
+            _logger.debug('Malformed SVG path data near token %d: %s', i, d[:80])
+            return
+        yield (command, [float(t) for t in tokens[i:i + arity]])
+        i += arity
+        if command == 'M':
+            command = 'L'
+        elif command == 'm':
+            command = 'l'
 
 
 @dataclass
@@ -404,7 +435,7 @@ class SVGParser(Parser):
         return shape
 
     def _parse_path(self, elem: ET.Element, transform: Transform) -> Shape | None:
-        """Parse SVG path to IR Shape (basic commands only: M, L, H, V, Z)."""
+        """Parse SVG path to IR Shape (curves contribute control/end points to the bounding box)."""
         d = elem.get('d', '')
         if not d:
             return None
@@ -476,69 +507,40 @@ class SVGParser(Parser):
         return shape
 
     def _parse_path_commands(self, d: str) -> list[tuple[float, float]]:
-        """Parse SVG path d attribute into list of points (basic commands only)."""
+        """Parse SVG path d attribute into a list of points for bounding-box computation."""
         points: list[tuple[float, float]] = []
         current_x, current_y = 0.0, 0.0
         start_x, start_y = 0.0, 0.0
 
-        tokens = re.findall(r'[MmLlHhVvZz]|[-+]?[0-9]*\.?[0-9]+', d)
+        for command, ops in _tokenize_path(d):
+            relative = command.islower()
+            ox, oy = (current_x, current_y) if relative else (0.0, 0.0)
 
-        i = 0
-        command = 'M'
-        while i < len(tokens):
-            token = tokens[i]
-
-            if token.isalpha():
-                command = token
-                i += 1
-                if command in ('Z', 'z'):
+            match command.upper():
+                case 'M':
+                    current_x, current_y = ox + ops[0], oy + ops[1]
+                    start_x, start_y = current_x, current_y
+                    points.append((current_x, current_y))
+                case 'L' | 'T':
+                    current_x, current_y = ox + ops[0], oy + ops[1]
+                    points.append((current_x, current_y))
+                case 'H':
+                    current_x = ox + ops[0]
+                    points.append((current_x, current_y))
+                case 'V':
+                    current_y = oy + ops[0]
+                    points.append((current_x, current_y))
+                case 'C' | 'S' | 'Q':
+                    for j in range(0, len(ops), 2):
+                        points.append((ox + ops[j], oy + ops[j + 1]))
+                    current_x, current_y = points[-1]
+                case 'A':
+                    current_x, current_y = ox + ops[5], oy + ops[6]
+                    points.append((current_x, current_y))
+                case 'Z':
                     if points and (current_x != start_x or current_y != start_y):
                         points.append((start_x, start_y))
                     current_x, current_y = start_x, start_y
-                continue
-
-            match command:
-                case 'M':
-                    current_x, current_y = float(tokens[i]), float(tokens[i + 1])
-                    start_x, start_y = current_x, current_y
-                    points.append((current_x, current_y))
-                    command = 'L'
-                    i += 2
-                case 'm':
-                    current_x += float(tokens[i])
-                    current_y += float(tokens[i + 1])
-                    start_x, start_y = current_x, current_y
-                    points.append((current_x, current_y))
-                    command = 'l'
-                    i += 2
-                case 'L':
-                    current_x, current_y = float(tokens[i]), float(tokens[i + 1])
-                    points.append((current_x, current_y))
-                    i += 2
-                case 'l':
-                    current_x += float(tokens[i])
-                    current_y += float(tokens[i + 1])
-                    points.append((current_x, current_y))
-                    i += 2
-                case 'H':
-                    current_x = float(tokens[i])
-                    points.append((current_x, current_y))
-                    i += 1
-                case 'h':
-                    current_x += float(tokens[i])
-                    points.append((current_x, current_y))
-                    i += 1
-                case 'V':
-                    current_y = float(tokens[i])
-                    points.append((current_x, current_y))
-                    i += 1
-                case 'v':
-                    current_y += float(tokens[i])
-                    points.append((current_x, current_y))
-                    i += 1
-                case _:
-                    _logger.debug('Skipping unsupported path command: %s', command)
-                    i += 1
 
         return points
 

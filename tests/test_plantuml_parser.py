@@ -333,6 +333,26 @@ class TestSequenceRejection:
             PlantUMLParser().parse(_wrap(line))
 
 
+class TestActivityRejection:
+
+    @pytest.mark.parametrize('line', [
+        '(*) --> "Step 0: Select release manager"',
+        ':Do the thing;',
+        'if (72 hours or 3 yes votes?) then',
+        'start',
+        'stop',
+        'while (more items?)',
+    ])
+    def test_activity_syntax_raises(self, line):
+        with pytest.raises(ValueError, match='activity diagrams are not supported'):
+            PlantUMLParser().parse(_wrap(line))
+
+    def test_fineract_fixture_raises(self):
+        content = (DATA_DIR / 'real' / 'fineract_release_process.puml').read_text()
+        with pytest.raises(ValueError, match='activity diagrams are not supported'):
+            PlantUMLParser().parse(content)
+
+
 class TestC4:
 
     @pytest.mark.parametrize(('macro', 'semantic'), [

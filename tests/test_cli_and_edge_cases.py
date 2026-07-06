@@ -902,3 +902,50 @@ class TestSemanticInference:
         assert semantic == SemanticType.PERSON
         assert confidence >= 0.6
 
+    def test_camelcase_label_not_database(self):
+        from diacea.ir.semantic import SemanticType, infer_semantic_type
+
+        semantic, _ = infer_semantic_type(shape_type="rectangle", label="GameDropDown")
+        assert semantic != SemanticType.DATABASE
+
+    def test_sentence_label_not_database(self):
+        from diacea.ir.semantic import SemanticType, infer_semantic_type
+
+        semantic, _ = infer_semantic_type(
+            shape_type="rectangle", label="Select the hit shape"
+        )
+        assert semantic != SemanticType.DATABASE
+
+    def test_keyword_inside_word_not_matched(self):
+        from diacea.ir.semantic import SemanticType, infer_semantic_type
+
+        semantic, _ = infer_semantic_type(shape_type="rectangle", label="Feedback")
+        assert semantic != SemanticType.DATABASE
+
+    def test_whole_word_db_still_matches(self):
+        from diacea.ir.semantic import SemanticType, infer_semantic_type
+
+        semantic, confidence = infer_semantic_type(
+            shape_type="rectangle", label="Orders DB"
+        )
+        assert semantic == SemanticType.DATABASE
+        assert confidence >= 0.8
+
+    def test_camelcase_split_enables_word_match(self):
+        from diacea.ir.semantic import SemanticType, infer_semantic_type
+
+        semantic, confidence = infer_semantic_type(
+            shape_type="rectangle", label="UserDatabase"
+        )
+        assert semantic == SemanticType.DATABASE
+        assert confidence >= 0.8
+
+    def test_snake_case_split_enables_word_match(self):
+        from diacea.ir.semantic import SemanticType, infer_semantic_type
+
+        semantic, confidence = infer_semantic_type(
+            shape_type="rectangle", label="user_store"
+        )
+        assert semantic == SemanticType.PERSON
+        assert confidence >= 0.8
+

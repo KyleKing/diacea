@@ -41,6 +41,43 @@ class TestHeader:
         assert edges == {('A', 'B'), ('B', 'C')}
 
 
+class TestFrontmatter:
+    CONTENT = '---\ntitle: My Title\n---\nflowchart LR\n    A --> B'
+
+    def test_parse_strips_frontmatter(self):
+        _, diagram = _parse(self.CONTENT)
+        assert diagram.name == 'My Title'
+        assert {s.id for s in diagram.get_shapes()} == {'A', 'B'}
+        assert diagram.metadata['mermaid']['direction'] == 'LR'
+
+    def test_sniffers_accept_frontmatter(self):
+        assert is_mermaid(self.CONTENT)
+        assert is_mermaid_flowchart(self.CONTENT)
+
+    def test_frontmatter_without_title(self):
+        _, diagram = _parse('---\nconfig:\n  theme: dark\n---\ngraph TD\n    A --> B')
+        assert diagram.name is None
+
+    def test_unterminated_frontmatter_is_not_flowchart(self):
+        assert not is_mermaid_flowchart('---\ntitle: Broken\nflowchart LR\n    A --> B')
+
+    @pytest.mark.parametrize(
+        'fixture_name',
+        [
+            'ai_patent_check_app.mmd',
+            'dynamic_loading_mechanism.mmd',
+            'mcp_playwright_architecture.mmd',
+        ],
+    )
+    def test_real_frontmatter_fixtures(self, fixture_name):
+        content = (TEST_DATA_DIR / 'real' / fixture_name).read_text()
+        assert is_mermaid(content)
+        assert is_mermaid_flowchart(content)
+        diagram = MermaidParser().parse(content)
+        assert len(diagram.get_shapes()) > 0
+        assert diagram.name
+
+
 class TestRejection:
     @pytest.mark.parametrize('header', ['sequenceDiagram', 'C4Context', 'classDiagram', 'gantt'])
     def test_non_flowchart_rejected(self, header):
@@ -166,6 +203,35 @@ class TestEdges:
         assert diagram.get_element('A').label == 'Salt & Pepper'
         assert len(diagram.get_connections()) == 1
 
+    def test_inline_label_without_spaces(self):
+        _, diagram = _parse('flowchart LR\n    A --Prompt with Info--> B')
+        conn = diagram.get_connections()[0]
+        assert (conn.from_id, conn.to_id) == ('A', 'B')
+        assert conn.label == 'Prompt with Info'
+
+    def test_thick_inline_label(self):
+        _, diagram = _parse('flowchart LR\n    A ==fast==> B')
+        conn = diagram.get_connections()[0]
+        assert conn.label == 'fast'
+        assert conn.style.stroke_width == 3.0
+
+    def test_dotted_inline_label(self):
+        _, diagram = _parse('flowchart LR\n    A -.maybe.-> B')
+        conn = diagram.get_connections()[0]
+        assert conn.label == 'maybe'
+        assert conn.style.stroke_style == 'dashed'
+
+    def test_node_id_with_colon(self):
+        _, diagram = _parse('flowchart LR\n    Loop:Result --> State:Config')
+        edges = {(c.from_id, c.to_id) for c in diagram.get_connections()}
+        assert edges == {('Loop:Result', 'State:Config')}
+
+    def test_class_suffix_stripped_from_node(self):
+        _, diagram = _parse('flowchart LR\n    A[Box]:::highlight --> B')
+        assert diagram.get_element('A').label == 'Box'
+        edges = {(c.from_id, c.to_id) for c in diagram.get_connections()}
+        assert edges == {('A', 'B')}
+
     def test_connection_endpoints_synthesized(self):
         _, diagram = _parse('flowchart LR\n    A --> B')
         conn = diagram.get_connections()[0]
@@ -210,9 +276,9 @@ class TestSubgraphs:
                 end
             '''
         )
-        outer = next(g for g in diagram.get_groups() if g.id == 'outer')
-        inner = next(g for g in diagram.get_groups() if g.id == 'inner')
-        assert 'inner' in outer.children
+        outer = next(g for g in diagram.get_groups() if g.id == 'group-outer')
+        inner = next(g for g in diagram.get_groups() if g.id == 'group-inner')
+        assert 'group-inner' in outer.children
         assert 'A' in outer.children
         assert inner.children == ['B']
 
@@ -244,6 +310,56 @@ class TestSubgraphs:
     def test_unclosed_subgraph_warns(self):
         parser, _ = _parse('flowchart TD\n    subgraph sg[Open]\n        A')
         assert any('unclosed subgraph' in w for w in parser.warnings)
+
+    def test_subgraph_and_node_sharing_name(self):
+        _, diagram = _parse(
+            '''
+            flowchart LR
+                subgraph Results
+                    A
+                end
+                B --> Results
+            '''
+        )
+        group = diagram.get_groups()[0]
+        assert group.id == 'group-Results'
+        node = diagram.get_element('Results')
+        assert isinstance(node, Shape)
+        edges = {(c.from_id, c.to_id) for c in diagram.get_connections()}
+        assert edges == {('B', 'Results')}
+
+
+class TestFaIcons:
+    def test_icon_stripped_and_mapped(self):
+        _, diagram = _parse('flowchart LR\n    B[fa:fa-database Orders DB]')
+        shape = diagram.get_element('B')
+        assert shape.label == 'Orders DB'
+        assert shape.semantic_type == SemanticType.DATABASE
+        assert shape.semantic_confidence >= 0.9
+        assert shape.metadata['mermaid']['icons'] == ['database']
+
+    @pytest.mark.parametrize(
+        ('icon', 'semantic'),
+        [
+            ('cloud', SemanticType.CLOUD),
+            ('cogs', SemanticType.SERVICE),
+            ('envelope', SemanticType.QUEUE),
+            ('globe', SemanticType.EXTERNAL),
+            ('server', SemanticType.SERVER),
+            ('user', SemanticType.PERSON),
+        ],
+    )
+    def test_known_icons_map_semantics(self, icon, semantic):
+        _, diagram = _parse(f'flowchart LR\n    N(fa:fa-{icon} Something)')
+        shape = diagram.get_element('N')
+        assert shape.label == 'Something'
+        assert shape.semantic_type == semantic
+
+    def test_unknown_icon_stripped_without_hint(self):
+        _, diagram = _parse('flowchart LR\n    N[fa:fa-creative-commons Licensing]')
+        shape = diagram.get_element('N')
+        assert shape.label == 'Licensing'
+        assert 'semantic_type' not in shape.metadata
 
 
 class TestWarnings:
@@ -346,6 +462,17 @@ class TestRealWorldFixtures:
         assert {('lb', 'api'), ('lb', 'worker')} <= edges
         skipped = {w.split("'")[1] for w in parser.warnings if 'directive' in w}
         assert skipped == {'classDef', 'class', 'click', 'linkStyle'}
+
+    def test_infra_topology_fixture(self):
+        content = (TEST_DATA_DIR / 'real' / 'mermaid_infra_topology.mmd').read_text()
+        parser = MermaidParser()
+        diagram = parser.parse(content)
+        assert len(diagram.get_shapes()) == 22
+        assert len(diagram.get_connections()) == 40
+        assert not any('unrecognized' in w or 'unsupported' in w for w in parser.warnings)
+        db_instance = diagram.get_element('f4112290_1ec3_e711_8c5a_005056ad0002')
+        assert db_instance.semantic_type == SemanticType.DATABASE
+        assert db_instance.label == '[DBServer\\SharedDbInstance]'
 
 
 class TestRoundTrip:

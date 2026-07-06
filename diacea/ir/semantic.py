@@ -14,6 +14,7 @@ Design decisions (from Phase 1 open questions):
 
 from __future__ import annotations
 
+import re
 from enum import Enum
 from typing import Optional
 
@@ -333,6 +334,15 @@ SEMANTIC_KEYWORDS = {
     ],
 }
 
+_CAMEL_BOUNDARY_RE = re.compile(r"(?<=[a-z0-9])(?=[A-Z])")
+
+_KEYWORD_PATTERNS = {
+    semantic_type: re.compile(
+        r"\b(?:" + "|".join(re.escape(keyword) for keyword in keywords) + r")\b"
+    )
+    for semantic_type, keywords in SEMANTIC_KEYWORDS.items()
+}
+
 # Shape type to semantic type mapping for strong inference
 SHAPE_SEMANTIC_MAP = {
     "note": SemanticType.NOTE,
@@ -613,32 +623,21 @@ def _is_gray_color(color: str) -> bool:
     return False
 
 
+def _normalize_label_words(label: str) -> str:
+    return _CAMEL_BOUNDARY_RE.sub(" ", label).replace("_", " ").lower()
+
+
 def _infer_from_text(label: str) -> tuple[Optional[SemanticType], float]:
-    """Infer semantic type from label text keywords."""
+    """Infer semantic type from whole-word keyword matches in the label."""
     if not label:
         return (None, 0.0)
 
-    label_lower = label.lower()
+    normalized = _normalize_label_words(label)
+    for semantic_type, pattern in _KEYWORD_PATTERNS.items():
+        if pattern.search(normalized):
+            return (semantic_type, 0.8)
 
-    # Check each semantic type's keywords
-    best_match = None
-    best_confidence = 0.0
-
-    for semantic_type, keywords in SEMANTIC_KEYWORDS.items():
-        for keyword in keywords:
-            if keyword in label_lower:
-                # Exact word match gets higher confidence
-                words = label_lower.split()
-                if keyword in words:
-                    confidence = 0.8
-                else:
-                    confidence = 0.65
-
-                if confidence > best_confidence:
-                    best_match = semantic_type
-                    best_confidence = confidence
-
-    return (best_match, best_confidence)
+    return (None, 0.0)
 
 
 def validate_confidence(

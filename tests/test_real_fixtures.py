@@ -20,20 +20,8 @@ from .configuration import TEST_DATA_DIR
 
 REAL_DATA_DIR = TEST_DATA_DIR / 'real'
 
-_EXCALIDRAW_INT_DIMENSIONS = (
-    'ExcalidrawParser passes raw JSON ints to float-typed IR fields '
-    '(Dimensions.width/height); fails under beartype runtime checks'
-)
-
 _XFAIL_REASONS = {
-    'ai_patent_check_app.mmd': 'Mermaid YAML frontmatter (---/title/---) breaks format detection and parsing',
-    'dynamic_loading_mechanism.mmd': 'Mermaid YAML frontmatter (---/title/---) breaks format detection and parsing',
-    'fineract_release_process.puml': 'PlantUML activity diagram syntax unsupported; parses 0 elements',
-    'intertwin_c4_qa_pipeline.excalidraw': _EXCALIDRAW_INT_DIMENSIONS,
-    'intertwin_dte_infra_containers.excalidraw': _EXCALIDRAW_INT_DIMENSIONS,
-    'intertwin_system_context.excalidraw': _EXCALIDRAW_INT_DIMENSIONS,
-    'llm_proxy_component.svg': "SVG path curve commands desync the tokenizer: ValueError could not convert string to float: 'l'",
-    'mcp_playwright_architecture.mmd': 'Mermaid YAML frontmatter (---/title/---) breaks format detection and parsing',
+    'fineract_release_process.puml': 'PlantUML activity diagrams are explicitly rejected with ValueError',
 }
 
 

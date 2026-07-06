@@ -17,6 +17,7 @@ from collections import defaultdict, deque
 from typing import Any, Optional
 
 from ..ir import (
+    GROUP_ID_PREFIX,
     Connection,
     Diagram,
     Dimensions,
@@ -26,9 +27,11 @@ from ..ir import (
     Shape,
     Style,
 )
-from ..ir.semantic import infer_semantic_type
+from ..ir.semantic import SemanticType, infer_semantic_type
 
 _HEADER_RE = re.compile(r"^(?:flowchart|graph)\b\s*(LR|RL|TD|TB|BT)?\s*;?\s*$", re.IGNORECASE)
+
+_FRONTMATTER_TITLE_RE = re.compile(r"^title:\s*(.+?)\s*$")
 
 _OTHER_DIAGRAM_KEYWORDS = (
     "C4Component",
@@ -64,13 +67,32 @@ _LINK_RE = re.compile(
 )
 
 _TEXT_ARROW_SUBS = (
-    (re.compile(r"--\s+([^-|>][^|]*?)\s+-->"), r"-->|\1|"),
-    (re.compile(r"--\s+([^-|>][^|]*?)\s+---"), r"---|\1|"),
-    (re.compile(r"-\.\s+([^-|.>][^|]*?)\s+\.->"), r"-.->|\1|"),
-    (re.compile(r"==\s+([^=|>][^|]*?)\s+==>"), r"==>|\1|"),
+    (re.compile(r"--\s*([^-|>][^|]*?)\s*-->"), r"-->|\1|"),
+    (re.compile(r"--\s*([^-|>][^|]*?)\s*---"), r"---|\1|"),
+    (re.compile(r"-\.\s*([^-|.>][^|]*?)\s*\.->"), r"-.->|\1|"),
+    (re.compile(r"==\s*([^=|>][^|]*?)\s*==>"), r"==>|\1|"),
 )
 
-_NODE_TOKEN_RE = re.compile(r"^([A-Za-z0-9_.-]+)\s*(.*)$", re.DOTALL)
+_NODE_TOKEN_RE = re.compile(r"^([A-Za-z0-9_.:-]+)\s*(.*)$", re.DOTALL)
+
+_CLASS_SUFFIX_RE = re.compile(r":::[\w-]+$")
+
+_FA_ICON_RE = re.compile(r"fa[brs]?:fa-([A-Za-z0-9-]+)\s*")
+
+_FA_ICON_SEMANTICS: dict[str, SemanticType] = {
+    "cloud": SemanticType.CLOUD,
+    "cog": SemanticType.SERVICE,
+    "cogs": SemanticType.SERVICE,
+    "database": SemanticType.DATABASE,
+    "envelope": SemanticType.QUEUE,
+    "gear": SemanticType.SERVICE,
+    "gears": SemanticType.SERVICE,
+    "globe": SemanticType.EXTERNAL,
+    "person": SemanticType.PERSON,
+    "server": SemanticType.SERVER,
+    "user": SemanticType.PERSON,
+    "users": SemanticType.PERSON,
+}
 
 _SUBGRAPH_TITLED_RE = re.compile(r"^([A-Za-z0-9_.-]+)\s*\[(.*)\]$")
 
@@ -109,9 +131,27 @@ def is_mermaid_flowchart(content: str) -> bool:
     return first is not None and _HEADER_RE.match(first) is not None
 
 
+def _split_frontmatter(content: str) -> tuple[str, Optional[str]]:
+    lines = content.split("\n")
+    start = next((i for i, line in enumerate(lines) if line.strip()), None)
+    if start is None or lines[start].strip() != "---":
+        return (content, None)
+    title = None
+    for end in range(start + 1, len(lines)):
+        stripped = lines[end].strip()
+        if stripped == "---":
+            for index in range(start, end + 1):
+                lines[index] = ""
+            return ("\n".join(lines), title)
+        if match := _FRONTMATTER_TITLE_RE.match(stripped):
+            title = match.group(1).strip("\"'")
+    return (content, None)
+
+
 def _first_meaningful_line(content: str) -> Optional[str]:
     if not isinstance(content, str):
         return None
+    content, _ = _split_frontmatter(content)
     for raw in content.splitlines():
         line = raw.strip()
         if not line or line.startswith("%%") or line.startswith("```"):
@@ -131,6 +171,23 @@ def _unescape_label(label: str) -> str:
     text = text.replace("&#124;", "|")
     text = text.replace("&amp;", "&")
     return text
+
+
+def _extract_fa_icons(label: str) -> tuple[str, list[str]]:
+    icons = _FA_ICON_RE.findall(label)
+    if not icons:
+        return (label, [])
+    cleaned = _FA_ICON_RE.sub("", label)
+    return (re.sub(r"[ \t]{2,}", " ", cleaned).strip(), icons)
+
+
+def _icon_metadata(icons: list[str]) -> dict[str, Any]:
+    metadata: dict[str, Any] = {"mermaid": {"icons": icons}}
+    for icon in icons:
+        if (semantic := _FA_ICON_SEMANTICS.get(icon)) is not None:
+            metadata["semantic_type"] = semantic.value
+            break
+    return metadata
 
 
 def _split_arrow_attrs(arrow: str) -> tuple[str, str, Optional[float]]:
@@ -179,6 +236,7 @@ class MermaidParser(Parser):
             raise ValueError("Mermaid parser expects a string input")
 
         self.warnings = []
+        data, title = _split_frontmatter(data)
         self._shapes: dict[str, Shape] = {}
         self._shape_order: list[Shape] = []
         self._connections: list[Connection] = []
@@ -200,7 +258,7 @@ class MermaidParser(Parser):
             shape.semantic_type, shape.semantic_confidence = infer_semantic_type(
                 shape_type=shape.shape_type,
                 label=shape.label,
-                size=shape.size,
+                size=None,
                 style=shape.style,
                 metadata=shape.metadata,
             )
@@ -209,6 +267,7 @@ class MermaidParser(Parser):
 
         diagram = Diagram(
             id="mermaid-flowchart",
+            name=title,
             metadata={
                 "mermaid": {"direction": self._direction},
                 "synthesized_layout": True,
@@ -291,6 +350,7 @@ class MermaidParser(Parser):
         else:
             label = _unescape_label(rest)
             group_id = re.sub(r"\W", "_", label)
+        group_id = GROUP_ID_PREFIX + re.sub(r"^group[-_]", "", group_id)
         group = Group(
             id=group_id,
             position=Point(0.0, 0.0),
@@ -347,7 +407,7 @@ class MermaidParser(Parser):
         return True
 
     def _declare_node(self, token: str, line_number: int) -> Optional[str]:
-        match = _NODE_TOKEN_RE.match(token.strip())
+        match = _NODE_TOKEN_RE.match(_CLASS_SUFFIX_RE.sub("", token.strip()))
         if not match:
             return None
         node_id, body = match.group(1), match.group(2).strip()
@@ -362,13 +422,21 @@ class MermaidParser(Parser):
         for opening, closing, shape_type in _BRACKET_SHAPES:
             if body.startswith(opening) and body.endswith(closing):
                 label = _unescape_label(body[len(opening):-len(closing)])
+                label, icons = _extract_fa_icons(label)
                 if node_id in self._shapes:
                     shape = self._shapes[node_id]
                     shape.label = label
                     shape.shape_type = shape_type
+                    if icons:
+                        shape.metadata.update(_icon_metadata(icons))
                     self._adopt_into_group(node_id)
                 else:
-                    self._create_shape(node_id, label=label, shape_type=shape_type)
+                    self._create_shape(
+                        node_id,
+                        label=label,
+                        shape_type=shape_type,
+                        metadata=_icon_metadata(icons) if icons else None,
+                    )
                 return node_id
 
         self.warnings.append(
@@ -376,7 +444,13 @@ class MermaidParser(Parser):
         )
         return None
 
-    def _create_shape(self, node_id: str, label: str, shape_type: str) -> None:
+    def _create_shape(
+        self,
+        node_id: str,
+        label: str,
+        shape_type: str,
+        metadata: Optional[dict[str, Any]] = None,
+    ) -> None:
         label_lines = label.splitlines() or [""]
         width = max(_NODE_WIDTH_MIN, 12.0 * max(len(line) for line in label_lines) + 40.0)
         height = _NODE_HEIGHT_BASE + 30.0 * (len(label_lines) - 1)
@@ -386,6 +460,7 @@ class MermaidParser(Parser):
             size=Dimensions(width, height),
             label=label,
             shape_type=shape_type,
+            metadata=metadata or {},
         )
         self._shapes[node_id] = shape
         self._shape_order.append(shape)
