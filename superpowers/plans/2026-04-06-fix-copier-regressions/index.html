@@ -2084,8 +2084,10 @@
 </ul>
 <hr />
 <h3 id="task-1-restore-pyprojecttoml-project-description">Task 1: Restore pyproject.toml project description<a class="headerlink" href="#task-1-restore-pyprojecttoml-project-description" title="Permanent link">⚓︎</a></h3>
-<p><strong>Files:</strong>
-- Modify: <code>pyproject.toml:26</code></p>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Modify: <code>pyproject.toml:26</code></li>
+</ul>
 <p>The copier restore reset <code>description</code> to <code>"TBD"</code>. The intended value (from <code>pyproject.toml.rej</code>) is <code>"Convert between Excalidraw and PlantUML"</code>.</p>
 <ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox"/><span class="task-list-indicator"></span></label> <strong>Step 1: Edit the description field</strong></li>
@@ -2099,12 +2101,12 @@
 <ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox"/><span class="task-list-indicator"></span></label> <strong>Step 2: Verify the change</strong></li>
 </ul>
-<p>Run:
+<p>Run:</p>
 <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="1 "></span>grep<span class="w"> </span><span class="s1">&#39;description&#39;</span><span class="w"> </span>pyproject.toml
 </code></pre></div>
-Expected output:
+<p>Expected output:</p>
 <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="1 "></span>description = &quot;Convert between Excalidraw and PlantUML&quot;
-</code></pre></div></p>
+</code></pre></div>
 <ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox"/><span class="task-list-indicator"></span></label> <strong>Step 3: Commit</strong></li>
 </ul>
@@ -2113,12 +2115,14 @@ Expected output:
 </code></pre></div>
 <hr />
 <h3 id="task-2-restore-pyprojecttoml-project-dependencies">Task 2: Restore pyproject.toml project dependencies<a class="headerlink" href="#task-2-restore-pyprojecttoml-project-dependencies" title="Permanent link">⚓︎</a></h3>
-<p><strong>Files:</strong>
-- Modify: <code>pyproject.toml:23-25</code></p>
-<p>The copier restore stripped three runtime dependencies. The committed <code>HEAD</code> version had:
+<p><strong>Files:</strong></p>
+<ul>
+<li>Modify: <code>pyproject.toml:23-25</code></li>
+</ul>
+<p>The copier restore stripped three runtime dependencies. The committed <code>HEAD</code> version had:</p>
 <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="1 "></span>dependencies = [&#39;corallium&gt;=2.2.0&#39;, &#39;networkx&gt;=3.4.2,&lt;4&#39;, &#39;python-constraint2&gt;=2.0.0b8,&lt;3&#39;, &#39;pyyaml&gt;=6.0,&lt;7&#39;]
 </code></pre></div>
-The staged version has only <code>"corallium&gt;=2.2.0"</code>.</p>
+<p>The staged version has only <code>"corallium&gt;=2.2.0"</code>.</p>
 <ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox"/><span class="task-list-indicator"></span></label> <strong>Step 1: Replace the dependencies block</strong></li>
 </ul>
@@ -2138,24 +2142,24 @@ The staged version has only <code>"corallium&gt;=2.2.0"</code>.</p>
 <ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox"/><span class="task-list-indicator"></span></label> <strong>Step 2: Verify</strong></li>
 </ul>
-<p>Run:
+<p>Run:</p>
 <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="1 "></span>grep<span class="w"> </span>-A6<span class="w"> </span><span class="s1">&#39;^dependencies&#39;</span><span class="w"> </span>pyproject.toml
 </code></pre></div>
-Expected:
+<p>Expected:</p>
 <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="1 "></span><span class="n">dependencies</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
 <span class="linenos" data-linenos="2 "></span><span class="w">  </span><span class="s2">&quot;corallium&gt;=2.2.0&quot;</span><span class="p">,</span>
 <span class="linenos" data-linenos="3 "></span><span class="w">  </span><span class="s2">&quot;networkx&gt;=3.4.2,&lt;4&quot;</span><span class="p">,</span>
 <span class="linenos" data-linenos="4 "></span><span class="w">  </span><span class="s2">&quot;python-constraint2&gt;=2.0.0b8,&lt;3&quot;</span><span class="p">,</span>
 <span class="linenos" data-linenos="5 "></span><span class="w">  </span><span class="s2">&quot;pyyaml&gt;=6.0,&lt;7&quot;</span><span class="p">,</span>
 <span class="linenos" data-linenos="6 "></span><span class="p">]</span>
-</code></pre></div></p>
+</code></pre></div>
 <ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox"/><span class="task-list-indicator"></span></label> <strong>Step 3: Sync the lock file</strong></li>
 </ul>
-<p>Run:
+<p>Run:</p>
 <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="1 "></span>uv<span class="w"> </span>sync
 </code></pre></div>
-Expected: resolves without error and updates <code>uv.lock</code>.</p>
+<p>Expected: resolves without error and updates <code>uv.lock</code>.</p>
 <ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox"/><span class="task-list-indicator"></span></label> <strong>Step 4: Commit</strong></li>
 </ul>
@@ -2164,8 +2168,10 @@ Expected: resolves without error and updates <code>uv.lock</code>.</p>
 </code></pre></div>
 <hr />
 <h3 id="task-3-restore-dev-dependency-group">Task 3: Restore dev dependency group<a class="headerlink" href="#task-3-restore-dev-dependency-group" title="Permanent link">⚓︎</a></h3>
-<p><strong>Files:</strong>
-- Modify: <code>pyproject.toml:6-8</code></p>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Modify: <code>pyproject.toml:6-8</code></li>
+</ul>
 <p>The copier restore removed <code>calcipy[dev]&gt;=5.0.0</code> from <code>[dependency-groups].dev</code>. Only <code>calcipy[recommended]&gt;=6.0.0b3</code> was kept.</p>
 <ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox"/><span class="task-list-indicator"></span></label> <strong>Step 1: Add the missing dev dependency</strong></li>
@@ -2186,23 +2192,23 @@ Expected: resolves without error and updates <code>uv.lock</code>.</p>
 <ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox"/><span class="task-list-indicator"></span></label> <strong>Step 2: Verify</strong></li>
 </ul>
-<p>Run:
+<p>Run:</p>
 <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="1 "></span>grep<span class="w"> </span>-A5<span class="w"> </span><span class="s1">&#39;^\[dependency-groups\]&#39;</span><span class="w"> </span>pyproject.toml
 </code></pre></div>
-Expected:
+<p>Expected:</p>
 <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="1 "></span><span class="k">[dependency-groups]</span>
 <span class="linenos" data-linenos="2 "></span><span class="n">dev</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
 <span class="linenos" data-linenos="3 "></span><span class="w">  </span><span class="s2">&quot;calcipy[dev]&gt;=5.0.0&quot;</span><span class="p">,</span>
 <span class="linenos" data-linenos="4 "></span><span class="w">  </span><span class="s2">&quot;calcipy[recommended]&gt;=6.0.0b3&quot;</span><span class="p">,</span>
 <span class="linenos" data-linenos="5 "></span><span class="p">]</span>
-</code></pre></div></p>
+</code></pre></div>
 <ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox"/><span class="task-list-indicator"></span></label> <strong>Step 3: Sync the lock file</strong></li>
 </ul>
-<p>Run:
+<p>Run:</p>
 <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="1 "></span>uv<span class="w"> </span>sync
 </code></pre></div>
-Expected: resolves without error.</p>
+<p>Expected: resolves without error.</p>
 <ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox"/><span class="task-list-indicator"></span></label> <strong>Step 4: Commit</strong></li>
 </ul>
@@ -2211,19 +2217,21 @@ Expected: resolves without error.</p>
 </code></pre></div>
 <hr />
 <h3 id="task-4-add-missing-projectscripts-entry-points">Task 4: Add missing [project.scripts] entry points<a class="headerlink" href="#task-4-add-missing-projectscripts-entry-points" title="Permanent link">⚓︎</a></h3>
-<p><strong>Files:</strong>
-- Modify: <code>pyproject.toml</code> — add new <code>[project.scripts]</code> section</p>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Modify: <code>pyproject.toml</code> — add new <code>[project.scripts]</code> section</li>
+</ul>
 <p>Both <code>diacea/cli.py</code> and <code>diacea/workspace_cli.py</code> exist but are not registered as console scripts. The <code>pyproject.toml.rej</code> shows these were <code>[tool.poetry.scripts]</code> entries that were never migrated to <code>[project.scripts]</code>.</p>
 <ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox"/><span class="task-list-indicator"></span></label> <strong>Step 1: Confirm entry point functions exist</strong></li>
 </ul>
-<p>Run:
+<p>Run:</p>
 <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="1 "></span>grep<span class="w"> </span>-n<span class="w"> </span><span class="s1">&#39;^def main&#39;</span><span class="w"> </span>diacea/cli.py<span class="w"> </span>diacea/workspace_cli.py
 </code></pre></div>
-Expected:
+<p>Expected:</p>
 <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="1 "></span>diacea/cli.py:NN:def main(...)
 <span class="linenos" data-linenos="2 "></span>diacea/workspace_cli.py:NN:def main_workspace(...)
-</code></pre></div></p>
+</code></pre></div>
 <p>If the function names differ from <code>main</code> / <code>main_workspace</code>, adjust the entry points in the next step accordingly.</p>
 <ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox"/><span class="task-list-indicator"></span></label> <strong>Step 2: Add [project.scripts] section</strong></li>
@@ -2236,22 +2244,22 @@ Expected:
 <ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox"/><span class="task-list-indicator"></span></label> <strong>Step 3: Verify the section is present</strong></li>
 </ul>
-<p>Run:
+<p>Run:</p>
 <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="1 "></span>grep<span class="w"> </span>-A3<span class="w"> </span><span class="s1">&#39;^\[project.scripts\]&#39;</span><span class="w"> </span>pyproject.toml
 </code></pre></div>
-Expected:
+<p>Expected:</p>
 <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="1 "></span><span class="k">[project.scripts]</span>
 <span class="linenos" data-linenos="2 "></span><span class="n">diacea</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;diacea.cli:main&quot;</span>
 <span class="linenos" data-linenos="3 "></span><span class="n">diacea-workspace</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;diacea.workspace_cli:main_workspace&quot;</span>
-</code></pre></div></p>
+</code></pre></div>
 <ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox"/><span class="task-list-indicator"></span></label> <strong>Step 4: Reinstall and smoke-test the CLI</strong></li>
 </ul>
-<p>Run:
+<p>Run:</p>
 <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="1 "></span>uv<span class="w"> </span>sync
 <span class="linenos" data-linenos="2 "></span>uv<span class="w"> </span>run<span class="w"> </span>diacea<span class="w"> </span>--help
 </code></pre></div>
-Expected: diacea help text appears without <code>ModuleNotFoundError</code>.</p>
+<p>Expected: diacea help text appears without <code>ModuleNotFoundError</code>.</p>
 <ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox"/><span class="task-list-indicator"></span></label> <strong>Step 5: Commit</strong></li>
 </ul>
@@ -2260,8 +2268,10 @@ Expected: diacea help text appears without <code>ModuleNotFoundError</code>.</p>
 </code></pre></div>
 <hr />
 <h3 id="task-5-restore-readmemd-project-content">Task 5: Restore README.md project content<a class="headerlink" href="#task-5-restore-readmemd-project-content" title="Permanent link">⚓︎</a></h3>
-<p><strong>Files:</strong>
-- Modify: <code>README.md</code></p>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Modify: <code>README.md</code></li>
+</ul>
 <p>The copier restore replaced the full project README with a 3-line template stub (<code># diacea\n\nTBD\n...</code>). The full content from <code>HEAD</code> must be restored exactly.</p>
 <ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox"/><span class="task-list-indicator"></span></label> <strong>Step 1: Replace README.md with the committed content</strong></li>
@@ -2311,14 +2321,15 @@ Expected: diacea help text appears without <code>ModuleNotFoundError</code>.</p>
 <span class="linenos" data-linenos=" 5 "></span><span class="n">parser</span> <span class="o">=</span> <span class="n">ExcalidrawParser</span><span class="p">()</span>
 <span class="linenos" data-linenos=" 6 "></span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;diagram.json&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
 <span class="linenos" data-linenos=" 7 "></span>    <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
-<span class="linenos" data-linenos=" 8 "></span>    <span class="n">diagram</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">))</span>
-<span class="linenos" data-linenos=" 9 "></span>
-<span class="linenos" data-linenos="10 "></span><span class="c1"># Generate output</span>
-<span class="linenos" data-linenos="11 "></span><span class="n">mermaid_gen</span> <span class="o">=</span> <span class="n">MermaidGenerator</span><span class="p">()</span>
-<span class="linenos" data-linenos="12 "></span><span class="nb">print</span><span class="p">(</span><span class="n">mermaid_gen</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">diagram</span><span class="p">))</span>
-<span class="linenos" data-linenos="13 "></span>
-<span class="linenos" data-linenos="14 "></span><span class="n">c4_gen</span> <span class="o">=</span> <span class="n">C4PlantUMLGenerator</span><span class="p">()</span>
-<span class="linenos" data-linenos="15 "></span><span class="nb">print</span><span class="p">(</span><span class="n">c4_gen</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">diagram</span><span class="p">))</span>
+<span class="linenos" data-linenos=" 8 "></span>
+<span class="linenos" data-linenos=" 9 "></span>    <span class="n">diagram</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">))</span>
+<span class="linenos" data-linenos="10 "></span>
+<span class="linenos" data-linenos="11 "></span><span class="c1"># Generate output</span>
+<span class="linenos" data-linenos="12 "></span><span class="n">mermaid_gen</span> <span class="o">=</span> <span class="n">MermaidGenerator</span><span class="p">()</span>
+<span class="linenos" data-linenos="13 "></span><span class="nb">print</span><span class="p">(</span><span class="n">mermaid_gen</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">diagram</span><span class="p">))</span>
+<span class="linenos" data-linenos="14 "></span>
+<span class="linenos" data-linenos="15 "></span><span class="n">c4_gen</span> <span class="o">=</span> <span class="n">C4PlantUMLGenerator</span><span class="p">()</span>
+<span class="linenos" data-linenos="16 "></span><span class="nb">print</span><span class="p">(</span><span class="n">c4_gen</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">diagram</span><span class="p">))</span>
 </code></pre></div>
 <h2 id="supported-formats">Supported Formats<a class="headerlink" href="#supported-formats" title="Permanent link">⚓︎</a></h2>
 <h3 id="input-formats">Input Formats<a class="headerlink" href="#input-formats" title="Permanent link">⚓︎</a></h3>
@@ -2412,37 +2423,37 @@ Expected: diacea help text appears without <code>ModuleNotFoundError</code>.</p>
 <h2 id="license">License<a class="headerlink" href="#license" title="Permanent link">⚓︎</a></h2>
 <p><a href="LICENSE">MIT License</a></p>
 <h2 id="links">Links<a class="headerlink" href="#links" title="Permanent link">⚓︎</a></h2>
-<ul class="task-list">
+<ul>
 <li><strong>Documentation</strong>: <a href="https://diacea.kyleking.me">https://diacea.kyleking.me</a></li>
 <li><strong>PyPI</strong>: <a href="https://pypi.org/project/diacea">https://pypi.org/project/diacea</a></li>
 <li><strong>Repository</strong>: <a href="https://github.com/kyleking/diacea">https://github.com/kyleking/diacea</a></li>
-<li>
-<p><strong>Changelog</strong>: <a href="docs/docs/CHANGELOG.md">docs/docs/CHANGELOG.md</a>
+<li><strong>Changelog</strong>: <a href="docs/docs/CHANGELOG.md">docs/docs/CHANGELOG.md</a></li>
+</ul>
 <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="1 "></span>- [ ] **Step 2: Verify first and last lines**
 <span class="linenos" data-linenos="2 "></span>
 <span class="linenos" data-linenos="3 "></span>Run:
 <span class="linenos" data-linenos="4 "></span>```bash
 <span class="linenos" data-linenos="5 "></span>head -5 README.md &amp;&amp; echo &quot;---&quot; &amp;&amp; tail -3 README.md
 </code></pre></div>
-Expected:
+<p>Expected:</p>
 <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="1 "></span># diacea
 <span class="linenos" data-linenos="2 "></span>
 <span class="linenos" data-linenos="3 "></span>Universal diagram converter - the pandoc for diagrams
 <span class="linenos" data-linenos="4 "></span>---
 <span class="linenos" data-linenos="5 "></span>- **Changelog**: [docs/docs/CHANGELOG.md](docs/docs/CHANGELOG.md)
-</code></pre></div></p>
-</li>
-<li class="task-list-item">
-<p><label class="task-list-control"><input type="checkbox"/><span class="task-list-indicator"></span></label> <strong>Step 3: Commit</strong></p>
-</li>
+</code></pre></div>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox"/><span class="task-list-indicator"></span></label> <strong>Step 3: Commit</strong></li>
 </ul>
 <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="1 "></span>git<span class="w"> </span>add<span class="w"> </span>README.md
 <span class="linenos" data-linenos="2 "></span>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;fix: restore README content overwritten by copier template reset&quot;</span>
 </code></pre></div>
 <hr />
 <h3 id="task-6-fix-docsreadmemd-install-instruction">Task 6: Fix docs/README.md install instruction<a class="headerlink" href="#task-6-fix-docsreadmemd-install-instruction" title="Permanent link">⚓︎</a></h3>
-<p><strong>Files:</strong>
-- Modify: <code>docs/README.md:7</code></p>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Modify: <code>docs/README.md:7</code></li>
+</ul>
 <p>The newly added template file has <code>poetry add diacea</code> on line 7. The project uses uv and the install instruction in <code>README.md</code> uses <code>pip install diacea</code>.</p>
 <ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox"/><span class="task-list-indicator"></span></label> <strong>Step 1: Fix the install instruction</strong></li>
@@ -2456,10 +2467,10 @@ Expected:
 <ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox"/><span class="task-list-indicator"></span></label> <strong>Step 2: Verify</strong></li>
 </ul>
-<p>Run:
+<p>Run:</p>
 <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="1 "></span>grep<span class="w"> </span><span class="s1">&#39;install\|add&#39;</span><span class="w"> </span>docs/README.md
 </code></pre></div>
-Expected: no <code>poetry</code> references remain.</p>
+<p>Expected: no <code>poetry</code> references remain.</p>
 <ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox"/><span class="task-list-indicator"></span></label> <strong>Step 3: Commit</strong></li>
 </ul>
@@ -2468,13 +2479,15 @@ Expected: no <code>poetry</code> references remain.</p>
 </code></pre></div>
 <hr />
 <h2 id="self-review">Self-Review<a class="headerlink" href="#self-review" title="Permanent link">⚓︎</a></h2>
-<p><strong>Spec coverage:</strong>
-- Issue 1 (description) → Task 1
-- Issue 2 (dependencies stripped) → Task 2
-- Issue 3 (dev dep dropped) → Task 3
-- Issue 4 (missing scripts) → Task 4
-- Issue 5 (README.md reset) → Task 5
-- Issue 6 (poetry add in docs/README.md) → Task 6</p>
+<p><strong>Spec coverage:</strong></p>
+<ul>
+<li>Issue 1 (description) → Task 1</li>
+<li>Issue 2 (dependencies stripped) → Task 2</li>
+<li>Issue 3 (dev dep dropped) → Task 3</li>
+<li>Issue 4 (missing scripts) → Task 4</li>
+<li>Issue 5 (README.md reset) → Task 5</li>
+<li>Issue 6 (poetry add in docs/README.md) → Task 6</li>
+</ul>
 <p>All six issues covered.</p>
 <p><strong>Placeholder scan:</strong> No TBD/TODO/placeholder steps. All code blocks contain exact content.</p>
 <p><strong>Type consistency:</strong> No types — pure config/doc edits.</p>
