@@ -5,6 +5,7 @@ This document describes what diacea does, its use cases, input/output formats, a
 ## Purpose
 
 diacea converts Excalidraw JSON exports to PlantUML diagrams, enabling:
+
 - Version control of diagrams as text files
 - Automated diagram generation
 - Integration with documentation pipelines
@@ -16,14 +17,16 @@ diacea converts Excalidraw JSON exports to PlantUML diagrams, enabling:
 
 **Input**: Excalidraw JSON with rectangles, text labels, and arrows
 
-**Process**: 
+**Process**:
+
 1. Parse Excalidraw JSON structure
-2. Convert absolute coordinates to relative relationships
-3. Generate PlantUML syntax
+1. Convert absolute coordinates to relative relationships
+1. Generate PlantUML syntax
 
 **Output**: PlantUML `.puml` file
 
 **Example**:
+
 - Input: Excalidraw diagram with nested rectangles and connecting arrows
 - Output: PlantUML diagram with container relationships and connections
 
@@ -32,14 +35,16 @@ diacea converts Excalidraw JSON exports to PlantUML diagrams, enabling:
 **Input**: Excalidraw diagram with system boundaries, containers, and people
 
 **Process**:
+
 1. Detect system boundaries (large rectangles or specific text patterns)
-2. Identify containers within boundaries
-3. Map people (diamond shapes) to Person elements
-4. Generate C4-PlantUML format
+1. Identify containers within boundaries
+1. Map people (diamond shapes) to Person elements
+1. Generate C4-PlantUML format
 
 **Output**: C4-PlantUML diagram
 
 **Example**:
+
 - Input: Excalidraw diagram showing AWS Cloud, EKS cluster, and services
 - Output: C4 Component diagram with System_Boundary, Container, and Person elements
 
@@ -94,19 +99,13 @@ The Python algorithms currently output a relative format:
 
 ```python
 [
-  {
-    "id": "rect-id",
-    "type": "rectangle",
-    "label": "Container Name",
-    "parent": "parent-rect-id"  # Empty string if no parent
-  },
-  {
-    "id": "arrow-id",
-    "type": "arrow",
-    "label": "",
-    "from": "source-id",
-    "to": "target-id"
-  }
+    {
+        'id': 'rect-id',
+        'type': 'rectangle',
+        'label': 'Container Name',
+        'parent': 'parent-rect-id',  # Empty string if no parent
+    },
+    {'id': 'arrow-id', 'type': 'arrow', 'label': '', 'from': 'source-id', 'to': 'target-id'},
 ]
 ```
 
@@ -134,13 +133,14 @@ Rel(Element_def456, Element_ghi789, "Label")
 **Strategy**: Sequential processing with explicit loops
 
 **Steps**:
+
 1. Sort rectangles by area (largest first)
-2. For each rectangle:
-   - Find contained text for label
-   - Find smallest containing rectangle for parent
-3. For each arrow:
-   - Find nearest rectangles to start/end points
-   - Create relationship
+1. For each rectangle:
+    - Find contained text for label
+    - Find smallest containing rectangle for parent
+1. For each arrow:
+    - Find nearest rectangles to start/end points
+    - Create relationship
 
 **Complexity**: O(n²) for rectangle containment checks
 
@@ -159,6 +159,7 @@ Rel(Element_def456, Element_ghi789, "Label")
 **Strategy**: Constraint Satisfaction Problem formulation
 
 **Constraints**:
+
 - Each text label can only be used once
 - Parent must be a containing rectangle
 - All rectangles must have valid parents
@@ -172,9 +173,10 @@ Rel(Element_def456, Element_ghi789, "Label")
 **Strategy**: Spatial indexing with QuadTree
 
 **Steps**:
+
 1. Build QuadTree from all elements
-2. Query QuadTree for spatial relationships
-3. Process rectangles and arrows using spatial queries
+1. Query QuadTree for spatial relationships
+1. Process rectangles and arrows using spatial queries
 
 **Complexity**: O(n log n) average case
 
@@ -185,11 +187,12 @@ Rel(Element_def456, Element_ghi789, "Label")
 **Strategy**: NetworkX directed graph representation
 
 **Steps**:
+
 1. Create graph with all elements as nodes
-2. Add edges for containment relationships
-3. Add edges for text containment
-4. Add edges for arrows
-5. Generate output from graph structure
+1. Add edges for containment relationships
+1. Add edges for text containment
+1. Add edges for arrows
+1. Generate output from graph structure
 
 **Best For**: Complex relationships, graph analysis
 
@@ -200,9 +203,9 @@ Rel(Element_def456, Element_ghi789, "Label")
 ### Current Limitations
 
 1. **No Input Validation**: Assumes valid Excalidraw JSON structure
-2. **No Error Messages**: Fails silently or with Python exceptions
-3. **Missing Elements**: May fail if required fields are missing
-4. **Invalid Coordinates**: No bounds checking
+1. **No Error Messages**: Fails silently or with Python exceptions
+1. **Missing Elements**: May fail if required fields are missing
+1. **Invalid Coordinates**: No bounds checking
 
 ### Planned Error Handling
 
@@ -217,23 +220,23 @@ Rel(Element_def456, Element_ghi789, "Label")
 ### Spatial Detection
 
 1. **Overlapping Rectangles**: May incorrectly identify parent-child relationships
-2. **Arrow Endpoints**: May not correctly identify target if arrow doesn't bind to element
-3. **Text Positioning**: Text must be clearly within rectangle bounds
-4. **Nested Boundaries**: Deep nesting may not be detected correctly
+1. **Arrow Endpoints**: May not correctly identify target if arrow doesn't bind to element
+1. **Text Positioning**: Text must be clearly within rectangle bounds
+1. **Nested Boundaries**: Deep nesting may not be detected correctly
 
 ### Element Support
 
 1. **Limited Shapes**: Currently focuses on rectangles, arrows, and text
-2. **No Images**: Image elements are not supported
-3. **No Groups**: Grouped elements are not handled specially
-4. **No Frames**: Frame elements are ignored
+1. **No Images**: Image elements are not supported
+1. **No Groups**: Grouped elements are not handled specially
+1. **No Frames**: Frame elements are ignored
 
 ### Output Format
 
 1. **No PlantUML Generation**: Currently only outputs relative format
-2. **No C4 Support**: C4-PlantUML format not yet implemented in Python
-3. **No Styling**: Visual styling from Excalidraw is lost
-4. **No Layout**: PlantUML layout is auto-generated, not preserved from Excalidraw
+1. **No C4 Support**: C4-PlantUML format not yet implemented in Python
+1. **No Styling**: Visual styling from Excalidraw is lost
+1. **No Layout**: PlantUML layout is auto-generated, not preserved from Excalidraw
 
 ## Edge Cases
 
@@ -294,10 +297,9 @@ Rel(Element_def456, Element_ghi789, "Label")
 ## Future Enhancements
 
 1. **Bidirectional Conversion**: PlantUML to Excalidraw
-2. **Additional Formats**: Mermaid, Graphviz, etc.
-3. **Layout Preservation**: Maintain visual layout in text format
-4. **Styling Support**: Preserve colors, line styles, etc.
-5. **Interactive Mode**: Preview conversion before saving
-6. **Batch Processing**: Convert multiple files at once
-7. **Validation Mode**: Check diagram validity without conversion
-
+1. **Additional Formats**: Mermaid, Graphviz, etc.
+1. **Layout Preservation**: Maintain visual layout in text format
+1. **Styling Support**: Preserve colors, line styles, etc.
+1. **Interactive Mode**: Preview conversion before saving
+1. **Batch Processing**: Convert multiple files at once
+1. **Validation Mode**: Check diagram validity without conversion

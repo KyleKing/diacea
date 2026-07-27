@@ -6,8 +6,7 @@ This document provides AI assistants with an overview of the diacea codebase, it
 
 **diacea** is a universal diagram converter - the "pandoc for diagrams". It converts between visual diagram formats using a format-agnostic intermediate representation (IR).
 
-**Supported Input Formats**: Excalidraw, Obsidian Excalidraw markdown, TLDraw (legacy and v2), SVG, Mermaid flowcharts and sequence diagrams, PlantUML (including C4 macros)
-**Supported Output Formats**: PlantUML, C4-PlantUML, Mermaid, GraphViz DOT, D2
+**Supported Input Formats**: Excalidraw, Obsidian Excalidraw markdown, TLDraw (legacy and v2), SVG, Mermaid flowcharts and sequence diagrams, PlantUML (including C4 macros) **Supported Output Formats**: PlantUML, C4-PlantUML, Mermaid, GraphViz DOT, D2
 
 ## Architecture
 
@@ -23,7 +22,7 @@ SVG         --+         (with semantic types)      +--> Mermaid
 
 ## Codebase Structure
 
-```
+````
 diacea/
 ├── diacea/
 │   ├── __init__.py           # Package version
@@ -63,13 +62,14 @@ diacea/
 │       ├── excalidraw.json
 │       └── svg/
 └── docs/
-```
+````
 
 ## Key Modules
 
 ### IR (Intermediate Representation)
 
 **`diacea/ir/elements.py`** - Core data structures:
+
 - `Point`, `Dimensions`, `Style` - Basic geometry and styling
 - `Element` - Base class for all diagram elements
 - `Shape` - Rectangle, ellipse, diamond, etc.
@@ -79,6 +79,7 @@ diacea/
 - `Diagram` - Top-level container
 
 **`diacea/ir/semantic.py`** - Semantic type inference:
+
 - `SemanticType` enum (Person, System, Container, Database, etc.)
 - `infer_semantic_type()` - Hybrid inference using shape, size, and text hints
 
@@ -136,7 +137,12 @@ The conversion CLI is designed to be driven programmatically. Bare invocations (
   "output_format": "mermaid",
   "diagram_type": "flowchart",
   "elements": [
-    {"id": "web", "label": "Web Server", "semantic_type": "service", "confidence": 0.8}
+    {
+      "id": "web",
+      "label": "Web Server",
+      "semantic_type": "service",
+      "confidence": 0.8
+    }
   ],
   "warnings": []
 }
@@ -195,54 +201,58 @@ pytest -v                 # Verbose output
 ### Adding a New Input Format
 
 1. Create `diacea/parsers/newformat.py`
-2. Implement class extending `Parser` base class
-3. Add to `diacea/parsers/__init__.py`
-4. Add detection logic to `diacea/cli.py:detect_input_format()`
-5. Add parser instantiation to `diacea/cli.py:main()`
-6. Create tests in `tests/test_newformat_parser.py`
+1. Implement class extending `Parser` base class
+1. Add to `diacea/parsers/__init__.py`
+1. Add detection logic to `diacea/cli.py:detect_input_format()`
+1. Add parser instantiation to `diacea/cli.py:main()`
+1. Create tests in `tests/test_newformat_parser.py`
 
 ### Adding a New Output Format
 
 1. Create `diacea/generators/newformat.py`
-2. Implement class extending `Generator` base class
-3. Add to `diacea/generators/__init__.py`
-4. Add CLI arguments to `diacea/cli.py:create_parser()`
-5. Add generator instantiation to `diacea/cli.py:main()`
-6. Add tests to `tests/test_ir_integration.py`
+1. Implement class extending `Generator` base class
+1. Add to `diacea/generators/__init__.py`
+1. Add CLI arguments to `diacea/cli.py:create_parser()`
+1. Add generator instantiation to `diacea/cli.py:main()`
+1. Add tests to `tests/test_ir_integration.py`
 
 ### Adding a New Semantic Type
 
 1. Add to `SemanticType` enum in `diacea/ir/semantic.py`
-2. Add keywords to `SEMANTIC_KEYWORDS` dict
-3. Add heuristics to `_infer_from_heuristics()` if needed
-4. Update generators to handle new type
+1. Add keywords to `SEMANTIC_KEYWORDS` dict
+1. Add heuristics to `_infer_from_heuristics()` if needed
+1. Update generators to handle new type
 
 ## Dependencies
 
 **Runtime**:
+
 - `networkx` - Graph operations
 - `python-constraint2` - Constraint solving (for complex layouts)
 - `corallium` - Utility functions
 - `pyyaml` - Workspace file format
 
 **Development**:
+
 - `calcipy` - Development tooling (lint, test, docs)
 - `pytest` - Testing framework
 
 ## Key Patterns
 
 ### Parser Pattern
+
 ```python
 class MyParser(Parser):
     def parse(self, data: dict) -> Diagram:
-        diagram = Diagram(name="...")
-        for elem in data["elements"]:
+        diagram = Diagram(name='...')
+        for elem in data['elements']:
             shape = self._parse_shape(elem)
             diagram.add_element(shape)
         return diagram
 ```
 
 ### Generator Pattern
+
 ```python
 class MyGenerator(Generator):
     def generate(self, diagram: Diagram) -> str:
@@ -250,7 +260,7 @@ class MyGenerator(Generator):
         for elem in diagram.elements:
             if isinstance(elem, Shape):
                 lines.append(self._generate_shape(elem))
-        return "\n".join(lines)
+        return '\n'.join(lines)
 ```
 
 ## Notes for AI Assistants

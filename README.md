@@ -123,6 +123,7 @@ from diacea.generators import MermaidGenerator, C4PlantUMLGenerator
 parser = ExcalidrawParser()
 with open('diagram.json') as f:
     import json
+
     diagram = parser.parse(json.load(f))
 
 # Generate output
@@ -136,23 +137,25 @@ print(c4_gen.generate(diagram))
 ## Supported Formats
 
 ### Input Formats
-| Format | Parser | Auto-detect | Notes |
-|--------|--------|-------------|-------|
-| Excalidraw JSON | `ExcalidrawParser` | Yes | Scenes and clipboard exports |
-| Obsidian Excalidraw (`.excalidraw.md`) | `ExcalidrawParser` | Yes | Compressed notes need the `[obsidian]` extra |
-| TLDraw JSON | `TLDrawParser` | Yes | Legacy v1 documents and v2 `.tldr` files |
-| SVG | `SVGParser` | Yes | Basic shapes; curves sampled for accurate bounding boxes |
-| Mermaid | `MermaidParser` | Yes | Flowchart/graph and sequence diagrams; layout synthesized |
-| PlantUML | `PlantUMLParser` | Yes | Deployment/component elements and C4 macros; layout synthesized |
+
+| Format                                 | Parser             | Auto-detect | Notes                                                           |
+| -------------------------------------- | ------------------ | ----------- | --------------------------------------------------------------- |
+| Excalidraw JSON                        | `ExcalidrawParser` | Yes         | Scenes and clipboard exports                                    |
+| Obsidian Excalidraw (`.excalidraw.md`) | `ExcalidrawParser` | Yes         | Compressed notes need the `[obsidian]` extra                    |
+| TLDraw JSON                            | `TLDrawParser`     | Yes         | Legacy v1 documents and v2 `.tldr` files                        |
+| SVG                                    | `SVGParser`        | Yes         | Basic shapes; curves sampled for accurate bounding boxes        |
+| Mermaid                                | `MermaidParser`    | Yes         | Flowchart/graph and sequence diagrams; layout synthesized       |
+| PlantUML                               | `PlantUMLParser`   | Yes         | Deployment/component elements and C4 macros; layout synthesized |
 
 ### Output Formats
-| Format | Generator | Options |
-|--------|-----------|---------|
-| PlantUML | `PlantUMLGenerator` | - |
-| C4-PlantUML | `C4PlantUMLGenerator` | - |
-| Mermaid | `MermaidGenerator` | `--mermaid-type` (flowchart, c4, sequence) |
-| GraphViz DOT | `GraphVizGenerator` | `--graphviz-direction`, `--graphviz-type` |
-| D2 | `D2Generator` | `--d2-direction`, `--d2-sketch` |
+
+| Format       | Generator             | Options                                    |
+| ------------ | --------------------- | ------------------------------------------ |
+| PlantUML     | `PlantUMLGenerator`   | -                                          |
+| C4-PlantUML  | `C4PlantUMLGenerator` | -                                          |
+| Mermaid      | `MermaidGenerator`    | `--mermaid-type` (flowchart, c4, sequence) |
+| GraphViz DOT | `GraphVizGenerator`   | `--graphviz-direction`, `--graphviz-type`  |
+| D2           | `D2Generator`         | `--d2-direction`, `--d2-sketch`            |
 
 ## Architecture
 

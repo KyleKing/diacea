@@ -95,6 +95,7 @@ poetry run pytest
 ### Test Data
 
 Test fixtures are located in `tests/data/`:
+
 - `excalidraw.json`: Sample Excalidraw export for testing
 
 All algorithms are tested against the same input to ensure consistent output format.
@@ -112,6 +113,7 @@ type(scope): description
 ```
 
 **Types:**
+
 - `fix`: A bug fix (PATCH version)
 - `feat`: A new feature (MINOR version)
 - `docs`: Documentation-only changes
@@ -124,25 +126,29 @@ type(scope): description
 - Add `!` for breaking changes (MAJOR version)
 
 **Scopes:**
+
 - Class name, file name, issue number, or other appropriate noun
 - Examples: `build(poetry): bump requests to v3`, `style(#32): add missing type annotations`
 
 **Description Guidelines:**
+
 - Use lowercase and present tense
 - Be concise but descriptive
 - Examples:
-  - `fix(converter): bug in parent rectangle detection`
-  - `feat(cli): add command-line interface`
-  - `refactor(parsers): consolidate input format detection`
+    - `fix(converter): bug in parent rectangle detection`
+    - `feat(cli): add command-line interface`
+    - `refactor(parsers): consolidate input format detection`
 
 ### Python Style
 
 The project uses:
+
 - **Ruff** for linting and formatting
 - **mypy** for type checking
 - **Google-style** docstrings
 
 Key style rules:
+
 - Line length: 120 characters
 - Use single quotes for strings
 - Type hints required for all functions
@@ -196,13 +202,15 @@ Use these scripts for prototyping or creating reference examples.
 ### Test Coverage
 
 <!-- {cts} COVERAGE -->
+
 | File                                  | Statements | Missing | Excluded | Coverage |
-|---------------------------------------|-----------:|--------:|---------:|---------:|
-| `diacea/__init__.py`                  | 4          | 0       | 0        | 100.0%   |
-| `diacea/_runtime_type_check_setup.py` | 13         | 0       | 37       | 100.0%   |
-| **Totals**                            | 17         | 0       | 37       | 100.0%   |
+| ------------------------------------- | ---------: | ------: | -------: | -------: |
+| `diacea/__init__.py`                  |          4 |       0 |        0 |   100.0% |
+| `diacea/_runtime_type_check_setup.py` |         13 |       0 |       37 |   100.0% |
+| **Totals**                            |         17 |       0 |       37 |   100.0% |
 
 Generated on: 2024-12-12
+
 <!-- {cte} -->
 
 Note: Coverage table may be outdated. Run `./run test` for current coverage.
@@ -210,11 +218,11 @@ Note: Coverage table may be outdated. Run `./run test` for current coverage.
 ## Development Workflow
 
 1. **Create a branch** for your feature or fix
-2. **Write tests** first (TDD approach recommended)
-3. **Implement** the feature
-4. **Run tests and linting**: `./run main`
-5. **Commit** using conventional commit format
-6. **Push** and create a pull request
+1. **Write tests** first (TDD approach recommended)
+1. **Implement** the feature
+1. **Run tests and linting**: `./run main`
+1. **Commit** using conventional commit format
+1. **Push** and create a pull request
 
 ## Issue Labels and Milestones
 
@@ -228,4 +236,3 @@ Note: Coverage table may be outdated. Run `./run test` for current coverage.
 - [Conventional Commits](https://www.conventionalcommits.org/)
 - [Semantic Versioning](https://semver.org/)
 - [Git Best Practices](https://chris.beams.io/posts/git-commit/)
-
