@@ -3,6 +3,7 @@
 from pathlib import Path
 
 import pytest
+from defusedxml import EntitiesForbidden
 
 from diacea.cli import detect_input_format
 from diacea.ir import Group, Shape, Text
@@ -462,6 +463,23 @@ class TestSVGLineElements:
 
         connections = diagram.get_connections()
         assert len(connections) >= 2
+
+
+class TestSVGSecurity:
+    """Test that untrusted SVG cannot trigger XML entity attacks."""
+
+    def test_billion_laughs_is_rejected(self):
+        svg = """<?xml version="1.0"?>
+        <!DOCTYPE svg [
+            <!ENTITY a "aaaaaaaaaa">
+            <!ENTITY b "&a;&a;&a;&a;&a;&a;&a;&a;&a;&a;">
+            <!ENTITY c "&b;&b;&b;&b;&b;&b;&b;&b;&b;&b;">
+        ]>
+        <svg xmlns="http://www.w3.org/2000/svg"><text id="t1">&c;</text></svg>"""
+
+        parser = SVGParser()
+        with pytest.raises(EntitiesForbidden):
+            parser.parse(svg)
 
 
 class TestSVGCLI:
