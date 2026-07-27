@@ -22,27 +22,27 @@ from .workspace import DiagramView, ElementDefinition, Workspace
 
 __all__ = [
     # Base classes
-    "Parser",
-    "Generator",
+    'Parser',
+    'Generator',
     # Core elements
-    "Point",
-    "Dimensions",
-    "Style",
-    "Element",
-    "Shape",
-    "Connection",
-    "Text",
-    "GROUP_ID_PREFIX",
-    "Group",
-    "Diagram",
+    'Point',
+    'Dimensions',
+    'Style',
+    'Element',
+    'Shape',
+    'Connection',
+    'Text',
+    'GROUP_ID_PREFIX',
+    'Group',
+    'Diagram',
     # Semantic
-    "SemanticType",
-    "infer_semantic_type",
-    "validate_confidence",
+    'SemanticType',
+    'infer_semantic_type',
+    'validate_confidence',
     # Workspace
-    "Workspace",
-    "ElementDefinition",
-    "DiagramView",
+    'Workspace',
+    'ElementDefinition',
+    'DiagramView',
     # Version
-    "IR_VERSION",
+    'IR_VERSION',
 ]

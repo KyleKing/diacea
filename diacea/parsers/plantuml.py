@@ -32,33 +32,37 @@ _GAP_Y = 100.0
 _GROUP_PADDING = 20.0
 _KEYWORD_CONFIDENCE = 0.9
 
-_ACTIVITY_KEYWORDS = frozenset({
-    'detach',
-    'end fork',
-    'endif',
-    'endwhile',
-    'fork',
-    'fork again',
-    'kill',
-    'repeat',
-    'start',
-    'stop',
-})
+_ACTIVITY_KEYWORDS = frozenset(
+    {
+        'detach',
+        'end fork',
+        'endif',
+        'endwhile',
+        'fork',
+        'fork again',
+        'kill',
+        'repeat',
+        'start',
+        'stop',
+    }
+)
 
 _ACTIVITY_LINE_RE = re.compile(
     r'^\(\*\)|^if\s*\(.*\)\s*then\b|^while\s*\(.*\)|^:[^;{}]*;$',
     re.IGNORECASE,
 )
 
-_SEQUENCE_KEYWORDS = frozenset({
-    'activate',
-    'alt',
-    'autonumber',
-    'deactivate',
-    'loop',
-    'opt',
-    'participant',
-})
+_SEQUENCE_KEYWORDS = frozenset(
+    {
+        'activate',
+        'alt',
+        'autonumber',
+        'deactivate',
+        'loop',
+        'opt',
+        'participant',
+    }
+)
 
 _KEYWORD_INFO: dict[str, tuple[str, Optional[SemanticType]]] = {
     'actor': ('actor', SemanticType.PERSON),
@@ -93,12 +97,14 @@ _C4_ELEMENT_MACROS: dict[str, tuple[str, SemanticType]] = {
     'SystemQueue': ('queue', SemanticType.QUEUE),
 }
 
-_C4_BOUNDARY_MACROS = frozenset({
-    'Boundary',
-    'Container_Boundary',
-    'Enterprise_Boundary',
-    'System_Boundary',
-})
+_C4_BOUNDARY_MACROS = frozenset(
+    {
+        'Boundary',
+        'Container_Boundary',
+        'Enterprise_Boundary',
+        'System_Boundary',
+    }
+)
 
 _C4_REL_DIRECTIONS = {
     'D': 'down',
@@ -280,7 +286,7 @@ class PlantUMLParser(Parser):
                     skip_until = None
                 continue
             if not in_diagram:
-                if (m := _STARTUML_RE.match(line)):
+                if m := _STARTUML_RE.match(line):
                     in_diagram = True
                     state.diagram_name = m.group('name').strip() or None
                 continue
@@ -297,10 +303,7 @@ class PlantUMLParser(Parser):
         token = line.split()[0].lower()
 
         if token in _SEQUENCE_KEYWORDS:
-            raise ValueError(
-                f'Line {lineno}: sequence diagrams are not supported '
-                f'(found "{token}")'
-            )
+            raise ValueError(f'Line {lineno}: sequence diagrams are not supported (found "{token}")')
 
         if line.lower() in _ACTIVITY_KEYWORDS or _ACTIVITY_LINE_RE.match(line):
             raise ValueError(
@@ -309,7 +312,7 @@ class PlantUMLParser(Parser):
                 'are supported'
             )
 
-        if (m := re.match(r'^(left to right|top to bottom) direction$', line.lower())):
+        if m := re.match(r'^(left to right|top to bottom) direction$', line.lower()):
             state.direction = m.group(1).replace(' ', '_')
             return None
 
@@ -339,15 +342,15 @@ class PlantUMLParser(Parser):
                 self.warnings.append(f'Line {lineno}: unmatched closing brace')
             return None
 
-        if (m := _ELEMENT_RE.match(line)):
+        if m := _ELEMENT_RE.match(line):
             self._handle_element(m, state)
             return None
 
-        if (m := _MACRO_RE.match(line)):
+        if m := _MACRO_RE.match(line):
             self._handle_macro(m, lineno, state)
             return None
 
-        if (m := _REL_RE.match(line)):
+        if m := _REL_RE.match(line):
             self._handle_relationship(m, state)
             return None
 
@@ -368,9 +371,7 @@ class PlantUMLParser(Parser):
         if m.group('brace'):
             self._add_group(state, elem_id, label, semantic)
         else:
-            self._add_shape(
-                state, elem_id, label, shape_type, semantic, _KEYWORD_CONFIDENCE
-            )
+            self._add_shape(state, elem_id, label, shape_type, semantic, _KEYWORD_CONFIDENCE)
 
     def _handle_macro(self, m: re.Match[str], lineno: int, state: _ParseState) -> None:
         name = m.group('name')
@@ -399,9 +400,7 @@ class PlantUMLParser(Parser):
                 metadata['description'] = _unquote(args[3])
             if is_external:
                 metadata['external'] = True
-            self._add_shape(
-                state, elem_id, label, shape_type, semantic, 1.0, metadata
-            )
+            self._add_shape(state, elem_id, label, shape_type, semantic, 1.0, metadata)
             return
 
         if base_name in _C4_BOUNDARY_MACROS and len(args) >= 1:
@@ -411,9 +410,7 @@ class PlantUMLParser(Parser):
             self._add_group(state, elem_id, label, None)
             if not m.group('brace'):
                 state.group_stack.pop()
-                self.warnings.append(
-                    f'Line {lineno}: boundary "{elem_id}" without opening brace'
-                )
+                self.warnings.append(f'Line {lineno}: boundary "{elem_id}" without opening brace')
             return
 
         if (base_name == 'Rel' or base_name.startswith(('Rel_', 'BiRel'))) and len(args) >= 2:
@@ -423,9 +420,7 @@ class PlantUMLParser(Parser):
 
         self.warnings.append(f'Line {lineno}: skipped unknown macro: {name}(...)')
 
-    def _add_c4_relationship(
-        self, name: str, args: list[str], state: _ParseState
-    ) -> None:
+    def _add_c4_relationship(self, name: str, args: list[str], state: _ParseState) -> None:
         from_id = self._resolve_endpoint(args[0], state)
         to_id = self._resolve_endpoint(args[1], state)
         label = _unquote(args[2]) if len(args) > 2 else ''
@@ -468,9 +463,7 @@ class PlantUMLParser(Parser):
         if (raw_dir := m.group('dir')) and (direction := _DIRECTION_HINTS.get(raw_dir)):
             metadata['direction_hint'] = direction
 
-        conn = self._add_connection(
-            state, from_id, to_id, label, connection_type, metadata
-        )
+        conn = self._add_connection(state, from_id, to_id, label, connection_type, metadata)
         if dashed:
             conn.style.stroke_style = 'dashed'
 
@@ -493,9 +486,7 @@ class PlantUMLParser(Parser):
             metadata=metadata or {},
         )
         if semantic is None:
-            inferred, inferred_confidence = infer_semantic_type(
-                shape_type, label, shape.size
-            )
+            inferred, inferred_confidence = infer_semantic_type(shape_type, label, shape.size)
             shape.semantic_type = inferred
             shape.semantic_confidence = inferred_confidence
         else:
@@ -598,11 +589,7 @@ class PlantUMLParser(Parser):
         adjacency: dict[str, list[str]] = defaultdict(list)
         in_degree: dict[str, int] = {sid: 0 for sid in shape_ids}
         for conn in connections:
-            if (
-                conn.from_id in shape_ids
-                and conn.to_id in shape_ids
-                and conn.from_id != conn.to_id
-            ):
+            if conn.from_id in shape_ids and conn.to_id in shape_ids and conn.from_id != conn.to_id:
                 adjacency[conn.from_id].append(conn.to_id)
                 in_degree[conn.to_id] += 1
 
@@ -618,7 +605,7 @@ class PlantUMLParser(Parser):
                 if in_degree[target] == 0:
                     queue.append(target)
 
-        if (unvisited := shape_ids - visited):
+        if unvisited := shape_ids - visited:
             overflow_layer = max(layers.values(), default=0) + 1
             for sid in unvisited:
                 layers[sid] = overflow_layer
@@ -630,12 +617,8 @@ class PlantUMLParser(Parser):
         horizontal = state.direction == 'left_to_right'
         for layer_index in sorted(buckets):
             for position_index, shape in enumerate(buckets[layer_index]):
-                along = layer_index * (
-                    (_DEFAULT_WIDTH + _GAP_X) if horizontal else (_DEFAULT_HEIGHT + _GAP_Y)
-                )
-                across = position_index * (
-                    (_DEFAULT_HEIGHT + _GAP_Y) if horizontal else (_DEFAULT_WIDTH + _GAP_X)
-                )
+                along = layer_index * ((_DEFAULT_WIDTH + _GAP_X) if horizontal else (_DEFAULT_HEIGHT + _GAP_Y))
+                across = position_index * ((_DEFAULT_HEIGHT + _GAP_Y) if horizontal else (_DEFAULT_WIDTH + _GAP_X))
                 if horizontal:
                     shape.position = Point(along, across)
                 else:
@@ -652,9 +635,7 @@ class PlantUMLParser(Parser):
             group.position = Point(min_x, min_y)
             group.size = Dimensions(max_x - min_x, max_y - min_y)
 
-    def _descendant_shapes(
-        self, group: Group, state: _ParseState, seen: set[str]
-    ) -> list[Shape]:
+    def _descendant_shapes(self, group: Group, state: _ParseState, seen: set[str]) -> list[Shape]:
         result: list[Shape] = []
         for child_id in group.children:
             if child_id in seen:

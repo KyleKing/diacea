@@ -16,23 +16,23 @@ from ..ir import Connection, Diagram, Generator, Group, SemanticType, Shape
 from ._text import sanitize_alnum_id
 
 _C4_BOUNDARY_KEYWORDS: dict[str, str] = {
-    SemanticType.COMPONENT: "Component",
-    SemanticType.CONTAINER: "Container",
-    SemanticType.DATABASE: "ContainerDb",
-    SemanticType.PERSON: "Person",
-    SemanticType.QUEUE: "ContainerQueue",
-    SemanticType.STORAGE: "ContainerDb",
-    SemanticType.SYSTEM: "System",
+    SemanticType.COMPONENT: 'Component',
+    SemanticType.CONTAINER: 'Container',
+    SemanticType.DATABASE: 'ContainerDb',
+    SemanticType.PERSON: 'Person',
+    SemanticType.QUEUE: 'ContainerQueue',
+    SemanticType.STORAGE: 'ContainerDb',
+    SemanticType.SYSTEM: 'System',
 }
 
 _C4_TOP_LEVEL_KEYWORDS: dict[str, str] = {
-    SemanticType.COMPONENT: "Component",
-    SemanticType.CONTAINER: "Container",
-    SemanticType.DATABASE: "SystemDb",
-    SemanticType.PERSON: "Person",
-    SemanticType.QUEUE: "SystemQueue",
-    SemanticType.STORAGE: "SystemDb",
-    SemanticType.SYSTEM: "System",
+    SemanticType.COMPONENT: 'Component',
+    SemanticType.CONTAINER: 'Container',
+    SemanticType.DATABASE: 'SystemDb',
+    SemanticType.PERSON: 'Person',
+    SemanticType.QUEUE: 'SystemQueue',
+    SemanticType.STORAGE: 'SystemDb',
+    SemanticType.SYSTEM: 'System',
 }
 
 _LABEL_CHARS_REQUIRING_QUOTES = frozenset('"()[]{}|')
@@ -65,9 +65,9 @@ class MermaidGenerator(Generator):
         diagram_type = self.diagram_type or self._detect_diagram_type(diagram)
         self.detected_type = diagram_type
 
-        if diagram_type == "c4":
+        if diagram_type == 'c4':
             return self._generate_c4(diagram)
-        elif diagram_type == "sequence":
+        elif diagram_type == 'sequence':
             return self._generate_sequence(diagram)
         else:  # flowchart (default)
             return self._generate_flowchart(diagram)
@@ -83,8 +83,8 @@ class MermaidGenerator(Generator):
         A parser-provided ``metadata["mermaid"]["diagram_type"]`` wins over
         the heuristics.
         """
-        source_type = diagram.metadata.get("mermaid", {}).get("diagram_type")
-        if source_type in {"c4", "flowchart", "sequence"}:
+        source_type = diagram.metadata.get('mermaid', {}).get('diagram_type')
+        if source_type in {'c4', 'flowchart', 'sequence'}:
             return source_type
 
         shapes = diagram.get_shapes()
@@ -101,7 +101,7 @@ class MermaidGenerator(Generator):
         semantic_types = {s.semantic_type for s in shapes if s.semantic_type}
 
         if semantic_types & c4_types:  # Intersection
-            return "c4"
+            return 'c4'
 
         # Check for sequential pattern (each shape has at most one out connection)
         # This is a simple heuristic - could be improved
@@ -110,14 +110,14 @@ class MermaidGenerator(Generator):
             out_counts[conn.from_id] = out_counts.get(conn.from_id, 0) + 1
 
         if connections and all(count <= 1 for count in out_counts.values()):
-            return "sequence"
+            return 'sequence'
 
         # Default to flowchart
-        return "flowchart"
+        return 'flowchart'
 
     def _generate_flowchart(self, diagram: Diagram) -> str:
         """Generate Mermaid flowchart."""
-        lines = ["flowchart LR"]  # Left-to-right by default
+        lines = ['flowchart LR']  # Left-to-right by default
 
         shapes = diagram.get_shapes()
         connections = diagram.get_connections()
@@ -125,9 +125,7 @@ class MermaidGenerator(Generator):
 
         group_source_ids = {g.source_shape_id for g in groups}
         top_level_shapes = [
-            s for s in shapes
-            if not any(s.id in g.children for g in groups)
-            and s.id not in group_source_ids
+            s for s in shapes if not any(s.id in g.children for g in groups) and s.id not in group_source_ids
         ]
 
         for shape in top_level_shapes:
@@ -145,17 +143,17 @@ class MermaidGenerator(Generator):
         # Add styling (basic colors)
         style_lines = self._generate_flowchart_styles(shapes)
         if style_lines:
-            lines.append("")
+            lines.append('')
             lines.extend(style_lines)
 
-        return "\n".join(lines)
+        return '\n'.join(lines)
 
     def _format_flowchart_node(self, shape: Shape) -> str:
         """Format a Mermaid flowchart node."""
         node_id = self._sanitize_id(shape.id)
         label = self._format_bracket_label(shape.label or node_id)
         brackets = self._get_node_brackets(shape)
-        return f"    {node_id}{brackets[0]}{label}{brackets[1]}"
+        return f'    {node_id}{brackets[0]}{label}{brackets[1]}'
 
     def _format_bracket_label(self, label: str) -> str:
         escaped = self._escape_label(label)
@@ -172,23 +170,23 @@ class MermaidGenerator(Generator):
         if shape.semantic_type:
             semantic = shape.semantic_type
             if semantic == SemanticType.DECISION:
-                return ("{", "}")  # Diamond
+                return ('{', '}')  # Diamond
             elif semantic == SemanticType.DATABASE:
-                return ("[(", ")]")  # Cylindrical
+                return ('[(', ')]')  # Cylindrical
             elif semantic == SemanticType.PERSON:
-                return ("([", "])")  # Stadium/rounded
+                return ('([', '])')  # Stadium/rounded
             elif semantic == SemanticType.START_END:
-                return ("([", "])")  # Stadium
+                return ('([', '])')  # Stadium
 
         # Fall back to geometric shape
         shape_map = {
-            "rectangle": ("[", "]"),
-            "ellipse": ("([", "])"),
-            "diamond": ("{", "}"),
-            "circle": ("((", "))"),
+            'rectangle': ('[', ']'),
+            'ellipse': ('([', '])'),
+            'diamond': ('{', '}'),
+            'circle': ('((', '))'),
         }
 
-        return shape_map.get(shape.shape_type, ("[", "]"))  # Default rectangle
+        return shape_map.get(shape.shape_type, ('[', ']'))  # Default rectangle
 
     def _format_flowchart_connection(self, conn: Connection) -> str:
         """Format a Mermaid flowchart connection."""
@@ -196,30 +194,28 @@ class MermaidGenerator(Generator):
         to_id = self._sanitize_id(conn.to_id)
 
         # Determine arrow style
-        if conn.connection_type == "bidirectional":
-            arrow = "<-->"
-        elif conn.style.stroke_style == "dashed":
-            arrow = "-.."
+        if conn.connection_type == 'bidirectional':
+            arrow = '<-->'
+        elif conn.style.stroke_style == 'dashed':
+            arrow = '-..'
         else:
-            arrow = "-->"
+            arrow = '-->'
 
         if conn.label:
             label = self._escape_pipe_label(conn.label)
-            return f"    {from_id} {arrow}|{label}| {to_id}"
-        return f"    {from_id} {arrow} {to_id}"
+            return f'    {from_id} {arrow}|{label}| {to_id}'
+        return f'    {from_id} {arrow} {to_id}'
 
-    def _generate_subgraph(
-        self, group: Group, all_shapes: list[Shape], depth: int
-    ) -> list[str]:
+    def _generate_subgraph(self, group: Group, all_shapes: list[Shape], depth: int) -> list[str]:
         """Generate Mermaid subgraph for a group."""
         if depth > self.max_subgraph_depth:
             return []  # Skip too deeply nested groups
 
         lines = []
-        indent = "    " * depth
+        indent = '    ' * depth
         subgraph_id = self._sanitize_id(group.id)
         label = self._format_bracket_label(group.label or subgraph_id)
-        lines.append(f"{indent}subgraph {subgraph_id}[{label}]")
+        lines.append(f'{indent}subgraph {subgraph_id}[{label}]')
 
         # Add child shapes
         for child_id in group.children:
@@ -228,7 +224,7 @@ class MermaidGenerator(Generator):
                 node_line = self._format_flowchart_node(child_shape)
                 lines.append(indent + node_line)
 
-        lines.append(f"{indent}end")
+        lines.append(f'{indent}end')
         return lines
 
     def _generate_flowchart_styles(self, shapes: list[Shape]) -> list[str]:
@@ -243,21 +239,21 @@ class MermaidGenerator(Generator):
             style_parts = []
 
             if shape.style.fill_color:
-                style_parts.append(f"fill:{shape.style.fill_color}")
+                style_parts.append(f'fill:{shape.style.fill_color}')
 
             if shape.style.stroke_color:
-                style_parts.append(f"stroke:{shape.style.stroke_color}")
+                style_parts.append(f'stroke:{shape.style.stroke_color}')
 
             if style_parts:
-                style_str = ",".join(style_parts)
-                lines.append(f"    style {node_id} {style_str}")
+                style_str = ','.join(style_parts)
+                lines.append(f'    style {node_id} {style_str}')
 
         return lines
 
     def _generate_c4(self, diagram: Diagram) -> str:
         """Generate Mermaid C4 diagram."""
-        lines = ["C4Context"]  # Start with Context level
-        lines.append("    title " + (diagram.name or "Architecture Diagram"))
+        lines = ['C4Context']  # Start with Context level
+        lines.append('    title ' + (diagram.name or 'Architecture Diagram'))
 
         shapes = diagram.get_shapes()
         connections = diagram.get_connections()
@@ -276,7 +272,7 @@ class MermaidGenerator(Generator):
             declared_ids.add(shape.id)
 
         for group in groups:
-            label = self._escape_quoted_label(group.label or "System")
+            label = self._escape_quoted_label(group.label or 'System')
             boundary_id = self._sanitize_id(group.id)
             lines.append(f'    Boundary({boundary_id}, "{label}") {{')
 
@@ -286,7 +282,7 @@ class MermaidGenerator(Generator):
                     lines.append(self._format_c4_element(child, in_boundary=True))
                     declared_ids.add(child.id)
 
-            lines.append("    }")
+            lines.append('    }')
 
         for shape in shapes:
             if shape.id in declared_ids or shape.id in group_source_ids:
@@ -297,23 +293,23 @@ class MermaidGenerator(Generator):
         for conn in connections:
             from_id = self._sanitize_id(conn.from_id)
             to_id = self._sanitize_id(conn.to_id)
-            label = self._escape_quoted_label(conn.label or "uses")
+            label = self._escape_quoted_label(conn.label or 'uses')
             lines.append(f'    Rel({from_id}, {to_id}, "{label}")')
 
-        return "\n".join(lines)
+        return '\n'.join(lines)
 
     def _format_c4_element(self, shape: Shape, in_boundary: bool) -> str:
         keywords = _C4_BOUNDARY_KEYWORDS if in_boundary else _C4_TOP_LEVEL_KEYWORDS
-        default = "Container" if in_boundary else "System"
-        keyword = keywords.get(shape.semantic_type or "", default)
+        default = 'Container' if in_boundary else 'System'
+        keyword = keywords.get(shape.semantic_type or '', default)
         node_id = self._sanitize_id(shape.id)
         label = self._escape_quoted_label(shape.label or node_id)
-        indent = "        " if in_boundary else "    "
+        indent = '        ' if in_boundary else '    '
         return f'{indent}{keyword}({node_id}, "{label}")'
 
     def _generate_sequence(self, diagram: Diagram) -> str:
         """Generate Mermaid sequence diagram."""
-        lines = ["sequenceDiagram"]
+        lines = ['sequenceDiagram']
 
         shapes = diagram.get_shapes()
         connections = diagram.get_connections()
@@ -321,50 +317,50 @@ class MermaidGenerator(Generator):
         for shape in shapes:
             participant_id = self._sanitize_id(shape.id)
             label = self._escape_label(shape.label or participant_id)
-            lines.append(f"    participant {participant_id} as {label}")
+            lines.append(f'    participant {participant_id} as {label}')
 
         for conn in connections:
             from_id = self._sanitize_id(conn.from_id)
             to_id = self._sanitize_id(conn.to_id)
 
-            if conn.connection_type == "bidirectional":
-                arrow = "->>"
-            elif conn.style.stroke_style == "dashed":
-                arrow = "-->"
+            if conn.connection_type == 'bidirectional':
+                arrow = '->>'
+            elif conn.style.stroke_style == 'dashed':
+                arrow = '-->'
             else:
-                arrow = "->>"
+                arrow = '->>'
 
-            label = self._escape_label(conn.label or "")
-            lines.append(f"    {from_id}{arrow}{to_id}: {label}")
+            label = self._escape_label(conn.label or '')
+            lines.append(f'    {from_id}{arrow}{to_id}: {label}')
 
-        return "\n".join(lines)
+        return '\n'.join(lines)
 
     _sanitize_id = staticmethod(sanitize_alnum_id)
 
     def _escape_label(self, label: str) -> str:
         """Escape label for Mermaid flowchart node syntax."""
-        escaped = label.replace("&", "&amp;")
-        escaped = escaped.replace('"', "#quot;")
-        escaped = escaped.replace("<", "&lt;")
-        escaped = escaped.replace(">", "&gt;")
-        escaped = escaped.replace("\n", "<br/>")
+        escaped = label.replace('&', '&amp;')
+        escaped = escaped.replace('"', '#quot;')
+        escaped = escaped.replace('<', '&lt;')
+        escaped = escaped.replace('>', '&gt;')
+        escaped = escaped.replace('\n', '<br/>')
         return escaped
 
     def _escape_quoted_label(self, label: str) -> str:
         """Escape label for Mermaid quoted string contexts (C4, sequence)."""
-        escaped = label.replace("\\", "\\\\")
+        escaped = label.replace('\\', '\\\\')
         escaped = escaped.replace('"', '\\"')
-        escaped = escaped.replace("&", "&amp;")
-        escaped = escaped.replace("<", "&lt;")
-        escaped = escaped.replace(">", "&gt;")
-        escaped = escaped.replace("\n", "<br/>")
+        escaped = escaped.replace('&', '&amp;')
+        escaped = escaped.replace('<', '&lt;')
+        escaped = escaped.replace('>', '&gt;')
+        escaped = escaped.replace('\n', '<br/>')
         return escaped
 
     def _escape_pipe_label(self, label: str) -> str:
         """Escape label for Mermaid pipe-delimited connection labels."""
-        escaped = label.replace("&", "&amp;")
-        escaped = escaped.replace("|", "&#124;")
-        escaped = escaped.replace("<", "&lt;")
-        escaped = escaped.replace(">", "&gt;")
-        escaped = escaped.replace("\n", "<br/>")
+        escaped = label.replace('&', '&amp;')
+        escaped = escaped.replace('|', '&#124;')
+        escaped = escaped.replace('<', '&lt;')
+        escaped = escaped.replace('>', '&gt;')
+        escaped = escaped.replace('\n', '<br/>')
         return escaped

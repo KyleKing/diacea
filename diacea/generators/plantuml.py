@@ -7,12 +7,12 @@ from ._text import sanitize_alnum_id
 
 
 def _escape_plantuml_label(label: str) -> str:
-    escaped = label.replace("\\", "\\\\")
+    escaped = label.replace('\\', '\\\\')
     escaped = escaped.replace('"', '\\"')
-    escaped = escaped.replace("\n", "\\n")
-    escaped = escaped.replace("<", "~<")
-    escaped = escaped.replace(">", "~>")
-    escaped = escaped.replace("&", "&amp;")
+    escaped = escaped.replace('\n', '\\n')
+    escaped = escaped.replace('<', '~<')
+    escaped = escaped.replace('>', '~>')
+    escaped = escaped.replace('&', '&amp;')
     return escaped
 
 
@@ -28,7 +28,7 @@ class PlantUMLGenerator(Generator):
         Returns:
             PlantUML string
         """
-        lines = ["@startuml"]
+        lines = ['@startuml']
 
         # Get elements
         shapes = diagram.get_shapes()
@@ -51,8 +51,8 @@ class PlantUMLGenerator(Generator):
         for conn in connections:
             lines.append(self._generate_connection(conn))
 
-        lines.append("@enduml")
-        return "\n".join(lines)
+        lines.append('@enduml')
+        return '\n'.join(lines)
 
     def _generate_shape(self, shape: Shape) -> str:
         """Generate PlantUML for a shape."""
@@ -72,9 +72,9 @@ class PlantUMLGenerator(Generator):
         for child_id in group.children:
             child_shape = next((s for s in all_shapes if s.id == child_id), None)
             if child_shape:
-                lines.append(f"  {self._generate_shape(child_shape)}")
+                lines.append(f'  {self._generate_shape(child_shape)}')
 
-        lines.append("}")
+        lines.append('}')
         return lines
 
     def _generate_connection(self, conn: Connection) -> str:
@@ -83,15 +83,15 @@ class PlantUMLGenerator(Generator):
         to_id = self._sanitize_id(conn.to_id)
 
         # Determine arrow type
-        if conn.connection_type == "bidirectional":
-            arrow = "<-->"
+        if conn.connection_type == 'bidirectional':
+            arrow = '<-->'
         else:
-            arrow = "-->"
+            arrow = '-->'
 
         if conn.label:
             label = self._escape_label(conn.label)
             return f'{from_id} {arrow} {to_id} : "{label}"'
-        return f"{from_id} {arrow} {to_id}"
+        return f'{from_id} {arrow} {to_id}'
 
     def _map_shape_type(self, shape: Shape) -> str:
         """Map IR shape type to PlantUML type."""
@@ -99,21 +99,21 @@ class PlantUMLGenerator(Generator):
         if shape.semantic_type:
             semantic = shape.semantic_type
             if semantic == SemanticType.DATABASE:
-                return "database"
+                return 'database'
             elif semantic == SemanticType.QUEUE:
-                return "queue"
+                return 'queue'
             elif semantic == SemanticType.STORAGE:
-                return "storage"
+                return 'storage'
             elif semantic == SemanticType.CLOUD:
-                return "cloud"
+                return 'cloud'
 
         # Fallback to geometric shape
         shape_map = {
-            "rectangle": "rectangle",
-            "ellipse": "actor",  # PlantUML uses 'actor' for people
-            "diamond": "hexagon",
+            'rectangle': 'rectangle',
+            'ellipse': 'actor',  # PlantUML uses 'actor' for people
+            'diamond': 'hexagon',
         }
-        return shape_map.get(shape.shape_type, "rectangle")
+        return shape_map.get(shape.shape_type, 'rectangle')
 
     _sanitize_id = staticmethod(sanitize_alnum_id)
     _escape_label = staticmethod(_escape_plantuml_label)
@@ -132,11 +132,11 @@ class C4PlantUMLGenerator(Generator):
             C4-PlantUML string
         """
         lines = [
-            "@startuml",
-            "!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml",
-            "",
-            "LAYOUT_WITH_LEGEND()",
-            "",
+            '@startuml',
+            '!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml',
+            '',
+            'LAYOUT_WITH_LEGEND()',
+            '',
         ]
 
         # Get elements
@@ -191,38 +191,38 @@ class C4PlantUMLGenerator(Generator):
         for database in databases:
             lines.append(self._generate_database(database))
 
-        lines.append("")
+        lines.append('')
 
         # Generate groups as system boundaries
         for group in groups:
             lines.extend(self._generate_boundary(group, shapes))
 
-        lines.append("")
+        lines.append('')
 
         # Generate relationships
         for conn in connections:
             lines.append(self._generate_relationship(conn))
 
-        lines.append("@enduml")
-        return "\n".join(lines)
+        lines.append('@enduml')
+        return '\n'.join(lines)
 
     def _generate_person(self, shape: Shape) -> str:
         """Generate C4 Person element."""
         safe_id = self._sanitize_id(shape.id)
-        label = self._escape_label(shape.label or "Person")
+        label = self._escape_label(shape.label or 'Person')
         return f'Person({safe_id}, "{label}")'
 
     def _generate_system(self, shape: Shape) -> str:
         """Generate C4 System element."""
         safe_id = self._sanitize_id(shape.id)
-        label = self._escape_label(shape.label or "System")
+        label = self._escape_label(shape.label or 'System')
         return f'System({safe_id}, "{label}")'
 
     def _generate_container(self, shape: Shape) -> str:
         """Generate C4 Container element."""
         safe_id = self._sanitize_id(shape.id)
-        label = self._escape_label(shape.label or "Container")
-        tech = shape.metadata.get("technology", "")
+        label = self._escape_label(shape.label or 'Container')
+        tech = shape.metadata.get('technology', '')
         if tech:
             tech = self._escape_label(tech)
             return f'Container({safe_id}, "{label}", "{tech}")'
@@ -231,24 +231,24 @@ class C4PlantUMLGenerator(Generator):
     def _generate_component(self, shape: Shape) -> str:
         """Generate C4 Component element."""
         safe_id = self._sanitize_id(shape.id)
-        label = self._escape_label(shape.label or "Component")
+        label = self._escape_label(shape.label or 'Component')
         return f'Component({safe_id}, "{label}")'
 
     def _generate_database(self, shape: Shape) -> str:
         """Generate C4 Database element."""
         safe_id = self._sanitize_id(shape.id)
-        raw_label = shape.label or "Database"
+        raw_label = shape.label or 'Database'
         label = self._escape_label(raw_label)
         label_lower = raw_label.lower()
-        tech = ""
-        if "postgres" in label_lower:
-            tech = "PostgreSQL"
-        elif "mysql" in label_lower:
-            tech = "MySQL"
-        elif "mongodb" in label_lower or "mongo" in label_lower:
-            tech = "MongoDB"
-        elif "redis" in label_lower:
-            tech = "Redis"
+        tech = ''
+        if 'postgres' in label_lower:
+            tech = 'PostgreSQL'
+        elif 'mysql' in label_lower:
+            tech = 'MySQL'
+        elif 'mongodb' in label_lower or 'mongo' in label_lower:
+            tech = 'MongoDB'
+        elif 'redis' in label_lower:
+            tech = 'Redis'
 
         if tech:
             return f'ComponentDb({safe_id}, "{label}", "{tech}")'
@@ -258,7 +258,7 @@ class C4PlantUMLGenerator(Generator):
         """Generate C4 System_Boundary for a group."""
         lines = []
         safe_id = self._sanitize_id(group.id)
-        label = self._escape_label(group.label or "System")
+        label = self._escape_label(group.label or 'System')
         lines.append(f'System_Boundary({safe_id}, "{label}") {{')
 
         # Add child elements
@@ -267,23 +267,23 @@ class C4PlantUMLGenerator(Generator):
             if child_shape:
                 semantic = child_shape.semantic_type
                 if semantic == SemanticType.CONTAINER:
-                    lines.append(f"  {self._generate_container(child_shape)}")
+                    lines.append(f'  {self._generate_container(child_shape)}')
                 elif semantic == SemanticType.COMPONENT:
-                    lines.append(f"  {self._generate_component(child_shape)}")
+                    lines.append(f'  {self._generate_component(child_shape)}')
                 elif semantic == SemanticType.DATABASE:
-                    lines.append(f"  {self._generate_database(child_shape)}")
+                    lines.append(f'  {self._generate_database(child_shape)}')
                 else:
                     # Default to container
-                    lines.append(f"  {self._generate_container(child_shape)}")
+                    lines.append(f'  {self._generate_container(child_shape)}')
 
-        lines.append("}")
+        lines.append('}')
         return lines
 
     def _generate_relationship(self, conn: Connection) -> str:
         """Generate C4 Rel (relationship)."""
         from_id = self._sanitize_id(conn.from_id)
         to_id = self._sanitize_id(conn.to_id)
-        label = self._escape_label(conn.label or "uses")
+        label = self._escape_label(conn.label or 'uses')
         return f'Rel({from_id}, {to_id}, "{label}")'
 
     _sanitize_id = staticmethod(sanitize_alnum_id)

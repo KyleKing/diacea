@@ -20,9 +20,9 @@ class ElementDefinition:
 
     id: str
     label: str
-    description: str = ""
-    element_type: str = "component"  # system, container, component, etc.
-    technology: str = ""
+    description: str = ''
+    element_type: str = 'component'  # system, container, component, etc.
+    technology: str = ''
     style: dict[str, Any] = field(default_factory=dict)
     tags: list[str] = field(default_factory=list)
     metadata: dict[str, Any] = field(default_factory=dict)
@@ -38,8 +38,8 @@ class DiagramView:
     id: str
     name: str
     view_type: str  # "context", "container", "component", "sequence", etc.
-    description: str = ""
-    file: str = ""  # Path to diagram file
+    description: str = ''
+    file: str = ''  # Path to diagram file
     zoom_level: int = 0  # C4: 1=Context, 2=Container, 3=Component, 4=Code
     parent_view: Optional[str] = None  # For drill-down relationships
     focused_element: Optional[str] = None  # Which element this zooms into
@@ -56,7 +56,7 @@ class Workspace:
 
     id: str
     name: str
-    description: str = ""
+    description: str = ''
 
     # Shared element library - single source of truth
     elements: dict[str, ElementDefinition] = field(default_factory=dict)
@@ -65,10 +65,10 @@ class Workspace:
     views: dict[str, DiagramView] = field(default_factory=dict)
 
     # Metadata
-    created: str = ""
-    modified: str = ""
-    author: str = ""
-    version: str = "1.0.0"
+    created: str = ''
+    modified: str = ''
+    author: str = ''
+    version: str = '1.0.0'
 
     def get_element(self, element_id: str) -> Optional[ElementDefinition]:
         """Get element definition by ID.
@@ -160,21 +160,15 @@ class Workspace:
         for view_id, view in self.views.items():
             for elem_ref in view.element_refs:
                 if elem_ref not in self.elements:
-                    errors.append(
-                        f"View '{view_id}' references undefined element '{elem_ref}'"
-                    )
+                    errors.append(f"View '{view_id}' references undefined element '{elem_ref}'")
 
             # Validate parent view exists
             if view.parent_view and view.parent_view not in self.views:
-                errors.append(
-                    f"View '{view_id}' references undefined parent view '{view.parent_view}'"
-                )
+                errors.append(f"View '{view_id}' references undefined parent view '{view.parent_view}'")
 
             # Validate focused element exists
             if view.focused_element and view.focused_element not in self.elements:
-                errors.append(
-                    f"View '{view_id}' focuses on undefined element '{view.focused_element}'"
-                )
+                errors.append(f"View '{view_id}' focuses on undefined element '{view.focused_element}'")
 
         return errors
 
@@ -246,10 +240,10 @@ class Workspace:
         hierarchy: dict[str, list[str]] = {}
 
         # Find root views (no parent)
-        hierarchy["_root"] = []
+        hierarchy['_root'] = []
         for view_id, view in self.views.items():
             if not view.parent_view:
-                hierarchy["_root"].append(view_id)
+                hierarchy['_root'].append(view_id)
 
         # Build parent → children mapping
         for view_id, view in self.views.items():

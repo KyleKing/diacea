@@ -22,37 +22,46 @@ from diacea.parsers import ExcalidrawParser
 
 def excalidraw_shape_strategy():
     """Generate random Excalidraw shape data."""
-    return st.fixed_dictionaries({
-        'id': st.text(alphabet='abcdefghijklmnopqrstuvwxyz0123456789_', min_size=1, max_size=20),
-        'type': st.sampled_from(['rectangle', 'ellipse', 'diamond', 'text']),
-        'x': st.floats(min_value=-10000.0, max_value=10000.0, allow_nan=False),
-        'y': st.floats(min_value=-10000.0, max_value=10000.0, allow_nan=False),
-        'width': st.floats(min_value=1.0, max_value=1000.0, allow_nan=False),
-        'height': st.floats(min_value=1.0, max_value=1000.0, allow_nan=False),
-    })
+    return st.fixed_dictionaries(
+        {
+            'id': st.text(alphabet='abcdefghijklmnopqrstuvwxyz0123456789_', min_size=1, max_size=20),
+            'type': st.sampled_from(['rectangle', 'ellipse', 'diamond', 'text']),
+            'x': st.floats(min_value=-10000.0, max_value=10000.0, allow_nan=False),
+            'y': st.floats(min_value=-10000.0, max_value=10000.0, allow_nan=False),
+            'width': st.floats(min_value=1.0, max_value=1000.0, allow_nan=False),
+            'height': st.floats(min_value=1.0, max_value=1000.0, allow_nan=False),
+        }
+    )
+
 
 def excalidraw_text_strategy():
     """Generate random Excalidraw text element data."""
-    return st.fixed_dictionaries({
-        'id': st.text(alphabet='abcdefghijklmnopqrstuvwxyz0123456789_', min_size=1, max_size=20),
-        'type': st.just('text'),
-        'x': st.floats(min_value=-10000.0, max_value=10000.0, allow_nan=False),
-        'y': st.floats(min_value=-10000.0, max_value=10000.0, allow_nan=False),
-        'width': st.floats(min_value=1.0, max_value=500.0, allow_nan=False),
-        'height': st.floats(min_value=1.0, max_value=100.0, allow_nan=False),
-        'text': st.text(min_size=0, max_size=200),
-    })
+    return st.fixed_dictionaries(
+        {
+            'id': st.text(alphabet='abcdefghijklmnopqrstuvwxyz0123456789_', min_size=1, max_size=20),
+            'type': st.just('text'),
+            'x': st.floats(min_value=-10000.0, max_value=10000.0, allow_nan=False),
+            'y': st.floats(min_value=-10000.0, max_value=10000.0, allow_nan=False),
+            'width': st.floats(min_value=1.0, max_value=500.0, allow_nan=False),
+            'height': st.floats(min_value=1.0, max_value=100.0, allow_nan=False),
+            'text': st.text(min_size=0, max_size=200),
+        }
+    )
+
 
 def excalidraw_diagram_strategy():
     """Generate random Excalidraw diagram data."""
-    return st.fixed_dictionaries({
-        'type': st.just('excalidraw'),
-        'elements': st.lists(
-            st.one_of(excalidraw_shape_strategy(), excalidraw_text_strategy()),
-            min_size=0,
-            max_size=50,
-        ),
-    })
+    return st.fixed_dictionaries(
+        {
+            'type': st.just('excalidraw'),
+            'elements': st.lists(
+                st.one_of(excalidraw_shape_strategy(), excalidraw_text_strategy()),
+                min_size=0,
+                max_size=50,
+            ),
+        }
+    )
+
 
 def ir_shape_strategy():
     """Generate random IR Shape objects."""
@@ -80,6 +89,7 @@ def ir_shape_strategy():
         ),
     )
 
+
 def ir_diagram_strategy():
     """Generate random IR Diagram with just shapes (no connections)."""
     return st.builds(
@@ -88,6 +98,7 @@ def ir_diagram_strategy():
         name=st.text(min_size=0, max_size=50),
         elements=st.lists(ir_shape_strategy(), min_size=0, max_size=30),
     )
+
 
 class TestParserPropertyBased:
     """Property-based tests for parsers."""
@@ -112,6 +123,7 @@ class TestParserPropertyBased:
 
         non_arrow_elements = [e for e in data['elements'] if e.get('type') != 'arrow']
         assert len(diagram.elements) <= len(non_arrow_elements) + len(non_arrow_elements)
+
 
 class TestGeneratorPropertyBased:
     """Property-based tests for generators."""
@@ -174,6 +186,7 @@ class TestGeneratorPropertyBased:
             if diagram.elements:
                 assert output.strip()
 
+
 class TestEscapingPropertyBased:
     """Property-based tests for label escaping."""
 
@@ -227,6 +240,7 @@ class TestEscapingPropertyBased:
         output = gen.generate(diagram)
 
         assert 'flowchart' in output.lower()
+
 
 class TestIdempotency:
     """Test that operations are idempotent."""

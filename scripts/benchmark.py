@@ -202,7 +202,7 @@ def run_benchmark(track_memory: bool = False) -> None:
     print('BENCHMARK RESULTS (5 iterations each, times in ms)')
     print('=' * 85)
 
-    header = f"{'Size':<10} {'Parse':<12}"
+    header = f'{"Size":<10} {"Parse":<12}'
     for gen_name in generators:
         header += f'{gen_name:<12}'
     print(header)
@@ -224,7 +224,7 @@ def run_benchmark(track_memory: bool = False) -> None:
         print('MEMORY USAGE (peak bytes)')
         print('=' * 85)
 
-        header = f"{'Size':<10} {'Parse':<12}"
+        header = f'{"Size":<10} {"Parse":<12}'
         for gen_name in generators:
             header += f'{gen_name:<12}'
         print(header)
@@ -243,7 +243,7 @@ def run_benchmark(track_memory: bool = False) -> None:
     print('OUTPUT SIZES (bytes)')
     print('=' * 85)
 
-    header = f"{'Size':<10} "
+    header = f'{"Size":<10} '
     for gen_name in generators:
         header += f'{gen_name:<12}'
     print(header)
@@ -301,6 +301,7 @@ def main() -> int:
 
     if args.clean:
         import shutil
+
         if BENCH_DIR.exists():
             shutil.rmtree(BENCH_DIR)
             print(f'Cleaned up {BENCH_DIR}')

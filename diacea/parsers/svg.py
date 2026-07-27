@@ -56,10 +56,12 @@ def _sample_cubic(p0: _XY, p1: _XY, p2: _XY, p3: _XY) -> list[_XY]:
     for step in range(1, _CURVE_SAMPLES + 1):
         t = step / _CURVE_SAMPLES
         mt = 1.0 - t
-        points.append((
-            mt**3 * p0[0] + 3 * mt**2 * t * p1[0] + 3 * mt * t**2 * p2[0] + t**3 * p3[0],
-            mt**3 * p0[1] + 3 * mt**2 * t * p1[1] + 3 * mt * t**2 * p2[1] + t**3 * p3[1],
-        ))
+        points.append(
+            (
+                mt**3 * p0[0] + 3 * mt**2 * t * p1[0] + 3 * mt * t**2 * p2[0] + t**3 * p3[0],
+                mt**3 * p0[1] + 3 * mt**2 * t * p1[1] + 3 * mt * t**2 * p2[1] + t**3 * p3[1],
+            )
+        )
     return points
 
 
@@ -68,10 +70,12 @@ def _sample_quadratic(p0: _XY, p1: _XY, p2: _XY) -> list[_XY]:
     for step in range(1, _CURVE_SAMPLES + 1):
         t = step / _CURVE_SAMPLES
         mt = 1.0 - t
-        points.append((
-            mt**2 * p0[0] + 2 * mt * t * p1[0] + t**2 * p2[0],
-            mt**2 * p0[1] + 2 * mt * t * p1[1] + t**2 * p2[1],
-        ))
+        points.append(
+            (
+                mt**2 * p0[0] + 2 * mt * t * p1[0] + t**2 * p2[0],
+                mt**2 * p0[1] + 2 * mt * t * p1[1] + t**2 * p2[1],
+            )
+        )
     return points
 
 
@@ -126,10 +130,12 @@ def _sample_arc(  # noqa: PLR0913
     for step in range(1, _CURVE_SAMPLES + 1):
         theta = theta1 + delta * step / _CURVE_SAMPLES
         cos_t, sin_t = math.cos(theta), math.sin(theta)
-        points.append((
-            cx + rx * cos_t * cos_phi - ry * sin_t * sin_phi,
-            cy + rx * cos_t * sin_phi + ry * sin_t * cos_phi,
-        ))
+        points.append(
+            (
+                cx + rx * cos_t * cos_phi - ry * sin_t * sin_phi,
+                cy + rx * cos_t * sin_phi + ry * sin_t * cos_phi,
+            )
+        )
     points[-1] = end
     return points
 
@@ -153,7 +159,7 @@ def _tokenize_path(d: str) -> Iterator[tuple[str, list[float]]]:
         if i + arity > len(tokens) or any(tokens[i + j].isalpha() for j in range(arity)):
             _logger.debug('Malformed SVG path data near token %d: %s', i, d[:80])
             return
-        yield (command, [float(t) for t in tokens[i:i + arity]])
+        yield (command, [float(t) for t in tokens[i : i + arity]])
         i += arity
         if command == 'M':
             command = 'L'
@@ -847,25 +853,25 @@ class SVGParser(Parser):
         Returns:
             Style object
         """
-        fill = elem.get("fill")
-        stroke = elem.get("stroke")
-        stroke_width = elem.get("stroke-width")
-        stroke_dasharray = elem.get("stroke-dasharray")
+        fill = elem.get('fill')
+        stroke = elem.get('stroke')
+        stroke_width = elem.get('stroke-width')
+        stroke_dasharray = elem.get('stroke-dasharray')
 
         # Parse style attribute if present
-        style_str = elem.get("style", "")
+        style_str = elem.get('style', '')
         if style_str:
             style_dict = self._parse_style_string(style_str)
-            fill = style_dict.get("fill", fill)
-            stroke = style_dict.get("stroke", stroke)
-            stroke_width = style_dict.get("stroke-width", stroke_width)
-            stroke_dasharray = style_dict.get("stroke-dasharray", stroke_dasharray)
+            fill = style_dict.get('fill', fill)
+            stroke = style_dict.get('stroke', stroke)
+            stroke_width = style_dict.get('stroke-width', stroke_width)
+            stroke_dasharray = style_dict.get('stroke-dasharray', stroke_dasharray)
 
         return Style(
-            fill_color=fill if fill and fill != "none" else None,
-            stroke_color=stroke if stroke and stroke != "none" else None,
+            fill_color=fill if fill and fill != 'none' else None,
+            stroke_color=stroke if stroke and stroke != 'none' else None,
             stroke_width=float(stroke_width) if stroke_width else None,
-            stroke_style="dashed" if stroke_dasharray else "solid",
+            stroke_style='dashed' if stroke_dasharray else 'solid',
         )
 
     def _parse_style_string(self, style_str: str) -> dict[str, str]:
@@ -878,9 +884,9 @@ class SVGParser(Parser):
             Dictionary of style properties
         """
         result = {}
-        for item in style_str.split(";"):
-            if ":" in item:
-                key, value = item.split(":", 1)
+        for item in style_str.split(';'):
+            if ':' in item:
+                key, value = item.split(':', 1)
                 result[key.strip()] = value.strip()
         return result
 
@@ -893,17 +899,17 @@ class SVGParser(Parser):
         Returns:
             Font size in pixels
         """
-        font_size = elem.get("font-size")
+        font_size = elem.get('font-size')
         if font_size:
             # Remove units (px, pt, etc.)
-            return float("".join(c for c in font_size if c.isdigit() or c == ".") or "14")
+            return float(''.join(c for c in font_size if c.isdigit() or c == '.') or '14')
 
         # Check style attribute
-        style_str = elem.get("style", "")
+        style_str = elem.get('style', '')
         style_dict = self._parse_style_string(style_str)
-        if "font-size" in style_dict:
-            fs = style_dict["font-size"]
-            return float("".join(c for c in fs if c.isdigit() or c == ".") or "14")
+        if 'font-size' in style_dict:
+            fs = style_dict['font-size']
+            return float(''.join(c for c in fs if c.isdigit() or c == '.') or '14')
 
         return 14.0  # Default
 
@@ -919,19 +925,19 @@ class SVGParser(Parser):
         hint_lower = hint.lower()
 
         hint_map = {
-            "database": SemanticType.DATABASE,
-            "db": SemanticType.DATABASE,
-            "person": SemanticType.PERSON,
-            "user": SemanticType.PERSON,
-            "actor": SemanticType.PERSON,
-            "system": SemanticType.SYSTEM,
-            "component": SemanticType.COMPONENT,
-            "service": SemanticType.SERVICE,
-            "container": SemanticType.CONTAINER,
-            "queue": SemanticType.QUEUE,
-            "storage": SemanticType.STORAGE,
-            "external": SemanticType.EXTERNAL,
-            "cloud": SemanticType.CLOUD,
+            'database': SemanticType.DATABASE,
+            'db': SemanticType.DATABASE,
+            'person': SemanticType.PERSON,
+            'user': SemanticType.PERSON,
+            'actor': SemanticType.PERSON,
+            'system': SemanticType.SYSTEM,
+            'component': SemanticType.COMPONENT,
+            'service': SemanticType.SERVICE,
+            'container': SemanticType.CONTAINER,
+            'queue': SemanticType.QUEUE,
+            'storage': SemanticType.STORAGE,
+            'external': SemanticType.EXTERNAL,
+            'cloud': SemanticType.CLOUD,
         }
 
         return hint_map.get(hint_lower)
@@ -974,4 +980,4 @@ class SVGParser(Parser):
             Unique element ID
         """
         self._id_counter += 1
-        return f"elem_{self._id_counter}"
+        return f'elem_{self._id_counter}'

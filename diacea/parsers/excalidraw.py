@@ -50,15 +50,13 @@ class ExcalidrawParser(Parser):
 
         # Handle both full Excalidraw format and just elements list
         if isinstance(data, dict):
-            elements = data.get("elements", [])
-            excalidraw_metadata = {
-                k: v for k, v in data.items() if k not in ["elements"]
-            }
+            elements = data.get('elements', [])
+            excalidraw_metadata = {k: v for k, v in data.items() if k not in ['elements']}
         elif isinstance(data, list):
             elements = data
             excalidraw_metadata = {}
         else:
-            raise ValueError("Invalid Excalidraw data format")
+            raise ValueError('Invalid Excalidraw data format')
 
         # Parse elements by type
         ir_elements: list[Element] = []
@@ -68,18 +66,18 @@ class ExcalidrawParser(Parser):
 
         # First pass: Parse all elements
         for elem in elements:
-            elem_type = elem.get("type", "")
+            elem_type = elem.get('type', '')
 
-            if elem_type == "rectangle" or elem_type == "ellipse" or elem_type == "diamond":
+            if elem_type == 'rectangle' or elem_type == 'ellipse' or elem_type == 'diamond':
                 shape = self._parse_shape(elem)
                 ir_elements.append(shape)
                 shapes.append(shape)
 
-            elif elem_type == "arrow":
+            elif elem_type == 'arrow':
                 # Store arrows for second pass (need shapes first)
                 connections.append(elem)
 
-            elif elem_type == "text":
+            elif elem_type == 'text':
                 text = self._parse_text(elem)
                 ir_elements.append(text)
                 texts.append(text)
@@ -99,9 +97,9 @@ class ExcalidrawParser(Parser):
 
         # Create diagram
         diagram = Diagram(
-            id="excalidraw-diagram",
+            id='excalidraw-diagram',
             elements=ir_elements,
-            metadata={"excalidraw": excalidraw_metadata},
+            metadata={'excalidraw': excalidraw_metadata},
         )
 
         return diagram
@@ -109,26 +107,26 @@ class ExcalidrawParser(Parser):
     def _parse_shape(self, elem: dict[str, Any]) -> Shape:
         """Parse Excalidraw shape to IR Shape."""
         # Position and size
-        position = Point(x=float(elem.get("x", 0)), y=float(elem.get("y", 0)))
-        size = Dimensions(width=float(elem.get("width", 0)), height=float(elem.get("height", 0)))
+        position = Point(x=float(elem.get('x', 0)), y=float(elem.get('y', 0)))
+        size = Dimensions(width=float(elem.get('width', 0)), height=float(elem.get('height', 0)))
 
         # Style
-        stroke_width = elem.get("strokeWidth")
+        stroke_width = elem.get('strokeWidth')
         style = Style(
-            fill_color=elem.get("backgroundColor") if elem.get("backgroundColor") != "transparent" else None,
-            stroke_color=elem.get("strokeColor"),
+            fill_color=elem.get('backgroundColor') if elem.get('backgroundColor') != 'transparent' else None,
+            stroke_color=elem.get('strokeColor'),
             stroke_width=float(stroke_width) if stroke_width is not None else None,
-            stroke_style="dashed" if elem.get("strokeStyle") == "dashed" else "solid",
-            opacity=float(elem.get("opacity", 100)) / 100.0,
+            stroke_style='dashed' if elem.get('strokeStyle') == 'dashed' else 'solid',
+            opacity=float(elem.get('opacity', 100)) / 100.0,
         )
 
         # Map Excalidraw type to IR shape type
-        shape_type = elem.get("type", "rectangle")
+        shape_type = elem.get('type', 'rectangle')
 
         # Create shape
         shape = Shape(
-            id=elem["id"],
-            label="",  # Will be filled in by text association
+            id=elem['id'],
+            label='',  # Will be filled in by text association
             shape_type=shape_type,
             position=position,
             size=size,
@@ -138,14 +136,14 @@ class ExcalidrawParser(Parser):
 
         # Preserve Excalidraw-specific metadata for round-tripping
         excalidraw_metadata = {
-            "roughness": elem.get("roughness"),
-            "fillStyle": elem.get("fillStyle"),
-            "roundness": elem.get("roundness"),
-            "seed": elem.get("seed"),
-            "groupIds": elem.get("groupIds", []),
-            "boundElements": elem.get("boundElements", []),
+            'roughness': elem.get('roughness'),
+            'fillStyle': elem.get('fillStyle'),
+            'roundness': elem.get('roundness'),
+            'seed': elem.get('seed'),
+            'groupIds': elem.get('groupIds', []),
+            'boundElements': elem.get('boundElements', []),
         }
-        shape.metadata["excalidraw"] = excalidraw_metadata
+        shape.metadata['excalidraw'] = excalidraw_metadata
 
         # Infer semantic type
         shape.semantic_type, shape.semantic_confidence = infer_semantic_type(
@@ -160,48 +158,48 @@ class ExcalidrawParser(Parser):
 
     def _parse_text(self, elem: dict[str, Any]) -> Text:
         """Parse Excalidraw text to IR Text."""
-        position = Point(x=float(elem.get("x", 0)), y=float(elem.get("y", 0)))
-        size = Dimensions(width=float(elem.get("width", 0)), height=float(elem.get("height", 0)))
+        position = Point(x=float(elem.get('x', 0)), y=float(elem.get('y', 0)))
+        size = Dimensions(width=float(elem.get('width', 0)), height=float(elem.get('height', 0)))
 
-        font_size = elem.get("fontSize")
+        font_size = elem.get('fontSize')
         style = Style(
-            stroke_color=elem.get("strokeColor"),
-            font_family=str(elem.get("fontFamily", "default")),
+            stroke_color=elem.get('strokeColor'),
+            font_family=str(elem.get('fontFamily', 'default')),
             font_size=float(font_size) if font_size is not None else None,
         )
 
         text = Text(
-            id=elem["id"],
-            content=elem.get("text", ""),
-            alignment=elem.get("textAlign", "left"),
+            id=elem['id'],
+            content=elem.get('text', ''),
+            alignment=elem.get('textAlign', 'left'),
             position=position,
             size=size,
             style=style,
         )
 
         # Preserve Excalidraw metadata
-        text.metadata["excalidraw"] = {
-            "originalText": elem.get("originalText"),
-            "containerId": elem.get("containerId"),
-            "autoResize": elem.get("autoResize"),
+        text.metadata['excalidraw'] = {
+            'originalText': elem.get('originalText'),
+            'containerId': elem.get('containerId'),
+            'autoResize': elem.get('autoResize'),
         }
 
         return text
 
     def _parse_arrow(self, elem: dict[str, Any], shapes: list[Shape]) -> Connection | None:
         """Parse Excalidraw arrow to IR Connection."""
-        arrow_id = elem.get("id", "unknown")
+        arrow_id = elem.get('id', 'unknown')
 
         # Get arrow points
-        points = elem.get("points", [])
+        points = elem.get('points', [])
         if len(points) < 2:
             _logger.debug("Dropping arrow '%s': insufficient points (%d < 2)", arrow_id, len(points))
             self.warnings.append(f"Dropped arrow '{arrow_id}': fewer than 2 points")
             return None
 
         # Calculate absolute start and end points
-        arrow_x = float(elem.get("x", 0))
-        arrow_y = float(elem.get("y", 0))
+        arrow_x = float(elem.get('x', 0))
+        arrow_y = float(elem.get('y', 0))
         start_point = Point(x=arrow_x + float(points[0][0]), y=arrow_y + float(points[0][1]))
         end_point = Point(x=arrow_x + float(points[-1][0]), y=arrow_y + float(points[-1][1]))
 
@@ -215,26 +213,24 @@ class ExcalidrawParser(Parser):
                 from_id,
                 to_id,
             )
-            self.warnings.append(
-                f"Dropped arrow '{arrow_id}': could not resolve both endpoints"
-            )
+            self.warnings.append(f"Dropped arrow '{arrow_id}': could not resolve both endpoints")
             return None
 
         # Determine connection type
-        start_arrowhead = elem.get("startArrowhead")
-        end_arrowhead = elem.get("endArrowhead")
+        start_arrowhead = elem.get('startArrowhead')
+        end_arrowhead = elem.get('endArrowhead')
 
-        if start_arrowhead == "arrow" and end_arrowhead == "arrow":
-            connection_type = "bidirectional"
+        if start_arrowhead == 'arrow' and end_arrowhead == 'arrow':
+            connection_type = 'bidirectional'
         else:
-            connection_type = "directed"
+            connection_type = 'directed'
 
         # Style
-        stroke_width = elem.get("strokeWidth")
+        stroke_width = elem.get('strokeWidth')
         style = Style(
-            stroke_color=elem.get("strokeColor"),
+            stroke_color=elem.get('strokeColor'),
             stroke_width=float(stroke_width) if stroke_width is not None else None,
-            stroke_style="dashed" if elem.get("strokeStyle") == "dashed" else "solid",
+            stroke_style='dashed' if elem.get('strokeStyle') == 'dashed' else 'solid',
         )
 
         # Create connection
@@ -245,10 +241,10 @@ class ExcalidrawParser(Parser):
         height = abs(end_point.y - start_point.y)
 
         connection = Connection(
-            id=elem["id"],
+            id=elem['id'],
             from_id=from_id,
             to_id=to_id,
-            label="",  # Arrows typically don't have labels in Excalidraw
+            label='',  # Arrows typically don't have labels in Excalidraw
             connection_type=connection_type,
             position=Point(x=center_x, y=center_y),
             size=Dimensions(width=width, height=height),
@@ -262,11 +258,11 @@ class ExcalidrawParser(Parser):
         connection.waypoints = waypoints
 
         # Preserve Excalidraw metadata
-        connection.metadata["excalidraw"] = {
-            "points": points,
-            "startBinding": elem.get("startBinding"),
-            "endBinding": elem.get("endBinding"),
-            "elbowed": elem.get("elbowed"),
+        connection.metadata['excalidraw'] = {
+            'points': points,
+            'startBinding': elem.get('startBinding'),
+            'endBinding': elem.get('endBinding'),
+            'elbowed': elem.get('elbowed'),
         }
 
         return connection
@@ -279,11 +275,11 @@ class ExcalidrawParser(Parser):
         Uses bindings first, falls back to spatial proximity.
         """
         # Try using Excalidraw bindings first
-        start_binding = arrow.get("startBinding")
-        end_binding = arrow.get("endBinding")
+        start_binding = arrow.get('startBinding')
+        end_binding = arrow.get('endBinding')
 
-        from_id = start_binding.get("elementId") if start_binding else None
-        to_id = end_binding.get("elementId") if end_binding else None
+        from_id = start_binding.get('elementId') if start_binding else None
+        to_id = end_binding.get('elementId') if end_binding else None
 
         # If no bindings, use spatial proximity
         if not from_id:
@@ -385,9 +381,7 @@ class ExcalidrawParser(Parser):
                         other_shape.size.area < outer_shape.size.area
                         and self._shape_contains_shape(outer_shape, other_shape)
                         and all(
-                            self._shape_contains_shape(
-                                other_shape, next(s for s in shapes if s.id == child_id)
-                            )
+                            self._shape_contains_shape(other_shape, next(s for s in shapes if s.id == child_id))
                             for child_id in children
                         )
                     ):
@@ -396,7 +390,7 @@ class ExcalidrawParser(Parser):
 
                 if is_smallest_container:
                     group = Group(
-                        id=f"{GROUP_ID_PREFIX}{outer_shape.id}",
+                        id=f'{GROUP_ID_PREFIX}{outer_shape.id}',
                         label=outer_shape.label,
                         position=outer_shape.position,
                         size=outer_shape.size,
@@ -413,8 +407,6 @@ class ExcalidrawParser(Parser):
         return (
             outer.position.x < inner.position.x
             and outer.position.y < inner.position.y
-            and outer.position.x + outer.size.width
-            > inner.position.x + inner.size.width
-            and outer.position.y + outer.size.height
-            > inner.position.y + inner.size.height
+            and outer.position.x + outer.size.width > inner.position.x + inner.size.width
+            and outer.position.y + outer.size.height > inner.position.y + inner.size.height
         )

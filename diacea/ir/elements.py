@@ -20,10 +20,10 @@ from typing import Any, Optional
 
 
 # Version of the IR format
-IR_VERSION = "1.0.0"
+IR_VERSION = '1.0.0'
 
 # Prefix used for group IDs derived from container shapes
-GROUP_ID_PREFIX = "group-"
+GROUP_ID_PREFIX = 'group-'
 
 
 @dataclass
@@ -68,7 +68,7 @@ class Style:
     fill_color: Optional[str] = None  # Hex color or name
     stroke_color: Optional[str] = None  # Hex color or name
     stroke_width: Optional[float] = None
-    stroke_style: str = "solid"  # solid, dashed, dotted
+    stroke_style: str = 'solid'  # solid, dashed, dotted
     opacity: Optional[float] = None  # 0.0 to 1.0
     font_family: Optional[str] = None
     font_size: Optional[float] = None
@@ -84,7 +84,7 @@ class Element:
     id: str
     position: Point
     size: Dimensions
-    element_type: str = ""  # shape, connection, text, group (set by subclass)
+    element_type: str = ''  # shape, connection, text, group (set by subclass)
     style: Style = field(default_factory=Style)
 
     # Semantic information
@@ -103,22 +103,22 @@ class Element:
 class Shape(Element):
     """A shape element (rectangle, ellipse, etc.)."""
 
-    label: str = ""
-    shape_type: str = "rectangle"  # rectangle, ellipse, diamond, etc.
+    label: str = ''
+    shape_type: str = 'rectangle'  # rectangle, ellipse, diamond, etc.
 
     def __post_init__(self):
         """Set element type."""
-        self.element_type = "shape"
+        self.element_type = 'shape'
 
 
 @dataclass
 class Connection(Element):
     """A connection/arrow between elements."""
 
-    from_id: str = ""
-    to_id: str = ""
-    label: str = ""
-    connection_type: str = "directed"  # directed, bidirectional, undirected
+    from_id: str = ''
+    to_id: str = ''
+    label: str = ''
+    connection_type: str = 'directed'  # directed, bidirectional, undirected
 
     # Connection points (optional, for precise routing)
     start_point: Optional[Point] = None
@@ -127,31 +127,31 @@ class Connection(Element):
 
     def __post_init__(self):
         """Set element type."""
-        self.element_type = "connection"
+        self.element_type = 'connection'
 
 
 @dataclass
 class Text(Element):
     """A text element."""
 
-    content: str = ""
-    alignment: str = "left"  # left, center, right
+    content: str = ''
+    alignment: str = 'left'  # left, center, right
 
     def __post_init__(self):
         """Set element type."""
-        self.element_type = "text"
+        self.element_type = 'text'
 
 
 @dataclass
 class Group(Element):
     """A group/container of elements."""
 
-    label: str = ""
+    label: str = ''
     children: list[str] = field(default_factory=list)  # List of element IDs
 
     def __post_init__(self):
         """Set element type."""
-        self.element_type = "group"
+        self.element_type = 'group'
 
     @property
     def source_shape_id(self) -> str:

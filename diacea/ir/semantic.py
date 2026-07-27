@@ -32,38 +32,38 @@ class SemanticType(str, Enum):
     """
 
     # C4 Model types
-    PERSON = "person"
-    SYSTEM = "system"
-    CONTAINER = "container"
-    COMPONENT = "component"
+    PERSON = 'person'
+    SYSTEM = 'system'
+    CONTAINER = 'container'
+    COMPONENT = 'component'
 
     # Infrastructure types
-    DATABASE = "database"
-    QUEUE = "queue"
-    STORAGE = "storage"
-    SERVICE = "service"
+    DATABASE = 'database'
+    QUEUE = 'queue'
+    STORAGE = 'storage'
+    SERVICE = 'service'
 
     # Network/deployment types
-    SERVER = "server"
-    CLOUD = "cloud"
-    EXTERNAL = "external"
+    SERVER = 'server'
+    CLOUD = 'cloud'
+    EXTERNAL = 'external'
 
     # UI types
-    INTERFACE = "interface"
-    SCREEN = "screen"
+    INTERFACE = 'interface'
+    SCREEN = 'screen'
 
     # Data/document types
-    DOCUMENT = "document"
-    FILE = "file"
+    DOCUMENT = 'document'
+    FILE = 'file'
 
     # Flow types
-    DECISION = "decision"
-    PROCESS = "process"
-    START_END = "start_end"
+    DECISION = 'decision'
+    PROCESS = 'process'
+    START_END = 'start_end'
 
     # Generic types (fallback)
-    NOTE = "note"
-    GENERIC = "generic"
+    NOTE = 'note'
+    GENERIC = 'generic'
 
 
 # Keyword mappings for text-based inference
@@ -71,320 +71,318 @@ class SemanticType(str, Enum):
 # More specific keywords listed first for priority matching
 SEMANTIC_KEYWORDS = {
     SemanticType.DATABASE: [
-        "database",
-        "db",
-        "sql",
-        "postgres",
-        "postgresql",
-        "mysql",
-        "mariadb",
-        "mongodb",
-        "redis",
-        "dynamodb",
-        "cassandra",
-        "elasticsearch",
-        "sqlite",
-        "oracle",
-        "mssql",
-        "cockroachdb",
-        "neo4j",
-        "data store",
-        "datastore",
-        "cache",
-        "memcached",
+        'database',
+        'db',
+        'sql',
+        'postgres',
+        'postgresql',
+        'mysql',
+        'mariadb',
+        'mongodb',
+        'redis',
+        'dynamodb',
+        'cassandra',
+        'elasticsearch',
+        'sqlite',
+        'oracle',
+        'mssql',
+        'cockroachdb',
+        'neo4j',
+        'data store',
+        'datastore',
+        'cache',
+        'memcached',
     ],
     SemanticType.PERSON: [
-        "user",
-        "person",
-        "actor",
-        "customer",
-        "admin",
-        "administrator",
-        "operator",
-        "developer",
-        "engineer",
-        "manager",
-        "client",
-        "visitor",
-        "member",
-        "staff",
+        'user',
+        'person',
+        'actor',
+        'customer',
+        'admin',
+        'administrator',
+        'operator',
+        'developer',
+        'engineer',
+        'manager',
+        'client',
+        'visitor',
+        'member',
+        'staff',
     ],
     SemanticType.QUEUE: [
-        "queue",
-        "mq",
-        "kafka",
-        "rabbitmq",
-        "sqs",
-        "sns",
-        "pubsub",
-        "pub/sub",
-        "message broker",
-        "message bus",
-        "event bus",
-        "event stream",
-        "kinesis",
-        "nats",
-        "activemq",
-        "zeromq",
+        'queue',
+        'mq',
+        'kafka',
+        'rabbitmq',
+        'sqs',
+        'sns',
+        'pubsub',
+        'pub/sub',
+        'message broker',
+        'message bus',
+        'event bus',
+        'event stream',
+        'kinesis',
+        'nats',
+        'activemq',
+        'zeromq',
     ],
     SemanticType.STORAGE: [
-        "storage",
-        "s3",
-        "blob",
-        "bucket",
-        "file storage",
-        "object store",
-        "file system",
-        "filesystem",
-        "cdn",
-        "cloudfront",
-        "gcs",
-        "minio",
+        'storage',
+        's3',
+        'blob',
+        'bucket',
+        'file storage',
+        'object store',
+        'file system',
+        'filesystem',
+        'cdn',
+        'cloudfront',
+        'gcs',
+        'minio',
     ],
     SemanticType.SERVICE: [
-        "service",
-        "api",
-        "rest api",
-        "graphql",
-        "grpc",
-        "microservice",
-        "endpoint",
-        "handler",
-        "controller",
-        "gateway",
-        "proxy",
-        "load balancer",
-        "balancer",
-        "nginx",
-        "envoy",
-        "backend",
-        "frontend",
-        "server",
-        "worker",
-        "lambda",
-        "function",
-        "serverless",
+        'service',
+        'api',
+        'rest api',
+        'graphql',
+        'grpc',
+        'microservice',
+        'endpoint',
+        'handler',
+        'controller',
+        'gateway',
+        'proxy',
+        'load balancer',
+        'balancer',
+        'nginx',
+        'envoy',
+        'backend',
+        'frontend',
+        'server',
+        'worker',
+        'lambda',
+        'function',
+        'serverless',
     ],
     SemanticType.CLOUD: [
-        "cloud",
-        "aws",
-        "gcp",
-        "azure",
-        "kubernetes",
-        "k8s",
-        "eks",
-        "gke",
-        "aks",
-        "ecs",
-        "fargate",
-        "heroku",
-        "vercel",
-        "netlify",
-        "digitalocean",
-        "linode",
-        "infrastructure",
-        "infra",
-        "cluster",
-        "region",
-        "vpc",
-        "network",
+        'cloud',
+        'aws',
+        'gcp',
+        'azure',
+        'kubernetes',
+        'k8s',
+        'eks',
+        'gke',
+        'aks',
+        'ecs',
+        'fargate',
+        'heroku',
+        'vercel',
+        'netlify',
+        'digitalocean',
+        'linode',
+        'infrastructure',
+        'infra',
+        'cluster',
+        'region',
+        'vpc',
+        'network',
     ],
     SemanticType.EXTERNAL: [
-        "external",
-        "third party",
-        "3rd party",
-        "vendor",
-        "saas",
-        "partner",
-        "integration",
-        "legacy",
-        "existing",
-        "payment",
-        "stripe",
-        "paypal",
-        "twilio",
-        "sendgrid",
-        "auth0",
-        "okta",
-        "oauth",
-        "sso",
+        'external',
+        'third party',
+        '3rd party',
+        'vendor',
+        'saas',
+        'partner',
+        'integration',
+        'legacy',
+        'existing',
+        'payment',
+        'stripe',
+        'paypal',
+        'twilio',
+        'sendgrid',
+        'auth0',
+        'okta',
+        'oauth',
+        'sso',
     ],
     SemanticType.SYSTEM: [
-        "system",
-        "platform",
-        "application",
-        "app",
-        "product",
-        "solution",
-        "enterprise",
-        "monolith",
-        "core",
-        "main",
+        'system',
+        'platform',
+        'application',
+        'app',
+        'product',
+        'solution',
+        'enterprise',
+        'monolith',
+        'core',
+        'main',
     ],
     SemanticType.CONTAINER: [
-        "container",
-        "docker",
-        "pod",
-        "instance",
-        "replica",
-        "runtime",
-        "image",
-        "registry",
+        'container',
+        'docker',
+        'pod',
+        'instance',
+        'replica',
+        'runtime',
+        'image',
+        'registry',
     ],
     SemanticType.COMPONENT: [
-        "component",
-        "module",
-        "library",
-        "package",
-        "class",
-        "util",
-        "utility",
-        "helper",
-        "adapter",
-        "connector",
-        "repository",
-        "repo",
-        "dao",
-        "orm",
-        "model",
-        "entity",
+        'component',
+        'module',
+        'library',
+        'package',
+        'class',
+        'util',
+        'utility',
+        'helper',
+        'adapter',
+        'connector',
+        'repository',
+        'repo',
+        'dao',
+        'orm',
+        'model',
+        'entity',
     ],
     SemanticType.INTERFACE: [
-        "interface",
-        "ui",
-        "gui",
-        "cli",
-        "console",
-        "terminal",
-        "web app",
-        "webapp",
-        "website",
-        "portal",
-        "dashboard",
-        "panel",
-        "form",
+        'interface',
+        'ui',
+        'gui',
+        'cli',
+        'console',
+        'terminal',
+        'web app',
+        'webapp',
+        'website',
+        'portal',
+        'dashboard',
+        'panel',
+        'form',
     ],
     SemanticType.SCREEN: [
-        "screen",
-        "page",
-        "view",
-        "dialog",
-        "modal",
-        "window",
-        "tab",
+        'screen',
+        'page',
+        'view',
+        'dialog',
+        'modal',
+        'window',
+        'tab',
     ],
     SemanticType.DOCUMENT: [
-        "document",
-        "doc",
-        "report",
-        "pdf",
-        "export",
-        "template",
-        "config",
-        "configuration",
-        "settings",
-        "yaml",
-        "json",
-        "xml",
+        'document',
+        'doc',
+        'report',
+        'pdf',
+        'export',
+        'template',
+        'config',
+        'configuration',
+        'settings',
+        'yaml',
+        'json',
+        'xml',
     ],
     SemanticType.FILE: [
-        "file",
-        "log",
-        "logs",
-        "artifact",
-        "asset",
-        "upload",
-        "download",
+        'file',
+        'log',
+        'logs',
+        'artifact',
+        'asset',
+        'upload',
+        'download',
     ],
     SemanticType.PROCESS: [
-        "process",
-        "workflow",
-        "pipeline",
-        "flow",
-        "step",
-        "task",
-        "job",
-        "batch",
-        "cron",
-        "scheduler",
-        "action",
-        "operation",
+        'process',
+        'workflow',
+        'pipeline',
+        'flow',
+        'step',
+        'task',
+        'job',
+        'batch',
+        'cron',
+        'scheduler',
+        'action',
+        'operation',
     ],
     SemanticType.DECISION: [
-        "decision",
-        "condition",
-        "check",
-        "validate",
-        "if",
-        "branch",
-        "switch",
-        "route",
-        "filter",
+        'decision',
+        'condition',
+        'check',
+        'validate',
+        'if',
+        'branch',
+        'switch',
+        'route',
+        'filter',
     ],
     SemanticType.NOTE: [
-        "note",
-        "comment",
-        "annotation",
-        "todo",
-        "fixme",
-        "warning",
-        "info",
-        "hint",
-        "tip",
+        'note',
+        'comment',
+        'annotation',
+        'todo',
+        'fixme',
+        'warning',
+        'info',
+        'hint',
+        'tip',
     ],
 }
 
-_CAMEL_BOUNDARY_RE = re.compile(r"(?<=[a-z0-9])(?=[A-Z])")
+_CAMEL_BOUNDARY_RE = re.compile(r'(?<=[a-z0-9])(?=[A-Z])')
 
 _KEYWORD_PATTERNS = {
-    semantic_type: re.compile(
-        r"\b(?:" + "|".join(re.escape(keyword) for keyword in keywords) + r")\b"
-    )
+    semantic_type: re.compile(r'\b(?:' + '|'.join(re.escape(keyword) for keyword in keywords) + r')\b')
     for semantic_type, keywords in SEMANTIC_KEYWORDS.items()
 }
 
 # Shape type to semantic type mapping for strong inference
 SHAPE_SEMANTIC_MAP = {
-    "note": SemanticType.NOTE,
-    "sticky": SemanticType.NOTE,
-    "cylinder": SemanticType.DATABASE,
-    "database": SemanticType.DATABASE,
-    "cloud": SemanticType.CLOUD,
-    "person": SemanticType.PERSON,
-    "actor": SemanticType.PERSON,
-    "queue": SemanticType.QUEUE,
-    "document": SemanticType.DOCUMENT,
-    "file": SemanticType.FILE,
-    "parallelogram": SemanticType.INTERFACE,
-    "hexagon": SemanticType.PROCESS,
-    "stadium": SemanticType.START_END,
-    "rounded_rectangle": SemanticType.PROCESS,
+    'note': SemanticType.NOTE,
+    'sticky': SemanticType.NOTE,
+    'cylinder': SemanticType.DATABASE,
+    'database': SemanticType.DATABASE,
+    'cloud': SemanticType.CLOUD,
+    'person': SemanticType.PERSON,
+    'actor': SemanticType.PERSON,
+    'queue': SemanticType.QUEUE,
+    'document': SemanticType.DOCUMENT,
+    'file': SemanticType.FILE,
+    'parallelogram': SemanticType.INTERFACE,
+    'hexagon': SemanticType.PROCESS,
+    'stadium': SemanticType.START_END,
+    'rounded_rectangle': SemanticType.PROCESS,
 }
 
 # Icon/emoji to semantic type mapping
 ICON_SEMANTIC_MAP = {
-    "👤": SemanticType.PERSON,
-    "👥": SemanticType.PERSON,
-    "🧑": SemanticType.PERSON,
-    "🗄️": SemanticType.DATABASE,
-    "💾": SemanticType.DATABASE,
-    "📦": SemanticType.CONTAINER,
-    "☁️": SemanticType.CLOUD,
-    "🌐": SemanticType.EXTERNAL,
-    "📄": SemanticType.DOCUMENT,
-    "📁": SemanticType.FILE,
-    "⚙️": SemanticType.SERVICE,
-    "🔧": SemanticType.SERVICE,
-    "📝": SemanticType.NOTE,
-    "💬": SemanticType.NOTE,
-    "❓": SemanticType.DECISION,
-    "🔀": SemanticType.DECISION,
+    '👤': SemanticType.PERSON,
+    '👥': SemanticType.PERSON,
+    '🧑': SemanticType.PERSON,
+    '🗄️': SemanticType.DATABASE,
+    '💾': SemanticType.DATABASE,
+    '📦': SemanticType.CONTAINER,
+    '☁️': SemanticType.CLOUD,
+    '🌐': SemanticType.EXTERNAL,
+    '📄': SemanticType.DOCUMENT,
+    '📁': SemanticType.FILE,
+    '⚙️': SemanticType.SERVICE,
+    '🔧': SemanticType.SERVICE,
+    '📝': SemanticType.NOTE,
+    '💬': SemanticType.NOTE,
+    '❓': SemanticType.DECISION,
+    '🔀': SemanticType.DECISION,
 }
 
 
 def infer_semantic_type(
     shape_type: str,
-    label: str = "",
+    label: str = '',
     size: Optional[Dimensions] = None,
     style: Optional[Style] = None,
     metadata: Optional[dict[str, Any]] = None,
@@ -413,16 +411,16 @@ def infer_semantic_type(
     # Priority 1: Explicit user hints (highest confidence)
     if metadata:
         # Check for explicit semantic type hint
-        if "semantic_type" in metadata:
-            hint = metadata["semantic_type"]
+        if 'semantic_type' in metadata:
+            hint = metadata['semantic_type']
             try:
                 return (SemanticType(hint), 1.0)
             except ValueError:
                 pass  # Invalid hint, continue with other methods
 
         # Check for format-specific hints
-        if "data-semantic" in metadata:  # From SVG
-            hint = metadata["data-semantic"]
+        if 'data-semantic' in metadata:  # From SVG
+            hint = metadata['data-semantic']
             semantic = _parse_semantic_hint(hint)
             if semantic:
                 return (semantic, 0.95)
@@ -442,9 +440,7 @@ def infer_semantic_type(
     if text_result[0]:
         # If heuristics also found something, combine confidences
         if heuristic_result[0] == text_result[0]:
-            combined_confidence = min(
-                1.0, (heuristic_result[1] + text_result[1]) / 2 + 0.2
-            )
+            combined_confidence = min(1.0, (heuristic_result[1] + text_result[1]) / 2 + 0.2)
             return (text_result[0], combined_confidence)
         # Text has higher confidence if different
         if text_result[1] > heuristic_result[1]:
@@ -470,11 +466,11 @@ def _parse_semantic_hint(hint: str) -> Optional[SemanticType]:
 
     # Alias mapping
     alias_map = {
-        "db": SemanticType.DATABASE,
-        "user": SemanticType.PERSON,
-        "actor": SemanticType.PERSON,
-        "mq": SemanticType.QUEUE,
-        "api": SemanticType.SERVICE,
+        'db': SemanticType.DATABASE,
+        'user': SemanticType.PERSON,
+        'actor': SemanticType.PERSON,
+        'mq': SemanticType.QUEUE,
+        'api': SemanticType.SERVICE,
     }
 
     return alias_map.get(hint_lower)
@@ -521,7 +517,7 @@ def _infer_from_heuristics(
     style_result = _infer_from_style(style)
 
     # Shape-based inference
-    if shape_type == "ellipse" or shape_type == "circle":
+    if shape_type == 'ellipse' or shape_type == 'circle':
         if size:
             aspect_ratio = size.width / size.height if size.height > 0 else 1.0
             if aspect_ratio > 2.0:  # Very wide ellipse
@@ -530,13 +526,13 @@ def _infer_from_heuristics(
                 return (SemanticType.PERSON, 0.65)
         return (SemanticType.PERSON, 0.5)
 
-    elif shape_type == "diamond":
+    elif shape_type == 'diamond':
         return (SemanticType.DECISION, 0.9)
 
-    elif shape_type == "triangle":
+    elif shape_type == 'triangle':
         return (SemanticType.DECISION, 0.6)
 
-    elif shape_type == "rectangle":
+    elif shape_type == 'rectangle':
         # Check style hints first
         if style_result[0] and style_result[1] > 0.6:
             return style_result
@@ -586,14 +582,14 @@ def _infer_from_style(style: Optional[Style]) -> tuple[Optional[SemanticType], f
     if not style:
         return (None, 0.0)
 
-    fill = (style.fill_color or "").lower()
+    fill = (style.fill_color or '').lower()
 
     # Yellow/amber → Note
     if fill and _is_yellow_color(fill):
         return (SemanticType.NOTE, 0.7)
 
     # Gray + dashed → External
-    if style.stroke_style == "dashed":
+    if style.stroke_style == 'dashed':
         if fill and _is_gray_color(fill):
             return (SemanticType.EXTERNAL, 0.65)
         return (SemanticType.EXTERNAL, 0.5)
@@ -603,16 +599,16 @@ def _infer_from_style(style: Optional[Style]) -> tuple[Optional[SemanticType], f
 
 def _is_yellow_color(color: str) -> bool:
     """Check if color is in yellow/amber range."""
-    yellow_hints = ["yellow", "ffff", "fff3", "ffc", "ffb", "ffa", "ff9", "amber", "gold"]
+    yellow_hints = ['yellow', 'ffff', 'fff3', 'ffc', 'ffb', 'ffa', 'ff9', 'amber', 'gold']
     return any(hint in color for hint in yellow_hints)
 
 
 def _is_gray_color(color: str) -> bool:
     """Check if color is gray."""
-    if "gray" in color or "grey" in color:
+    if 'gray' in color or 'grey' in color:
         return True
     # Check for hex gray (r=g=b approximately)
-    if color.startswith("#") and len(color) >= 7:
+    if color.startswith('#') and len(color) >= 7:
         try:
             r = int(color[1:3], 16)
             g = int(color[3:5], 16)
@@ -624,7 +620,7 @@ def _is_gray_color(color: str) -> bool:
 
 
 def _normalize_label_words(label: str) -> str:
-    return _CAMEL_BOUNDARY_RE.sub(" ", label).replace("_", " ").lower()
+    return _CAMEL_BOUNDARY_RE.sub(' ', label).replace('_', ' ').lower()
 
 
 def _infer_from_text(label: str) -> tuple[Optional[SemanticType], float]:
@@ -640,9 +636,7 @@ def _infer_from_text(label: str) -> tuple[Optional[SemanticType], float]:
     return (None, 0.0)
 
 
-def validate_confidence(
-    semantic_type: Optional[SemanticType], confidence: float
-) -> Optional[str]:
+def validate_confidence(semantic_type: Optional[SemanticType], confidence: float) -> Optional[str]:
     """Validate confidence level and return warning if below threshold.
 
     Args:
@@ -655,6 +649,6 @@ def validate_confidence(
     if semantic_type and confidence < CONFIDENCE_THRESHOLD:
         return (
             f"Low confidence ({confidence:.2f}) for semantic type '{semantic_type.value}'. "
-            f"Consider adding explicit hints in metadata."
+            f'Consider adding explicit hints in metadata.'
         )
     return None

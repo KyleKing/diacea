@@ -409,25 +409,33 @@ class TestMainWorkspace:
     def test_create_subcommand(self, tmp_path, capsys):
         output_file = tmp_path / 'workspace.yml'
 
-        result = main_workspace([
-            'create',
-            '--name', 'CLI Test',
-            '-o', str(output_file),
-        ])
+        result = main_workspace(
+            [
+                'create',
+                '--name',
+                'CLI Test',
+                '-o',
+                str(output_file),
+            ]
+        )
         assert result == 0
         assert output_file.exists()
 
     def test_create_from_diagrams_subcommand(self, tmp_path, capsys):
         output_file = tmp_path / 'workspace.yml'
 
-        result = main_workspace([
-            'create',
-            '--name', 'CLI Ingest',
-            '--from-diagrams',
-            str(TEST_DATA_DIR / 'excalidraw.json'),
-            str(TEST_DATA_DIR / 'obsidian_plain.excalidraw.md'),
-            '-o', str(output_file),
-        ])
+        result = main_workspace(
+            [
+                'create',
+                '--name',
+                'CLI Ingest',
+                '--from-diagrams',
+                str(TEST_DATA_DIR / 'excalidraw.json'),
+                str(TEST_DATA_DIR / 'obsidian_plain.excalidraw.md'),
+                '-o',
+                str(output_file),
+            ]
+        )
         assert result == 0
 
         workspace = load_workspace(output_file)
@@ -461,12 +469,16 @@ class TestMainWorkspace:
         workspace = Workspace(id='test', name='Test')
         save_workspace(workspace, workspace_file)
 
-        result = main_workspace([
-            'add-element',
-            str(workspace_file),
-            '--id', 'new-elem',
-            '--label', 'New Element',
-        ])
+        result = main_workspace(
+            [
+                'add-element',
+                str(workspace_file),
+                '--id',
+                'new-elem',
+                '--label',
+                'New Element',
+            ]
+        )
         assert result == 0
 
         updated = load_workspace(workspace_file)
@@ -477,12 +489,16 @@ class TestMainWorkspace:
         workspace = Workspace(id='test', name='Test')
         save_workspace(workspace, workspace_file)
 
-        result = main_workspace([
-            'add-view',
-            str(workspace_file),
-            '--id', 'new-view',
-            '--name', 'New View',
-        ])
+        result = main_workspace(
+            [
+                'add-view',
+                str(workspace_file),
+                '--id',
+                'new-view',
+                '--name',
+                'New View',
+            ]
+        )
         assert result == 0
 
         updated = load_workspace(workspace_file)

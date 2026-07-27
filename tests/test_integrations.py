@@ -141,9 +141,7 @@ class TestMarkdownFences:
 
 class TestMkDocsPlugin:
     def test_on_page_markdown_replaces_fences(self, excalidraw_source):
-        page = SimpleNamespace(
-            file=SimpleNamespace(abs_src_path=str(excalidraw_source.parent / 'index.md'))
-        )
+        page = SimpleNamespace(file=SimpleNamespace(abs_src_path=str(excalidraw_source.parent / 'index.md')))
         config = {'docs_dir': str(excalidraw_source.parent)}
 
         result = DiaceaPlugin().on_page_markdown(

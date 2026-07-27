@@ -21,9 +21,9 @@ except ImportError:
     lzstring = None
     _HAS_LZSTRING = False
 
-_DRAWING_JSON_RE = re.compile(r"\n##? Drawing\n[^`]*```json\n([\s\S]*?)```")
-_DRAWING_COMPRESSED_RE = re.compile(r"\n##? Drawing\n[^`]*```compressed-json\n([\s\S]*?)```")
-_FRONTMATTER_PLUGIN_RE = re.compile(r"^excalidraw-plugin:", re.MULTILINE)
+_DRAWING_JSON_RE = re.compile(r'\n##? Drawing\n[^`]*```json\n([\s\S]*?)```')
+_DRAWING_COMPRESSED_RE = re.compile(r'\n##? Drawing\n[^`]*```compressed-json\n([\s\S]*?)```')
+_FRONTMATTER_PLUGIN_RE = re.compile(r'^excalidraw-plugin:', re.MULTILINE)
 
 
 def is_obsidian_excalidraw(content: str) -> bool:
@@ -48,13 +48,13 @@ def extract_excalidraw_json(content: str) -> dict[str, Any]:
     if match := _DRAWING_COMPRESSED_RE.search(content):
         if lzstring is None or not _HAS_LZSTRING:
             raise ValueError(
-                "This Obsidian Excalidraw file uses a compressed-json Drawing block. "
+                'This Obsidian Excalidraw file uses a compressed-json Drawing block. '
                 "Install the optional dependency to decompress it: pip install 'diacea[obsidian]'"
             )
-        compressed = re.sub(r"\s+", "", match.group(1))
+        compressed = re.sub(r'\s+', '', match.group(1))
         decompressed = lzstring.LZString().decompressFromBase64(compressed)
         if not decompressed:
-            raise ValueError("Failed to decompress the compressed-json Drawing block")
+            raise ValueError('Failed to decompress the compressed-json Drawing block')
         return json.loads(decompressed)
 
     raise ValueError("No '# Drawing' section with a json or compressed-json code block was found")

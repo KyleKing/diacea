@@ -31,114 +31,114 @@ from ..ir import (
 )
 from ..ir.semantic import SemanticType, infer_semantic_type
 
-_HEADER_RE = re.compile(r"^(?:flowchart|graph)\b\s*(LR|RL|TD|TB|BT)?\s*;?\s*$", re.IGNORECASE)
+_HEADER_RE = re.compile(r'^(?:flowchart|graph)\b\s*(LR|RL|TD|TB|BT)?\s*;?\s*$', re.IGNORECASE)
 
-_SEQUENCE_HEADER_RE = re.compile(r"^sequenceDiagram\s*;?\s*$")
+_SEQUENCE_HEADER_RE = re.compile(r'^sequenceDiagram\s*;?\s*$')
 
-_FRONTMATTER_TITLE_RE = re.compile(r"^title:\s*(.+?)\s*$")
+_FRONTMATTER_TITLE_RE = re.compile(r'^title:\s*(.+?)\s*$')
 
 _OTHER_DIAGRAM_KEYWORDS = (
-    "C4Component",
-    "C4Container",
-    "C4Context",
-    "C4Deployment",
-    "C4Dynamic",
-    "block-beta",
-    "classDiagram",
-    "erDiagram",
-    "gantt",
-    "gitGraph",
-    "journey",
-    "mindmap",
-    "packet-beta",
-    "pie",
-    "quadrantChart",
-    "requirementDiagram",
-    "sankey-beta",
-    "stateDiagram",
-    "stateDiagram-v2",
-    "timeline",
-    "xychart-beta",
-    "zenuml",
+    'C4Component',
+    'C4Container',
+    'C4Context',
+    'C4Deployment',
+    'C4Dynamic',
+    'block-beta',
+    'classDiagram',
+    'erDiagram',
+    'gantt',
+    'gitGraph',
+    'journey',
+    'mindmap',
+    'packet-beta',
+    'pie',
+    'quadrantChart',
+    'requirementDiagram',
+    'sankey-beta',
+    'stateDiagram',
+    'stateDiagram-v2',
+    'timeline',
+    'xychart-beta',
+    'zenuml',
 )
 
-_SKIPPED_DIRECTIVES = ("class", "classDef", "click", "direction", "linkStyle", "style")
+_SKIPPED_DIRECTIVES = ('class', 'classDef', 'click', 'direction', 'linkStyle', 'style')
 
 _SEQUENCE_BLOCK_KEYWORDS = (
-    "alt",
-    "and",
-    "box",
-    "break",
-    "critical",
-    "else",
-    "end",
-    "loop",
-    "opt",
-    "option",
-    "par",
-    "rect",
+    'alt',
+    'and',
+    'box',
+    'break',
+    'critical',
+    'else',
+    'end',
+    'loop',
+    'opt',
+    'option',
+    'par',
+    'rect',
 )
 
 _SEQUENCE_SKIPPED_DIRECTIVES = (
-    "activate",
-    "autonumber",
-    "deactivate",
-    "link",
-    "links",
-    "note",
-    "properties",
+    'activate',
+    'autonumber',
+    'deactivate',
+    'link',
+    'links',
+    'note',
+    'properties',
 )
 
-_SEQ_PARTICIPANT_RE = re.compile(r"^(participant|actor)\s+([\w.-]+)(?:\s+as\s+(.+))?$")
+_SEQ_PARTICIPANT_RE = re.compile(r'^(participant|actor)\s+([\w.-]+)(?:\s+as\s+(.+))?$')
 
 _SEQ_MESSAGE_RE = re.compile(
-    r"^([\w.]+)\s*(<<-->>|<<->>|-->>|->>|--[>x)]|-[>x)])\s*([+-]?)\s*([\w.]+)\s*(?::\s*(.*))?$"
+    r'^([\w.]+)\s*(<<-->>|<<->>|-->>|->>|--[>x)]|-[>x)])\s*([+-]?)\s*([\w.]+)\s*(?::\s*(.*))?$'
 )
 
 _LINK_RE = re.compile(
-    r"\s*(<?(?:={2,}|-{2,}|-\.+-*)[>xo]?)"
-    r"(?:\|([^|]*)\|)?\s*"
+    r'\s*(<?(?:={2,}|-{2,}|-\.+-*)[>xo]?)'
+    r'(?:\|([^|]*)\|)?\s*'
 )
 
 _TEXT_ARROW_SUBS = (
-    (re.compile(r"--\s*([^-|>][^|]*?)\s*-->"), r"-->|\1|"),
-    (re.compile(r"--\s*([^-|>][^|]*?)\s*---"), r"---|\1|"),
-    (re.compile(r"-\.\s*([^-|.>][^|]*?)\s*\.->"), r"-.->|\1|"),
-    (re.compile(r"==\s*([^=|>][^|]*?)\s*==>"), r"==>|\1|"),
+    (re.compile(r'--\s*([^-|>][^|]*?)\s*-->'), r'-->|\1|'),
+    (re.compile(r'--\s*([^-|>][^|]*?)\s*---'), r'---|\1|'),
+    (re.compile(r'-\.\s*([^-|.>][^|]*?)\s*\.->'), r'-.->|\1|'),
+    (re.compile(r'==\s*([^=|>][^|]*?)\s*==>'), r'==>|\1|'),
 )
 
-_NODE_TOKEN_RE = re.compile(r"^([A-Za-z0-9_.:-]+)\s*(.*)$", re.DOTALL)
+_NODE_TOKEN_RE = re.compile(r'^([A-Za-z0-9_.:-]+)\s*(.*)$', re.DOTALL)
 
-_CLASS_SUFFIX_RE = re.compile(r":::[\w-]+$")
+_CLASS_SUFFIX_RE = re.compile(r':::[\w-]+$')
 
-_FA_ICON_RE = re.compile(r"fa[brs]?:fa-([A-Za-z0-9-]+)\s*")
+_FA_ICON_RE = re.compile(r'fa[brs]?:fa-([A-Za-z0-9-]+)\s*')
 
 _FA_ICON_SEMANTICS: dict[str, SemanticType] = {
-    "cloud": SemanticType.CLOUD,
-    "cog": SemanticType.SERVICE,
-    "cogs": SemanticType.SERVICE,
-    "database": SemanticType.DATABASE,
-    "envelope": SemanticType.QUEUE,
-    "gear": SemanticType.SERVICE,
-    "gears": SemanticType.SERVICE,
-    "globe": SemanticType.EXTERNAL,
-    "person": SemanticType.PERSON,
-    "server": SemanticType.SERVER,
-    "user": SemanticType.PERSON,
-    "users": SemanticType.PERSON,
+    'cloud': SemanticType.CLOUD,
+    'cog': SemanticType.SERVICE,
+    'cogs': SemanticType.SERVICE,
+    'database': SemanticType.DATABASE,
+    'envelope': SemanticType.QUEUE,
+    'gear': SemanticType.SERVICE,
+    'gears': SemanticType.SERVICE,
+    'globe': SemanticType.EXTERNAL,
+    'person': SemanticType.PERSON,
+    'server': SemanticType.SERVER,
+    'user': SemanticType.PERSON,
+    'users': SemanticType.PERSON,
 }
 
-_SUBGRAPH_TITLED_RE = re.compile(r"^([A-Za-z0-9_.-]+)\s*\[(.*)\]$")
+_SUBGRAPH_TITLED_RE = re.compile(r'^([A-Za-z0-9_.-]+)\s*\[(.*)\]$')
 
 _BRACKET_SHAPES = (
-    ("([", "])", "stadium"),
-    ("[(", ")]", "cylinder"),
-    ("((", "))", "circle"),
-    ("{{", "}}", "hexagon"),
-    ("[/", "/]", "parallelogram"),
-    ("[", "]", "rectangle"),
-    ("(", ")", "rounded_rectangle"),
-    ("{", "}", "diamond"),
+    ('([', '])', 'stadium'),
+    ('[(', ')]', 'cylinder'),
+    ('((', '))', 'circle'),
+    ('{{', '}}', 'hexagon'),
+    ('[/', '/]', 'parallelogram'),
+    ('[', ']', 'rectangle'),
+    ('(', ')', 'rounded_rectangle'),
+    ('{', '}', 'diamond'),
 )
 
 _NODE_WIDTH_MIN = 120.0
@@ -155,7 +155,7 @@ def is_mermaid(content: str) -> bool:
         return False
     if _HEADER_RE.match(first) or _SEQUENCE_HEADER_RE.match(first):
         return True
-    keyword = first.split()[0].rstrip(":;")
+    keyword = first.split()[0].rstrip(':;')
     return keyword in _OTHER_DIAGRAM_KEYWORDS
 
 
@@ -172,19 +172,19 @@ def is_mermaid_sequence(content: str) -> bool:
 
 
 def _split_frontmatter(content: str) -> tuple[str, Optional[str]]:
-    lines = content.split("\n")
+    lines = content.split('\n')
     start = next((i for i, line in enumerate(lines) if line.strip()), None)
-    if start is None or lines[start].strip() != "---":
+    if start is None or lines[start].strip() != '---':
         return (content, None)
     title = None
     for end in range(start + 1, len(lines)):
         stripped = lines[end].strip()
-        if stripped == "---":
+        if stripped == '---':
             for index in range(start, end + 1):
-                lines[index] = ""
-            return ("\n".join(lines), title)
+                lines[index] = ''
+            return ('\n'.join(lines), title)
         if match := _FRONTMATTER_TITLE_RE.match(stripped):
-            title = match.group(1).strip("\"'")
+            title = match.group(1).strip('"\'')
     return (content, None)
 
 
@@ -192,7 +192,7 @@ def _first_meaningful_line(content: str) -> Optional[str]:
     content, _ = _split_frontmatter(content)
     for raw in content.splitlines():
         line = raw.strip()
-        if not line or line.startswith("%%") or line.startswith("```"):
+        if not line or line.startswith('%%') or line.startswith('```'):
             continue
         return line
     return None
@@ -202,12 +202,12 @@ def _unescape_label(label: str) -> str:
     text = label.strip()
     if len(text) >= 2 and text[0] == '"' and text[-1] == '"':
         text = text[1:-1]
-    text = text.replace("<br/>", "\n").replace("<br>", "\n")
-    text = text.replace("#quot;", '"')
-    text = text.replace("&lt;", "<")
-    text = text.replace("&gt;", ">")
-    text = text.replace("&#124;", "|")
-    text = text.replace("&amp;", "&")
+    text = text.replace('<br/>', '\n').replace('<br>', '\n')
+    text = text.replace('#quot;', '"')
+    text = text.replace('&lt;', '<')
+    text = text.replace('&gt;', '>')
+    text = text.replace('&#124;', '|')
+    text = text.replace('&amp;', '&')
     return text
 
 
@@ -215,29 +215,29 @@ def _extract_fa_icons(label: str) -> tuple[str, list[str]]:
     icons = _FA_ICON_RE.findall(label)
     if not icons:
         return (label, [])
-    cleaned = _FA_ICON_RE.sub("", label)
-    return (re.sub(r"[ \t]{2,}", " ", cleaned).strip(), icons)
+    cleaned = _FA_ICON_RE.sub('', label)
+    return (re.sub(r'[ \t]{2,}', ' ', cleaned).strip(), icons)
 
 
 def _icon_metadata(icons: list[str]) -> dict[str, Any]:
-    metadata: dict[str, Any] = {"mermaid": {"icons": icons}}
+    metadata: dict[str, Any] = {'mermaid': {'icons': icons}}
     for icon in icons:
         if (semantic := _FA_ICON_SEMANTICS.get(icon)) is not None:
-            metadata["semantic_type"] = semantic.value
+            metadata['semantic_type'] = semantic.value
             break
     return metadata
 
 
 def _split_arrow_attrs(arrow: str) -> tuple[str, str, Optional[float]]:
-    has_head = arrow[-1] in ">xo"
-    if arrow.startswith("<") and has_head:
-        connection_type = "bidirectional"
+    has_head = arrow[-1] in '>xo'
+    if arrow.startswith('<') and has_head:
+        connection_type = 'bidirectional'
     elif has_head:
-        connection_type = "directed"
+        connection_type = 'directed'
     else:
-        connection_type = "undirected"
-    stroke_style = "dashed" if "." in arrow else "solid"
-    stroke_width = 3.0 if "=" in arrow else None
+        connection_type = 'undirected'
+    stroke_style = 'dashed' if '.' in arrow else 'solid'
+    stroke_width = 3.0 if '=' in arrow else None
     return (connection_type, stroke_style, stroke_width)
 
 
@@ -249,16 +249,16 @@ def _split_on_ampersand(segment: str) -> list[str]:
     for char in segment:
         if char == '"':
             in_quote = not in_quote
-        elif char in "[({" and not in_quote:
+        elif char in '[({' and not in_quote:
             depth += 1
-        elif char in "])}" and not in_quote:
+        elif char in '])}' and not in_quote:
             depth -= 1
-        if char == "&" and depth == 0 and not in_quote:
-            parts.append("".join(current))
+        if char == '&' and depth == 0 and not in_quote:
+            parts.append(''.join(current))
             current = []
         else:
             current.append(char)
-    parts.append("".join(current))
+    parts.append(''.join(current))
     return [part.strip() for part in parts if part.strip()]
 
 
@@ -271,7 +271,7 @@ class MermaidParser(Parser):
     def parse(self, data: Any) -> Diagram:
         """Parse Mermaid flowchart or sequence text to an IR Diagram."""
         if not isinstance(data, str):
-            raise ValueError("Mermaid parser expects a string input")
+            raise ValueError('Mermaid parser expects a string input')
 
         self.warnings = []
         data, title = _split_frontmatter(data)
@@ -282,16 +282,14 @@ class MermaidParser(Parser):
         self._connections: list[Connection] = []
         self._groups: list[Group] = []
         self._group_stack: list[Group] = []
-        self._direction = "TD"
+        self._direction = 'TD'
 
         statements = self._collect_statements(data)
         for line_number, statement in statements:
             self._parse_statement(statement, line_number)
 
         if self._group_stack:
-            self.warnings.append(
-                f"unclosed subgraph '{self._group_stack[-1].id}': missing 'end'"
-            )
+            self.warnings.append(f"unclosed subgraph '{self._group_stack[-1].id}': missing 'end'")
             self._group_stack = []
 
         for shape in self._shape_order:
@@ -306,11 +304,11 @@ class MermaidParser(Parser):
         self._synthesize_layout()
 
         diagram = Diagram(
-            id="mermaid-flowchart",
+            id='mermaid-flowchart',
             name=title,
             metadata={
-                "mermaid": {"direction": self._direction},
-                "synthesized_layout": True,
+                'mermaid': {'direction': self._direction},
+                'synthesized_layout': True,
             },
         )
         for shape in self._shape_order:
@@ -326,37 +324,35 @@ class MermaidParser(Parser):
         statements: list[tuple[int, str]] = []
         for line_number, raw in enumerate(data.splitlines(), start=1):
             line = raw.strip()
-            if not line or line.startswith("```"):
+            if not line or line.startswith('```'):
                 continue
-            if line.startswith("%%"):
-                self.warnings.append(f"line {line_number}: skipped comment")
+            if line.startswith('%%'):
+                self.warnings.append(f'line {line_number}: skipped comment')
                 continue
             if not header_seen:
-                parts = line.split(";")
+                parts = line.split(';')
                 self._parse_header(parts[0].strip(), line_number)
                 header_seen = True
                 for part in parts[1:]:
                     if part.strip():
                         statements.append((line_number, part.strip()))
                 continue
-            statements.append((line_number, line.rstrip(";").strip()))
+            statements.append((line_number, line.rstrip(';').strip()))
         if not header_seen:
-            raise ValueError("Empty input: no Mermaid diagram found")
+            raise ValueError('Empty input: no Mermaid diagram found')
         return statements
 
     def _parse_header(self, line: str, line_number: int) -> None:
-        if match := _HEADER_RE.match(line.split(";")[0].strip()):
-            self._direction = (match.group(1) or "TD").upper()
+        if match := _HEADER_RE.match(line.split(';')[0].strip()):
+            self._direction = (match.group(1) or 'TD').upper()
             return
-        keyword = line.split()[0].rstrip(":;")
+        keyword = line.split()[0].rstrip(':;')
         if keyword in _OTHER_DIAGRAM_KEYWORDS:
             raise ValueError(
                 f"Unsupported Mermaid diagram type '{keyword}': "
-                "only flowchart/graph and sequence diagrams are supported"
+                'only flowchart/graph and sequence diagrams are supported'
             )
-        raise ValueError(
-            f"line {line_number}: not a Mermaid flowchart (expected 'flowchart' or 'graph' header)"
-        )
+        raise ValueError(f"line {line_number}: not a Mermaid flowchart (expected 'flowchart' or 'graph' header)")
 
     def _parse_sequence(self, data: str, title: Optional[str]) -> Diagram:
         self._shapes = {}
@@ -369,15 +365,15 @@ class MermaidParser(Parser):
         header_seen = False
         for line_number, raw in enumerate(data.splitlines(), start=1):
             line = raw.strip()
-            if not line or line.startswith("```"):
+            if not line or line.startswith('```'):
                 continue
-            if line.startswith("%%"):
-                self.warnings.append(f"line {line_number}: skipped comment")
+            if line.startswith('%%'):
+                self.warnings.append(f'line {line_number}: skipped comment')
                 continue
             if not header_seen:
                 header_seen = True
                 continue
-            self._parse_sequence_statement(line.rstrip(";").strip(), line_number)
+            self._parse_sequence_statement(line.rstrip(';').strip(), line_number)
 
         for shape in self._shape_order:
             shape.semantic_type, shape.semantic_confidence = infer_semantic_type(
@@ -391,11 +387,11 @@ class MermaidParser(Parser):
         self._layout_sequence()
 
         diagram = Diagram(
-            id="mermaid-sequence",
+            id='mermaid-sequence',
             name=title or self._sequence_title,
             metadata={
-                "mermaid": {"diagram_type": "sequence"},
-                "synthesized_layout": True,
+                'mermaid': {'diagram_type': 'sequence'},
+                'synthesized_layout': True,
             },
         )
         for shape in self._shape_order:
@@ -412,38 +408,38 @@ class MermaidParser(Parser):
             self._declare_participant(
                 participant_id,
                 label=_unescape_label(label) if label else None,
-                is_actor=kind == "actor",
+                is_actor=kind == 'actor',
             )
             return
         if match := _SEQ_MESSAGE_RE.match(statement):
             from_id, arrow, _activation, to_id, label = match.groups()
             self._declare_participant(from_id)
             self._declare_participant(to_id)
-            connection_type = "bidirectional" if arrow.startswith("<<") else "directed"
-            stroke_style = "dashed" if "--" in arrow else "solid"
+            connection_type = 'bidirectional' if arrow.startswith('<<') else 'directed'
+            stroke_style = 'dashed' if '--' in arrow else 'solid'
             self._connections.append(
                 Connection(
-                    id=f"message-{len(self._connections)}",
+                    id=f'message-{len(self._connections)}',
                     position=Point(0.0, 0.0),
                     size=Dimensions(1.0, 1.0),
                     from_id=from_id,
                     to_id=to_id,
-                    label=_unescape_label(label) if label else "",
+                    label=_unescape_label(label) if label else '',
                     connection_type=connection_type,
                     style=Style(stroke_style=stroke_style),
-                    metadata={"mermaid": {"arrow": arrow}},
+                    metadata={'mermaid': {'arrow': arrow}},
                 )
             )
             return
 
-        keyword = statement.split(maxsplit=1)[0].rstrip(":").lower()
-        if keyword == "title":
-            self._sequence_title = statement.split(maxsplit=1)[1].strip() if " " in statement else None
+        keyword = statement.split(maxsplit=1)[0].rstrip(':').lower()
+        if keyword == 'title':
+            self._sequence_title = statement.split(maxsplit=1)[1].strip() if ' ' in statement else None
             return
         if keyword in _SEQUENCE_BLOCK_KEYWORDS or keyword in _SEQUENCE_SKIPPED_DIRECTIVES:
             self.warnings.append(f"line {line_number}: skipped '{keyword}' sequence directive")
             return
-        self.warnings.append(f"line {line_number}: unrecognized line skipped: {statement!r}")
+        self.warnings.append(f'line {line_number}: unrecognized line skipped: {statement!r}')
 
     def _declare_participant(
         self,
@@ -455,13 +451,13 @@ class MermaidParser(Parser):
             if label is not None:
                 shape.label = label
             if is_actor:
-                shape.metadata["semantic_type"] = SemanticType.PERSON.value
+                shape.metadata['semantic_type'] = SemanticType.PERSON.value
             return
-        metadata = {"semantic_type": SemanticType.PERSON.value} if is_actor else None
+        metadata = {'semantic_type': SemanticType.PERSON.value} if is_actor else None
         self._create_shape(
             participant_id,
             label=label or participant_id,
-            shape_type="rectangle",
+            shape_type='rectangle',
             metadata=metadata,
         )
 
@@ -487,13 +483,13 @@ class MermaidParser(Parser):
             return
         keyword = statement.split(maxsplit=1)[0]
 
-        if keyword == "end" and statement == "end":
+        if keyword == 'end' and statement == 'end':
             if self._group_stack:
                 self._group_stack.pop()
             else:
                 self.warnings.append(f"line {line_number}: 'end' without matching subgraph")
             return
-        if keyword == "subgraph":
+        if keyword == 'subgraph':
             self._parse_subgraph(statement, line_number)
             return
         if keyword in _SKIPPED_DIRECTIVES:
@@ -502,19 +498,19 @@ class MermaidParser(Parser):
 
         if self._parse_node_or_edges(statement, line_number):
             return
-        self.warnings.append(f"line {line_number}: unrecognized line skipped: {statement!r}")
+        self.warnings.append(f'line {line_number}: unrecognized line skipped: {statement!r}')
 
     def _parse_subgraph(self, statement: str, line_number: int) -> None:
-        rest = statement[len("subgraph"):].strip()
+        rest = statement[len('subgraph') :].strip()
         if not rest:
-            self.warnings.append(f"line {line_number}: subgraph without an id skipped")
+            self.warnings.append(f'line {line_number}: subgraph without an id skipped')
             return
         if match := _SUBGRAPH_TITLED_RE.match(rest):
             group_id, label = match.group(1), _unescape_label(match.group(2))
         else:
             label = _unescape_label(rest)
-            group_id = re.sub(r"\W", "_", label)
-        group_id = GROUP_ID_PREFIX + re.sub(r"^group[-_]", "", group_id)
+            group_id = re.sub(r'\W', '_', label)
+        group_id = GROUP_ID_PREFIX + re.sub(r'^group[-_]', '', group_id)
         group = Group(
             id=group_id,
             position=Point(0.0, 0.0),
@@ -557,35 +553,35 @@ class MermaidParser(Parser):
                 for to_id in resolved[index + 1]:
                     self._connections.append(
                         Connection(
-                            id=f"edge-{len(self._connections)}",
+                            id=f'edge-{len(self._connections)}',
                             position=Point(0.0, 0.0),
                             size=Dimensions(1.0, 1.0),
                             from_id=from_id,
                             to_id=to_id,
-                            label=_unescape_label(label) if label else "",
+                            label=_unescape_label(label) if label else '',
                             connection_type=connection_type,
                             style=Style(stroke_style=stroke_style, stroke_width=stroke_width),
-                            metadata={"mermaid": {"arrow": arrow}},
+                            metadata={'mermaid': {'arrow': arrow}},
                         )
                     )
         return True
 
     def _declare_node(self, token: str, line_number: int) -> Optional[str]:
-        match = _NODE_TOKEN_RE.match(_CLASS_SUFFIX_RE.sub("", token.strip()))
+        match = _NODE_TOKEN_RE.match(_CLASS_SUFFIX_RE.sub('', token.strip()))
         if not match:
             return None
         node_id, body = match.group(1), match.group(2).strip()
 
         if not body:
             if node_id not in self._shapes:
-                self._create_shape(node_id, label=node_id, shape_type="rectangle")
+                self._create_shape(node_id, label=node_id, shape_type='rectangle')
             else:
                 self._adopt_into_group(node_id)
             return node_id
 
         for opening, closing, shape_type in _BRACKET_SHAPES:
             if body.startswith(opening) and body.endswith(closing):
-                label = _unescape_label(body[len(opening):-len(closing)])
+                label = _unescape_label(body[len(opening) : -len(closing)])
                 label, icons = _extract_fa_icons(label)
                 if node_id in self._shapes:
                     shape = self._shapes[node_id]
@@ -603,9 +599,7 @@ class MermaidParser(Parser):
                     )
                 return node_id
 
-        self.warnings.append(
-            f"line {line_number}: unsupported node syntax skipped: {token.strip()!r}"
-        )
+        self.warnings.append(f'line {line_number}: unsupported node syntax skipped: {token.strip()!r}')
         return None
 
     def _create_shape(
@@ -615,7 +609,7 @@ class MermaidParser(Parser):
         shape_type: str,
         metadata: Optional[dict[str, Any]] = None,
     ) -> None:
-        label_lines = label.splitlines() or [""]
+        label_lines = label.splitlines() or ['']
         width = max(_NODE_WIDTH_MIN, 12.0 * max(len(line) for line in label_lines) + 40.0)
         height = _NODE_HEIGHT_BASE + 30.0 * (len(label_lines) - 1)
         shape = Shape(
@@ -648,11 +642,11 @@ class MermaidParser(Parser):
             cross = cross_counters[layer]
             cross_counters[layer] += 1
             match self._direction:
-                case "LR":
+                case 'LR':
                     shape.position = Point(layer * _LAYER_PITCH, cross * _CROSS_PITCH)
-                case "RL":
+                case 'RL':
                     shape.position = Point((max_layer - layer) * _LAYER_PITCH, cross * _CROSS_PITCH)
-                case "BT":
+                case 'BT':
                     shape.position = Point(cross * _LAYER_PITCH, (max_layer - layer) * _CROSS_PITCH)
                 case _:
                     shape.position = Point(cross * _LAYER_PITCH, layer * _CROSS_PITCH)
@@ -673,9 +667,7 @@ class MermaidParser(Parser):
             connection.start_point = start
             connection.end_point = end
             connection.position = Point(min(start.x, end.x), min(start.y, end.y))
-            connection.size = Dimensions(
-                max(abs(end.x - start.x), 1.0), max(abs(end.y - start.y), 1.0)
-            )
+            connection.size = Dimensions(max(abs(end.x - start.x), 1.0), max(abs(end.y - start.y), 1.0))
 
         for group in reversed(self._groups):
             self._fit_group_box(group)
@@ -703,9 +695,7 @@ class MermaidParser(Parser):
     def _fit_group_box(self, group: Group) -> None:
         boxes: list[tuple[float, float, float, float]] = []
         for child_id in group.children:
-            child = self._shapes.get(child_id) or next(
-                (g for g in self._groups if g.id == child_id), None
-            )
+            child = self._shapes.get(child_id) or next((g for g in self._groups if g.id == child_id), None)
             if child:
                 boxes.append(
                     (

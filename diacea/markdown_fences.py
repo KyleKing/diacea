@@ -31,19 +31,19 @@ from .ingestion import DiagramIngestionError, parse_diagram_file
 from .ir.elements import Diagram
 
 _FENCE_RE = re.compile(
-    r"^(?P<indent>[ \t]*)```[ \t]*diacea[ \t]*\n(?P<body>.*?)\n(?P=indent)```[ \t]*$",
+    r'^(?P<indent>[ \t]*)```[ \t]*diacea[ \t]*\n(?P<body>.*?)\n(?P=indent)```[ \t]*$',
     re.MULTILINE | re.DOTALL,
 )
 
 _FENCE_LANGUAGES = {
-    "c4": "plantuml",
-    "d2": "d2",
-    "graphviz": "dot",
-    "mermaid": "mermaid",
-    "plantuml": "plantuml",
+    'c4': 'plantuml',
+    'd2': 'd2',
+    'graphviz': 'dot',
+    'mermaid': 'mermaid',
+    'plantuml': 'plantuml',
 }
 
-_MERMAID_TYPES = ("c4", "flowchart", "sequence")
+_MERMAID_TYPES = ('c4', 'flowchart', 'sequence')
 
 
 class DiaceaFenceError(ValueError):
@@ -54,47 +54,44 @@ def replace_diacea_fences(markdown: str, base_dirs: Sequence[str | Path]) -> str
     """Replace every ```diacea fence with a generated diagram code block."""
 
     def _render(match: re.Match[str]) -> str:
-        indent = match.group("indent")
-        options = _parse_fence_body(match.group("body"))
-        source = _resolve_source(options["source"], base_dirs)
+        indent = match.group('indent')
+        options = _parse_fence_body(match.group('body'))
+        source = _resolve_source(options['source'], base_dirs)
         try:
             diagram = parse_diagram_file(source)
         except DiagramIngestionError as err:
             raise DiaceaFenceError(str(err)) from err
-        output = _generate(diagram, options["format"], options.get("mermaid-type"))
-        language = _FENCE_LANGUAGES[options["format"]]
-        lines = [f"{indent}```{language}"]
-        lines.extend(f"{indent}{line}".rstrip() for line in output.splitlines())
-        lines.append(f"{indent}```")
-        return "\n".join(lines)
+        output = _generate(diagram, options['format'], options.get('mermaid-type'))
+        language = _FENCE_LANGUAGES[options['format']]
+        lines = [f'{indent}```{language}']
+        lines.extend(f'{indent}{line}'.rstrip() for line in output.splitlines())
+        lines.append(f'{indent}```')
+        return '\n'.join(lines)
 
     return _FENCE_RE.sub(_render, markdown)
 
 
 def _parse_fence_body(body: str) -> dict[str, str]:
-    options = {"format": "mermaid"}
+    options = {'format': 'mermaid'}
     for raw in body.splitlines():
         line = raw.strip()
         if not line:
             continue
-        key, separator, value = line.partition(":")
+        key, separator, value = line.partition(':')
         key, value = key.strip(), value.strip()
         if not separator or not value:
             raise DiaceaFenceError(f"diacea fence lines must be 'key: value', got {line!r}")
-        if key not in {"format", "mermaid-type", "source"}:
-            raise DiaceaFenceError(f"unknown diacea fence option {key!r}")
+        if key not in {'format', 'mermaid-type', 'source'}:
+            raise DiaceaFenceError(f'unknown diacea fence option {key!r}')
         options[key] = value
-    if "source" not in options:
+    if 'source' not in options:
         raise DiaceaFenceError("diacea fence is missing the required 'source' option")
-    if options["format"] not in _FENCE_LANGUAGES:
+    if options['format'] not in _FENCE_LANGUAGES:
         raise DiaceaFenceError(
-            f"unknown diacea fence format {options['format']!r}; "
-            f"expected one of {sorted(_FENCE_LANGUAGES)}"
+            f'unknown diacea fence format {options["format"]!r}; expected one of {sorted(_FENCE_LANGUAGES)}'
         )
-    if (mermaid_type := options.get("mermaid-type")) is not None and mermaid_type not in _MERMAID_TYPES:
-        raise DiaceaFenceError(
-            f"unknown mermaid-type {mermaid_type!r}; expected one of {sorted(_MERMAID_TYPES)}"
-        )
+    if (mermaid_type := options.get('mermaid-type')) is not None and mermaid_type not in _MERMAID_TYPES:
+        raise DiaceaFenceError(f'unknown mermaid-type {mermaid_type!r}; expected one of {sorted(_MERMAID_TYPES)}')
     return options
 
 
@@ -103,20 +100,20 @@ def _resolve_source(source: str, base_dirs: Sequence[str | Path]) -> Path:
     for candidate in candidates:
         if candidate.exists():
             return candidate
-    searched = ", ".join(str(c) for c in candidates)
-    raise DiaceaFenceError(f"diacea fence source {source!r} not found (searched: {searched})")
+    searched = ', '.join(str(c) for c in candidates)
+    raise DiaceaFenceError(f'diacea fence source {source!r} not found (searched: {searched})')
 
 
 def _generate(diagram: Diagram, output_format: str, mermaid_type: str | None) -> str:
     match output_format:
-        case "c4":
+        case 'c4':
             return C4PlantUMLGenerator().generate(diagram)
-        case "d2":
+        case 'd2':
             return D2Generator().generate(diagram)
-        case "graphviz":
+        case 'graphviz':
             return GraphVizGenerator().generate(diagram)
-        case "mermaid":
+        case 'mermaid':
             return MermaidGenerator(diagram_type=mermaid_type).generate(diagram)
-        case "plantuml":
+        case 'plantuml':
             return PlantUMLGenerator().generate(diagram)
-    raise DiaceaFenceError(f"unknown diacea fence format {output_format!r}")
+    raise DiaceaFenceError(f'unknown diacea fence format {output_format!r}')

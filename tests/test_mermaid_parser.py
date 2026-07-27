@@ -142,9 +142,7 @@ class TestNodeShapes:
         assert _shape(diagram, 'A').label == 'Quoted label (with parens)'
 
     def test_label_special_chars_unescaped(self):
-        _, diagram = _parse(
-            'flowchart LR\n    A[Tom &amp; Jerry #quot;cartoon#quot; &lt;classic&gt;<br/>second line]'
-        )
+        _, diagram = _parse('flowchart LR\n    A[Tom &amp; Jerry #quot;cartoon#quot; &lt;classic&gt;<br/>second line]')
         assert _shape(diagram, 'A').label == 'Tom & Jerry "cartoon" <classic>\nsecond line'
 
     def test_cylinder_label_infers_database(self):
@@ -254,14 +252,14 @@ class TestEdges:
 class TestSubgraphs:
     def test_subgraph_becomes_group(self):
         _, diagram = _parse(
-            '''
+            """
             flowchart TD
                 subgraph cluster1[My Cluster]
                     A[One]
                     B[Two]
                 end
                 A --> B
-            '''
+            """
         )
         groups = diagram.get_groups()
         assert len(groups) == 1
@@ -277,7 +275,7 @@ class TestSubgraphs:
 
     def test_nested_subgraphs(self):
         _, diagram = _parse(
-            '''
+            """
             flowchart TD
                 subgraph outer[Outer]
                     A
@@ -285,7 +283,7 @@ class TestSubgraphs:
                         B
                     end
                 end
-            '''
+            """
         )
         outer = next(g for g in diagram.get_groups() if g.id == 'group-outer')
         inner = next(g for g in diagram.get_groups() if g.id == 'group-inner')
@@ -294,9 +292,7 @@ class TestSubgraphs:
         assert inner.children == ['B']
 
     def test_group_box_contains_children(self):
-        _, diagram = _parse(
-            'flowchart LR\n    subgraph sg[Box]\n        A --> B\n    end'
-        )
+        _, diagram = _parse('flowchart LR\n    subgraph sg[Box]\n        A --> B\n    end')
         group = diagram.get_groups()[0]
         for child_id in ('A', 'B'):
             child = _shape(diagram, child_id)
@@ -306,13 +302,13 @@ class TestSubgraphs:
 
     def test_node_referenced_inside_subgraph_joins_it(self):
         _, diagram = _parse(
-            '''
+            """
             flowchart TD
                 start --> api
                 subgraph backend[Backend]
                     api[API] --> db[(DB)]
                 end
-            '''
+            """
         )
         group = diagram.get_groups()[0]
         assert set(group.children) == {'api', 'db'}
@@ -324,13 +320,13 @@ class TestSubgraphs:
 
     def test_subgraph_and_node_sharing_name(self):
         _, diagram = _parse(
-            '''
+            """
             flowchart LR
                 subgraph Results
                     A
                 end
                 B --> Results
-            '''
+            """
         )
         group = diagram.get_groups()[0]
         assert group.id == 'group-Results'
@@ -451,7 +447,15 @@ class TestRealWorldFixtures:
         diagram = parser.parse(content)
         shapes = {s.id: s for s in diagram.get_shapes()}
         assert set(shapes) == {
-            'dev', 'gh', 'ci', 'build', 'notify', 'registry', 'deploy', 'smoke', 'prod',
+            'dev',
+            'gh',
+            'ci',
+            'build',
+            'notify',
+            'registry',
+            'deploy',
+            'smoke',
+            'prod',
         }
         assert shapes['ci'].shape_type == 'diamond'
         assert shapes['registry'].semantic_type == SemanticType.DATABASE
@@ -513,15 +517,9 @@ class TestRoundTrip:
 
     def test_round_trip_is_fixpoint(self):
         data = json.loads((TEST_DATA_DIR / 'excalidraw.json').read_text())
-        first = MermaidGenerator(diagram_type='flowchart').generate(
-            ExcalidrawParser().parse(data)
-        )
-        second = MermaidGenerator(diagram_type='flowchart').generate(
-            MermaidParser().parse(first)
-        )
-        third = MermaidGenerator(diagram_type='flowchart').generate(
-            MermaidParser().parse(second)
-        )
+        first = MermaidGenerator(diagram_type='flowchart').generate(ExcalidrawParser().parse(data))
+        second = MermaidGenerator(diagram_type='flowchart').generate(MermaidParser().parse(first))
+        third = MermaidGenerator(diagram_type='flowchart').generate(MermaidParser().parse(second))
         assert third == second
 
     def test_round_trip_structure_matches(self):
@@ -531,9 +529,7 @@ class TestRoundTrip:
         reparsed = MermaidParser().parse(first)
 
         group_source_ids = {g.source_shape_id for g in source.get_groups()}
-        source_labels = {
-            s.label for s in source.get_shapes() if s.id not in group_source_ids
-        }
+        source_labels = {s.label for s in source.get_shapes() if s.id not in group_source_ids}
         reparsed_labels = {s.label for s in reparsed.get_shapes()}
         assert reparsed_labels == source_labels
 
@@ -549,13 +545,13 @@ class TestRoundTrip:
 
 class TestSequenceDiagrams:
     def test_participants_and_messages(self):
-        content = textwrap.dedent('''
+        content = textwrap.dedent("""
             sequenceDiagram
                 participant web as Web App
                 actor alice as Alice
                 web->>api: GET /orders
                 api-->>web: 200 OK
-        ''')
+        """)
         parser = MermaidParser()
         diagram = parser.parse(content)
 
@@ -602,14 +598,12 @@ class TestSequenceDiagrams:
         assert connection.metadata['mermaid']['arrow'] == arrow
 
     def test_activation_shorthand(self):
-        diagram = MermaidParser().parse(
-            'sequenceDiagram\n    A->>+B: start\n    B-->>-A: done'
-        )
+        diagram = MermaidParser().parse('sequenceDiagram\n    A->>+B: start\n    B-->>-A: done')
         edges = [(c.from_id, c.to_id) for c in diagram.get_connections()]
         assert edges == [('A', 'B'), ('B', 'A')]
 
     def test_blocks_and_notes_skipped_but_messages_kept(self):
-        content = textwrap.dedent('''
+        content = textwrap.dedent("""
             sequenceDiagram
                 autonumber
                 A->>B: request
@@ -622,7 +616,7 @@ class TestSequenceDiagrams:
                 loop every minute
                     A->>B: poll
                 end
-        ''')
+        """)
         parser = MermaidParser()
         diagram = parser.parse(content)
 
@@ -663,14 +657,14 @@ class TestSequenceDiagrams:
         assert output.startswith('sequenceDiagram')
 
     def test_round_trip_is_fixpoint(self):
-        content = textwrap.dedent('''
+        content = textwrap.dedent("""
             sequenceDiagram
                 participant web as Web App
                 actor alice as Alice
                 web->>api: GET /orders
                 api-->>web: 200 OK
                 alice->>web: click
-        ''')
+        """)
         first = MermaidGenerator().generate(MermaidParser().parse(content))
         second = MermaidGenerator().generate(MermaidParser().parse(first))
         assert second == first

@@ -44,7 +44,16 @@ class TestExcalidrawFloatCoercion:
             'elements': [
                 {'id': 'r1', 'type': 'rectangle', 'x': 0, 'y': 0, 'width': 100, 'height': 60, 'opacity': 100},
                 {'id': 'r2', 'type': 'rectangle', 'x': 300, 'y': 0, 'width': 100, 'height': 60},
-                {'id': 't1', 'type': 'text', 'x': 10, 'y': 20, 'width': 80, 'height': 20, 'text': 'API', 'fontSize': 16},
+                {
+                    'id': 't1',
+                    'type': 'text',
+                    'x': 10,
+                    'y': 20,
+                    'width': 80,
+                    'height': 20,
+                    'text': 'API',
+                    'fontSize': 16,
+                },
                 {'id': 'a1', 'type': 'arrow', 'x': 100, 'y': 30, 'points': [[0, 0], [100, 10], [200, 0]]},
             ],
         }

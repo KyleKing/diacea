@@ -23,5 +23,5 @@ class DiaceaPlugin(BasePlugin):  # type: ignore[type-arg]
     """Replace ```diacea fences with generated diagram code blocks."""
 
     def on_page_markdown(self, markdown: str, /, *, page: Any, config: Any, files: Any) -> str:
-        base_dirs = [Path(page.file.abs_src_path).parent, Path(config["docs_dir"])]
+        base_dirs = [Path(page.file.abs_src_path).parent, Path(config['docs_dir'])]
         return replace_diacea_fences(markdown, base_dirs)

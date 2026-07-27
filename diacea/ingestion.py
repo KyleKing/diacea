@@ -44,13 +44,13 @@ def parse_diagram_file(file_path: str | Path) -> Diagram:
     """
     path = Path(file_path)
     if not path.exists():
-        raise DiagramIngestionError(f"Diagram file not found: {path}")
+        raise DiagramIngestionError(f'Diagram file not found: {path}')
 
     content = path.read_text()
     stripped = content.strip()
 
-    if stripped.startswith(("<?xml", "<svg")):
-        input_format = "svg"
+    if stripped.startswith(('<?xml', '<svg')):
+        input_format = 'svg'
         input_data: dict[str, Any] | str = content
     else:
         try:
@@ -62,27 +62,25 @@ def parse_diagram_file(file_path: str | Path) -> Diagram:
             except json.JSONDecodeError as err:
                 raise DiagramIngestionError(
                     f"Could not detect diagram format of '{path}': not SVG, "
-                    f"Obsidian Excalidraw markdown, PlantUML, Mermaid, or valid JSON"
+                    f'Obsidian Excalidraw markdown, PlantUML, Mermaid, or valid JSON'
                 ) from err
             try:
                 input_format = detect_input_format(input_data)
             except ValueError as err:
-                raise DiagramIngestionError(
-                    f"Could not detect diagram format of '{path}': {err}"
-                ) from err
+                raise DiagramIngestionError(f"Could not detect diagram format of '{path}': {err}") from err
 
     try:
-        if input_format == "svg":
+        if input_format == 'svg':
             return SVGParser().parse(input_data)
-        if input_format == "obsidian":
+        if input_format == 'obsidian':
             if not isinstance(input_data, str):
                 raise DiagramIngestionError(f"Obsidian Excalidraw requires text content: '{path}'")
             return ExcalidrawParser().parse(extract_excalidraw_json(input_data))
-        if input_format == "mermaid":
+        if input_format == 'mermaid':
             return MermaidParser().parse(input_data)
-        if input_format == "plantuml":
+        if input_format == 'plantuml':
             return PlantUMLParser().parse(input_data)
-        if input_format == "tldraw":
+        if input_format == 'tldraw':
             return TLDrawParser().parse(input_data)
         return ExcalidrawParser().parse(input_data)
     except ValueError as err:
@@ -139,8 +137,8 @@ def ingest_diagrams(
                     label=_collapse_whitespace(shape.label),
                     element_type=semantic_type,
                     metadata={
-                        "semantic_confidence": confidence,
-                        "source_file": str(file_path),
+                        'semantic_confidence': confidence,
+                        'source_file': str(file_path),
                     },
                 )
                 workspace.add_element(element)
@@ -160,7 +158,7 @@ def ingest_diagrams(
         if view is None:
             view = DiagramView(
                 id=view_id,
-                name=view_id.replace("-", " ").replace("_", " ").title(),
+                name=view_id.replace('-', ' ').replace('_', ' ').title(),
                 view_type=view_type,
                 file=str(file_path),
             )
@@ -173,9 +171,9 @@ def ingest_diagrams(
 def view_id_from_path(file_path: str | Path) -> str:
     """Derive a view ID from a diagram file name (e.g. 'a.excalidraw.md' -> 'a')."""
     name = Path(file_path).name
-    known_suffixes = (".md", ".mmd", ".excalidraw", ".puml", ".tldr", ".json", ".svg")
+    known_suffixes = ('.md', '.mmd', '.excalidraw', '.puml', '.tldr', '.json', '.svg')
     while name.lower().endswith(known_suffixes):
-        name = name[: name.rfind(".")]
+        name = name[: name.rfind('.')]
     return _slugify(name.lower())
 
 
@@ -186,13 +184,13 @@ def _resolve_type_conflict(
     file_path: str,
     summary: IngestionSummary,
 ) -> None:
-    existing_confidence = existing.metadata.get("semantic_confidence", 0.0)
+    existing_confidence = existing.metadata.get('semantic_confidence', 0.0)
     if confidence > existing_confidence:
         kept, kept_confidence = semantic_type, confidence
         dropped = existing.element_type
         existing.element_type = semantic_type
-        existing.metadata["semantic_confidence"] = confidence
-        existing.metadata["source_file"] = str(file_path)
+        existing.metadata['semantic_confidence'] = confidence
+        existing.metadata['source_file'] = str(file_path)
     else:
         kept, kept_confidence = existing.element_type, existing_confidence
         dropped = semantic_type
@@ -205,12 +203,12 @@ def _resolve_type_conflict(
 
 def _semantic_type_name(semantic_type: object) -> str:
     if not semantic_type:
-        return "generic"
-    return str(getattr(semantic_type, "value", semantic_type))
+        return 'generic'
+    return str(getattr(semantic_type, 'value', semantic_type))
 
 
 def _collapse_whitespace(label: str) -> str:
-    return " ".join(label.split())
+    return ' '.join(label.split())
 
 
 def _normalize_name(label: str) -> str:
@@ -218,5 +216,5 @@ def _normalize_name(label: str) -> str:
 
 
 def _slugify(name: str) -> str:
-    slug = re.sub(r"[^a-z0-9]+", "-", name.lower())
-    return slug.strip("-") or "element"
+    slug = re.sub(r'[^a-z0-9]+', '-', name.lower())
+    return slug.strip('-') or 'element'

@@ -138,9 +138,7 @@ def _v2_shape_metadata(record: dict[str, Any]) -> dict[str, Any]:
         'rotation': record.get('rotation'),
         'isLocked': record.get('isLocked'),
         'props': {
-            key: props[key]
-            for key in ('geo', 'fill', 'dash', 'size', 'font', 'align', 'color', 'url')
-            if key in props
+            key: props[key] for key in ('geo', 'fill', 'dash', 'size', 'font', 'align', 'color', 'url') if key in props
         },
     }
 
@@ -256,31 +254,19 @@ class TLDrawParser(Parser):
             'tldraw': {
                 'tldrawFileFormatVersion': data.get('tldrawFileFormatVersion'),
                 'schema': data.get('schema', {}),
-                'document': next(
-                    (r for r in records if r.get('typeName') == 'document'), {}
-                ),
+                'document': next((r for r in records if r.get('typeName') == 'document'), {}),
             }
         }
 
         if not selected_pages:
-            return Diagram(
-                id='empty', name='Empty Diagram', elements=[], metadata=metadata
-            )
+            return Diagram(id='empty', name='Empty Diagram', elements=[], metadata=metadata)
 
         shape_records = [r for r in records if r.get('typeName') == 'shape']
-        arrow_bindings = [
-            r
-            for r in records
-            if r.get('typeName') == 'binding' and r.get('type') == 'arrow'
-        ]
+        arrow_bindings = [r for r in records if r.get('typeName') == 'binding' and r.get('type') == 'arrow']
 
         parent_map = {r['id']: r.get('parentId') for r in shape_records}
         page_ids = {p['id'] for p in selected_pages}
-        page_shapes = [
-            r
-            for r in shape_records
-            if _resolve_page_id(r['id'], parent_map) in page_ids
-        ]
+        page_shapes = [r for r in shape_records if _resolve_page_id(r['id'], parent_map) in page_ids]
 
         elements: list[Element] = []
         node_shapes: list[Shape] = []
@@ -295,15 +281,11 @@ class TLDrawParser(Parser):
         for binding in arrow_bindings:
             terminal = binding.get('props', {}).get('terminal')
             if terminal in ('start', 'end'):
-                bindings_by_arrow.setdefault(binding['fromId'], {})[terminal] = (
-                    binding['toId']
-                )
+                bindings_by_arrow.setdefault(binding['fromId'], {})[terminal] = binding['toId']
 
         for record in page_shapes:
             if record.get('type') == 'arrow':
-                conn = self._parse_v2_arrow(
-                    record, bindings_by_arrow.get(record['id'], {}), node_shapes
-                )
+                conn = self._parse_v2_arrow(record, bindings_by_arrow.get(record['id'], {}), node_shapes)
                 if conn is not None:
                     elements.append(conn)
 
@@ -314,9 +296,7 @@ class TLDrawParser(Parser):
             diagram_id = 'diagram'
             diagram_name = f'TLDraw Diagram ({len(selected_pages)} pages)'
 
-        return Diagram(
-            id=diagram_id, name=diagram_name, elements=elements, metadata=metadata
-        )
+        return Diagram(id=diagram_id, name=diagram_name, elements=elements, metadata=metadata)
 
     def _warn_skipped_pages(self, total_pages: int, selected_pages: int) -> None:
         if 0 < selected_pages < total_pages:
@@ -341,9 +321,7 @@ class TLDrawParser(Parser):
 
         return pages
 
-    def _parse_v2_shape(
-        self, record: dict[str, Any], page_shapes: list[dict[str, Any]]
-    ) -> Shape | Group | Text | None:
+    def _parse_v2_shape(self, record: dict[str, Any], page_shapes: list[dict[str, Any]]) -> Shape | Group | Text | None:
         match record.get('type'):
             case 'arrow':
                 return None
@@ -359,9 +337,7 @@ class TLDrawParser(Parser):
     def _parse_v2_geo(self, record: dict[str, Any]) -> Shape:
         props = record.get('props', {})
         position = Point(x=float(record.get('x', 0.0)), y=float(record.get('y', 0.0)))
-        size = Dimensions(
-            width=float(props.get('w', 100.0)), height=float(props.get('h', 100.0))
-        )
+        size = Dimensions(width=float(props.get('w', 100.0)), height=float(props.get('h', 100.0)))
         label = _v2_label(props)
         style = _v2_style(record)
 
@@ -395,15 +371,11 @@ class TLDrawParser(Parser):
 
     def _parse_v2_frame(self, record: dict[str, Any], page_shapes: list[dict[str, Any]]) -> Group:
         props = record.get('props', {})
-        children = [
-            s['id'] for s in page_shapes if s.get('parentId') == record['id']
-        ]
+        children = [s['id'] for s in page_shapes if s.get('parentId') == record['id']]
         group = Group(
             id=record['id'],
             label=props.get('name', '') or _v2_label(props),
-            position=Point(
-                x=float(record.get('x', 0.0)), y=float(record.get('y', 0.0))
-            ),
+            position=Point(x=float(record.get('x', 0.0)), y=float(record.get('y', 0.0))),
             size=Dimensions(
                 width=float(props.get('w', 100.0)),
                 height=float(props.get('h', 100.0)),
@@ -420,9 +392,7 @@ class TLDrawParser(Parser):
             id=record['id'],
             content=_v2_label(props),
             alignment=props.get('textAlign', props.get('align', 'left')),
-            position=Point(
-                x=float(record.get('x', 0.0)), y=float(record.get('y', 0.0))
-            ),
+            position=Point(x=float(record.get('x', 0.0)), y=float(record.get('y', 0.0))),
             size=Dimensions(
                 width=float(props.get('w', 100.0)),
                 height=float(props.get('h', 30.0)),
@@ -440,11 +410,7 @@ class TLDrawParser(Parser):
         base_x = float(record.get('x', 0.0))
         base_y = float(record.get('y', 0.0))
 
-        points = [
-            point
-            for segment in props.get('segments', [])
-            for point in segment.get('points', [])
-        ]
+        points = [point for segment in props.get('segments', []) for point in segment.get('points', [])]
         if not points:
             return None
 
@@ -482,12 +448,8 @@ class TLDrawParser(Parser):
 
         start = props.get('start', {})
         end = props.get('end', {})
-        start_point = Point(
-            x=base_x + float(start.get('x', 0.0)), y=base_y + float(start.get('y', 0.0))
-        )
-        end_point = Point(
-            x=base_x + float(end.get('x', 0.0)), y=base_y + float(end.get('y', 0.0))
-        )
+        start_point = Point(x=base_x + float(start.get('x', 0.0)), y=base_y + float(start.get('y', 0.0)))
+        end_point = Point(x=base_x + float(end.get('x', 0.0)), y=base_y + float(end.get('y', 0.0)))
 
         from_id = terminals.get('start') or start.get('boundShapeId')
         to_id = terminals.get('end') or end.get('boundShapeId')
@@ -577,9 +539,7 @@ class TLDrawParser(Parser):
 
         return elements
 
-    def _parse_shape(
-        self, shape_id: str, shape_data: dict[str, Any]
-    ) -> Shape | Group | Text | None:
+    def _parse_shape(self, shape_id: str, shape_data: dict[str, Any]) -> Shape | Group | Text | None:
         """Parse a TLDraw shape to IR element."""
         shape_type = shape_data.get('type')
 
@@ -636,7 +596,6 @@ class TLDrawParser(Parser):
             size=size,
             style=style,
         )
-
 
         return shape
 
@@ -697,44 +656,44 @@ class TLDrawParser(Parser):
         Returns:
             Parsed Connection or None if invalid
         """
-        handles = arrow_data.get("handles", {})
+        handles = arrow_data.get('handles', {})
 
-        start_handle = handles.get("start", {})
-        end_handle = handles.get("end", {})
+        start_handle = handles.get('start', {})
+        end_handle = handles.get('end', {})
 
-        start_binding_id = start_handle.get("bindingId")
-        end_binding_id = end_handle.get("bindingId")
+        start_binding_id = start_handle.get('bindingId')
+        end_binding_id = end_handle.get('bindingId')
 
         # Get bound shape IDs from bindings
         from_id = None
         to_id = None
 
         if start_binding_id and start_binding_id in bindings:
-            from_id = bindings[start_binding_id].get("toId")
+            from_id = bindings[start_binding_id].get('toId')
 
         if end_binding_id and end_binding_id in bindings:
-            to_id = bindings[end_binding_id].get("toId")
+            to_id = bindings[end_binding_id].get('toId')
 
         if not from_id or not to_id:
             return None  # Can't create connection without both endpoints
 
         # Get label
-        label = arrow_data.get("label", "")
+        label = arrow_data.get('label', '')
 
         # Parse style
-        style = self._parse_style(arrow_data.get("style", {}))
+        style = self._parse_style(arrow_data.get('style', {}))
 
         # Determine if bidirectional
-        decorations = arrow_data.get("decorations", {})
-        start_dec = decorations.get("start")
-        end_dec = decorations.get("end")
+        decorations = arrow_data.get('decorations', {})
+        start_dec = decorations.get('start')
+        end_dec = decorations.get('end')
 
-        connection_type = "directed"
-        if start_dec == "arrow" and end_dec == "arrow":
-            connection_type = "bidirectional"
+        connection_type = 'directed'
+        if start_dec == 'arrow' and end_dec == 'arrow':
+            connection_type = 'bidirectional'
 
         # Calculate approximate position (center of arrow)
-        point = arrow_data.get("point", [0.0, 0.0])
+        point = arrow_data.get('point', [0.0, 0.0])
         position = Point(x=float(point[0]), y=float(point[1]))
 
         # Approximate size (arrows don't have meaningful size)
@@ -764,38 +723,38 @@ class TLDrawParser(Parser):
         """
         # TLDraw color mapping
         color_map = {
-            "black": "#1d1d1d",
-            "white": "#ffffff",
-            "lightGray": "#c6cbd1",
-            "gray": "#788492",
-            "darkGray": "#1d1d1d",
-            "red": "#ff0000",
-            "orange": "#ff8800",
-            "yellow": "#ffff00",
-            "green": "#00ff00",
-            "blue": "#0000ff",
-            "indigo": "#4b0082",
-            "violet": "#ee82ee",
+            'black': '#1d1d1d',
+            'white': '#ffffff',
+            'lightGray': '#c6cbd1',
+            'gray': '#788492',
+            'darkGray': '#1d1d1d',
+            'red': '#ff0000',
+            'orange': '#ff8800',
+            'yellow': '#ffff00',
+            'green': '#00ff00',
+            'blue': '#0000ff',
+            'indigo': '#4b0082',
+            'violet': '#ee82ee',
         }
 
         # TLDraw size mapping
         size_map = {
-            "small": 2.0,
-            "medium": 3.0,
-            "large": 5.0,
+            'small': 2.0,
+            'medium': 3.0,
+            'large': 5.0,
         }
 
-        color = style_data.get("color", "black")
-        stroke_color = color_map.get(color, "#000000")
+        color = style_data.get('color', 'black')
+        stroke_color = color_map.get(color, '#000000')
 
-        size = style_data.get("size", "medium")
+        size = style_data.get('size', 'medium')
         stroke_width = size_map.get(size, 3.0)
 
-        is_filled = style_data.get("isFilled", False)
+        is_filled = style_data.get('isFilled', False)
         fill_color = stroke_color if is_filled else None
 
-        dash = style_data.get("dash", "solid")
-        stroke_style = "dashed" if dash in ["dashed", "dotted"] else "solid"
+        dash = style_data.get('dash', 'solid')
+        stroke_style = 'dashed' if dash in ['dashed', 'dotted'] else 'solid'
 
         return Style(
             fill_color=fill_color,
@@ -814,17 +773,17 @@ class TLDrawParser(Parser):
             IR shape type name
         """
         if not tldraw_type:
-            return "rectangle"
+            return 'rectangle'
 
         type_map = {
-            "rectangle": "rectangle",
-            "ellipse": "ellipse",
-            "triangle": "triangle",
-            "diamond": "diamond",
-            "text": "text",
-            "draw": "freehand",
-            "sticky": "note",
-            "group": "group",
+            'rectangle': 'rectangle',
+            'ellipse': 'ellipse',
+            'triangle': 'triangle',
+            'diamond': 'diamond',
+            'text': 'text',
+            'draw': 'freehand',
+            'sticky': 'note',
+            'group': 'group',
         }
 
-        return type_map.get(tldraw_type, "rectangle")
+        return type_map.get(tldraw_type, 'rectangle')

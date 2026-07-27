@@ -28,13 +28,13 @@ class D2Config:
         """Initialize default shape mappings."""
         if not self.shape_map:
             self.shape_map = {
-                SemanticType.DATABASE: "cylinder",
-                SemanticType.PERSON: "person",
-                SemanticType.QUEUE: "queue",
-                SemanticType.STORAGE: "cylinder",
-                SemanticType.DOCUMENT: "document",
-                SemanticType.CLOUD: "cloud",
-                SemanticType.DECISION: "diamond",
+                SemanticType.DATABASE: 'cylinder',
+                SemanticType.PERSON: 'person',
+                SemanticType.QUEUE: 'queue',
+                SemanticType.STORAGE: 'cylinder',
+                SemanticType.DOCUMENT: 'document',
+                SemanticType.CLOUD: 'cloud',
+                SemanticType.DECISION: 'diamond',
             }
 
 
@@ -64,8 +64,8 @@ class D2Generator(Generator):
         # Direction
         direction = self.config.direction or self._detect_direction(diagram)
         if direction:
-            lines.append(f"direction: {direction}")
-            lines.append("")
+            lines.append(f'direction: {direction}')
+            lines.append('')
 
         # Build element paths for hierarchy
         self._build_element_paths(diagram)
@@ -76,11 +76,11 @@ class D2Generator(Generator):
         # Generate connections
         connections = diagram.get_connections()
         if connections:
-            lines.append("")
+            lines.append('')
             for conn in connections:
                 lines.append(self._format_connection(conn))
 
-        return "\n".join(lines)
+        return '\n'.join(lines)
 
     def _detect_direction(self, diagram: Diagram) -> Optional[str]:
         """Auto-detect optimal direction based on layout."""
@@ -99,10 +99,10 @@ class D2Generator(Generator):
 
         # If wider than tall, use right
         if width > height * 1.5:
-            return "right"
+            return 'right'
         # If taller than wide, use down
         elif height > width * 1.5:
-            return "down"
+            return 'down'
 
         return None  # Let D2 decide
 
@@ -130,7 +130,7 @@ class D2Generator(Generator):
                 parent_id = child_to_parent[elem_id]
                 parent_path = get_path(parent_id, visited)
                 sanitized_id = self._sanitize_id(elem_id)
-                return f"{parent_path}.{sanitized_id}" if parent_path else sanitized_id
+                return f'{parent_path}.{sanitized_id}' if parent_path else sanitized_id
             else:
                 return self._sanitize_id(elem_id)
 
@@ -161,7 +161,7 @@ class D2Generator(Generator):
         label = self._escape_label(group.label or group_id)
 
         # Start container
-        lines.append(f"{group_id}: {label} {{")
+        lines.append(f'{group_id}: {label} {{')
 
         # Write child shapes
         for child_id in group.children:
@@ -169,11 +169,11 @@ class D2Generator(Generator):
             if child_shape:
                 # For children, use relative path (just the ID)
                 child_line = self._format_shape(child_shape, use_relative_path=True)
-                lines.extend(f"  {line}" for line in child_line.split("\n"))
+                lines.extend(f'  {line}' for line in child_line.split('\n'))
 
         # Close container
-        lines.append("}")
-        lines.append("")
+        lines.append('}')
+        lines.append('')
 
     def _format_shape(self, shape: Shape, use_relative_path: bool = False) -> str:
         """Format a D2 shape declaration."""
@@ -190,21 +190,21 @@ class D2Generator(Generator):
 
         # Simple declaration if no special properties
         if not d2_shape and not has_style:
-            return f"{shape_id}: {label}"
+            return f'{shape_id}: {label}'
 
         # Complex declaration with properties
-        lines = [f"{shape_id}: {label} {{"]
+        lines = [f'{shape_id}: {label} {{']
 
         if d2_shape:
-            lines.append(f"  shape: {d2_shape}")
+            lines.append(f'  shape: {d2_shape}')
 
         if has_style:
             style_lines = self._format_style(shape)
-            lines.extend(f"  {line}" for line in style_lines)
+            lines.extend(f'  {line}' for line in style_lines)
 
-        lines.append("}")
+        lines.append('}')
 
-        return "\n".join(lines)
+        return '\n'.join(lines)
 
     def _get_d2_shape(self, shape: Shape) -> Optional[str]:
         """Get D2 shape name based on semantic or geometric type."""
@@ -214,9 +214,9 @@ class D2Generator(Generator):
 
         # Map geometric shapes
         shape_map = {
-            "ellipse": "oval",
-            "diamond": "diamond",
-            "circle": "circle",
+            'ellipse': 'oval',
+            'diamond': 'diamond',
+            'circle': 'circle',
         }
 
         return shape_map.get(shape.shape_type)
@@ -224,12 +224,7 @@ class D2Generator(Generator):
     def _has_custom_style(self, shape: Shape) -> bool:
         """Check if shape has custom styling."""
         style = shape.style
-        return bool(
-            style.fill_color
-            or style.stroke_color
-            or style.stroke_width
-            or style.stroke_style == "dashed"
-        )
+        return bool(style.fill_color or style.stroke_color or style.stroke_width or style.stroke_style == 'dashed')
 
     def _format_style(self, shape: Shape) -> list[str]:
         """Format D2 style block for a shape."""
@@ -238,21 +233,21 @@ class D2Generator(Generator):
 
         style_props = []
         if style.fill_color:
-            style_props.append(f"fill: {style.fill_color}")
+            style_props.append(f'fill: {style.fill_color}')
 
         if style.stroke_color:
-            style_props.append(f"stroke: {style.stroke_color}")
+            style_props.append(f'stroke: {style.stroke_color}')
 
         if style.stroke_width:
-            style_props.append(f"stroke-width: {int(style.stroke_width)}")
+            style_props.append(f'stroke-width: {int(style.stroke_width)}')
 
-        if style.stroke_style == "dashed":
-            style_props.append("stroke-dash: 3")
+        if style.stroke_style == 'dashed':
+            style_props.append('stroke-dash: 3')
 
         if style_props:
-            lines.append("style: {")
-            lines.extend(f"  {prop}" for prop in style_props)
-            lines.append("}")
+            lines.append('style: {')
+            lines.extend(f'  {prop}' for prop in style_props)
+            lines.append('}')
 
         return lines
 
@@ -267,34 +262,30 @@ class D2Generator(Generator):
         # Format connection
         if conn.label:
             label = self._escape_label(conn.label)
-            line = f"{from_path} {arrow} {to_path}: {label}"
+            line = f'{from_path} {arrow} {to_path}: {label}'
         else:
-            line = f"{from_path} {arrow} {to_path}"
+            line = f'{from_path} {arrow} {to_path}'
 
         # Add styling if needed
         if self._connection_has_style(conn):
-            lines = [line + " {"]
+            lines = [line + ' {']
             style_lines = self._format_connection_style(conn)
-            lines.extend(f"  {l}" for l in style_lines)
-            lines.append("}")
-            return "\n".join(lines)
+            lines.extend(f'  {l}' for l in style_lines)
+            lines.append('}')
+            return '\n'.join(lines)
 
         return line
 
     def _get_arrow_type(self, conn: Connection) -> str:
         """Get D2 arrow type."""
-        if conn.connection_type == "bidirectional":
-            return "<->"
-        return "->"
+        if conn.connection_type == 'bidirectional':
+            return '<->'
+        return '->'
 
     def _connection_has_style(self, conn: Connection) -> bool:
         """Check if connection has custom styling."""
         style = conn.style
-        return bool(
-            style.stroke_color
-            or style.stroke_width
-            or style.stroke_style == "dashed"
-        )
+        return bool(style.stroke_color or style.stroke_width or style.stroke_style == 'dashed')
 
     def _format_connection_style(self, conn: Connection) -> list[str]:
         """Format D2 style for connection."""
@@ -303,18 +294,18 @@ class D2Generator(Generator):
 
         style_props = []
         if style.stroke_color:
-            style_props.append(f"stroke: {style.stroke_color}")
+            style_props.append(f'stroke: {style.stroke_color}')
 
         if style.stroke_width:
-            style_props.append(f"stroke-width: {int(style.stroke_width)}")
+            style_props.append(f'stroke-width: {int(style.stroke_width)}')
 
-        if style.stroke_style == "dashed":
-            style_props.append("stroke-dash: 3")
+        if style.stroke_style == 'dashed':
+            style_props.append('stroke-dash: 3')
 
         if style_props:
-            lines.append("style: {")
-            lines.extend(f"  {prop}" for prop in style_props)
-            lines.append("}")
+            lines.append('style: {')
+            lines.extend(f'  {prop}' for prop in style_props)
+            lines.append('}')
 
         return lines
 
@@ -322,21 +313,21 @@ class D2Generator(Generator):
         """Sanitize ID for D2 format."""
         # D2 allows hyphens and underscores
         # Replace spaces and special chars
-        sanitized = id_str.replace(" ", "_").replace(":", "_")
+        sanitized = id_str.replace(' ', '_').replace(':', '_')
 
         # Escape if starts with number
         if sanitized and sanitized[0].isdigit():
-            sanitized = "n_" + sanitized
+            sanitized = 'n_' + sanitized
 
-        return sanitized or "node"
+        return sanitized or 'node'
 
     def _escape_label(self, label: str) -> str:
         """Escape label for D2 format."""
         # D2 handles most characters well, escape special ones
-        escaped = label.replace("\\", "\\\\").replace("\n", "\\n")
+        escaped = label.replace('\\', '\\\\').replace('\n', '\\n')
 
         # Quote if contains special characters
-        if any(c in escaped for c in ["{", "}", ":", ";"]):
+        if any(c in escaped for c in ['{', '}', ':', ';']):
             escaped = f'"{escaped}"'
 
         return escaped

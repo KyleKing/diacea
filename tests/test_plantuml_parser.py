@@ -45,7 +45,6 @@ def excalidraw_diagram() -> Diagram:
 
 
 class TestSniffing:
-
     def test_is_plantuml(self):
         assert is_plantuml('@startuml\nrectangle a\n@enduml')
 
@@ -73,7 +72,6 @@ class TestSniffing:
 
 
 class TestEnvelope:
-
     def test_diagram_name(self):
         diagram, _ = _parse('@startuml my_diagram\nrectangle a\n@enduml')
         assert diagram.name == 'my_diagram'
@@ -98,28 +96,47 @@ class TestEnvelope:
 
 
 class TestElementDeclarations:
-
-    @pytest.mark.parametrize('keyword', [
-        'actor', 'agent', 'card', 'cloud', 'component', 'database', 'ellipse',
-        'folder', 'frame', 'hexagon', 'node', 'package', 'person', 'queue',
-        'rectangle', 'storage', 'usecase',
-    ])
+    @pytest.mark.parametrize(
+        'keyword',
+        [
+            'actor',
+            'agent',
+            'card',
+            'cloud',
+            'component',
+            'database',
+            'ellipse',
+            'folder',
+            'frame',
+            'hexagon',
+            'node',
+            'package',
+            'person',
+            'queue',
+            'rectangle',
+            'storage',
+            'usecase',
+        ],
+    )
     def test_each_keyword(self, keyword):
         diagram, parser = _parse(_wrap(f'{keyword} "Widget" as w1'))
         shape = _shape(diagram, 'w1')
         assert shape.label == 'Widget'
         assert not parser.warnings
 
-    @pytest.mark.parametrize(('keyword', 'semantic'), [
-        ('actor', SemanticType.PERSON),
-        ('cloud', SemanticType.CLOUD),
-        ('component', SemanticType.COMPONENT),
-        ('database', SemanticType.DATABASE),
-        ('node', SemanticType.SERVER),
-        ('person', SemanticType.PERSON),
-        ('queue', SemanticType.QUEUE),
-        ('storage', SemanticType.STORAGE),
-    ])
+    @pytest.mark.parametrize(
+        ('keyword', 'semantic'),
+        [
+            ('actor', SemanticType.PERSON),
+            ('cloud', SemanticType.CLOUD),
+            ('component', SemanticType.COMPONENT),
+            ('database', SemanticType.DATABASE),
+            ('node', SemanticType.SERVER),
+            ('person', SemanticType.PERSON),
+            ('queue', SemanticType.QUEUE),
+            ('storage', SemanticType.STORAGE),
+        ],
+    )
     def test_explicit_keyword_semantics(self, keyword, semantic):
         diagram, _ = _parse(_wrap(f'{keyword} "Widget" as w1'))
         shape = _shape(diagram, 'w1')
@@ -154,14 +171,15 @@ class TestElementDeclarations:
 
 
 class TestBlocks:
-
     def test_block_creates_group(self):
-        diagram, _ = _parse(_wrap('''
+        diagram, _ = _parse(
+            _wrap("""
             rectangle "Platform" as plat {
               component "API" as api
               database "DB" as db
             }
-        '''))
+        """)
+        )
         groups = diagram.get_groups()
         assert len(groups) == 1
         group = groups[0]
@@ -170,14 +188,16 @@ class TestBlocks:
         assert group.children == ['api', 'db']
 
     def test_nested_blocks(self):
-        diagram, _ = _parse(_wrap('''
+        diagram, _ = _parse(
+            _wrap("""
             package "Outer" as outer {
               rectangle "Inner" as inner {
                 component "Leaf" as leaf
               }
               component "Sibling" as sib
             }
-        '''))
+        """)
+        )
         outer = diagram.get_element('outer')
         inner = diagram.get_element('inner')
         assert isinstance(outer, Group)
@@ -186,12 +206,14 @@ class TestBlocks:
         assert inner.children == ['leaf']
 
     def test_elements_after_block_not_children(self):
-        diagram, _ = _parse(_wrap('''
+        diagram, _ = _parse(
+            _wrap("""
             rectangle "Grp" as grp {
               component "In" as inside
             }
             component "Out" as outside
-        '''))
+        """)
+        )
         group = diagram.get_element('grp')
         assert isinstance(group, Group)
         assert group.children == ['inside']
@@ -199,7 +221,6 @@ class TestBlocks:
 
 
 class TestRelationships:
-
     @pytest.mark.parametrize('arrow', ['->', '-->'])
     def test_directed(self, arrow):
         diagram, _ = _parse(_wrap(f'rectangle a\nrectangle b\na {arrow} b'))
@@ -236,15 +257,18 @@ class TestRelationships:
         diagram, _ = _parse(_wrap('rectangle a\nrectangle b\na --> b : "reads/writes"'))
         assert _only_connection(diagram).label == 'reads/writes'
 
-    @pytest.mark.parametrize(('arrow', 'direction'), [
-        ('-down->', 'down'),
-        ('-d->', 'down'),
-        ('-left->', 'left'),
-        ('-l->', 'left'),
-        ('-right->', 'right'),
-        ('-up->', 'up'),
-        ('.d.>', 'down'),
-    ])
+    @pytest.mark.parametrize(
+        ('arrow', 'direction'),
+        [
+            ('-down->', 'down'),
+            ('-d->', 'down'),
+            ('-left->', 'left'),
+            ('-l->', 'left'),
+            ('-right->', 'right'),
+            ('-up->', 'up'),
+            ('.d.>', 'down'),
+        ],
+    )
     def test_direction_hints(self, arrow, direction):
         diagram, parser = _parse(_wrap(f'rectangle a\nrectangle b\na {arrow} b'))
         conn = _only_connection(diagram)
@@ -252,11 +276,13 @@ class TestRelationships:
         assert not parser.warnings
 
     def test_quoted_endpoints_resolve_to_declared_ids(self):
-        diagram, _ = _parse(_wrap('''
+        diagram, _ = _parse(
+            _wrap("""
             rectangle "Some Label" as s1
             rectangle "Other" as o1
             "Some Label" --> "Other"
-        '''))
+        """)
+        )
         conn = _only_connection(diagram)
         assert (conn.from_id, conn.to_id) == ('s1', 'o1')
         assert len(diagram.get_shapes()) == 2
@@ -268,33 +294,37 @@ class TestRelationships:
 
 
 class TestSkippedDirectives:
-
     def test_skinparam_single_line(self):
         diagram, parser = _parse(_wrap('skinparam shadowing false\nrectangle a'))
         assert len(diagram.get_shapes()) == 1
         assert any('skinparam' in w for w in parser.warnings)
 
     def test_skinparam_block(self):
-        diagram, parser = _parse(_wrap('''
+        diagram, parser = _parse(
+            _wrap("""
             skinparam rectangle {
               BackgroundColor white
               BorderColor black
             }
             rectangle a
-        '''))
+        """)
+        )
         assert len(diagram.get_shapes()) == 1
         assert any('skinparam' in w for w in parser.warnings)
 
-    @pytest.mark.parametrize('directive', [
-        'title My Title',
-        'caption A caption',
-        'header Page header',
-        'footer Page footer',
-        'hide stereotype',
-        'show members',
-        '!include other.puml',
-        '!define MACRO value',
-    ])
+    @pytest.mark.parametrize(
+        'directive',
+        [
+            'title My Title',
+            'caption A caption',
+            'header Page header',
+            'footer Page footer',
+            'hide stereotype',
+            'show members',
+            '!include other.puml',
+            '!define MACRO value',
+        ],
+    )
     def test_directives_warn(self, directive):
         diagram, parser = _parse(_wrap(f'{directive}\nrectangle a'))
         assert len(diagram.get_shapes()) == 1
@@ -312,38 +342,44 @@ class TestSkippedDirectives:
         assert any(w.startswith('Line 3:') for w in parser.warnings)
 
     def test_comments_ignored_silently(self):
-        diagram, parser = _parse(_wrap("""
+        diagram, parser = _parse(
+            _wrap("""
             ' single line comment
             /' block
             comment '/
             rectangle a
-        """))
+        """)
+        )
         assert len(diagram.get_shapes()) == 1
         assert not parser.warnings
 
 
 class TestSequenceRejection:
-
-    @pytest.mark.parametrize('line', [
-        'participant Alice',
-        'activate Alice',
-        'alt success case',
-    ])
+    @pytest.mark.parametrize(
+        'line',
+        [
+            'participant Alice',
+            'activate Alice',
+            'alt success case',
+        ],
+    )
     def test_sequence_syntax_raises(self, line):
         with pytest.raises(ValueError, match='sequence diagram'):
             PlantUMLParser().parse(_wrap(line))
 
 
 class TestActivityRejection:
-
-    @pytest.mark.parametrize('line', [
-        '(*) --> "Step 0: Select release manager"',
-        ':Do the thing;',
-        'if (72 hours or 3 yes votes?) then',
-        'start',
-        'stop',
-        'while (more items?)',
-    ])
+    @pytest.mark.parametrize(
+        'line',
+        [
+            '(*) --> "Step 0: Select release manager"',
+            ':Do the thing;',
+            'if (72 hours or 3 yes votes?) then',
+            'start',
+            'stop',
+            'while (more items?)',
+        ],
+    )
     def test_activity_syntax_raises(self, line):
         with pytest.raises(ValueError, match='activity diagrams are not supported'):
             PlantUMLParser().parse(_wrap(line))
@@ -355,15 +391,17 @@ class TestActivityRejection:
 
 
 class TestC4:
-
-    @pytest.mark.parametrize(('macro', 'semantic'), [
-        ('Person(x, "Label")', SemanticType.PERSON),
-        ('System(x, "Label")', SemanticType.SYSTEM),
-        ('Container(x, "Label")', SemanticType.CONTAINER),
-        ('ContainerDb(x, "Label")', SemanticType.DATABASE),
-        ('Component(x, "Label")', SemanticType.COMPONENT),
-        ('ComponentDb(x, "Label")', SemanticType.DATABASE),
-    ])
+    @pytest.mark.parametrize(
+        ('macro', 'semantic'),
+        [
+            ('Person(x, "Label")', SemanticType.PERSON),
+            ('System(x, "Label")', SemanticType.SYSTEM),
+            ('Container(x, "Label")', SemanticType.CONTAINER),
+            ('ContainerDb(x, "Label")', SemanticType.DATABASE),
+            ('Component(x, "Label")', SemanticType.COMPONENT),
+            ('ComponentDb(x, "Label")', SemanticType.DATABASE),
+        ],
+    )
     def test_element_macros(self, macro, semantic):
         diagram, parser = _parse(_wrap(macro))
         shape = _shape(diagram, 'x')
@@ -383,12 +421,14 @@ class TestC4:
         assert shape.metadata['external'] is True
 
     def test_system_boundary_group(self):
-        diagram, _ = _parse(_wrap('''
+        diagram, _ = _parse(
+            _wrap("""
             System_Boundary(shop, "Web Shop") {
               Container(web, "Web App")
               ContainerDb(db, "Orders DB")
             }
-        '''))
+        """)
+        )
         groups = diagram.get_groups()
         assert len(groups) == 1
         assert groups[0].id == 'shop'
@@ -396,23 +436,28 @@ class TestC4:
         assert groups[0].children == ['web', 'db']
 
     def test_rel(self):
-        diagram, _ = _parse(_wrap('''
+        diagram, _ = _parse(
+            _wrap("""
             Person(u, "User")
             System(s, "System")
             Rel(u, s, "Uses")
-        '''))
+        """)
+        )
         conn = _only_connection(diagram)
         assert (conn.from_id, conn.to_id) == ('u', 's')
         assert conn.label == 'Uses'
         assert conn.connection_type == 'directed'
 
-    @pytest.mark.parametrize(('macro', 'direction'), [
-        ('Rel_D', 'down'),
-        ('Rel_U', 'up'),
-        ('Rel_L', 'left'),
-        ('Rel_R', 'right'),
-        ('Rel_Down', 'down'),
-    ])
+    @pytest.mark.parametrize(
+        ('macro', 'direction'),
+        [
+            ('Rel_D', 'down'),
+            ('Rel_U', 'up'),
+            ('Rel_L', 'left'),
+            ('Rel_R', 'right'),
+            ('Rel_Down', 'down'),
+        ],
+    )
     def test_rel_direction_variants(self, macro, direction):
         diagram, _ = _parse(_wrap(f'System(a, "A")\nSystem(b, "B")\n{macro}(a, b, "x")'))
         assert _only_connection(diagram).metadata['direction_hint'] == direction
@@ -443,7 +488,6 @@ class TestC4:
 
 
 class TestLayoutSynthesis:
-
     def test_metadata_flag(self):
         diagram, _ = _parse(_wrap('rectangle a'))
         assert diagram.metadata['synthesized_layout'] is True
@@ -454,12 +498,14 @@ class TestLayoutSynthesis:
         assert pos['a'].y < pos['b'].y < pos['c'].y
 
     def test_left_to_right_direction(self):
-        diagram, _ = _parse(_wrap('''
+        diagram, _ = _parse(
+            _wrap("""
             left to right direction
             rectangle a
             rectangle b
             a --> b
-        '''))
+        """)
+        )
         pos = {s.id: s.position for s in diagram.get_shapes()}
         assert pos['a'].x < pos['b'].x
 
@@ -473,12 +519,14 @@ class TestLayoutSynthesis:
         assert len(diagram.get_shapes()) == 2
 
     def test_group_bounds_contain_children(self):
-        diagram, _ = _parse(_wrap('''
+        diagram, _ = _parse(
+            _wrap("""
             rectangle "Grp" as grp {
               rectangle a
               rectangle b
             }
-        '''))
+        """)
+        )
         group = diagram.get_element('grp')
         assert isinstance(group, Group)
         for shape in diagram.get_shapes():
@@ -489,7 +537,6 @@ class TestLayoutSynthesis:
 
 
 class TestRoundTrip:
-
     def test_basic_plantuml_round_trip(self, excalidraw_diagram):
         generator = PlantUMLGenerator()
         first = generator.generate(excalidraw_diagram)
@@ -515,13 +562,10 @@ class TestRoundTrip:
         assert reparsed.metadata['c4_plantuml'] is True
         original_groups = excalidraw_diagram.get_groups()
         assert len(reparsed.get_groups()) == len(original_groups)
-        assert len(reparsed.get_connections()) == len(
-            excalidraw_diagram.get_connections()
-        )
+        assert len(reparsed.get_connections()) == len(excalidraw_diagram.get_connections())
 
 
 class TestArchitectureFixture:
-
     @pytest.fixture
     def fixture_result(self):
         parser = PlantUMLParser()
@@ -539,7 +583,12 @@ class TestArchitectureFixture:
         group = diagram.get_element('platform')
         assert isinstance(group, Group)
         assert group.children == [
-            'frontend', 'gateway', 'orders', 'billing', 'events', 'orders_db',
+            'frontend',
+            'gateway',
+            'orders',
+            'billing',
+            'events',
+            'orders_db',
         ]
 
     def test_semantics(self, fixture_result):
@@ -570,7 +619,6 @@ class TestArchitectureFixture:
 
 @pytest.mark.skipif(shutil.which('plantuml') is None, reason='plantuml binary not installed')
 class TestPlantUMLBinary:
-
     @pytest.mark.parametrize('fixture', ['architecture.puml', 'c4_container.puml'])
     def test_fixtures_are_valid_plantuml(self, fixture):
         result = subprocess.run(
