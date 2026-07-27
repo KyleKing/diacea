@@ -10,7 +10,7 @@ flowchart TB
     subgraph Backend["Server Layer (Dockerized)"]
         NodeBackend["Node.js Backend"]
         Template["OpenAI Prompt Template"]
-        
+
         subgraph Processing["Data Processing"]
             InputHandler["Patent ID & Company Input Handler"]
         end
@@ -33,7 +33,7 @@ flowchart TB
     classDef docker fill:#e1f5fe,stroke:#01579b
     classDef process fill:#e8f5e9,stroke:#2e7d32
     classDef External fill:#fff3e0,stroke:#e65100
-    
+
     class Frontend,NodeBackend docker
     class InputHandler,Template process
     class OpenAI,Standard External
