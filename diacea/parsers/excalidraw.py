@@ -12,6 +12,7 @@ from ..ir import (
     Connection,
     Diagram,
     Dimensions,
+    Element,
     GROUP_ID_PREFIX,
     Group,
     Parser,
@@ -60,10 +61,10 @@ class ExcalidrawParser(Parser):
             raise ValueError("Invalid Excalidraw data format")
 
         # Parse elements by type
-        ir_elements = []
-        shapes = []
-        connections = []
-        texts = []
+        ir_elements: list[Element] = []
+        shapes: list[Shape] = []
+        connections: list[dict[str, Any]] = []
+        texts: list[Text] = []
 
         # First pass: Parse all elements
         for elem in elements:
@@ -105,7 +106,7 @@ class ExcalidrawParser(Parser):
 
         return diagram
 
-    def _parse_shape(self, elem: dict) -> Shape:
+    def _parse_shape(self, elem: dict[str, Any]) -> Shape:
         """Parse Excalidraw shape to IR Shape."""
         # Position and size
         position = Point(x=float(elem.get("x", 0)), y=float(elem.get("y", 0)))
@@ -157,7 +158,7 @@ class ExcalidrawParser(Parser):
 
         return shape
 
-    def _parse_text(self, elem: dict) -> Text:
+    def _parse_text(self, elem: dict[str, Any]) -> Text:
         """Parse Excalidraw text to IR Text."""
         position = Point(x=float(elem.get("x", 0)), y=float(elem.get("y", 0)))
         size = Dimensions(width=float(elem.get("width", 0)), height=float(elem.get("height", 0)))
@@ -187,7 +188,7 @@ class ExcalidrawParser(Parser):
 
         return text
 
-    def _parse_arrow(self, elem: dict, shapes: list[Shape]) -> Connection | None:
+    def _parse_arrow(self, elem: dict[str, Any], shapes: list[Shape]) -> Connection | None:
         """Parse Excalidraw arrow to IR Connection."""
         arrow_id = elem.get("id", "unknown")
 
@@ -271,7 +272,7 @@ class ExcalidrawParser(Parser):
         return connection
 
     def _find_arrow_connections(
-        self, arrow: dict, shapes: list[Shape], start_point: Point, end_point: Point
+        self, arrow: dict[str, Any], shapes: list[Shape], start_point: Point, end_point: Point
     ) -> tuple[str | None, str | None]:
         """Find which shapes an arrow connects to.
 

@@ -4,6 +4,7 @@ import json
 import subprocess
 import sys
 from io import StringIO
+from typing import Any
 
 import pytest
 
@@ -298,7 +299,7 @@ class TestFormatDetection:
     """Test input format auto-detection."""
 
     def test_detect_excalidraw(self):
-        data = {"elements": []}
+        data: dict[str, Any] = {"elements": []}
         assert detect_input_format(data) == "excalidraw"
 
     def test_detect_excalidraw_clipboard(self):
@@ -306,7 +307,7 @@ class TestFormatDetection:
         assert detect_input_format(data) == "excalidraw"
 
     def test_detect_tldraw(self):
-        data = {"document": {"pages": {}}}
+        data: dict[str, Any] = {"document": {"pages": {}}}
         assert detect_input_format(data) == "tldraw"
 
     def test_detect_svg_xml_header(self):

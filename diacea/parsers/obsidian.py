@@ -14,10 +14,11 @@ import re
 from typing import Any
 
 try:
-    import lzstring
+    import lzstring  # type: ignore[import-untyped]  # lzstring ships no type stubs
 
     _HAS_LZSTRING = True
 except ImportError:
+    lzstring = None
     _HAS_LZSTRING = False
 
 _DRAWING_JSON_RE = re.compile(r"\n##? Drawing\n[^`]*```json\n([\s\S]*?)```")
@@ -45,7 +46,7 @@ def extract_excalidraw_json(content: str) -> dict[str, Any]:
         return json.loads(match.group(1))
 
     if match := _DRAWING_COMPRESSED_RE.search(content):
-        if not _HAS_LZSTRING:
+        if lzstring is None or not _HAS_LZSTRING:
             raise ValueError(
                 "This Obsidian Excalidraw file uses a compressed-json Drawing block. "
                 "Install the optional dependency to decompress it: pip install 'diacea[obsidian]'"

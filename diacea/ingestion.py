@@ -6,6 +6,7 @@ import json
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
 
 from .cli import detect_input_format
 from .ir.elements import Diagram
@@ -50,7 +51,7 @@ def parse_diagram_file(file_path: str | Path) -> Diagram:
 
     if stripped.startswith(("<?xml", "<svg")):
         input_format = "svg"
-        input_data: dict | str = content
+        input_data: dict[str, Any] | str = content
     else:
         try:
             input_format = detect_input_format(content)
@@ -74,6 +75,8 @@ def parse_diagram_file(file_path: str | Path) -> Diagram:
         if input_format == "svg":
             return SVGParser().parse(input_data)
         if input_format == "obsidian":
+            if not isinstance(input_data, str):
+                raise DiagramIngestionError(f"Obsidian Excalidraw requires text content: '{path}'")
             return ExcalidrawParser().parse(extract_excalidraw_json(input_data))
         if input_format == "mermaid":
             return MermaidParser().parse(input_data)

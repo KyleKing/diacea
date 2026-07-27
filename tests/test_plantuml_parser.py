@@ -193,6 +193,7 @@ class TestBlocks:
             component "Out" as outside
         '''))
         group = diagram.get_element('grp')
+        assert isinstance(group, Group)
         assert group.children == ['inside']
         assert isinstance(diagram.get_element('outside'), Shape)
 
@@ -479,6 +480,7 @@ class TestLayoutSynthesis:
             }
         '''))
         group = diagram.get_element('grp')
+        assert isinstance(group, Group)
         for shape in diagram.get_shapes():
             assert group.position.x <= shape.position.x
             assert group.position.y <= shape.position.y

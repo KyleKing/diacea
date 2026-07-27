@@ -12,6 +12,7 @@ To skip slow tests:
 import json
 import random
 import time
+from typing import Any
 
 import pytest
 
@@ -25,7 +26,7 @@ from diacea.generators import (
 from diacea.parsers import ExcalidrawParser
 
 
-def generate_excalidraw_diagram(num_shapes: int, num_connections: int) -> dict:
+def generate_excalidraw_diagram(num_shapes: int, num_connections: int) -> dict[str, Any]:
     """Generate a test Excalidraw diagram."""
     elements = []
     shapes = []

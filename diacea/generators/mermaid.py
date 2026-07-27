@@ -15,7 +15,7 @@ from typing import Optional
 from ..ir import Connection, Diagram, Generator, Group, SemanticType, Shape
 from ._text import sanitize_alnum_id
 
-_C4_BOUNDARY_KEYWORDS = {
+_C4_BOUNDARY_KEYWORDS: dict[str, str] = {
     SemanticType.COMPONENT: "Component",
     SemanticType.CONTAINER: "Container",
     SemanticType.DATABASE: "ContainerDb",
@@ -25,7 +25,7 @@ _C4_BOUNDARY_KEYWORDS = {
     SemanticType.SYSTEM: "System",
 }
 
-_C4_TOP_LEVEL_KEYWORDS = {
+_C4_TOP_LEVEL_KEYWORDS: dict[str, str] = {
     SemanticType.COMPONENT: "Component",
     SemanticType.CONTAINER: "Container",
     SemanticType.DATABASE: "SystemDb",
@@ -105,7 +105,7 @@ class MermaidGenerator(Generator):
 
         # Check for sequential pattern (each shape has at most one out connection)
         # This is a simple heuristic - could be improved
-        out_counts = {}
+        out_counts: dict[str, int] = {}
         for conn in connections:
             out_counts[conn.from_id] = out_counts.get(conn.from_id, 0) + 1
 
@@ -305,7 +305,7 @@ class MermaidGenerator(Generator):
     def _format_c4_element(self, shape: Shape, in_boundary: bool) -> str:
         keywords = _C4_BOUNDARY_KEYWORDS if in_boundary else _C4_TOP_LEVEL_KEYWORDS
         default = "Container" if in_boundary else "System"
-        keyword = keywords.get(shape.semantic_type, default)
+        keyword = keywords.get(shape.semantic_type or "", default)
         node_id = self._sanitize_id(shape.id)
         label = self._escape_quoted_label(shape.label or node_id)
         indent = "        " if in_boundary else "    "

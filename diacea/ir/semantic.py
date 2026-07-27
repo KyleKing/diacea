@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import re
 from enum import Enum
-from typing import Optional
+from typing import Any, Optional
 
 from .elements import Dimensions, Style
 
@@ -387,7 +387,7 @@ def infer_semantic_type(
     label: str = "",
     size: Optional[Dimensions] = None,
     style: Optional[Style] = None,
-    metadata: Optional[dict] = None,
+    metadata: Optional[dict[str, Any]] = None,
 ) -> tuple[Optional[SemanticType], float]:
     """Infer semantic type using hybrid approach.
 

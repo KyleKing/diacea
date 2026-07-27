@@ -354,7 +354,7 @@ class PlantUMLParser(Parser):
         self.warnings.append(f'Line {lineno}: unsupported line skipped: {line}')
         return None
 
-    def _handle_element(self, m: re.Match, state: _ParseState) -> None:
+    def _handle_element(self, m: re.Match[str], state: _ParseState) -> None:
         keyword = m.group('kw')
         shape_type, semantic = _KEYWORD_INFO[keyword]
 
@@ -372,7 +372,7 @@ class PlantUMLParser(Parser):
                 state, elem_id, label, shape_type, semantic, _KEYWORD_CONFIDENCE
             )
 
-    def _handle_macro(self, m: re.Match, lineno: int, state: _ParseState) -> None:
+    def _handle_macro(self, m: re.Match[str], lineno: int, state: _ParseState) -> None:
         name = m.group('name')
         args = _split_macro_args(m.group('args'))
 
@@ -441,7 +441,7 @@ class PlantUMLParser(Parser):
 
         self._add_connection(state, from_id, to_id, label, connection_type, metadata)
 
-    def _handle_relationship(self, m: re.Match, state: _ParseState) -> None:
+    def _handle_relationship(self, m: re.Match[str], state: _ParseState) -> None:
         from_id = self._resolve_endpoint(m.group('src'), state)
         to_id = self._resolve_endpoint(m.group('dst'), state)
 

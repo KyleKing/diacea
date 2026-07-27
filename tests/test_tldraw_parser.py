@@ -2,6 +2,7 @@
 
 import json
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -201,7 +202,7 @@ class TestTLDrawParser:
 
     def test_empty_document(self):
         """Test parsing empty document."""
-        tldraw_data = {"document": {"pages": {}}}
+        tldraw_data: dict[str, Any] = {"document": {"pages": {}}}
 
         parser = TLDrawParser()
         diagram = parser.parse(tldraw_data)
@@ -294,13 +295,13 @@ class TestTLDrawCLI:
 
     def test_auto_detect_tldraw(self):
         """Test auto-detection of TLDraw format."""
-        tldraw_data = {"document": {"pages": {}}}
+        tldraw_data: dict[str, Any] = {"document": {"pages": {}}}
         format_type = detect_input_format(tldraw_data)
         assert format_type == "tldraw"
 
     def test_auto_detect_excalidraw(self):
         """Test auto-detection of Excalidraw format."""
-        excalidraw_data = {"elements": []}
+        excalidraw_data: dict[str, Any] = {"elements": []}
         format_type = detect_input_format(excalidraw_data)
         assert format_type == "excalidraw"
 
@@ -529,8 +530,10 @@ class TestTLDrawV2Parser:
         diagram = TLDrawParser().parse(data)
 
         assert len(diagram.elements) == 1
-        assert diagram.elements[0].label == "Decide"
-        assert diagram.elements[0].shape_type == "diamond"
+        decision = diagram.elements[0]
+        assert isinstance(decision, Shape)
+        assert decision.label == "Decide"
+        assert decision.shape_type == "diamond"
 
     def test_rich_text_multiline_extraction(self):
         """Test multi-paragraph richText extraction."""
@@ -561,7 +564,9 @@ class TestTLDrawV2Parser:
 
         diagram = TLDrawParser().parse(data)
 
-        assert diagram.elements[0].label == "Line 1\nLine 2"
+        multiline = diagram.elements[0]
+        assert isinstance(multiline, Shape)
+        assert multiline.label == "Line 1\nLine 2"
 
     def test_unbound_arrow_falls_back_to_points(self):
         """Test unbound arrow resolves endpoints spatially from start/end."""
@@ -654,6 +659,7 @@ class TestTLDrawV2Parser:
         diagram = TLDrawParser(include_freehand=True).parse(data)
         assert len(diagram.elements) == 1
         shape = diagram.elements[0]
+        assert isinstance(shape, Shape)
         assert shape.shape_type == "freehand"
         assert shape.position.x == 10
         assert shape.position.y == 20
@@ -690,14 +696,14 @@ class TestTLDrawV2Parser:
 
         first = TLDrawParser(page_index=0).parse(data)
         assert first.name == "First"
-        assert [e.label for e in first.elements] == ["One"]
+        assert [s.label for s in first.get_shapes()] == ["One"]
 
         second = TLDrawParser(page_index=1).parse(data)
         assert second.name == "Second"
-        assert [e.label for e in second.elements] == ["Two"]
+        assert [s.label for s in second.get_shapes()] == ["Two"]
 
         both = TLDrawParser(page_index=None).parse(data)
         assert len(both.elements) == 2
 
         by_id = TLDrawParser(page_id="page:p2").parse(data)
-        assert [e.label for e in by_id.elements] == ["Two"]
+        assert [s.label for s in by_id.get_shapes()] == ["Two"]

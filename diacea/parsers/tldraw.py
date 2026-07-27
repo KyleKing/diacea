@@ -26,6 +26,7 @@ from ..ir import (
     Connection,
     Diagram,
     Dimensions,
+    Element,
     Group,
     Parser,
     Point,
@@ -79,7 +80,7 @@ _V2_GEO_TYPE_MAP = {
 }
 
 
-def is_tldraw_v2(data: dict) -> bool:
+def is_tldraw_v2(data: dict[str, Any]) -> bool:
     """Check whether data is a modern tldraw v2 record-store file."""
     return 'tldrawFileFormatVersion' in data or isinstance(data.get('records'), list)
 
@@ -100,14 +101,14 @@ def _extract_rich_text(node: Any) -> str:
     return ''
 
 
-def _v2_label(props: dict) -> str:
+def _v2_label(props: dict[str, Any]) -> str:
     if 'richText' in props:
         return _extract_rich_text(props['richText']).strip()
     text = props.get('text', '')
     return text.strip() if isinstance(text, str) else ''
 
 
-def _v2_style(record: dict) -> Style:
+def _v2_style(record: dict[str, Any]) -> Style:
     props = record.get('props', {})
     stroke_color = _V2_COLOR_MAP.get(props.get('color', 'black'), '#1d1d1d')
     fill = props.get('fill', 'none')
@@ -128,7 +129,7 @@ def _v2_style(record: dict) -> Style:
     )
 
 
-def _v2_shape_metadata(record: dict) -> dict:
+def _v2_shape_metadata(record: dict[str, Any]) -> dict[str, Any]:
     props = record.get('props', {})
     return {
         'type': record.get('type'),
@@ -165,13 +166,15 @@ def _nearest_shape(point: Point, shapes: list[Shape]) -> Shape | None:
     return min(shapes, key=distance)
 
 
-def _resolve_page_id(shape_id: str, parent_map: dict[str, str]) -> str | None:
+def _resolve_page_id(shape_id: str, parent_map: dict[str, str | None]) -> str | None:
     current = shape_id
     seen: set[str] = set()
     while current in parent_map and current not in seen:
         seen.add(current)
         parent = parent_map[current]
-        if isinstance(parent, str) and parent.startswith('page:'):
+        if parent is None:
+            return None
+        if parent.startswith('page:'):
             return parent
         current = parent
     return None
@@ -223,7 +226,7 @@ class TLDrawParser(Parser):
         if not pages_to_process:
             return Diagram(id='empty', name='Empty Diagram', elements=[])
 
-        all_elements: list = []
+        all_elements: list[Element] = []
         diagram_name = 'TLDraw Diagram'
         diagram_id = 'diagram'
 
@@ -240,7 +243,7 @@ class TLDrawParser(Parser):
 
         return Diagram(id=diagram_id, name=diagram_name, elements=all_elements)
 
-    def _parse_v2(self, data: dict) -> Diagram:
+    def _parse_v2(self, data: dict[str, Any]) -> Diagram:
         records = data.get('records', [])
         pages = sorted(
             (r for r in records if r.get('typeName') == 'page'),
@@ -279,7 +282,7 @@ class TLDrawParser(Parser):
             if _resolve_page_id(r['id'], parent_map) in page_ids
         ]
 
-        elements: list = []
+        elements: list[Element] = []
         node_shapes: list[Shape] = []
         for record in page_shapes:
             parsed = self._parse_v2_shape(record, page_shapes)
@@ -322,7 +325,7 @@ class TLDrawParser(Parser):
                 'was converted (use page_index=None to merge all pages)'
             )
 
-    def _select_v2_pages(self, pages: list[dict]) -> list[dict]:
+    def _select_v2_pages(self, pages: list[dict[str, Any]]) -> list[dict[str, Any]]:
         if self.page_id:
             matches = [p for p in pages if p.get('id') == self.page_id]
             if matches:
@@ -339,7 +342,7 @@ class TLDrawParser(Parser):
         return pages
 
     def _parse_v2_shape(
-        self, record: dict, page_shapes: list[dict]
+        self, record: dict[str, Any], page_shapes: list[dict[str, Any]]
     ) -> Shape | Group | Text | None:
         match record.get('type'):
             case 'arrow':
@@ -353,7 +356,7 @@ class TLDrawParser(Parser):
             case _:
                 return self._parse_v2_geo(record)
 
-    def _parse_v2_geo(self, record: dict) -> Shape:
+    def _parse_v2_geo(self, record: dict[str, Any]) -> Shape:
         props = record.get('props', {})
         position = Point(x=float(record.get('x', 0.0)), y=float(record.get('y', 0.0)))
         size = Dimensions(
@@ -390,7 +393,7 @@ class TLDrawParser(Parser):
 
         return shape
 
-    def _parse_v2_frame(self, record: dict, page_shapes: list[dict]) -> Group:
+    def _parse_v2_frame(self, record: dict[str, Any], page_shapes: list[dict[str, Any]]) -> Group:
         props = record.get('props', {})
         children = [
             s['id'] for s in page_shapes if s.get('parentId') == record['id']
@@ -411,7 +414,7 @@ class TLDrawParser(Parser):
         group.metadata['tldraw'] = _v2_shape_metadata(record)
         return group
 
-    def _parse_v2_text(self, record: dict) -> Text:
+    def _parse_v2_text(self, record: dict[str, Any]) -> Text:
         props = record.get('props', {})
         text = Text(
             id=record['id'],
@@ -429,7 +432,7 @@ class TLDrawParser(Parser):
         text.metadata['tldraw'] = _v2_shape_metadata(record)
         return text
 
-    def _parse_v2_freehand(self, record: dict) -> Shape | None:
+    def _parse_v2_freehand(self, record: dict[str, Any]) -> Shape | None:
         if not self.include_freehand:
             return None
 
@@ -469,7 +472,7 @@ class TLDrawParser(Parser):
 
     def _parse_v2_arrow(
         self,
-        record: dict,
+        record: dict[str, Any],
         terminals: dict[str, str],
         shapes: list[Shape],
     ) -> Connection | None:
@@ -530,7 +533,7 @@ class TLDrawParser(Parser):
         conn.metadata['tldraw'] = _v2_shape_metadata(record)
         return conn
 
-    def _select_pages(self, pages: dict) -> list[tuple[str, dict]]:
+    def _select_pages(self, pages: dict[str, Any]) -> list[tuple[str, dict[str, Any]]]:
         """Select pages to process based on parser options."""
         page_list = list(pages.items())
 
@@ -548,9 +551,9 @@ class TLDrawParser(Parser):
 
         return page_list
 
-    def _parse_page(self, page: dict) -> list:
+    def _parse_page(self, page: dict[str, Any]) -> list[Element]:
         """Parse a single TLDraw page to IR elements."""
-        elements: list = []
+        elements: list[Element] = []
 
         shapes = page.get('shapes', {})
         bindings = page.get('bindings', {})
@@ -575,7 +578,7 @@ class TLDrawParser(Parser):
         return elements
 
     def _parse_shape(
-        self, shape_id: str, shape_data: dict
+        self, shape_id: str, shape_data: dict[str, Any]
     ) -> Shape | Group | Text | None:
         """Parse a TLDraw shape to IR element."""
         shape_type = shape_data.get('type')
@@ -637,7 +640,7 @@ class TLDrawParser(Parser):
 
         return shape
 
-    def _parse_freehand(self, shape_id: str, shape_data: dict) -> Shape | None:
+    def _parse_freehand(self, shape_id: str, shape_data: dict[str, Any]) -> Shape | None:
         """Parse TLDraw freehand drawing to IR Shape (polygon bounding box)."""
         point = shape_data.get('point', [0.0, 0.0])
         base_x, base_y = float(point[0]), float(point[1])
@@ -681,8 +684,8 @@ class TLDrawParser(Parser):
     def _parse_arrow(
         self,
         arrow_id: str,
-        arrow_data: dict,
-        bindings: dict,
+        arrow_data: dict[str, Any],
+        bindings: dict[str, Any],
     ) -> Connection | None:
         """Parse TLDraw arrow to IR connection.
 
@@ -748,7 +751,7 @@ class TLDrawParser(Parser):
             style=style,
         )
 
-    def _parse_style(self, style_data: dict) -> Style:
+    def _parse_style(self, style_data: dict[str, Any]) -> Style:
         """Parse TLDraw style to IR style.
 
         TLDraw uses named colors and sizes that need mapping.

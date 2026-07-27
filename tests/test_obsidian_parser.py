@@ -67,9 +67,9 @@ class TestEndToEnd:
 
         diagram = ExcalidrawParser().parse(scene)
 
-        shapes = [elem for elem in diagram.elements if getattr(elem, "shape_type", None) == "rectangle"]
+        shapes = [shape for shape in diagram.get_shapes() if shape.shape_type == "rectangle"]
         assert {shape.label for shape in shapes} == {"Client", "Server"}
-        connections = [elem for elem in diagram.elements if hasattr(elem, "from_id")]
+        connections = diagram.get_connections()
         assert len(connections) == 1
         assert connections[0].from_id == "rectClient"
         assert connections[0].to_id == "rectServer"

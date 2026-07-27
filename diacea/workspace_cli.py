@@ -5,11 +5,16 @@ from __future__ import annotations
 import argparse
 import sys
 from pathlib import Path
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from .ingestion import DiagramIngestionError, view_id_from_path
 from .ir.workspace import DiagramView, ElementDefinition, Workspace
 from .workspace_format import create_workspace_from_diagrams, load_workspace, save_workspace
+
+if TYPE_CHECKING:
+    _SubParsersAction = argparse._SubParsersAction[argparse.ArgumentParser]
+else:
+    _SubParsersAction = argparse._SubParsersAction
 
 
 def workspace_create(args: argparse.Namespace) -> int:
@@ -240,7 +245,7 @@ def workspace_add_view(args: argparse.Namespace) -> int:
     return 0
 
 
-def add_workspace_subcommands(subparsers: argparse._SubParsersAction) -> None:
+def add_workspace_subcommands(subparsers: _SubParsersAction) -> None:
     """Add workspace subcommands to CLI parser.
 
     Args:

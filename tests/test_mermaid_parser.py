@@ -6,7 +6,7 @@ import textwrap
 import pytest
 
 from diacea.generators.mermaid import MermaidGenerator
-from diacea.ir import Connection, Group, Shape
+from diacea.ir import Connection, Diagram, Group, Shape
 from diacea.ir.semantic import SemanticType
 from diacea.parsers.excalidraw import ExcalidrawParser
 from diacea.parsers.mermaid import (
@@ -21,9 +21,15 @@ from .configuration import TEST_DATA_DIR
 MERMAID_DATA_DIR = TEST_DATA_DIR / 'mermaid'
 
 
-def _parse(content: str) -> tuple[MermaidParser, 'Diagram']:
+def _parse(content: str) -> tuple[MermaidParser, Diagram]:
     parser = MermaidParser()
     return parser, parser.parse(textwrap.dedent(content))
+
+
+def _shape(diagram: Diagram, element_id: str) -> Shape:
+    element = diagram.get_element(element_id)
+    assert isinstance(element, Shape)
+    return element
 
 
 class TestHeader:
@@ -118,7 +124,7 @@ class TestNodeShapes:
     )
     def test_bracket_shapes(self, body, shape_type, semantic):
         _, diagram = _parse(f'flowchart LR\n    node1{body}')
-        shape = diagram.get_element('node1')
+        shape = _shape(diagram, 'node1')
         assert isinstance(shape, Shape)
         assert shape.shape_type == shape_type
         if semantic is not None:
@@ -127,27 +133,27 @@ class TestNodeShapes:
 
     def test_bare_id_defaults_to_rectangle(self):
         _, diagram = _parse('flowchart LR\n    lonely')
-        shape = diagram.get_element('lonely')
+        shape = _shape(diagram, 'lonely')
         assert shape.shape_type == 'rectangle'
         assert shape.label == 'lonely'
 
     def test_quoted_label(self):
         _, diagram = _parse('flowchart LR\n    A["Quoted label (with parens)"]')
-        assert diagram.get_element('A').label == 'Quoted label (with parens)'
+        assert _shape(diagram, 'A').label == 'Quoted label (with parens)'
 
     def test_label_special_chars_unescaped(self):
         _, diagram = _parse(
             'flowchart LR\n    A[Tom &amp; Jerry #quot;cartoon#quot; &lt;classic&gt;<br/>second line]'
         )
-        assert diagram.get_element('A').label == 'Tom & Jerry "cartoon" <classic>\nsecond line'
+        assert _shape(diagram, 'A').label == 'Tom & Jerry "cartoon" <classic>\nsecond line'
 
     def test_cylinder_label_infers_database(self):
         _, diagram = _parse('flowchart LR\n    db[(Users)]')
-        assert diagram.get_element('db').semantic_type == SemanticType.DATABASE
+        assert _shape(diagram, 'db').semantic_type == SemanticType.DATABASE
 
     def test_all_shapes_have_positive_size(self):
         _, diagram = _parse('flowchart LR\n    A[Short] --> B[A much longer label here]')
-        a, b = diagram.get_element('A'), diagram.get_element('B')
+        a, b = _shape(diagram, 'A'), _shape(diagram, 'B')
         assert a.size.width > 0 and a.size.height > 0
         assert b.size.width > a.size.width
 
@@ -190,8 +196,8 @@ class TestEdges:
 
     def test_inline_nodes_on_edge_line_declared(self):
         _, diagram = _parse('flowchart LR\n    A[Start] --> B{Choice}')
-        assert diagram.get_element('A').label == 'Start'
-        assert diagram.get_element('B').shape_type == 'diamond'
+        assert _shape(diagram, 'A').label == 'Start'
+        assert _shape(diagram, 'B').shape_type == 'diamond'
 
     def test_chained_edges(self):
         _, diagram = _parse('flowchart LR\n    A --> B --> C')
@@ -205,7 +211,7 @@ class TestEdges:
 
     def test_ampersand_inside_label_not_split(self):
         _, diagram = _parse('flowchart LR\n    A[Salt & Pepper] --> B')
-        assert diagram.get_element('A').label == 'Salt & Pepper'
+        assert _shape(diagram, 'A').label == 'Salt & Pepper'
         assert len(diagram.get_connections()) == 1
 
     def test_inline_label_without_spaces(self):
@@ -233,7 +239,7 @@ class TestEdges:
 
     def test_class_suffix_stripped_from_node(self):
         _, diagram = _parse('flowchart LR\n    A[Box]:::highlight --> B')
-        assert diagram.get_element('A').label == 'Box'
+        assert _shape(diagram, 'A').label == 'Box'
         edges = {(c.from_id, c.to_id) for c in diagram.get_connections()}
         assert edges == {('A', 'B')}
 
@@ -293,7 +299,7 @@ class TestSubgraphs:
         )
         group = diagram.get_groups()[0]
         for child_id in ('A', 'B'):
-            child = diagram.get_element(child_id)
+            child = _shape(diagram, child_id)
             assert group.position.x <= child.position.x
             assert group.position.y <= child.position.y
             assert child.position.x + child.size.width <= group.position.x + group.size.width
@@ -328,7 +334,7 @@ class TestSubgraphs:
         )
         group = diagram.get_groups()[0]
         assert group.id == 'group-Results'
-        node = diagram.get_element('Results')
+        node = _shape(diagram, 'Results')
         assert isinstance(node, Shape)
         edges = {(c.from_id, c.to_id) for c in diagram.get_connections()}
         assert edges == {('B', 'Results')}
@@ -337,7 +343,7 @@ class TestSubgraphs:
 class TestFaIcons:
     def test_icon_stripped_and_mapped(self):
         _, diagram = _parse('flowchart LR\n    B[fa:fa-database Orders DB]')
-        shape = diagram.get_element('B')
+        shape = _shape(diagram, 'B')
         assert shape.label == 'Orders DB'
         assert shape.semantic_type == SemanticType.DATABASE
         assert shape.semantic_confidence >= 0.9
@@ -356,13 +362,13 @@ class TestFaIcons:
     )
     def test_known_icons_map_semantics(self, icon, semantic):
         _, diagram = _parse(f'flowchart LR\n    N(fa:fa-{icon} Something)')
-        shape = diagram.get_element('N')
+        shape = _shape(diagram, 'N')
         assert shape.label == 'Something'
         assert shape.semantic_type == semantic
 
     def test_unknown_icon_stripped_without_hint(self):
         _, diagram = _parse('flowchart LR\n    N[fa:fa-creative-commons Licensing]')
-        shape = diagram.get_element('N')
+        shape = _shape(diagram, 'N')
         assert shape.label == 'Licensing'
         assert 'semantic_type' not in shape.metadata
 
@@ -403,19 +409,19 @@ class TestWarnings:
 class TestLayout:
     def test_layers_follow_topology_lr(self):
         _, diagram = _parse('flowchart LR\n    A --> B --> C')
-        a, b, c = (diagram.get_element(i) for i in 'ABC')
+        a, b, c = (_shape(diagram, i) for i in 'ABC')
         assert a.position.x < b.position.x < c.position.x
 
     def test_layers_follow_topology_td(self):
         _, diagram = _parse('flowchart TD\n    A --> B --> C')
-        a, b, c = (diagram.get_element(i) for i in 'ABC')
+        a, b, c = (_shape(diagram, i) for i in 'ABC')
         assert a.position.y < b.position.y < c.position.y
 
     def test_reversed_directions_flip_axis(self):
         _, diagram = _parse('flowchart RL\n    A --> B')
-        assert diagram.get_element('A').position.x > diagram.get_element('B').position.x
+        assert _shape(diagram, 'A').position.x > _shape(diagram, 'B').position.x
         _, diagram = _parse('flowchart BT\n    A --> B')
-        assert diagram.get_element('A').position.y > diagram.get_element('B').position.y
+        assert _shape(diagram, 'A').position.y > _shape(diagram, 'B').position.y
 
     def test_cycle_does_not_crash(self):
         _, diagram = _parse('flowchart LR\n    A --> B --> A')
@@ -461,8 +467,10 @@ class TestRealWorldFixtures:
         diagram = parser.parse(content)
         group = diagram.get_groups()[0]
         assert set(group.children) == {'api', 'worker', 'db', 'cache', 'queue'}
-        assert diagram.get_element('client').label == 'Web Client'
-        assert diagram.get_element('lb').shape_type == 'parallelogram'
+        client = _shape(diagram, 'client')
+        assert client.label == 'Web Client'
+        lb = _shape(diagram, 'lb')
+        assert lb.shape_type == 'parallelogram'
         edges = {(c.from_id, c.to_id) for c in diagram.get_connections()}
         assert {('lb', 'api'), ('lb', 'worker')} <= edges
         skipped = {w.split("'")[1] for w in parser.warnings if 'directive' in w}
@@ -475,7 +483,7 @@ class TestRealWorldFixtures:
         assert len(diagram.get_shapes()) == 22
         assert len(diagram.get_connections()) == 40
         assert not any('unrecognized' in w or 'unsupported' in w for w in parser.warnings)
-        db_instance = diagram.get_element('f4112290_1ec3_e711_8c5a_005056ad0002')
+        db_instance = _shape(diagram, 'f4112290_1ec3_e711_8c5a_005056ad0002')
         assert db_instance.semantic_type == SemanticType.DATABASE
         assert db_instance.label == '[DBServer\\SharedDbInstance]'
 

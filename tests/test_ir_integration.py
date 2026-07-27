@@ -72,8 +72,6 @@ class TestExcalidrawParser:
         # Check shape properties
         for shape in shapes:
             assert shape.id
-            assert shape.position
-            assert shape.size
             assert shape.size.width >= 0
             assert shape.size.height >= 0
 

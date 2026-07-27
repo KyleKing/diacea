@@ -18,6 +18,7 @@ from .generators import (
     MermaidGenerator,
     PlantUMLGenerator,
 )
+from .ir.base import Parser
 from .ir.elements import Diagram
 from .parsers import (
     ExcalidrawParser,
@@ -100,7 +101,7 @@ class _CLIError(Exception):
         self.exit_code = exit_code
 
 
-def detect_input_format(data: dict | str) -> str:
+def detect_input_format(data: dict[str, Any] | str) -> str:
     """Detect input format from data structure.
 
     Args:
@@ -211,6 +212,7 @@ def _resolve_input_format(content: str, requested: str) -> tuple[str, Any]:
 
 def _parse_to_diagram(input_format: str, input_data: Any) -> tuple[Diagram, list[str]]:
     """Parse input data to IR and collect parser conversion-loss warnings."""
+    input_parser: Parser
     match input_format:
         case "svg":
             input_parser = SVGParser()

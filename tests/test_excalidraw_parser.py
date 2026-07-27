@@ -71,6 +71,8 @@ class TestExcalidrawFloatCoercion:
         assert texts[0].style.font_size == 16.0
 
         arrow = connections[0]
+        assert arrow.start_point is not None
+        assert arrow.end_point is not None
         assert isinstance(arrow.start_point.x, float)
         assert isinstance(arrow.start_point.y, float)
         assert isinstance(arrow.end_point.x, float)

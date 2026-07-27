@@ -189,8 +189,6 @@ def _split_frontmatter(content: str) -> tuple[str, Optional[str]]:
 
 
 def _first_meaningful_line(content: str) -> Optional[str]:
-    if not isinstance(content, str):
-        return None
     content, _ = _split_frontmatter(content)
     for raw in content.splitlines():
         line = raw.strip()

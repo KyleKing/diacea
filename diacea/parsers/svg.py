@@ -25,6 +25,7 @@ from ..ir import (
     Connection,
     Diagram,
     Dimensions,
+    Element,
     Group,
     Parser,
     Point,
@@ -261,7 +262,7 @@ class SVGParser(Parser):
         self._lines = []
         self._text_elements = {}
         self.warnings = []
-        elements: list = []
+        elements: list[Element] = []
 
         self._process_element(root, elements, transform=Transform(), parent_id=None)
 
@@ -279,7 +280,7 @@ class SVGParser(Parser):
     def _process_element(
         self,
         elem: ET.Element,
-        elements: list,
+        elements: list[Element],
         transform: Transform | None,
         parent_id: str | None,
     ) -> None:
@@ -720,7 +721,7 @@ class SVGParser(Parser):
             segment_id = f'{base_id}_seg{i // 2}'
             self._lines.append((segment_id, Point(x=tx1, y=ty1), Point(x=tx2, y=ty2), style))
 
-    def _detect_connections_from_lines(self, elements: list) -> list[Connection]:
+    def _detect_connections_from_lines(self, elements: list[Element]) -> list[Connection]:
         """Detect connections from line elements that connect shapes."""
         connections = []
         shapes = [e for e in elements if isinstance(e, Shape)]
@@ -794,13 +795,13 @@ class SVGParser(Parser):
     def _parse_group(
         self,
         elem: ET.Element,
-        elements: list,
+        elements: list[Element],
         transform: Transform,
     ) -> Group | None:
         """Parse SVG group to IR Group."""
         group_id = elem.get('id') or self._generate_id()
 
-        child_elements: list = []
+        child_elements: list[Element] = []
         for child in elem:
             self._process_element(child, child_elements, transform, parent_id=group_id)
 
@@ -935,7 +936,7 @@ class SVGParser(Parser):
 
         return hint_map.get(hint_lower)
 
-    def _associate_text_labels(self, elements: list) -> None:
+    def _associate_text_labels(self, elements: list[Element]) -> None:
         """Associate text elements with nearby shapes as labels.
 
         Args:
