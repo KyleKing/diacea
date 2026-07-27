@@ -264,7 +264,7 @@ class D2Generator(Generator):
         if self._connection_has_style(conn):
             lines = [line + ' {']
             style_lines = self._format_connection_style(conn)
-            lines.extend(f'  {l}' for l in style_lines)
+            lines.extend(f'  {style_line}' for style_line in style_lines)
             lines.append('}')
             return '\n'.join(lines)
 

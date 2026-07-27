@@ -775,8 +775,8 @@ class TestDuplicateElementFix:
         assert 'inner1' in plantuml
         assert 'inner2' in plantuml
         lines = plantuml.split('\n')
-        inner1_declarations = [l for l in lines if 'rectangle' in l and 'inner1' in l]
-        inner2_declarations = [l for l in lines if 'rectangle' in l and 'inner2' in l]
+        inner1_declarations = [line for line in lines if 'rectangle' in line and 'inner1' in line]
+        inner2_declarations = [line for line in lines if 'rectangle' in line and 'inner2' in line]
         assert len(inner1_declarations) == 1
         assert len(inner2_declarations) == 1
 

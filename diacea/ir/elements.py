@@ -90,7 +90,7 @@ class Element:
     semantic_confidence: float = 0.0  # 0.0 to 1.0
 
     # Metadata for format-specific data (preserves for roundtrip)
-    # Example: {"excalidraw": {"roughness": 1}, "icon_url": "..."}
+    # Example: {"excalidraw": {"roughness": 1}, "icon_url": "..."}  # noqa: ERA001
     metadata: dict[str, Any] = field(default_factory=dict)
 
     # Z-index for layering
@@ -178,7 +178,7 @@ class Diagram:
     author: str | None = None
 
     # Format-specific metadata (preserves for roundtrip)
-    # Example: {"excalidraw": {"appState": {...}}}
+    # Example: {"excalidraw": {"appState": {...}}}  # noqa: ERA001
     metadata: dict[str, Any] = field(default_factory=dict)
 
     def get_element(self, element_id: str) -> Element | None:

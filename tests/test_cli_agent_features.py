@@ -142,7 +142,7 @@ class TestStructuredFailures:
         result = main(['-i', 'nonexistent.json', '-f', 'mermaid', '--json'])
         assert result == EXIT_ERROR
         captured = capsys.readouterr()
-        assert captured.out == ''
+        assert not captured.out
         error = json.loads(captured.err)
         assert 'not found' in error['error']
         assert error['exit_code'] == EXIT_ERROR

@@ -16,7 +16,9 @@ from __future__ import annotations
 import logging
 import math
 import re
-import xml.etree.ElementTree as ET
+
+# TODO: switch to defusedxml so untrusted SVG cannot trigger entity-expansion attacks
+import xml.etree.ElementTree as ET  # noqa: S405
 from collections.abc import Iterator
 from dataclasses import dataclass
 from typing import Any
@@ -260,7 +262,7 @@ class SVGParser(Parser):
         Returns:
             IR Diagram object
         """
-        root = ET.fromstring(data) if isinstance(data, str) else data
+        root = ET.fromstring(data) if isinstance(data, str) else data  # noqa: S314
 
         self._lines = []
         self._text_elements = {}

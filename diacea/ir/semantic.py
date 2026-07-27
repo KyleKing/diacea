@@ -66,7 +66,7 @@ class SemanticType(str, Enum):
 
 
 # Keyword mappings for text-based inference
-# Format: {semantic_type: [keywords]}
+# Format: {semantic_type: [keywords]}  # noqa: ERA001
 # More specific keywords listed first for priority matching
 SEMANTIC_KEYWORDS = {
     SemanticType.DATABASE: [

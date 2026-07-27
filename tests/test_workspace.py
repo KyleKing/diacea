@@ -1,6 +1,7 @@
 """Tests for workspace functionality."""
 
 import json
+import re
 import tempfile
 from pathlib import Path
 
@@ -660,7 +661,7 @@ class TestWorkspaceIngestion:
     def test_missing_file_errors_with_file_name(self, tmp_path):
         missing = tmp_path / 'missing.excalidraw'
 
-        with pytest.raises(DiagramIngestionError, match='missing.excalidraw'):
+        with pytest.raises(DiagramIngestionError, match=re.escape('missing.excalidraw')):
             create_workspace_from_diagrams(
                 workspace_id='test',
                 workspace_name='Test',
@@ -671,7 +672,7 @@ class TestWorkspaceIngestion:
         garbage = tmp_path / 'garbage.excalidraw'
         garbage.write_text('this is not a diagram')
 
-        with pytest.raises(DiagramIngestionError, match='garbage.excalidraw'):
+        with pytest.raises(DiagramIngestionError, match=re.escape('garbage.excalidraw')):
             create_workspace_from_diagrams(
                 workspace_id='test',
                 workspace_name='Test',

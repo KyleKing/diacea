@@ -149,7 +149,7 @@ def workspace_info(args: argparse.Namespace) -> int:
     print(f'Views ({len(workspace.views)}):')
     hierarchy = workspace.get_view_hierarchy()
 
-    def print_view(view_id: str, indent: int = 0):
+    def print_view(view_id: str, indent: int = 0) -> None:
         view = workspace.views[view_id]
         prefix = '  ' * indent
         print(f'{prefix}- {view_id}: {view.name} ({view.view_type})')

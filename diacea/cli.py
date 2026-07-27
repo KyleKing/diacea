@@ -52,7 +52,10 @@ _INPUT_FORMATS = [
     },
     {
         'name': 'obsidian',
-        'description': 'Obsidian Excalidraw plugin markdown (.excalidraw.md); compressed-json Drawing blocks require the diacea[obsidian] extra',
+        'description': (
+            'Obsidian Excalidraw plugin markdown (.excalidraw.md); '
+            'compressed-json Drawing blocks require the diacea[obsidian] extra'
+        ),
         'detection': "markdown with 'excalidraw-plugin' frontmatter or a '# Drawing' code block",
     },
     {
@@ -347,7 +350,9 @@ def _run_convert(argv: list[str]) -> int:
 def _run_inspect(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(
         prog='diacea inspect',
-        description='Parse a diagram file and report detected format, element count, and semantic inference without converting',
+        description=(
+            'Parse a diagram file and report detected format, element count, and semantic inference without converting'
+        ),
     )
     parser.add_argument('input', help='Input file or - for stdin')
     parser.add_argument(
@@ -611,10 +616,10 @@ def _get_version() -> str:
     """
     try:
         from . import __version__
-
-        return __version__
     except ImportError:
         return 'unknown'
+    else:
+        return __version__
 
 
 if __name__ == '__main__':

@@ -48,7 +48,7 @@ def load_workspace(file_path: str | Path) -> Workspace:
     return from_dict(data)
 
 
-def save_workspace(workspace: Workspace, file_path: str | Path, format: str = 'yaml') -> None:
+def save_workspace(workspace: Workspace, file_path: str | Path, format: str = 'yaml') -> None:  # noqa: A002
     """Save workspace to YAML or JSON file.
 
     Args:

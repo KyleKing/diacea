@@ -33,7 +33,7 @@ class TestSyncCLI:
         capsys.readouterr()
 
         assert main(['sync', str(excalidraw_source)]) == EXIT_OK
-        assert capsys.readouterr().err == ''
+        assert not capsys.readouterr().err
 
     def test_check_reports_stale_without_writing(self, excalidraw_source, capsys):
         result = main(['sync', '--check', str(excalidraw_source)])

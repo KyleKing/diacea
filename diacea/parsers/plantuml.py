@@ -318,7 +318,7 @@ class PlantUMLParser(Parser):
             state.direction = m.group(1).replace(' ', '_')
             return None
 
-        if token == 'skinparam':
+        if token == 'skinparam':  # noqa: S105
             self.warnings.append(f'Line {lineno}: skipped skinparam directive')
             return '}' if line.rstrip().endswith('{') else None
 

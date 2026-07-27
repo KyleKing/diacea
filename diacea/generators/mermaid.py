@@ -67,7 +67,7 @@ class MermaidGenerator(Generator):
             return self._generate_c4(diagram)
         if diagram_type == 'sequence':
             return self._generate_sequence(diagram)
-        # flowchart (default)
+        # flowchart (default)  # noqa: ERA001
         return self._generate_flowchart(diagram)
 
     def _detect_diagram_type(self, diagram: Diagram) -> str:
