@@ -1771,79 +1771,79 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>diacea/cli.py</code></summary>
-              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="496 "></span><span class="k">def</span><span class="w"> </span><span class="nf">create_parser</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">:</span>
-<span class="linenos" data-linenos="497 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Create argument parser for the convert command.</span>
-<span class="linenos" data-linenos="498 "></span>
-<span class="linenos" data-linenos="499 "></span><span class="sd">    Returns:</span>
-<span class="linenos" data-linenos="500 "></span><span class="sd">        Configured ArgumentParser</span>
-<span class="linenos" data-linenos="501 "></span><span class="sd">    &quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="502 "></span>    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
-<span class="linenos" data-linenos="503 "></span>        <span class="n">prog</span><span class="o">=</span><span class="s2">&quot;diacea&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="504 "></span>        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Universal diagram converter - the pandoc for diagrams&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="505 "></span>        <span class="n">epilog</span><span class="o">=</span><span class="s2">&quot;Examples:</span><span class="se">\n</span><span class="s2">&quot;</span>
-<span class="linenos" data-linenos="506 "></span>        <span class="s2">&quot;  diacea -i diagram.json -f mermaid -o output.mmd</span><span class="se">\n</span><span class="s2">&quot;</span>
-<span class="linenos" data-linenos="507 "></span>        <span class="s2">&quot;  diacea -i diagram.json -f mermaid --json</span><span class="se">\n</span><span class="s2">&quot;</span>
-<span class="linenos" data-linenos="508 "></span>        <span class="s2">&quot;  diacea -i diagram.json -f graphviz --graphviz-direction TB</span><span class="se">\n</span><span class="s2">&quot;</span>
-<span class="linenos" data-linenos="509 "></span>        <span class="s2">&quot;  cat diagram.json | diacea -i - -f c4</span><span class="se">\n</span><span class="s2">&quot;</span>
-<span class="linenos" data-linenos="510 "></span>        <span class="s2">&quot;  diacea inspect diagram.json --json</span><span class="se">\n</span><span class="s2">&quot;</span>
-<span class="linenos" data-linenos="511 "></span>        <span class="s2">&quot;  diacea formats --json</span><span class="se">\n</span><span class="s2">&quot;</span>
-<span class="linenos" data-linenos="512 "></span>        <span class="s2">&quot;  diacea sync docs/arch.excalidraw -f mermaid&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="513 "></span>        <span class="n">formatter_class</span><span class="o">=</span><span class="n">argparse</span><span class="o">.</span><span class="n">RawDescriptionHelpFormatter</span><span class="p">,</span>
-<span class="linenos" data-linenos="514 "></span>    <span class="p">)</span>
-<span class="linenos" data-linenos="515 "></span>
-<span class="linenos" data-linenos="516 "></span>    <span class="c1"># Input/Output</span>
-<span class="linenos" data-linenos="517 "></span>    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
-<span class="linenos" data-linenos="518 "></span>        <span class="s2">&quot;-i&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="519 "></span>        <span class="s2">&quot;--input&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="520 "></span>        <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-<span class="linenos" data-linenos="521 "></span>        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Input file (Excalidraw/TLDraw JSON, Obsidian .excalidraw.md, SVG) or - for stdin&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="522 "></span>    <span class="p">)</span>
-<span class="linenos" data-linenos="523 "></span>
-<span class="linenos" data-linenos="524 "></span>    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
-<span class="linenos" data-linenos="525 "></span>        <span class="s2">&quot;-o&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="526 "></span>        <span class="s2">&quot;--output&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="527 "></span>        <span class="n">default</span><span class="o">=</span><span class="s2">&quot;-&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="528 "></span>        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Output file or - for stdout (default: stdout)&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="529 "></span>    <span class="p">)</span>
-<span class="linenos" data-linenos="530 "></span>
-<span class="linenos" data-linenos="531 "></span>    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
-<span class="linenos" data-linenos="532 "></span>        <span class="s2">&quot;--input-format&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="533 "></span>        <span class="n">default</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="534 "></span>        <span class="n">choices</span><span class="o">=</span><span class="n">_INPUT_FORMAT_CHOICES</span><span class="p">,</span>
-<span class="linenos" data-linenos="535 "></span>        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Input format (default: auto-detect)&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="536 "></span>    <span class="p">)</span>
-<span class="linenos" data-linenos="537 "></span>
-<span class="linenos" data-linenos="538 "></span>    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
-<span class="linenos" data-linenos="539 "></span>        <span class="s2">&quot;-f&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="540 "></span>        <span class="s2">&quot;--format&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="541 "></span>        <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-<span class="linenos" data-linenos="542 "></span>        <span class="n">choices</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;plantuml&quot;</span><span class="p">,</span> <span class="s2">&quot;c4&quot;</span><span class="p">,</span> <span class="s2">&quot;mermaid&quot;</span><span class="p">,</span> <span class="s2">&quot;graphviz&quot;</span><span class="p">,</span> <span class="s2">&quot;d2&quot;</span><span class="p">],</span>
-<span class="linenos" data-linenos="543 "></span>        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Output format&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="544 "></span>    <span class="p">)</span>
-<span class="linenos" data-linenos="545 "></span>
-<span class="linenos" data-linenos="546 "></span>    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
-<span class="linenos" data-linenos="547 "></span>        <span class="s2">&quot;--json&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="548 "></span>        <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="549 "></span>        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Emit a JSON envelope (output, formats, elements, warnings) to stdout; errors go to stderr as JSON&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="550 "></span>    <span class="p">)</span>
-<span class="linenos" data-linenos="551 "></span>
-<span class="linenos" data-linenos="552 "></span>    <span class="n">_add_format_options</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
-<span class="linenos" data-linenos="553 "></span>
-<span class="linenos" data-linenos="554 "></span>    <span class="c1"># General options</span>
-<span class="linenos" data-linenos="555 "></span>    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
-<span class="linenos" data-linenos="556 "></span>        <span class="s2">&quot;-v&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="557 "></span>        <span class="s2">&quot;--verbose&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="558 "></span>        <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="559 "></span>        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Verbose output (show stack traces)&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="560 "></span>    <span class="p">)</span>
-<span class="linenos" data-linenos="561 "></span>
-<span class="linenos" data-linenos="562 "></span>    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
-<span class="linenos" data-linenos="563 "></span>        <span class="s2">&quot;--version&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="564 "></span>        <span class="n">action</span><span class="o">=</span><span class="s2">&quot;version&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="565 "></span>        <span class="n">version</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;%(prog)s </span><span class="si">{</span><span class="n">_get_version</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="566 "></span>    <span class="p">)</span>
-<span class="linenos" data-linenos="567 "></span>
-<span class="linenos" data-linenos="568 "></span>    <span class="k">return</span> <span class="n">parser</span>
+              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="500 "></span><span class="k">def</span><span class="w"> </span><span class="nf">create_parser</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">:</span>
+<span class="linenos" data-linenos="501 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Create argument parser for the convert command.</span>
+<span class="linenos" data-linenos="502 "></span>
+<span class="linenos" data-linenos="503 "></span><span class="sd">    Returns:</span>
+<span class="linenos" data-linenos="504 "></span><span class="sd">        Configured ArgumentParser</span>
+<span class="linenos" data-linenos="505 "></span><span class="sd">    &quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="506 "></span>    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
+<span class="linenos" data-linenos="507 "></span>        <span class="n">prog</span><span class="o">=</span><span class="s1">&#39;diacea&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="508 "></span>        <span class="n">description</span><span class="o">=</span><span class="s1">&#39;Universal diagram converter - the pandoc for diagrams&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="509 "></span>        <span class="n">epilog</span><span class="o">=</span><span class="s1">&#39;Examples:</span><span class="se">\n</span><span class="s1">&#39;</span>
+<span class="linenos" data-linenos="510 "></span>        <span class="s1">&#39;  diacea -i diagram.json -f mermaid -o output.mmd</span><span class="se">\n</span><span class="s1">&#39;</span>
+<span class="linenos" data-linenos="511 "></span>        <span class="s1">&#39;  diacea -i diagram.json -f mermaid --json</span><span class="se">\n</span><span class="s1">&#39;</span>
+<span class="linenos" data-linenos="512 "></span>        <span class="s1">&#39;  diacea -i diagram.json -f graphviz --graphviz-direction TB</span><span class="se">\n</span><span class="s1">&#39;</span>
+<span class="linenos" data-linenos="513 "></span>        <span class="s1">&#39;  cat diagram.json | diacea -i - -f c4</span><span class="se">\n</span><span class="s1">&#39;</span>
+<span class="linenos" data-linenos="514 "></span>        <span class="s1">&#39;  diacea inspect diagram.json --json</span><span class="se">\n</span><span class="s1">&#39;</span>
+<span class="linenos" data-linenos="515 "></span>        <span class="s1">&#39;  diacea formats --json</span><span class="se">\n</span><span class="s1">&#39;</span>
+<span class="linenos" data-linenos="516 "></span>        <span class="s1">&#39;  diacea sync docs/arch.excalidraw -f mermaid&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="517 "></span>        <span class="n">formatter_class</span><span class="o">=</span><span class="n">argparse</span><span class="o">.</span><span class="n">RawDescriptionHelpFormatter</span><span class="p">,</span>
+<span class="linenos" data-linenos="518 "></span>    <span class="p">)</span>
+<span class="linenos" data-linenos="519 "></span>
+<span class="linenos" data-linenos="520 "></span>    <span class="c1"># Input/Output</span>
+<span class="linenos" data-linenos="521 "></span>    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+<span class="linenos" data-linenos="522 "></span>        <span class="s1">&#39;-i&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="523 "></span>        <span class="s1">&#39;--input&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="524 "></span>        <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="linenos" data-linenos="525 "></span>        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Input file (Excalidraw/TLDraw JSON, Obsidian .excalidraw.md, SVG) or - for stdin&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="526 "></span>    <span class="p">)</span>
+<span class="linenos" data-linenos="527 "></span>
+<span class="linenos" data-linenos="528 "></span>    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+<span class="linenos" data-linenos="529 "></span>        <span class="s1">&#39;-o&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="530 "></span>        <span class="s1">&#39;--output&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="531 "></span>        <span class="n">default</span><span class="o">=</span><span class="s1">&#39;-&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="532 "></span>        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Output file or - for stdout (default: stdout)&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="533 "></span>    <span class="p">)</span>
+<span class="linenos" data-linenos="534 "></span>
+<span class="linenos" data-linenos="535 "></span>    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+<span class="linenos" data-linenos="536 "></span>        <span class="s1">&#39;--input-format&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="537 "></span>        <span class="n">default</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="538 "></span>        <span class="n">choices</span><span class="o">=</span><span class="n">_INPUT_FORMAT_CHOICES</span><span class="p">,</span>
+<span class="linenos" data-linenos="539 "></span>        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Input format (default: auto-detect)&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="540 "></span>    <span class="p">)</span>
+<span class="linenos" data-linenos="541 "></span>
+<span class="linenos" data-linenos="542 "></span>    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+<span class="linenos" data-linenos="543 "></span>        <span class="s1">&#39;-f&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="544 "></span>        <span class="s1">&#39;--format&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="545 "></span>        <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="linenos" data-linenos="546 "></span>        <span class="n">choices</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;plantuml&#39;</span><span class="p">,</span> <span class="s1">&#39;c4&#39;</span><span class="p">,</span> <span class="s1">&#39;mermaid&#39;</span><span class="p">,</span> <span class="s1">&#39;graphviz&#39;</span><span class="p">,</span> <span class="s1">&#39;d2&#39;</span><span class="p">],</span>
+<span class="linenos" data-linenos="547 "></span>        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Output format&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="548 "></span>    <span class="p">)</span>
+<span class="linenos" data-linenos="549 "></span>
+<span class="linenos" data-linenos="550 "></span>    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+<span class="linenos" data-linenos="551 "></span>        <span class="s1">&#39;--json&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="552 "></span>        <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="553 "></span>        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Emit a JSON envelope (output, formats, elements, warnings) to stdout; errors go to stderr as JSON&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="554 "></span>    <span class="p">)</span>
+<span class="linenos" data-linenos="555 "></span>
+<span class="linenos" data-linenos="556 "></span>    <span class="n">_add_format_options</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
+<span class="linenos" data-linenos="557 "></span>
+<span class="linenos" data-linenos="558 "></span>    <span class="c1"># General options</span>
+<span class="linenos" data-linenos="559 "></span>    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+<span class="linenos" data-linenos="560 "></span>        <span class="s1">&#39;-v&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="561 "></span>        <span class="s1">&#39;--verbose&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="562 "></span>        <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="563 "></span>        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Verbose output (show stack traces)&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="564 "></span>    <span class="p">)</span>
+<span class="linenos" data-linenos="565 "></span>
+<span class="linenos" data-linenos="566 "></span>    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+<span class="linenos" data-linenos="567 "></span>        <span class="s1">&#39;--version&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="568 "></span>        <span class="n">action</span><span class="o">=</span><span class="s1">&#39;version&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="569 "></span>        <span class="n">version</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;%(prog)s </span><span class="si">{</span><span class="n">_get_version</span><span class="p">()</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="570 "></span>    <span class="p">)</span>
+<span class="linenos" data-linenos="571 "></span>
+<span class="linenos" data-linenos="572 "></span>    <span class="k">return</span> <span class="n">parser</span>
 </code></pre></div>
             </details>
     </div>
@@ -1885,7 +1885,7 @@
               <p>
                   <span class="doc-param-annotation">
                     <b>TYPE:</b>
-                      <code><span title="dict">dict</span> | <span title="str">str</span></code>
+                      <code><span title="dict">dict</span>[<span title="str">str</span>, <span title="typing.Any">Any</span>] | <span title="str">str</span></code>
                   </span>
               </p>
             </td>
@@ -1944,46 +1944,43 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>diacea/cli.py</code></summary>
-              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="103 "></span><span class="k">def</span><span class="w"> </span><span class="nf">detect_input_format</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="linenos" data-linenos="104 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Detect input format from data structure.</span>
-<span class="linenos" data-linenos="105 "></span>
-<span class="linenos" data-linenos="106 "></span><span class="sd">    Args:</span>
-<span class="linenos" data-linenos="107 "></span><span class="sd">        data: JSON data dictionary or string content</span>
-<span class="linenos" data-linenos="108 "></span>
-<span class="linenos" data-linenos="109 "></span><span class="sd">    Returns:</span>
-<span class="linenos" data-linenos="110 "></span><span class="sd">        Format name (&#39;svg&#39;, &#39;obsidian&#39;, &#39;tldraw&#39;, or &#39;excalidraw&#39;)</span>
-<span class="linenos" data-linenos="111 "></span>
-<span class="linenos" data-linenos="112 "></span><span class="sd">    Raises:</span>
-<span class="linenos" data-linenos="113 "></span><span class="sd">        ValueError: If format cannot be detected</span>
-<span class="linenos" data-linenos="114 "></span><span class="sd">    &quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="115 "></span>    <span class="c1"># Check if it&#39;s string content (SVG, Obsidian Excalidraw markdown, PlantUML, or Mermaid)</span>
-<span class="linenos" data-linenos="116 "></span>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-<span class="linenos" data-linenos="117 "></span>        <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;?xml&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">data</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;svg&quot;</span><span class="p">):</span>
-<span class="linenos" data-linenos="118 "></span>            <span class="k">return</span> <span class="s2">&quot;svg&quot;</span>
-<span class="linenos" data-linenos="119 "></span>        <span class="k">if</span> <span class="n">is_obsidian_excalidraw</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
-<span class="linenos" data-linenos="120 "></span>            <span class="k">return</span> <span class="s2">&quot;obsidian&quot;</span>
-<span class="linenos" data-linenos="121 "></span>        <span class="k">if</span> <span class="n">is_plantuml</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
-<span class="linenos" data-linenos="122 "></span>            <span class="k">return</span> <span class="s2">&quot;plantuml&quot;</span>
-<span class="linenos" data-linenos="123 "></span>        <span class="k">if</span> <span class="n">is_mermaid</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
-<span class="linenos" data-linenos="124 "></span>            <span class="k">return</span> <span class="s2">&quot;mermaid&quot;</span>
-<span class="linenos" data-linenos="125 "></span>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-<span class="linenos" data-linenos="126 "></span>            <span class="s2">&quot;Unknown string format - expected SVG XML, Obsidian Excalidraw markdown, &quot;</span>
-<span class="linenos" data-linenos="127 "></span>            <span class="s2">&quot;PlantUML, or Mermaid&quot;</span>
-<span class="linenos" data-linenos="128 "></span>        <span class="p">)</span>
-<span class="linenos" data-linenos="129 "></span>
-<span class="linenos" data-linenos="130 "></span>    <span class="c1"># Modern TLDraw v2 .tldr files have &quot;tldrawFileFormatVersion&quot; + flat &quot;records&quot;</span>
-<span class="linenos" data-linenos="131 "></span>    <span class="k">if</span> <span class="n">is_tldraw_v2</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
-<span class="linenos" data-linenos="132 "></span>        <span class="k">return</span> <span class="s2">&quot;tldraw&quot;</span>
-<span class="linenos" data-linenos="133 "></span>
-<span class="linenos" data-linenos="134 "></span>    <span class="c1"># Legacy TLDraw has &quot;document&quot; -&gt; &quot;pages&quot; structure</span>
-<span class="linenos" data-linenos="135 "></span>    <span class="k">if</span> <span class="s2">&quot;document&quot;</span> <span class="ow">in</span> <span class="n">data</span> <span class="ow">and</span> <span class="s2">&quot;pages&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;document&quot;</span><span class="p">,</span> <span class="p">{}):</span>
-<span class="linenos" data-linenos="136 "></span>        <span class="k">return</span> <span class="s2">&quot;tldraw&quot;</span>
-<span class="linenos" data-linenos="137 "></span>
-<span class="linenos" data-linenos="138 "></span>    <span class="c1"># Excalidraw has &quot;elements&quot; or &quot;type&quot;: &quot;excalidraw/clipboard&quot;</span>
-<span class="linenos" data-linenos="139 "></span>    <span class="k">if</span> <span class="s2">&quot;elements&quot;</span> <span class="ow">in</span> <span class="n">data</span> <span class="ow">or</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;excalidraw/clipboard&quot;</span><span class="p">:</span>
-<span class="linenos" data-linenos="140 "></span>        <span class="k">return</span> <span class="s2">&quot;excalidraw&quot;</span>
-<span class="linenos" data-linenos="141 "></span>
-<span class="linenos" data-linenos="142 "></span>    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown input format - expected SVG, TLDraw, or Excalidraw&quot;</span><span class="p">)</span>
+              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="107 "></span><span class="k">def</span><span class="w"> </span><span class="nf">detect_input_format</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos" data-linenos="108 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Detect input format from data structure.</span>
+<span class="linenos" data-linenos="109 "></span>
+<span class="linenos" data-linenos="110 "></span><span class="sd">    Args:</span>
+<span class="linenos" data-linenos="111 "></span><span class="sd">        data: JSON data dictionary or string content</span>
+<span class="linenos" data-linenos="112 "></span>
+<span class="linenos" data-linenos="113 "></span><span class="sd">    Returns:</span>
+<span class="linenos" data-linenos="114 "></span><span class="sd">        Format name (&#39;svg&#39;, &#39;obsidian&#39;, &#39;tldraw&#39;, or &#39;excalidraw&#39;)</span>
+<span class="linenos" data-linenos="115 "></span>
+<span class="linenos" data-linenos="116 "></span><span class="sd">    Raises:</span>
+<span class="linenos" data-linenos="117 "></span><span class="sd">        ValueError: If format cannot be detected</span>
+<span class="linenos" data-linenos="118 "></span><span class="sd">    &quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="119 "></span>    <span class="c1"># Check if it&#39;s string content (SVG, Obsidian Excalidraw markdown, PlantUML, or Mermaid)</span>
+<span class="linenos" data-linenos="120 "></span>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+<span class="linenos" data-linenos="121 "></span>        <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;&lt;?xml&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">data</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;&lt;svg&#39;</span><span class="p">):</span>
+<span class="linenos" data-linenos="122 "></span>            <span class="k">return</span> <span class="s1">&#39;svg&#39;</span>
+<span class="linenos" data-linenos="123 "></span>        <span class="k">if</span> <span class="n">is_obsidian_excalidraw</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+<span class="linenos" data-linenos="124 "></span>            <span class="k">return</span> <span class="s1">&#39;obsidian&#39;</span>
+<span class="linenos" data-linenos="125 "></span>        <span class="k">if</span> <span class="n">is_plantuml</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+<span class="linenos" data-linenos="126 "></span>            <span class="k">return</span> <span class="s1">&#39;plantuml&#39;</span>
+<span class="linenos" data-linenos="127 "></span>        <span class="k">if</span> <span class="n">is_mermaid</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+<span class="linenos" data-linenos="128 "></span>            <span class="k">return</span> <span class="s1">&#39;mermaid&#39;</span>
+<span class="linenos" data-linenos="129 "></span>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unknown string format - expected SVG XML, Obsidian Excalidraw markdown, PlantUML, or Mermaid&#39;</span><span class="p">)</span>
+<span class="linenos" data-linenos="130 "></span>
+<span class="linenos" data-linenos="131 "></span>    <span class="c1"># Modern TLDraw v2 .tldr files have &quot;tldrawFileFormatVersion&quot; + flat &quot;records&quot;</span>
+<span class="linenos" data-linenos="132 "></span>    <span class="k">if</span> <span class="n">is_tldraw_v2</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+<span class="linenos" data-linenos="133 "></span>        <span class="k">return</span> <span class="s1">&#39;tldraw&#39;</span>
+<span class="linenos" data-linenos="134 "></span>
+<span class="linenos" data-linenos="135 "></span>    <span class="c1"># Legacy TLDraw has &quot;document&quot; -&gt; &quot;pages&quot; structure</span>
+<span class="linenos" data-linenos="136 "></span>    <span class="k">if</span> <span class="s1">&#39;document&#39;</span> <span class="ow">in</span> <span class="n">data</span> <span class="ow">and</span> <span class="s1">&#39;pages&#39;</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;document&#39;</span><span class="p">,</span> <span class="p">{}):</span>
+<span class="linenos" data-linenos="137 "></span>        <span class="k">return</span> <span class="s1">&#39;tldraw&#39;</span>
+<span class="linenos" data-linenos="138 "></span>
+<span class="linenos" data-linenos="139 "></span>    <span class="c1"># Excalidraw has &quot;elements&quot; or &quot;type&quot;: &quot;excalidraw/clipboard&quot;</span>
+<span class="linenos" data-linenos="140 "></span>    <span class="k">if</span> <span class="s1">&#39;elements&#39;</span> <span class="ow">in</span> <span class="n">data</span> <span class="ow">or</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;excalidraw/clipboard&#39;</span><span class="p">:</span>
+<span class="linenos" data-linenos="141 "></span>        <span class="k">return</span> <span class="s1">&#39;excalidraw&#39;</span>
+<span class="linenos" data-linenos="142 "></span>
+<span class="linenos" data-linenos="143 "></span>    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unknown input format - expected SVG, TLDraw, or Excalidraw&#39;</span><span class="p">)</span>
 </code></pre></div>
             </details>
     </div>
@@ -2028,7 +2025,7 @@ backward compatibility, bare conversion invocations without a subcommand
               <p>
                   <span class="doc-param-annotation">
                     <b>TYPE:</b>
-                      <code><span title="typing.Optional">Optional</span>[<span title="list">list</span>[<span title="str">str</span>]]</code>
+                      <code><span title="list">list</span>[<span title="str">str</span>] | None</code>
                   </span>
                   <span class="doc-param-default">
                     <b>DEFAULT:</b>
@@ -2067,31 +2064,31 @@ backward compatibility, bare conversion invocations without a subcommand
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>diacea/cli.py</code></summary>
-              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="145 "></span><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">argv</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="linenos" data-linenos="146 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Main CLI entry point.</span>
-<span class="linenos" data-linenos="147 "></span>
-<span class="linenos" data-linenos="148 "></span><span class="sd">    Dispatches to the `formats`, `inspect`, or `convert` subcommands. For</span>
-<span class="linenos" data-linenos="149 "></span><span class="sd">    backward compatibility, bare conversion invocations without a subcommand</span>
-<span class="linenos" data-linenos="150 "></span><span class="sd">    (`diacea -i file -f mermaid`) are treated as `convert`.</span>
-<span class="linenos" data-linenos="151 "></span>
-<span class="linenos" data-linenos="152 "></span><span class="sd">    Args:</span>
-<span class="linenos" data-linenos="153 "></span><span class="sd">        argv: Command-line arguments (None = sys.argv)</span>
-<span class="linenos" data-linenos="154 "></span>
-<span class="linenos" data-linenos="155 "></span><span class="sd">    Returns:</span>
-<span class="linenos" data-linenos="156 "></span><span class="sd">        Exit code (0 = success, 1 = error, 2 = parsed 0 elements)</span>
-<span class="linenos" data-linenos="157 "></span><span class="sd">    &quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="158 "></span>    <span class="n">args_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="k">if</span> <span class="n">argv</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">argv</span><span class="p">)</span>
-<span class="linenos" data-linenos="159 "></span>    <span class="k">match</span> <span class="n">args_list</span><span class="p">:</span>
-<span class="linenos" data-linenos="160 "></span>        <span class="k">case</span> <span class="p">[</span><span class="s2">&quot;convert&quot;</span><span class="p">,</span> <span class="o">*</span><span class="n">rest</span><span class="p">]:</span>
-<span class="linenos" data-linenos="161 "></span>            <span class="k">return</span> <span class="n">_run_convert</span><span class="p">(</span><span class="n">rest</span><span class="p">)</span>
-<span class="linenos" data-linenos="162 "></span>        <span class="k">case</span> <span class="p">[</span><span class="s2">&quot;formats&quot;</span><span class="p">,</span> <span class="o">*</span><span class="n">rest</span><span class="p">]:</span>
-<span class="linenos" data-linenos="163 "></span>            <span class="k">return</span> <span class="n">_run_formats</span><span class="p">(</span><span class="n">rest</span><span class="p">)</span>
-<span class="linenos" data-linenos="164 "></span>        <span class="k">case</span> <span class="p">[</span><span class="s2">&quot;inspect&quot;</span><span class="p">,</span> <span class="o">*</span><span class="n">rest</span><span class="p">]:</span>
-<span class="linenos" data-linenos="165 "></span>            <span class="k">return</span> <span class="n">_run_inspect</span><span class="p">(</span><span class="n">rest</span><span class="p">)</span>
-<span class="linenos" data-linenos="166 "></span>        <span class="k">case</span> <span class="p">[</span><span class="s2">&quot;sync&quot;</span><span class="p">,</span> <span class="o">*</span><span class="n">rest</span><span class="p">]:</span>
-<span class="linenos" data-linenos="167 "></span>            <span class="k">return</span> <span class="n">_run_sync</span><span class="p">(</span><span class="n">rest</span><span class="p">)</span>
-<span class="linenos" data-linenos="168 "></span>        <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
-<span class="linenos" data-linenos="169 "></span>            <span class="k">return</span> <span class="n">_run_convert</span><span class="p">(</span><span class="n">args_list</span><span class="p">)</span>
+              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="146 "></span><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">argv</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="linenos" data-linenos="147 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Main CLI entry point.</span>
+<span class="linenos" data-linenos="148 "></span>
+<span class="linenos" data-linenos="149 "></span><span class="sd">    Dispatches to the `formats`, `inspect`, or `convert` subcommands. For</span>
+<span class="linenos" data-linenos="150 "></span><span class="sd">    backward compatibility, bare conversion invocations without a subcommand</span>
+<span class="linenos" data-linenos="151 "></span><span class="sd">    (`diacea -i file -f mermaid`) are treated as `convert`.</span>
+<span class="linenos" data-linenos="152 "></span>
+<span class="linenos" data-linenos="153 "></span><span class="sd">    Args:</span>
+<span class="linenos" data-linenos="154 "></span><span class="sd">        argv: Command-line arguments (None = sys.argv)</span>
+<span class="linenos" data-linenos="155 "></span>
+<span class="linenos" data-linenos="156 "></span><span class="sd">    Returns:</span>
+<span class="linenos" data-linenos="157 "></span><span class="sd">        Exit code (0 = success, 1 = error, 2 = parsed 0 elements)</span>
+<span class="linenos" data-linenos="158 "></span><span class="sd">    &quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="159 "></span>    <span class="n">args_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="k">if</span> <span class="n">argv</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">argv</span><span class="p">)</span>
+<span class="linenos" data-linenos="160 "></span>    <span class="k">match</span> <span class="n">args_list</span><span class="p">:</span>
+<span class="linenos" data-linenos="161 "></span>        <span class="k">case</span> <span class="p">[</span><span class="s1">&#39;convert&#39;</span><span class="p">,</span> <span class="o">*</span><span class="n">rest</span><span class="p">]:</span>
+<span class="linenos" data-linenos="162 "></span>            <span class="k">return</span> <span class="n">_run_convert</span><span class="p">(</span><span class="n">rest</span><span class="p">)</span>
+<span class="linenos" data-linenos="163 "></span>        <span class="k">case</span> <span class="p">[</span><span class="s1">&#39;formats&#39;</span><span class="p">,</span> <span class="o">*</span><span class="n">rest</span><span class="p">]:</span>
+<span class="linenos" data-linenos="164 "></span>            <span class="k">return</span> <span class="n">_run_formats</span><span class="p">(</span><span class="n">rest</span><span class="p">)</span>
+<span class="linenos" data-linenos="165 "></span>        <span class="k">case</span> <span class="p">[</span><span class="s1">&#39;inspect&#39;</span><span class="p">,</span> <span class="o">*</span><span class="n">rest</span><span class="p">]:</span>
+<span class="linenos" data-linenos="166 "></span>            <span class="k">return</span> <span class="n">_run_inspect</span><span class="p">(</span><span class="n">rest</span><span class="p">)</span>
+<span class="linenos" data-linenos="167 "></span>        <span class="k">case</span> <span class="p">[</span><span class="s1">&#39;sync&#39;</span><span class="p">,</span> <span class="o">*</span><span class="n">rest</span><span class="p">]:</span>
+<span class="linenos" data-linenos="168 "></span>            <span class="k">return</span> <span class="n">_run_sync</span><span class="p">(</span><span class="n">rest</span><span class="p">)</span>
+<span class="linenos" data-linenos="169 "></span>        <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
+<span class="linenos" data-linenos="170 "></span>            <span class="k">return</span> <span class="n">_run_convert</span><span class="p">(</span><span class="n">args_list</span><span class="p">)</span>
 </code></pre></div>
             </details>
     </div>

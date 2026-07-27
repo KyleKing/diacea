@@ -1852,7 +1852,7 @@
               <p>
                   <span class="doc-param-annotation">
                     <b>TYPE:</b>
-                      <code><span title="argparse._SubParsersAction">_SubParsersAction</span></code>
+                      <code><span title="diacea.workspace_cli._SubParsersAction">_SubParsersAction</span></code>
                   </span>
               </p>
             </td>
@@ -1863,88 +1863,90 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>diacea/workspace_cli.py</code></summary>
-              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="243 "></span><span class="k">def</span><span class="w"> </span><span class="nf">add_workspace_subcommands</span><span class="p">(</span><span class="n">subparsers</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">_SubParsersAction</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="linenos" data-linenos="244 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Add workspace subcommands to CLI parser.</span>
-<span class="linenos" data-linenos="245 "></span>
-<span class="linenos" data-linenos="246 "></span><span class="sd">    Args:</span>
-<span class="linenos" data-linenos="247 "></span><span class="sd">        subparsers: Subparser action object</span>
-<span class="linenos" data-linenos="248 "></span><span class="sd">    &quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="249 "></span>    <span class="c1"># workspace create</span>
-<span class="linenos" data-linenos="250 "></span>    <span class="n">create_parser</span> <span class="o">=</span> <span class="n">subparsers</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span>
-<span class="linenos" data-linenos="251 "></span>        <span class="s2">&quot;create&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="252 "></span>        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Create new workspace&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="253 "></span>        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Create a new workspace from diagram files&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="254 "></span>    <span class="p">)</span>
-<span class="linenos" data-linenos="255 "></span>    <span class="n">create_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--name&quot;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Workspace name&quot;</span><span class="p">)</span>
-<span class="linenos" data-linenos="256 "></span>    <span class="n">create_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--id&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Workspace ID (default: derived from name)&quot;</span><span class="p">)</span>
-<span class="linenos" data-linenos="257 "></span>    <span class="n">create_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--description&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Workspace description&quot;</span><span class="p">)</span>
-<span class="linenos" data-linenos="258 "></span>    <span class="n">create_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--author&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Workspace author&quot;</span><span class="p">)</span>
-<span class="linenos" data-linenos="259 "></span>    <span class="n">create_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
-<span class="linenos" data-linenos="260 "></span>        <span class="s2">&quot;--add&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="261 "></span>        <span class="n">action</span><span class="o">=</span><span class="s2">&quot;append&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="262 "></span>        <span class="n">default</span><span class="o">=</span><span class="p">[],</span>
-<span class="linenos" data-linenos="263 "></span>        <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;FILE:VIEW_ID[:TYPE]&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="264 "></span>        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Add diagram file (format: file.json:view_id or file.json:view_id:context)&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="265 "></span>    <span class="p">)</span>
-<span class="linenos" data-linenos="266 "></span>    <span class="n">create_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
-<span class="linenos" data-linenos="267 "></span>        <span class="s2">&quot;--from-diagrams&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="268 "></span>        <span class="n">nargs</span><span class="o">=</span><span class="s2">&quot;+&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="269 "></span>        <span class="n">default</span><span class="o">=</span><span class="p">[],</span>
-<span class="linenos" data-linenos="270 "></span>        <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;FILE&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="271 "></span>        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Diagram files to ingest (view IDs derived from file names)&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="272 "></span>    <span class="p">)</span>
-<span class="linenos" data-linenos="273 "></span>    <span class="n">create_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-o&quot;</span><span class="p">,</span> <span class="s2">&quot;--output&quot;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Output workspace file (.yml or .json)&quot;</span><span class="p">)</span>
-<span class="linenos" data-linenos="274 "></span>    <span class="n">create_parser</span><span class="o">.</span><span class="n">set_defaults</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="n">workspace_create</span><span class="p">)</span>
-<span class="linenos" data-linenos="275 "></span>
-<span class="linenos" data-linenos="276 "></span>    <span class="c1"># workspace validate</span>
-<span class="linenos" data-linenos="277 "></span>    <span class="n">validate_parser</span> <span class="o">=</span> <span class="n">subparsers</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span>
-<span class="linenos" data-linenos="278 "></span>        <span class="s2">&quot;validate&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="279 "></span>        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Validate workspace&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="280 "></span>        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Validate workspace for consistency and reference errors&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="281 "></span>    <span class="p">)</span>
-<span class="linenos" data-linenos="282 "></span>    <span class="n">validate_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;workspace&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Workspace file to validate&quot;</span><span class="p">)</span>
-<span class="linenos" data-linenos="283 "></span>    <span class="n">validate_parser</span><span class="o">.</span><span class="n">set_defaults</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="n">workspace_validate</span><span class="p">)</span>
-<span class="linenos" data-linenos="284 "></span>
-<span class="linenos" data-linenos="285 "></span>    <span class="c1"># workspace info</span>
-<span class="linenos" data-linenos="286 "></span>    <span class="n">info_parser</span> <span class="o">=</span> <span class="n">subparsers</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span>
-<span class="linenos" data-linenos="287 "></span>        <span class="s2">&quot;info&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="288 "></span>        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Show workspace information&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="289 "></span>        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Display workspace details, elements, and views&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="290 "></span>    <span class="p">)</span>
-<span class="linenos" data-linenos="291 "></span>    <span class="n">info_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;workspace&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Workspace file&quot;</span><span class="p">)</span>
-<span class="linenos" data-linenos="292 "></span>    <span class="n">info_parser</span><span class="o">.</span><span class="n">set_defaults</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="n">workspace_info</span><span class="p">)</span>
-<span class="linenos" data-linenos="293 "></span>
-<span class="linenos" data-linenos="294 "></span>    <span class="c1"># workspace element add</span>
-<span class="linenos" data-linenos="295 "></span>    <span class="n">elem_add_parser</span> <span class="o">=</span> <span class="n">subparsers</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span>
-<span class="linenos" data-linenos="296 "></span>        <span class="s2">&quot;add-element&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="297 "></span>        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Add element to workspace&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="298 "></span>        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Add a new element definition to the workspace library&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="299 "></span>    <span class="p">)</span>
-<span class="linenos" data-linenos="300 "></span>    <span class="n">elem_add_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;workspace&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Workspace file&quot;</span><span class="p">)</span>
-<span class="linenos" data-linenos="301 "></span>    <span class="n">elem_add_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--id&quot;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Element ID&quot;</span><span class="p">)</span>
-<span class="linenos" data-linenos="302 "></span>    <span class="n">elem_add_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--label&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Element label&quot;</span><span class="p">)</span>
-<span class="linenos" data-linenos="303 "></span>    <span class="n">elem_add_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--description&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Element description&quot;</span><span class="p">)</span>
-<span class="linenos" data-linenos="304 "></span>    <span class="n">elem_add_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--type&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;component&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Element type (system, container, component, etc.)&quot;</span><span class="p">)</span>
-<span class="linenos" data-linenos="305 "></span>    <span class="n">elem_add_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--technology&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Technology stack&quot;</span><span class="p">)</span>
-<span class="linenos" data-linenos="306 "></span>    <span class="n">elem_add_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--tags&quot;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Tags&quot;</span><span class="p">)</span>
-<span class="linenos" data-linenos="307 "></span>    <span class="n">elem_add_parser</span><span class="o">.</span><span class="n">set_defaults</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="n">workspace_add_element</span><span class="p">)</span>
+              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="258 "></span><span class="k">def</span><span class="w"> </span><span class="nf">add_workspace_subcommands</span><span class="p">(</span><span class="n">subparsers</span><span class="p">:</span> <span class="n">_SubParsersAction</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos" data-linenos="259 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Add workspace subcommands to CLI parser.</span>
+<span class="linenos" data-linenos="260 "></span>
+<span class="linenos" data-linenos="261 "></span><span class="sd">    Args:</span>
+<span class="linenos" data-linenos="262 "></span><span class="sd">        subparsers: Subparser action object</span>
+<span class="linenos" data-linenos="263 "></span><span class="sd">    &quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="264 "></span>    <span class="c1"># workspace create</span>
+<span class="linenos" data-linenos="265 "></span>    <span class="n">create_parser</span> <span class="o">=</span> <span class="n">subparsers</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span>
+<span class="linenos" data-linenos="266 "></span>        <span class="s1">&#39;create&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="267 "></span>        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Create new workspace&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="268 "></span>        <span class="n">description</span><span class="o">=</span><span class="s1">&#39;Create a new workspace from diagram files&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="269 "></span>    <span class="p">)</span>
+<span class="linenos" data-linenos="270 "></span>    <span class="n">create_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--name&#39;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Workspace name&#39;</span><span class="p">)</span>
+<span class="linenos" data-linenos="271 "></span>    <span class="n">create_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--id&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Workspace ID (default: derived from name)&#39;</span><span class="p">)</span>
+<span class="linenos" data-linenos="272 "></span>    <span class="n">create_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--description&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Workspace description&#39;</span><span class="p">)</span>
+<span class="linenos" data-linenos="273 "></span>    <span class="n">create_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--author&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Workspace author&#39;</span><span class="p">)</span>
+<span class="linenos" data-linenos="274 "></span>    <span class="n">create_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+<span class="linenos" data-linenos="275 "></span>        <span class="s1">&#39;--add&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="276 "></span>        <span class="n">action</span><span class="o">=</span><span class="s1">&#39;append&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="277 "></span>        <span class="n">default</span><span class="o">=</span><span class="p">[],</span>
+<span class="linenos" data-linenos="278 "></span>        <span class="n">metavar</span><span class="o">=</span><span class="s1">&#39;FILE:VIEW_ID[:TYPE]&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="279 "></span>        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Add diagram file (format: file.json:view_id or file.json:view_id:context)&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="280 "></span>    <span class="p">)</span>
+<span class="linenos" data-linenos="281 "></span>    <span class="n">create_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+<span class="linenos" data-linenos="282 "></span>        <span class="s1">&#39;--from-diagrams&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="283 "></span>        <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;+&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="284 "></span>        <span class="n">default</span><span class="o">=</span><span class="p">[],</span>
+<span class="linenos" data-linenos="285 "></span>        <span class="n">metavar</span><span class="o">=</span><span class="s1">&#39;FILE&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="286 "></span>        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Diagram files to ingest (view IDs derived from file names)&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="287 "></span>    <span class="p">)</span>
+<span class="linenos" data-linenos="288 "></span>    <span class="n">create_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-o&#39;</span><span class="p">,</span> <span class="s1">&#39;--output&#39;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Output workspace file (.yml or .json)&#39;</span><span class="p">)</span>
+<span class="linenos" data-linenos="289 "></span>    <span class="n">create_parser</span><span class="o">.</span><span class="n">set_defaults</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="n">workspace_create</span><span class="p">)</span>
+<span class="linenos" data-linenos="290 "></span>
+<span class="linenos" data-linenos="291 "></span>    <span class="c1"># workspace validate</span>
+<span class="linenos" data-linenos="292 "></span>    <span class="n">validate_parser</span> <span class="o">=</span> <span class="n">subparsers</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span>
+<span class="linenos" data-linenos="293 "></span>        <span class="s1">&#39;validate&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="294 "></span>        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Validate workspace&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="295 "></span>        <span class="n">description</span><span class="o">=</span><span class="s1">&#39;Validate workspace for consistency and reference errors&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="296 "></span>    <span class="p">)</span>
+<span class="linenos" data-linenos="297 "></span>    <span class="n">validate_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;workspace&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Workspace file to validate&#39;</span><span class="p">)</span>
+<span class="linenos" data-linenos="298 "></span>    <span class="n">validate_parser</span><span class="o">.</span><span class="n">set_defaults</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="n">workspace_validate</span><span class="p">)</span>
+<span class="linenos" data-linenos="299 "></span>
+<span class="linenos" data-linenos="300 "></span>    <span class="c1"># workspace info</span>
+<span class="linenos" data-linenos="301 "></span>    <span class="n">info_parser</span> <span class="o">=</span> <span class="n">subparsers</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span>
+<span class="linenos" data-linenos="302 "></span>        <span class="s1">&#39;info&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="303 "></span>        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Show workspace information&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="304 "></span>        <span class="n">description</span><span class="o">=</span><span class="s1">&#39;Display workspace details, elements, and views&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="305 "></span>    <span class="p">)</span>
+<span class="linenos" data-linenos="306 "></span>    <span class="n">info_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;workspace&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Workspace file&#39;</span><span class="p">)</span>
+<span class="linenos" data-linenos="307 "></span>    <span class="n">info_parser</span><span class="o">.</span><span class="n">set_defaults</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="n">workspace_info</span><span class="p">)</span>
 <span class="linenos" data-linenos="308 "></span>
-<span class="linenos" data-linenos="309 "></span>    <span class="c1"># workspace view add</span>
-<span class="linenos" data-linenos="310 "></span>    <span class="n">view_add_parser</span> <span class="o">=</span> <span class="n">subparsers</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span>
-<span class="linenos" data-linenos="311 "></span>        <span class="s2">&quot;add-view&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="312 "></span>        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Add view to workspace&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="313 "></span>        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Add a new diagram view to the workspace&quot;</span><span class="p">,</span>
+<span class="linenos" data-linenos="309 "></span>    <span class="c1"># workspace element add</span>
+<span class="linenos" data-linenos="310 "></span>    <span class="n">elem_add_parser</span> <span class="o">=</span> <span class="n">subparsers</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span>
+<span class="linenos" data-linenos="311 "></span>        <span class="s1">&#39;add-element&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="312 "></span>        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Add element to workspace&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="313 "></span>        <span class="n">description</span><span class="o">=</span><span class="s1">&#39;Add a new element definition to the workspace library&#39;</span><span class="p">,</span>
 <span class="linenos" data-linenos="314 "></span>    <span class="p">)</span>
-<span class="linenos" data-linenos="315 "></span>    <span class="n">view_add_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;workspace&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Workspace file&quot;</span><span class="p">)</span>
-<span class="linenos" data-linenos="316 "></span>    <span class="n">view_add_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--id&quot;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;View ID&quot;</span><span class="p">)</span>
-<span class="linenos" data-linenos="317 "></span>    <span class="n">view_add_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--name&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;View name&quot;</span><span class="p">)</span>
-<span class="linenos" data-linenos="318 "></span>    <span class="n">view_add_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--type&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;diagram&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;View type (context, container, component, etc.)&quot;</span><span class="p">)</span>
-<span class="linenos" data-linenos="319 "></span>    <span class="n">view_add_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--description&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;View description&quot;</span><span class="p">)</span>
-<span class="linenos" data-linenos="320 "></span>    <span class="n">view_add_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--file&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Diagram file path&quot;</span><span class="p">)</span>
-<span class="linenos" data-linenos="321 "></span>    <span class="n">view_add_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--level&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Zoom level (C4: 1=Context, 2=Container, etc.)&quot;</span><span class="p">)</span>
-<span class="linenos" data-linenos="322 "></span>    <span class="n">view_add_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--parent&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Parent view ID&quot;</span><span class="p">)</span>
-<span class="linenos" data-linenos="323 "></span>    <span class="n">view_add_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--elements&quot;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Element IDs used in this view&quot;</span><span class="p">)</span>
-<span class="linenos" data-linenos="324 "></span>    <span class="n">view_add_parser</span><span class="o">.</span><span class="n">set_defaults</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="n">workspace_add_view</span><span class="p">)</span>
+<span class="linenos" data-linenos="315 "></span>    <span class="n">elem_add_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;workspace&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Workspace file&#39;</span><span class="p">)</span>
+<span class="linenos" data-linenos="316 "></span>    <span class="n">elem_add_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--id&#39;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Element ID&#39;</span><span class="p">)</span>
+<span class="linenos" data-linenos="317 "></span>    <span class="n">elem_add_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--label&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Element label&#39;</span><span class="p">)</span>
+<span class="linenos" data-linenos="318 "></span>    <span class="n">elem_add_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--description&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Element description&#39;</span><span class="p">)</span>
+<span class="linenos" data-linenos="319 "></span>    <span class="n">elem_add_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+<span class="linenos" data-linenos="320 "></span>        <span class="s1">&#39;--type&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;component&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Element type (system, container, component, etc.)&#39;</span>
+<span class="linenos" data-linenos="321 "></span>    <span class="p">)</span>
+<span class="linenos" data-linenos="322 "></span>    <span class="n">elem_add_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--technology&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Technology stack&#39;</span><span class="p">)</span>
+<span class="linenos" data-linenos="323 "></span>    <span class="n">elem_add_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--tags&#39;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Tags&#39;</span><span class="p">)</span>
+<span class="linenos" data-linenos="324 "></span>    <span class="n">elem_add_parser</span><span class="o">.</span><span class="n">set_defaults</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="n">workspace_add_element</span><span class="p">)</span>
+<span class="linenos" data-linenos="325 "></span>
+<span class="linenos" data-linenos="326 "></span>    <span class="c1"># workspace view add</span>
+<span class="linenos" data-linenos="327 "></span>    <span class="n">view_add_parser</span> <span class="o">=</span> <span class="n">subparsers</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span>
+<span class="linenos" data-linenos="328 "></span>        <span class="s1">&#39;add-view&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="329 "></span>        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Add view to workspace&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="330 "></span>        <span class="n">description</span><span class="o">=</span><span class="s1">&#39;Add a new diagram view to the workspace&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="331 "></span>    <span class="p">)</span>
+<span class="linenos" data-linenos="332 "></span>    <span class="n">view_add_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;workspace&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Workspace file&#39;</span><span class="p">)</span>
+<span class="linenos" data-linenos="333 "></span>    <span class="n">view_add_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--id&#39;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;View ID&#39;</span><span class="p">)</span>
+<span class="linenos" data-linenos="334 "></span>    <span class="n">view_add_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--name&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;View name&#39;</span><span class="p">)</span>
+<span class="linenos" data-linenos="335 "></span>    <span class="n">view_add_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--type&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;diagram&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;View type (context, container, component, etc.)&#39;</span><span class="p">)</span>
+<span class="linenos" data-linenos="336 "></span>    <span class="n">view_add_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--description&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;View description&#39;</span><span class="p">)</span>
+<span class="linenos" data-linenos="337 "></span>    <span class="n">view_add_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--file&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Diagram file path&#39;</span><span class="p">)</span>
+<span class="linenos" data-linenos="338 "></span>    <span class="n">view_add_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--level&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Zoom level (C4: 1=Context, 2=Container, etc.)&#39;</span><span class="p">)</span>
+<span class="linenos" data-linenos="339 "></span>    <span class="n">view_add_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--parent&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Parent view ID&#39;</span><span class="p">)</span>
+<span class="linenos" data-linenos="340 "></span>    <span class="n">view_add_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--elements&#39;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Element IDs used in this view&#39;</span><span class="p">)</span>
+<span class="linenos" data-linenos="341 "></span>    <span class="n">view_add_parser</span><span class="o">.</span><span class="n">set_defaults</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="n">workspace_add_view</span><span class="p">)</span>
 </code></pre></div>
             </details>
     </div>
@@ -1986,7 +1988,7 @@
               <p>
                   <span class="doc-param-annotation">
                     <b>TYPE:</b>
-                      <code><span title="typing.Optional">Optional</span>[<span title="list">list</span>[<span title="str">str</span>]]</code>
+                      <code><span title="list">list</span>[<span title="str">str</span>] | None</code>
                   </span>
                   <span class="doc-param-default">
                     <b>DEFAULT:</b>
@@ -2025,33 +2027,33 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>diacea/workspace_cli.py</code></summary>
-              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="327 "></span><span class="k">def</span><span class="w"> </span><span class="nf">main_workspace</span><span class="p">(</span><span class="n">argv</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="linenos" data-linenos="328 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Main entry point for workspace CLI.</span>
-<span class="linenos" data-linenos="329 "></span>
-<span class="linenos" data-linenos="330 "></span><span class="sd">    Args:</span>
-<span class="linenos" data-linenos="331 "></span><span class="sd">        argv: Command-line arguments</span>
-<span class="linenos" data-linenos="332 "></span>
-<span class="linenos" data-linenos="333 "></span><span class="sd">    Returns:</span>
-<span class="linenos" data-linenos="334 "></span><span class="sd">        Exit code</span>
-<span class="linenos" data-linenos="335 "></span><span class="sd">    &quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="336 "></span>    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
-<span class="linenos" data-linenos="337 "></span>        <span class="n">prog</span><span class="o">=</span><span class="s2">&quot;diacea workspace&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="338 "></span>        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Workspace management for multi-diagram projects&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="339 "></span>    <span class="p">)</span>
-<span class="linenos" data-linenos="340 "></span>
-<span class="linenos" data-linenos="341 "></span>    <span class="n">subparsers</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_subparsers</span><span class="p">(</span>
-<span class="linenos" data-linenos="342 "></span>        <span class="n">title</span><span class="o">=</span><span class="s2">&quot;commands&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="343 "></span>        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Available workspace commands&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="344 "></span>        <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;command&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="345 "></span>        <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-<span class="linenos" data-linenos="346 "></span>    <span class="p">)</span>
-<span class="linenos" data-linenos="347 "></span>
-<span class="linenos" data-linenos="348 "></span>    <span class="n">add_workspace_subcommands</span><span class="p">(</span><span class="n">subparsers</span><span class="p">)</span>
+              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="344 "></span><span class="k">def</span><span class="w"> </span><span class="nf">main_workspace</span><span class="p">(</span><span class="n">argv</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="linenos" data-linenos="345 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Main entry point for workspace CLI.</span>
+<span class="linenos" data-linenos="346 "></span>
+<span class="linenos" data-linenos="347 "></span><span class="sd">    Args:</span>
+<span class="linenos" data-linenos="348 "></span><span class="sd">        argv: Command-line arguments</span>
 <span class="linenos" data-linenos="349 "></span>
-<span class="linenos" data-linenos="350 "></span>    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">(</span><span class="n">argv</span><span class="p">)</span>
-<span class="linenos" data-linenos="351 "></span>
-<span class="linenos" data-linenos="352 "></span>    <span class="c1"># Execute command</span>
-<span class="linenos" data-linenos="353 "></span>    <span class="k">return</span> <span class="n">args</span><span class="o">.</span><span class="n">func</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+<span class="linenos" data-linenos="350 "></span><span class="sd">    Returns:</span>
+<span class="linenos" data-linenos="351 "></span><span class="sd">        Exit code</span>
+<span class="linenos" data-linenos="352 "></span><span class="sd">    &quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="353 "></span>    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
+<span class="linenos" data-linenos="354 "></span>        <span class="n">prog</span><span class="o">=</span><span class="s1">&#39;diacea workspace&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="355 "></span>        <span class="n">description</span><span class="o">=</span><span class="s1">&#39;Workspace management for multi-diagram projects&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="356 "></span>    <span class="p">)</span>
+<span class="linenos" data-linenos="357 "></span>
+<span class="linenos" data-linenos="358 "></span>    <span class="n">subparsers</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_subparsers</span><span class="p">(</span>
+<span class="linenos" data-linenos="359 "></span>        <span class="n">title</span><span class="o">=</span><span class="s1">&#39;commands&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="360 "></span>        <span class="n">description</span><span class="o">=</span><span class="s1">&#39;Available workspace commands&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="361 "></span>        <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;command&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="362 "></span>        <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="linenos" data-linenos="363 "></span>    <span class="p">)</span>
+<span class="linenos" data-linenos="364 "></span>
+<span class="linenos" data-linenos="365 "></span>    <span class="n">add_workspace_subcommands</span><span class="p">(</span><span class="n">subparsers</span><span class="p">)</span>
+<span class="linenos" data-linenos="366 "></span>
+<span class="linenos" data-linenos="367 "></span>    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">(</span><span class="n">argv</span><span class="p">)</span>
+<span class="linenos" data-linenos="368 "></span>
+<span class="linenos" data-linenos="369 "></span>    <span class="c1"># Execute command</span>
+<span class="linenos" data-linenos="370 "></span>    <span class="k">return</span> <span class="n">args</span><span class="o">.</span><span class="n">func</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
 </code></pre></div>
             </details>
     </div>
@@ -2128,40 +2130,40 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>diacea/workspace_cli.py</code></summary>
-              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="169 "></span><span class="k">def</span><span class="w"> </span><span class="nf">workspace_add_element</span><span class="p">(</span><span class="n">args</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">Namespace</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="linenos" data-linenos="170 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Add element to workspace.</span>
-<span class="linenos" data-linenos="171 "></span>
-<span class="linenos" data-linenos="172 "></span><span class="sd">    Args:</span>
-<span class="linenos" data-linenos="173 "></span><span class="sd">        args: Command-line arguments</span>
-<span class="linenos" data-linenos="174 "></span>
-<span class="linenos" data-linenos="175 "></span><span class="sd">    Returns:</span>
-<span class="linenos" data-linenos="176 "></span><span class="sd">        Exit code</span>
-<span class="linenos" data-linenos="177 "></span><span class="sd">    &quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="178 "></span>    <span class="k">try</span><span class="p">:</span>
-<span class="linenos" data-linenos="179 "></span>        <span class="n">workspace</span> <span class="o">=</span> <span class="n">load_workspace</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">workspace</span><span class="p">)</span>
-<span class="linenos" data-linenos="180 "></span>    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-<span class="linenos" data-linenos="181 "></span>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error loading workspace: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-<span class="linenos" data-linenos="182 "></span>        <span class="k">return</span> <span class="mi">1</span>
-<span class="linenos" data-linenos="183 "></span>
-<span class="linenos" data-linenos="184 "></span>    <span class="c1"># Create element</span>
-<span class="linenos" data-linenos="185 "></span>    <span class="n">element</span> <span class="o">=</span> <span class="n">ElementDefinition</span><span class="p">(</span>
-<span class="linenos" data-linenos="186 "></span>        <span class="nb">id</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
-<span class="linenos" data-linenos="187 "></span>        <span class="n">label</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">label</span> <span class="ow">or</span> <span class="n">args</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">title</span><span class="p">(),</span>
-<span class="linenos" data-linenos="188 "></span>        <span class="n">description</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">description</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="189 "></span>        <span class="n">element_type</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-<span class="linenos" data-linenos="190 "></span>        <span class="n">technology</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">technology</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="191 "></span>        <span class="n">tags</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">tags</span> <span class="ow">or</span> <span class="p">[],</span>
-<span class="linenos" data-linenos="192 "></span>    <span class="p">)</span>
-<span class="linenos" data-linenos="193 "></span>
-<span class="linenos" data-linenos="194 "></span>    <span class="c1"># Add to workspace</span>
-<span class="linenos" data-linenos="195 "></span>    <span class="n">workspace</span><span class="o">.</span><span class="n">add_element</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
-<span class="linenos" data-linenos="196 "></span>
-<span class="linenos" data-linenos="197 "></span>    <span class="c1"># Save</span>
-<span class="linenos" data-linenos="198 "></span>    <span class="n">save_workspace</span><span class="p">(</span><span class="n">workspace</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">workspace</span><span class="p">)</span>
-<span class="linenos" data-linenos="199 "></span>
-<span class="linenos" data-linenos="200 "></span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Added element &#39;</span><span class="si">{</span><span class="n">element</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">&#39; to workspace&quot;</span><span class="p">)</span>
-<span class="linenos" data-linenos="201 "></span>
-<span class="linenos" data-linenos="202 "></span>    <span class="k">return</span> <span class="mi">0</span>
+              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="184 "></span><span class="k">def</span><span class="w"> </span><span class="nf">workspace_add_element</span><span class="p">(</span><span class="n">args</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">Namespace</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="linenos" data-linenos="185 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Add element to workspace.</span>
+<span class="linenos" data-linenos="186 "></span>
+<span class="linenos" data-linenos="187 "></span><span class="sd">    Args:</span>
+<span class="linenos" data-linenos="188 "></span><span class="sd">        args: Command-line arguments</span>
+<span class="linenos" data-linenos="189 "></span>
+<span class="linenos" data-linenos="190 "></span><span class="sd">    Returns:</span>
+<span class="linenos" data-linenos="191 "></span><span class="sd">        Exit code</span>
+<span class="linenos" data-linenos="192 "></span><span class="sd">    &quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="193 "></span>    <span class="k">try</span><span class="p">:</span>
+<span class="linenos" data-linenos="194 "></span>        <span class="n">workspace</span> <span class="o">=</span> <span class="n">load_workspace</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">workspace</span><span class="p">)</span>
+<span class="linenos" data-linenos="195 "></span>    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+<span class="linenos" data-linenos="196 "></span>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Error loading workspace: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+<span class="linenos" data-linenos="197 "></span>        <span class="k">return</span> <span class="mi">1</span>
+<span class="linenos" data-linenos="198 "></span>
+<span class="linenos" data-linenos="199 "></span>    <span class="c1"># Create element</span>
+<span class="linenos" data-linenos="200 "></span>    <span class="n">element</span> <span class="o">=</span> <span class="n">ElementDefinition</span><span class="p">(</span>
+<span class="linenos" data-linenos="201 "></span>        <span class="nb">id</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+<span class="linenos" data-linenos="202 "></span>        <span class="n">label</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">label</span> <span class="ow">or</span> <span class="n">args</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">title</span><span class="p">(),</span>
+<span class="linenos" data-linenos="203 "></span>        <span class="n">description</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">description</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="204 "></span>        <span class="n">element_type</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+<span class="linenos" data-linenos="205 "></span>        <span class="n">technology</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">technology</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="206 "></span>        <span class="n">tags</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">tags</span> <span class="ow">or</span> <span class="p">[],</span>
+<span class="linenos" data-linenos="207 "></span>    <span class="p">)</span>
+<span class="linenos" data-linenos="208 "></span>
+<span class="linenos" data-linenos="209 "></span>    <span class="c1"># Add to workspace</span>
+<span class="linenos" data-linenos="210 "></span>    <span class="n">workspace</span><span class="o">.</span><span class="n">add_element</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+<span class="linenos" data-linenos="211 "></span>
+<span class="linenos" data-linenos="212 "></span>    <span class="c1"># Save</span>
+<span class="linenos" data-linenos="213 "></span>    <span class="n">save_workspace</span><span class="p">(</span><span class="n">workspace</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">workspace</span><span class="p">)</span>
+<span class="linenos" data-linenos="214 "></span>
+<span class="linenos" data-linenos="215 "></span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Added element &#39;</span><span class="si">{</span><span class="n">element</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">&#39; to workspace&quot;</span><span class="p">)</span>
+<span class="linenos" data-linenos="216 "></span>
+<span class="linenos" data-linenos="217 "></span>    <span class="k">return</span> <span class="mi">0</span>
 </code></pre></div>
             </details>
     </div>
@@ -2238,42 +2240,42 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>diacea/workspace_cli.py</code></summary>
-              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="205 "></span><span class="k">def</span><span class="w"> </span><span class="nf">workspace_add_view</span><span class="p">(</span><span class="n">args</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">Namespace</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="linenos" data-linenos="206 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Add view to workspace.</span>
-<span class="linenos" data-linenos="207 "></span>
-<span class="linenos" data-linenos="208 "></span><span class="sd">    Args:</span>
-<span class="linenos" data-linenos="209 "></span><span class="sd">        args: Command-line arguments</span>
-<span class="linenos" data-linenos="210 "></span>
-<span class="linenos" data-linenos="211 "></span><span class="sd">    Returns:</span>
-<span class="linenos" data-linenos="212 "></span><span class="sd">        Exit code</span>
-<span class="linenos" data-linenos="213 "></span><span class="sd">    &quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="214 "></span>    <span class="k">try</span><span class="p">:</span>
-<span class="linenos" data-linenos="215 "></span>        <span class="n">workspace</span> <span class="o">=</span> <span class="n">load_workspace</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">workspace</span><span class="p">)</span>
-<span class="linenos" data-linenos="216 "></span>    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-<span class="linenos" data-linenos="217 "></span>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error loading workspace: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-<span class="linenos" data-linenos="218 "></span>        <span class="k">return</span> <span class="mi">1</span>
-<span class="linenos" data-linenos="219 "></span>
-<span class="linenos" data-linenos="220 "></span>    <span class="c1"># Create view</span>
-<span class="linenos" data-linenos="221 "></span>    <span class="n">view</span> <span class="o">=</span> <span class="n">DiagramView</span><span class="p">(</span>
-<span class="linenos" data-linenos="222 "></span>        <span class="nb">id</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
-<span class="linenos" data-linenos="223 "></span>        <span class="n">name</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">name</span> <span class="ow">or</span> <span class="n">args</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">title</span><span class="p">(),</span>
-<span class="linenos" data-linenos="224 "></span>        <span class="n">view_type</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-<span class="linenos" data-linenos="225 "></span>        <span class="n">description</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">description</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="226 "></span>        <span class="n">file</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">file</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="227 "></span>        <span class="n">zoom_level</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">level</span><span class="p">,</span>
-<span class="linenos" data-linenos="228 "></span>        <span class="n">parent_view</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span>
-<span class="linenos" data-linenos="229 "></span>        <span class="n">element_refs</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">elements</span> <span class="ow">or</span> <span class="p">[],</span>
-<span class="linenos" data-linenos="230 "></span>    <span class="p">)</span>
-<span class="linenos" data-linenos="231 "></span>
-<span class="linenos" data-linenos="232 "></span>    <span class="c1"># Add to workspace</span>
-<span class="linenos" data-linenos="233 "></span>    <span class="n">workspace</span><span class="o">.</span><span class="n">add_view</span><span class="p">(</span><span class="n">view</span><span class="p">)</span>
+              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="220 "></span><span class="k">def</span><span class="w"> </span><span class="nf">workspace_add_view</span><span class="p">(</span><span class="n">args</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">Namespace</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="linenos" data-linenos="221 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Add view to workspace.</span>
+<span class="linenos" data-linenos="222 "></span>
+<span class="linenos" data-linenos="223 "></span><span class="sd">    Args:</span>
+<span class="linenos" data-linenos="224 "></span><span class="sd">        args: Command-line arguments</span>
+<span class="linenos" data-linenos="225 "></span>
+<span class="linenos" data-linenos="226 "></span><span class="sd">    Returns:</span>
+<span class="linenos" data-linenos="227 "></span><span class="sd">        Exit code</span>
+<span class="linenos" data-linenos="228 "></span><span class="sd">    &quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="229 "></span>    <span class="k">try</span><span class="p">:</span>
+<span class="linenos" data-linenos="230 "></span>        <span class="n">workspace</span> <span class="o">=</span> <span class="n">load_workspace</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">workspace</span><span class="p">)</span>
+<span class="linenos" data-linenos="231 "></span>    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+<span class="linenos" data-linenos="232 "></span>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Error loading workspace: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+<span class="linenos" data-linenos="233 "></span>        <span class="k">return</span> <span class="mi">1</span>
 <span class="linenos" data-linenos="234 "></span>
-<span class="linenos" data-linenos="235 "></span>    <span class="c1"># Save</span>
-<span class="linenos" data-linenos="236 "></span>    <span class="n">save_workspace</span><span class="p">(</span><span class="n">workspace</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">workspace</span><span class="p">)</span>
-<span class="linenos" data-linenos="237 "></span>
-<span class="linenos" data-linenos="238 "></span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Added view &#39;</span><span class="si">{</span><span class="n">view</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">&#39; to workspace&quot;</span><span class="p">)</span>
-<span class="linenos" data-linenos="239 "></span>
-<span class="linenos" data-linenos="240 "></span>    <span class="k">return</span> <span class="mi">0</span>
+<span class="linenos" data-linenos="235 "></span>    <span class="c1"># Create view</span>
+<span class="linenos" data-linenos="236 "></span>    <span class="n">view</span> <span class="o">=</span> <span class="n">DiagramView</span><span class="p">(</span>
+<span class="linenos" data-linenos="237 "></span>        <span class="nb">id</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+<span class="linenos" data-linenos="238 "></span>        <span class="n">name</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">name</span> <span class="ow">or</span> <span class="n">args</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">title</span><span class="p">(),</span>
+<span class="linenos" data-linenos="239 "></span>        <span class="n">view_type</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+<span class="linenos" data-linenos="240 "></span>        <span class="n">description</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">description</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="241 "></span>        <span class="n">file</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">file</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="242 "></span>        <span class="n">zoom_level</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">level</span><span class="p">,</span>
+<span class="linenos" data-linenos="243 "></span>        <span class="n">parent_view</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span>
+<span class="linenos" data-linenos="244 "></span>        <span class="n">element_refs</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">elements</span> <span class="ow">or</span> <span class="p">[],</span>
+<span class="linenos" data-linenos="245 "></span>    <span class="p">)</span>
+<span class="linenos" data-linenos="246 "></span>
+<span class="linenos" data-linenos="247 "></span>    <span class="c1"># Add to workspace</span>
+<span class="linenos" data-linenos="248 "></span>    <span class="n">workspace</span><span class="o">.</span><span class="n">add_view</span><span class="p">(</span><span class="n">view</span><span class="p">)</span>
+<span class="linenos" data-linenos="249 "></span>
+<span class="linenos" data-linenos="250 "></span>    <span class="c1"># Save</span>
+<span class="linenos" data-linenos="251 "></span>    <span class="n">save_workspace</span><span class="p">(</span><span class="n">workspace</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">workspace</span><span class="p">)</span>
+<span class="linenos" data-linenos="252 "></span>
+<span class="linenos" data-linenos="253 "></span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Added view &#39;</span><span class="si">{</span><span class="n">view</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">&#39; to workspace&quot;</span><span class="p">)</span>
+<span class="linenos" data-linenos="254 "></span>
+<span class="linenos" data-linenos="255 "></span>    <span class="k">return</span> <span class="mi">0</span>
 </code></pre></div>
             </details>
     </div>
@@ -2350,67 +2352,67 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>diacea/workspace_cli.py</code></summary>
-              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="15 "></span><span class="k">def</span><span class="w"> </span><span class="nf">workspace_create</span><span class="p">(</span><span class="n">args</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">Namespace</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="linenos" data-linenos="16 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a new workspace by ingesting diagram files.</span>
-<span class="linenos" data-linenos="17 "></span>
-<span class="linenos" data-linenos="18 "></span><span class="sd">    Args:</span>
-<span class="linenos" data-linenos="19 "></span><span class="sd">        args: Command-line arguments</span>
-<span class="linenos" data-linenos="20 "></span>
-<span class="linenos" data-linenos="21 "></span><span class="sd">    Returns:</span>
-<span class="linenos" data-linenos="22 "></span><span class="sd">        Exit code</span>
-<span class="linenos" data-linenos="23 "></span><span class="sd">    &quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="24 "></span>    <span class="c1"># Parse diagram file specifications</span>
-<span class="linenos" data-linenos="25 "></span>    <span class="n">diagram_files</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
-<span class="linenos" data-linenos="26 "></span>
-<span class="linenos" data-linenos="27 "></span>    <span class="k">for</span> <span class="n">spec</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">add</span><span class="p">:</span>
-<span class="linenos" data-linenos="28 "></span>        <span class="c1"># Format: file_path:view_id:view_type or file_path:view_id</span>
-<span class="linenos" data-linenos="29 "></span>        <span class="n">parts</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)</span>
-<span class="linenos" data-linenos="30 "></span>        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
-<span class="linenos" data-linenos="31 "></span>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: Invalid diagram spec &#39;</span><span class="si">{</span><span class="n">spec</span><span class="si">}</span><span class="s2">&#39; (use file:view_id or file:view_id:type)&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-<span class="linenos" data-linenos="32 "></span>            <span class="k">return</span> <span class="mi">1</span>
+              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="31 "></span><span class="k">def</span><span class="w"> </span><span class="nf">workspace_create</span><span class="p">(</span><span class="n">args</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">Namespace</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="linenos" data-linenos="32 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a new workspace by ingesting diagram files.</span>
 <span class="linenos" data-linenos="33 "></span>
-<span class="linenos" data-linenos="34 "></span>        <span class="n">file_path</span> <span class="o">=</span> <span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-<span class="linenos" data-linenos="35 "></span>        <span class="n">view_id</span> <span class="o">=</span> <span class="n">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-<span class="linenos" data-linenos="36 "></span>        <span class="n">view_type</span> <span class="o">=</span> <span class="n">parts</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="k">else</span> <span class="s2">&quot;diagram&quot;</span>
-<span class="linenos" data-linenos="37 "></span>
-<span class="linenos" data-linenos="38 "></span>        <span class="n">diagram_files</span><span class="p">[</span><span class="n">view_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">view_type</span><span class="p">)</span>
-<span class="linenos" data-linenos="39 "></span>
-<span class="linenos" data-linenos="40 "></span>    <span class="k">for</span> <span class="n">file_path</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">from_diagrams</span> <span class="ow">or</span> <span class="p">[]:</span>
-<span class="linenos" data-linenos="41 "></span>        <span class="n">view_id</span> <span class="o">=</span> <span class="n">view_id_from_path</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
-<span class="linenos" data-linenos="42 "></span>        <span class="k">if</span> <span class="n">view_id</span> <span class="ow">in</span> <span class="n">diagram_files</span><span class="p">:</span>
-<span class="linenos" data-linenos="43 "></span>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: Duplicate view ID &#39;</span><span class="si">{</span><span class="n">view_id</span><span class="si">}</span><span class="s2">&#39; derived from &#39;</span><span class="si">{</span><span class="n">file_path</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-<span class="linenos" data-linenos="44 "></span>            <span class="k">return</span> <span class="mi">1</span>
-<span class="linenos" data-linenos="45 "></span>        <span class="n">diagram_files</span><span class="p">[</span><span class="n">view_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s2">&quot;diagram&quot;</span><span class="p">)</span>
-<span class="linenos" data-linenos="46 "></span>
-<span class="linenos" data-linenos="47 "></span>    <span class="c1"># Create workspace (parses each diagram file and extracts elements)</span>
-<span class="linenos" data-linenos="48 "></span>    <span class="k">try</span><span class="p">:</span>
-<span class="linenos" data-linenos="49 "></span>        <span class="n">workspace</span><span class="p">,</span> <span class="n">summary</span> <span class="o">=</span> <span class="n">create_workspace_from_diagrams</span><span class="p">(</span>
-<span class="linenos" data-linenos="50 "></span>            <span class="n">workspace_id</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">id</span> <span class="ow">or</span> <span class="n">args</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">),</span>
-<span class="linenos" data-linenos="51 "></span>            <span class="n">workspace_name</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-<span class="linenos" data-linenos="52 "></span>            <span class="n">diagram_files</span><span class="o">=</span><span class="n">diagram_files</span><span class="p">,</span>
-<span class="linenos" data-linenos="53 "></span>        <span class="p">)</span>
-<span class="linenos" data-linenos="54 "></span>    <span class="k">except</span> <span class="n">DiagramIngestionError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
-<span class="linenos" data-linenos="55 "></span>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="n">err</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-<span class="linenos" data-linenos="56 "></span>        <span class="k">return</span> <span class="mi">1</span>
-<span class="linenos" data-linenos="57 "></span>
-<span class="linenos" data-linenos="58 "></span>    <span class="n">workspace</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">description</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span>
-<span class="linenos" data-linenos="59 "></span>    <span class="n">workspace</span><span class="o">.</span><span class="n">author</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">author</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span>
-<span class="linenos" data-linenos="60 "></span>
-<span class="linenos" data-linenos="61 "></span>    <span class="c1"># Save workspace</span>
-<span class="linenos" data-linenos="62 "></span>    <span class="n">format_type</span> <span class="o">=</span> <span class="s2">&quot;yaml&quot;</span> <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">endswith</span><span class="p">((</span><span class="s2">&quot;.yml&quot;</span><span class="p">,</span> <span class="s2">&quot;.yaml&quot;</span><span class="p">))</span> <span class="k">else</span> <span class="s2">&quot;json&quot;</span>
-<span class="linenos" data-linenos="63 "></span>    <span class="n">save_workspace</span><span class="p">(</span><span class="n">workspace</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">output</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="n">format_type</span><span class="p">)</span>
-<span class="linenos" data-linenos="64 "></span>
-<span class="linenos" data-linenos="65 "></span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Created workspace &#39;</span><span class="si">{</span><span class="n">workspace</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">workspace</span><span class="o">.</span><span class="n">views</span><span class="p">)</span><span class="si">}</span><span class="s2"> views&quot;</span><span class="p">)</span>
-<span class="linenos" data-linenos="66 "></span>    <span class="k">if</span> <span class="n">summary</span><span class="o">.</span><span class="n">diagrams_parsed</span><span class="p">:</span>
-<span class="linenos" data-linenos="67 "></span>        <span class="nb">print</span><span class="p">(</span>
-<span class="linenos" data-linenos="68 "></span>            <span class="sa">f</span><span class="s2">&quot;Ingested </span><span class="si">{</span><span class="n">summary</span><span class="o">.</span><span class="n">elements_added</span><span class="si">}</span><span class="s2"> elements from </span><span class="si">{</span><span class="n">summary</span><span class="o">.</span><span class="n">diagrams_parsed</span><span class="si">}</span><span class="s2"> diagrams &quot;</span>
-<span class="linenos" data-linenos="69 "></span>            <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">summary</span><span class="o">.</span><span class="n">deduplicated</span><span class="si">}</span><span class="s2"> deduplicated)&quot;</span>
-<span class="linenos" data-linenos="70 "></span>        <span class="p">)</span>
-<span class="linenos" data-linenos="71 "></span>    <span class="k">for</span> <span class="n">warning</span> <span class="ow">in</span> <span class="n">summary</span><span class="o">.</span><span class="n">warnings</span><span class="p">:</span>
-<span class="linenos" data-linenos="72 "></span>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Warning: </span><span class="si">{</span><span class="n">warning</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-<span class="linenos" data-linenos="73 "></span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Saved to: </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">output</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="linenos" data-linenos="74 "></span>
-<span class="linenos" data-linenos="75 "></span>    <span class="k">return</span> <span class="mi">0</span>
+<span class="linenos" data-linenos="34 "></span><span class="sd">    Args:</span>
+<span class="linenos" data-linenos="35 "></span><span class="sd">        args: Command-line arguments</span>
+<span class="linenos" data-linenos="36 "></span>
+<span class="linenos" data-linenos="37 "></span><span class="sd">    Returns:</span>
+<span class="linenos" data-linenos="38 "></span><span class="sd">        Exit code</span>
+<span class="linenos" data-linenos="39 "></span><span class="sd">    &quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="40 "></span>    <span class="c1"># Parse diagram file specifications</span>
+<span class="linenos" data-linenos="41 "></span>    <span class="n">diagram_files</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="linenos" data-linenos="42 "></span>
+<span class="linenos" data-linenos="43 "></span>    <span class="k">for</span> <span class="n">spec</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">add</span><span class="p">:</span>
+<span class="linenos" data-linenos="44 "></span>        <span class="c1"># Format: file_path:view_id:view_type or file_path:view_id</span>
+<span class="linenos" data-linenos="45 "></span>        <span class="n">parts</span> <span class="o">=</span> <span class="n">_split_diagram_spec</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
+<span class="linenos" data-linenos="46 "></span>        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+<span class="linenos" data-linenos="47 "></span>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: Invalid diagram spec &#39;</span><span class="si">{</span><span class="n">spec</span><span class="si">}</span><span class="s2">&#39; (use file:view_id or file:view_id:type)&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+<span class="linenos" data-linenos="48 "></span>            <span class="k">return</span> <span class="mi">1</span>
+<span class="linenos" data-linenos="49 "></span>
+<span class="linenos" data-linenos="50 "></span>        <span class="n">file_path</span> <span class="o">=</span> <span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="linenos" data-linenos="51 "></span>        <span class="n">view_id</span> <span class="o">=</span> <span class="n">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="linenos" data-linenos="52 "></span>        <span class="n">view_type</span> <span class="o">=</span> <span class="n">parts</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="k">else</span> <span class="s1">&#39;diagram&#39;</span>
+<span class="linenos" data-linenos="53 "></span>
+<span class="linenos" data-linenos="54 "></span>        <span class="n">diagram_files</span><span class="p">[</span><span class="n">view_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">view_type</span><span class="p">)</span>
+<span class="linenos" data-linenos="55 "></span>
+<span class="linenos" data-linenos="56 "></span>    <span class="k">for</span> <span class="n">file_path</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">from_diagrams</span> <span class="ow">or</span> <span class="p">[]:</span>
+<span class="linenos" data-linenos="57 "></span>        <span class="n">view_id</span> <span class="o">=</span> <span class="n">view_id_from_path</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+<span class="linenos" data-linenos="58 "></span>        <span class="k">if</span> <span class="n">view_id</span> <span class="ow">in</span> <span class="n">diagram_files</span><span class="p">:</span>
+<span class="linenos" data-linenos="59 "></span>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: Duplicate view ID &#39;</span><span class="si">{</span><span class="n">view_id</span><span class="si">}</span><span class="s2">&#39; derived from &#39;</span><span class="si">{</span><span class="n">file_path</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+<span class="linenos" data-linenos="60 "></span>            <span class="k">return</span> <span class="mi">1</span>
+<span class="linenos" data-linenos="61 "></span>        <span class="n">diagram_files</span><span class="p">[</span><span class="n">view_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s1">&#39;diagram&#39;</span><span class="p">)</span>
+<span class="linenos" data-linenos="62 "></span>
+<span class="linenos" data-linenos="63 "></span>    <span class="c1"># Create workspace (parses each diagram file and extracts elements)</span>
+<span class="linenos" data-linenos="64 "></span>    <span class="k">try</span><span class="p">:</span>
+<span class="linenos" data-linenos="65 "></span>        <span class="n">workspace</span><span class="p">,</span> <span class="n">summary</span> <span class="o">=</span> <span class="n">create_workspace_from_diagrams</span><span class="p">(</span>
+<span class="linenos" data-linenos="66 "></span>            <span class="n">workspace_id</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">id</span> <span class="ow">or</span> <span class="n">args</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">),</span>
+<span class="linenos" data-linenos="67 "></span>            <span class="n">workspace_name</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+<span class="linenos" data-linenos="68 "></span>            <span class="n">diagram_files</span><span class="o">=</span><span class="n">diagram_files</span><span class="p">,</span>
+<span class="linenos" data-linenos="69 "></span>        <span class="p">)</span>
+<span class="linenos" data-linenos="70 "></span>    <span class="k">except</span> <span class="n">DiagramIngestionError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+<span class="linenos" data-linenos="71 "></span>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Error: </span><span class="si">{</span><span class="n">err</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+<span class="linenos" data-linenos="72 "></span>        <span class="k">return</span> <span class="mi">1</span>
+<span class="linenos" data-linenos="73 "></span>
+<span class="linenos" data-linenos="74 "></span>    <span class="n">workspace</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">description</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span>
+<span class="linenos" data-linenos="75 "></span>    <span class="n">workspace</span><span class="o">.</span><span class="n">author</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">author</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span>
+<span class="linenos" data-linenos="76 "></span>
+<span class="linenos" data-linenos="77 "></span>    <span class="c1"># Save workspace</span>
+<span class="linenos" data-linenos="78 "></span>    <span class="n">format_type</span> <span class="o">=</span> <span class="s1">&#39;yaml&#39;</span> <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">endswith</span><span class="p">((</span><span class="s1">&#39;.yml&#39;</span><span class="p">,</span> <span class="s1">&#39;.yaml&#39;</span><span class="p">))</span> <span class="k">else</span> <span class="s1">&#39;json&#39;</span>
+<span class="linenos" data-linenos="79 "></span>    <span class="n">save_workspace</span><span class="p">(</span><span class="n">workspace</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">output</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="n">format_type</span><span class="p">)</span>
+<span class="linenos" data-linenos="80 "></span>
+<span class="linenos" data-linenos="81 "></span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Created workspace &#39;</span><span class="si">{</span><span class="n">workspace</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">workspace</span><span class="o">.</span><span class="n">views</span><span class="p">)</span><span class="si">}</span><span class="s2"> views&quot;</span><span class="p">)</span>
+<span class="linenos" data-linenos="82 "></span>    <span class="k">if</span> <span class="n">summary</span><span class="o">.</span><span class="n">diagrams_parsed</span><span class="p">:</span>
+<span class="linenos" data-linenos="83 "></span>        <span class="nb">print</span><span class="p">(</span>
+<span class="linenos" data-linenos="84 "></span>            <span class="sa">f</span><span class="s1">&#39;Ingested </span><span class="si">{</span><span class="n">summary</span><span class="o">.</span><span class="n">elements_added</span><span class="si">}</span><span class="s1"> elements from </span><span class="si">{</span><span class="n">summary</span><span class="o">.</span><span class="n">diagrams_parsed</span><span class="si">}</span><span class="s1"> diagrams &#39;</span>
+<span class="linenos" data-linenos="85 "></span>            <span class="sa">f</span><span class="s1">&#39;(</span><span class="si">{</span><span class="n">summary</span><span class="o">.</span><span class="n">deduplicated</span><span class="si">}</span><span class="s1"> deduplicated)&#39;</span>
+<span class="linenos" data-linenos="86 "></span>        <span class="p">)</span>
+<span class="linenos" data-linenos="87 "></span>    <span class="k">for</span> <span class="n">warning</span> <span class="ow">in</span> <span class="n">summary</span><span class="o">.</span><span class="n">warnings</span><span class="p">:</span>
+<span class="linenos" data-linenos="88 "></span>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Warning: </span><span class="si">{</span><span class="n">warning</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+<span class="linenos" data-linenos="89 "></span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Saved to: </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">output</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="linenos" data-linenos="90 "></span>
+<span class="linenos" data-linenos="91 "></span>    <span class="k">return</span> <span class="mi">0</span>
 </code></pre></div>
             </details>
     </div>
@@ -2487,63 +2489,63 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>diacea/workspace_cli.py</code></summary>
-              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="110 "></span><span class="k">def</span><span class="w"> </span><span class="nf">workspace_info</span><span class="p">(</span><span class="n">args</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">Namespace</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="linenos" data-linenos="111 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Show workspace information.</span>
-<span class="linenos" data-linenos="112 "></span>
-<span class="linenos" data-linenos="113 "></span><span class="sd">    Args:</span>
-<span class="linenos" data-linenos="114 "></span><span class="sd">        args: Command-line arguments</span>
-<span class="linenos" data-linenos="115 "></span>
-<span class="linenos" data-linenos="116 "></span><span class="sd">    Returns:</span>
-<span class="linenos" data-linenos="117 "></span><span class="sd">        Exit code</span>
-<span class="linenos" data-linenos="118 "></span><span class="sd">    &quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="119 "></span>    <span class="k">try</span><span class="p">:</span>
-<span class="linenos" data-linenos="120 "></span>        <span class="n">workspace</span> <span class="o">=</span> <span class="n">load_workspace</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">workspace</span><span class="p">)</span>
-<span class="linenos" data-linenos="121 "></span>    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-<span class="linenos" data-linenos="122 "></span>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error loading workspace: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-<span class="linenos" data-linenos="123 "></span>        <span class="k">return</span> <span class="mi">1</span>
-<span class="linenos" data-linenos="124 "></span>
-<span class="linenos" data-linenos="125 "></span>    <span class="c1"># Print workspace info</span>
-<span class="linenos" data-linenos="126 "></span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Workspace: </span><span class="si">{</span><span class="n">workspace</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="linenos" data-linenos="127 "></span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;ID: </span><span class="si">{</span><span class="n">workspace</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="linenos" data-linenos="128 "></span>    <span class="k">if</span> <span class="n">workspace</span><span class="o">.</span><span class="n">description</span><span class="p">:</span>
-<span class="linenos" data-linenos="129 "></span>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Description: </span><span class="si">{</span><span class="n">workspace</span><span class="o">.</span><span class="n">description</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="linenos" data-linenos="130 "></span>    <span class="k">if</span> <span class="n">workspace</span><span class="o">.</span><span class="n">author</span><span class="p">:</span>
-<span class="linenos" data-linenos="131 "></span>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Author: </span><span class="si">{</span><span class="n">workspace</span><span class="o">.</span><span class="n">author</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="linenos" data-linenos="132 "></span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Version: </span><span class="si">{</span><span class="n">workspace</span><span class="o">.</span><span class="n">version</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="linenos" data-linenos="133 "></span>    <span class="nb">print</span><span class="p">()</span>
-<span class="linenos" data-linenos="134 "></span>
-<span class="linenos" data-linenos="135 "></span>    <span class="c1"># Elements</span>
-<span class="linenos" data-linenos="136 "></span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Elements (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">workspace</span><span class="o">.</span><span class="n">elements</span><span class="p">)</span><span class="si">}</span><span class="s2">):&quot;</span><span class="p">)</span>
-<span class="linenos" data-linenos="137 "></span>    <span class="k">for</span> <span class="n">elem_id</span><span class="p">,</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">workspace</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-<span class="linenos" data-linenos="138 "></span>        <span class="n">usage</span> <span class="o">=</span> <span class="n">workspace</span><span class="o">.</span><span class="n">get_element_usage</span><span class="p">(</span><span class="n">elem_id</span><span class="p">)</span>
-<span class="linenos" data-linenos="139 "></span>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  - </span><span class="si">{</span><span class="n">elem_id</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">elem</span><span class="o">.</span><span class="n">label</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">elem</span><span class="o">.</span><span class="n">element_type</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
-<span class="linenos" data-linenos="140 "></span>        <span class="k">if</span> <span class="n">usage</span><span class="p">:</span>
-<span class="linenos" data-linenos="141 "></span>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    Used in: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">usage</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="linenos" data-linenos="142 "></span>
-<span class="linenos" data-linenos="143 "></span>    <span class="nb">print</span><span class="p">()</span>
-<span class="linenos" data-linenos="144 "></span>
-<span class="linenos" data-linenos="145 "></span>    <span class="c1"># Views</span>
-<span class="linenos" data-linenos="146 "></span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Views (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">workspace</span><span class="o">.</span><span class="n">views</span><span class="p">)</span><span class="si">}</span><span class="s2">):&quot;</span><span class="p">)</span>
-<span class="linenos" data-linenos="147 "></span>    <span class="n">hierarchy</span> <span class="o">=</span> <span class="n">workspace</span><span class="o">.</span><span class="n">get_view_hierarchy</span><span class="p">()</span>
-<span class="linenos" data-linenos="148 "></span>
-<span class="linenos" data-linenos="149 "></span>    <span class="k">def</span><span class="w"> </span><span class="nf">print_view</span><span class="p">(</span><span class="n">view_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">indent</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
-<span class="linenos" data-linenos="150 "></span>        <span class="n">view</span> <span class="o">=</span> <span class="n">workspace</span><span class="o">.</span><span class="n">views</span><span class="p">[</span><span class="n">view_id</span><span class="p">]</span>
-<span class="linenos" data-linenos="151 "></span>        <span class="n">prefix</span> <span class="o">=</span> <span class="s2">&quot;  &quot;</span> <span class="o">*</span> <span class="n">indent</span>
-<span class="linenos" data-linenos="152 "></span>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">- </span><span class="si">{</span><span class="n">view_id</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">view</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">view</span><span class="o">.</span><span class="n">view_type</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
-<span class="linenos" data-linenos="153 "></span>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">  Elements: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">view</span><span class="o">.</span><span class="n">element_refs</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="linenos" data-linenos="154 "></span>        <span class="k">if</span> <span class="n">view</span><span class="o">.</span><span class="n">file</span><span class="p">:</span>
-<span class="linenos" data-linenos="155 "></span>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">  File: </span><span class="si">{</span><span class="n">view</span><span class="o">.</span><span class="n">file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="linenos" data-linenos="156 "></span>
-<span class="linenos" data-linenos="157 "></span>        <span class="c1"># Print children</span>
-<span class="linenos" data-linenos="158 "></span>        <span class="k">if</span> <span class="n">view_id</span> <span class="ow">in</span> <span class="n">hierarchy</span><span class="p">:</span>
-<span class="linenos" data-linenos="159 "></span>            <span class="k">for</span> <span class="n">child_id</span> <span class="ow">in</span> <span class="n">hierarchy</span><span class="p">[</span><span class="n">view_id</span><span class="p">]:</span>
-<span class="linenos" data-linenos="160 "></span>                <span class="n">print_view</span><span class="p">(</span><span class="n">child_id</span><span class="p">,</span> <span class="n">indent</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
-<span class="linenos" data-linenos="161 "></span>
-<span class="linenos" data-linenos="162 "></span>    <span class="c1"># Print root views first</span>
-<span class="linenos" data-linenos="163 "></span>    <span class="k">for</span> <span class="n">root_id</span> <span class="ow">in</span> <span class="n">hierarchy</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;_root&quot;</span><span class="p">,</span> <span class="p">[]):</span>
-<span class="linenos" data-linenos="164 "></span>        <span class="n">print_view</span><span class="p">(</span><span class="n">root_id</span><span class="p">)</span>
-<span class="linenos" data-linenos="165 "></span>
-<span class="linenos" data-linenos="166 "></span>    <span class="k">return</span> <span class="mi">0</span>
+              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="125 "></span><span class="k">def</span><span class="w"> </span><span class="nf">workspace_info</span><span class="p">(</span><span class="n">args</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">Namespace</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="linenos" data-linenos="126 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Show workspace information.</span>
+<span class="linenos" data-linenos="127 "></span>
+<span class="linenos" data-linenos="128 "></span><span class="sd">    Args:</span>
+<span class="linenos" data-linenos="129 "></span><span class="sd">        args: Command-line arguments</span>
+<span class="linenos" data-linenos="130 "></span>
+<span class="linenos" data-linenos="131 "></span><span class="sd">    Returns:</span>
+<span class="linenos" data-linenos="132 "></span><span class="sd">        Exit code</span>
+<span class="linenos" data-linenos="133 "></span><span class="sd">    &quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="134 "></span>    <span class="k">try</span><span class="p">:</span>
+<span class="linenos" data-linenos="135 "></span>        <span class="n">workspace</span> <span class="o">=</span> <span class="n">load_workspace</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">workspace</span><span class="p">)</span>
+<span class="linenos" data-linenos="136 "></span>    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+<span class="linenos" data-linenos="137 "></span>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Error loading workspace: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+<span class="linenos" data-linenos="138 "></span>        <span class="k">return</span> <span class="mi">1</span>
+<span class="linenos" data-linenos="139 "></span>
+<span class="linenos" data-linenos="140 "></span>    <span class="c1"># Print workspace info</span>
+<span class="linenos" data-linenos="141 "></span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Workspace: </span><span class="si">{</span><span class="n">workspace</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="linenos" data-linenos="142 "></span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;ID: </span><span class="si">{</span><span class="n">workspace</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="linenos" data-linenos="143 "></span>    <span class="k">if</span> <span class="n">workspace</span><span class="o">.</span><span class="n">description</span><span class="p">:</span>
+<span class="linenos" data-linenos="144 "></span>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Description: </span><span class="si">{</span><span class="n">workspace</span><span class="o">.</span><span class="n">description</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="linenos" data-linenos="145 "></span>    <span class="k">if</span> <span class="n">workspace</span><span class="o">.</span><span class="n">author</span><span class="p">:</span>
+<span class="linenos" data-linenos="146 "></span>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Author: </span><span class="si">{</span><span class="n">workspace</span><span class="o">.</span><span class="n">author</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="linenos" data-linenos="147 "></span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Version: </span><span class="si">{</span><span class="n">workspace</span><span class="o">.</span><span class="n">version</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="linenos" data-linenos="148 "></span>    <span class="nb">print</span><span class="p">()</span>
+<span class="linenos" data-linenos="149 "></span>
+<span class="linenos" data-linenos="150 "></span>    <span class="c1"># Elements</span>
+<span class="linenos" data-linenos="151 "></span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Elements (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">workspace</span><span class="o">.</span><span class="n">elements</span><span class="p">)</span><span class="si">}</span><span class="s1">):&#39;</span><span class="p">)</span>
+<span class="linenos" data-linenos="152 "></span>    <span class="k">for</span> <span class="n">elem_id</span><span class="p">,</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">workspace</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+<span class="linenos" data-linenos="153 "></span>        <span class="n">usage</span> <span class="o">=</span> <span class="n">workspace</span><span class="o">.</span><span class="n">get_element_usage</span><span class="p">(</span><span class="n">elem_id</span><span class="p">)</span>
+<span class="linenos" data-linenos="154 "></span>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;  - </span><span class="si">{</span><span class="n">elem_id</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">elem</span><span class="o">.</span><span class="n">label</span><span class="si">}</span><span class="s1"> (</span><span class="si">{</span><span class="n">elem</span><span class="o">.</span><span class="n">element_type</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+<span class="linenos" data-linenos="155 "></span>        <span class="k">if</span> <span class="n">usage</span><span class="p">:</span>
+<span class="linenos" data-linenos="156 "></span>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;    Used in: </span><span class="si">{</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">usage</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="linenos" data-linenos="157 "></span>
+<span class="linenos" data-linenos="158 "></span>    <span class="nb">print</span><span class="p">()</span>
+<span class="linenos" data-linenos="159 "></span>
+<span class="linenos" data-linenos="160 "></span>    <span class="c1"># Views</span>
+<span class="linenos" data-linenos="161 "></span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Views (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">workspace</span><span class="o">.</span><span class="n">views</span><span class="p">)</span><span class="si">}</span><span class="s1">):&#39;</span><span class="p">)</span>
+<span class="linenos" data-linenos="162 "></span>    <span class="n">hierarchy</span> <span class="o">=</span> <span class="n">workspace</span><span class="o">.</span><span class="n">get_view_hierarchy</span><span class="p">()</span>
+<span class="linenos" data-linenos="163 "></span>
+<span class="linenos" data-linenos="164 "></span>    <span class="k">def</span><span class="w"> </span><span class="nf">print_view</span><span class="p">(</span><span class="n">view_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">indent</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos" data-linenos="165 "></span>        <span class="n">view</span> <span class="o">=</span> <span class="n">workspace</span><span class="o">.</span><span class="n">views</span><span class="p">[</span><span class="n">view_id</span><span class="p">]</span>
+<span class="linenos" data-linenos="166 "></span>        <span class="n">prefix</span> <span class="o">=</span> <span class="s1">&#39;  &#39;</span> <span class="o">*</span> <span class="n">indent</span>
+<span class="linenos" data-linenos="167 "></span>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s1">- </span><span class="si">{</span><span class="n">view_id</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">view</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> (</span><span class="si">{</span><span class="n">view</span><span class="o">.</span><span class="n">view_type</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+<span class="linenos" data-linenos="168 "></span>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s1">  Elements: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">view</span><span class="o">.</span><span class="n">element_refs</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="linenos" data-linenos="169 "></span>        <span class="k">if</span> <span class="n">view</span><span class="o">.</span><span class="n">file</span><span class="p">:</span>
+<span class="linenos" data-linenos="170 "></span>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s1">  File: </span><span class="si">{</span><span class="n">view</span><span class="o">.</span><span class="n">file</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="linenos" data-linenos="171 "></span>
+<span class="linenos" data-linenos="172 "></span>        <span class="c1"># Print children</span>
+<span class="linenos" data-linenos="173 "></span>        <span class="k">if</span> <span class="n">view_id</span> <span class="ow">in</span> <span class="n">hierarchy</span><span class="p">:</span>
+<span class="linenos" data-linenos="174 "></span>            <span class="k">for</span> <span class="n">child_id</span> <span class="ow">in</span> <span class="n">hierarchy</span><span class="p">[</span><span class="n">view_id</span><span class="p">]:</span>
+<span class="linenos" data-linenos="175 "></span>                <span class="n">print_view</span><span class="p">(</span><span class="n">child_id</span><span class="p">,</span> <span class="n">indent</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+<span class="linenos" data-linenos="176 "></span>
+<span class="linenos" data-linenos="177 "></span>    <span class="c1"># Print root views first</span>
+<span class="linenos" data-linenos="178 "></span>    <span class="k">for</span> <span class="n">root_id</span> <span class="ow">in</span> <span class="n">hierarchy</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;_root&#39;</span><span class="p">,</span> <span class="p">[]):</span>
+<span class="linenos" data-linenos="179 "></span>        <span class="n">print_view</span><span class="p">(</span><span class="n">root_id</span><span class="p">)</span>
+<span class="linenos" data-linenos="180 "></span>
+<span class="linenos" data-linenos="181 "></span>    <span class="k">return</span> <span class="mi">0</span>
 </code></pre></div>
             </details>
     </div>
@@ -2620,36 +2622,35 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>diacea/workspace_cli.py</code></summary>
-              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos=" 78 "></span><span class="k">def</span><span class="w"> </span><span class="nf">workspace_validate</span><span class="p">(</span><span class="n">args</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">Namespace</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="linenos" data-linenos=" 79 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Validate workspace consistency.</span>
-<span class="linenos" data-linenos=" 80 "></span>
-<span class="linenos" data-linenos=" 81 "></span><span class="sd">    Args:</span>
-<span class="linenos" data-linenos=" 82 "></span><span class="sd">        args: Command-line arguments</span>
-<span class="linenos" data-linenos=" 83 "></span>
-<span class="linenos" data-linenos=" 84 "></span><span class="sd">    Returns:</span>
-<span class="linenos" data-linenos=" 85 "></span><span class="sd">        Exit code (0 if valid, 1 if errors found)</span>
-<span class="linenos" data-linenos=" 86 "></span><span class="sd">    &quot;&quot;&quot;</span>
-<span class="linenos" data-linenos=" 87 "></span>    <span class="k">try</span><span class="p">:</span>
-<span class="linenos" data-linenos=" 88 "></span>        <span class="n">workspace</span> <span class="o">=</span> <span class="n">load_workspace</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">workspace</span><span class="p">)</span>
-<span class="linenos" data-linenos=" 89 "></span>    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-<span class="linenos" data-linenos=" 90 "></span>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error loading workspace: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-<span class="linenos" data-linenos=" 91 "></span>        <span class="k">return</span> <span class="mi">1</span>
-<span class="linenos" data-linenos=" 92 "></span>
-<span class="linenos" data-linenos=" 93 "></span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Validating workspace &#39;</span><span class="si">{</span><span class="n">workspace</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39;...&quot;</span><span class="p">)</span>
-<span class="linenos" data-linenos=" 94 "></span>
-<span class="linenos" data-linenos=" 95 "></span>    <span class="c1"># Run validation</span>
-<span class="linenos" data-linenos=" 96 "></span>    <span class="n">errors</span> <span class="o">=</span> <span class="n">workspace</span><span class="o">.</span><span class="n">validate_references</span><span class="p">()</span>
-<span class="linenos" data-linenos=" 97 "></span>
-<span class="linenos" data-linenos=" 98 "></span>    <span class="k">if</span> <span class="ow">not</span> <span class="n">errors</span><span class="p">:</span>
-<span class="linenos" data-linenos=" 99 "></span>        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;✓ Workspace is valid&quot;</span><span class="p">)</span>
-<span class="linenos" data-linenos="100 "></span>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  - </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">workspace</span><span class="o">.</span><span class="n">elements</span><span class="p">)</span><span class="si">}</span><span class="s2"> elements defined&quot;</span><span class="p">)</span>
-<span class="linenos" data-linenos="101 "></span>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  - </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">workspace</span><span class="o">.</span><span class="n">views</span><span class="p">)</span><span class="si">}</span><span class="s2"> views defined&quot;</span><span class="p">)</span>
-<span class="linenos" data-linenos="102 "></span>        <span class="k">return</span> <span class="mi">0</span>
-<span class="linenos" data-linenos="103 "></span>    <span class="k">else</span><span class="p">:</span>
-<span class="linenos" data-linenos="104 "></span>        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;✗ Validation errors found:&quot;</span><span class="p">)</span>
-<span class="linenos" data-linenos="105 "></span>        <span class="k">for</span> <span class="n">error</span> <span class="ow">in</span> <span class="n">errors</span><span class="p">:</span>
-<span class="linenos" data-linenos="106 "></span>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  - </span><span class="si">{</span><span class="n">error</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos=" 94 "></span><span class="k">def</span><span class="w"> </span><span class="nf">workspace_validate</span><span class="p">(</span><span class="n">args</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">Namespace</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="linenos" data-linenos=" 95 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Validate workspace consistency.</span>
+<span class="linenos" data-linenos=" 96 "></span>
+<span class="linenos" data-linenos=" 97 "></span><span class="sd">    Args:</span>
+<span class="linenos" data-linenos=" 98 "></span><span class="sd">        args: Command-line arguments</span>
+<span class="linenos" data-linenos=" 99 "></span>
+<span class="linenos" data-linenos="100 "></span><span class="sd">    Returns:</span>
+<span class="linenos" data-linenos="101 "></span><span class="sd">        Exit code (0 if valid, 1 if errors found)</span>
+<span class="linenos" data-linenos="102 "></span><span class="sd">    &quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="103 "></span>    <span class="k">try</span><span class="p">:</span>
+<span class="linenos" data-linenos="104 "></span>        <span class="n">workspace</span> <span class="o">=</span> <span class="n">load_workspace</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">workspace</span><span class="p">)</span>
+<span class="linenos" data-linenos="105 "></span>    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+<span class="linenos" data-linenos="106 "></span>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Error loading workspace: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
 <span class="linenos" data-linenos="107 "></span>        <span class="k">return</span> <span class="mi">1</span>
+<span class="linenos" data-linenos="108 "></span>
+<span class="linenos" data-linenos="109 "></span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Validating workspace &#39;</span><span class="si">{</span><span class="n">workspace</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39;...&quot;</span><span class="p">)</span>
+<span class="linenos" data-linenos="110 "></span>
+<span class="linenos" data-linenos="111 "></span>    <span class="c1"># Run validation</span>
+<span class="linenos" data-linenos="112 "></span>    <span class="n">errors</span> <span class="o">=</span> <span class="n">workspace</span><span class="o">.</span><span class="n">validate_references</span><span class="p">()</span>
+<span class="linenos" data-linenos="113 "></span>
+<span class="linenos" data-linenos="114 "></span>    <span class="k">if</span> <span class="ow">not</span> <span class="n">errors</span><span class="p">:</span>
+<span class="linenos" data-linenos="115 "></span>        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;✓ Workspace is valid&#39;</span><span class="p">)</span>
+<span class="linenos" data-linenos="116 "></span>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;  - </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">workspace</span><span class="o">.</span><span class="n">elements</span><span class="p">)</span><span class="si">}</span><span class="s1"> elements defined&#39;</span><span class="p">)</span>
+<span class="linenos" data-linenos="117 "></span>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;  - </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">workspace</span><span class="o">.</span><span class="n">views</span><span class="p">)</span><span class="si">}</span><span class="s1"> views defined&#39;</span><span class="p">)</span>
+<span class="linenos" data-linenos="118 "></span>        <span class="k">return</span> <span class="mi">0</span>
+<span class="linenos" data-linenos="119 "></span>    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;✗ Validation errors found:&#39;</span><span class="p">)</span>
+<span class="linenos" data-linenos="120 "></span>    <span class="k">for</span> <span class="n">error</span> <span class="ow">in</span> <span class="n">errors</span><span class="p">:</span>
+<span class="linenos" data-linenos="121 "></span>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;  - </span><span class="si">{</span><span class="n">error</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="linenos" data-linenos="122 "></span>    <span class="k">return</span> <span class="mi">1</span>
 </code></pre></div>
             </details>
     </div>

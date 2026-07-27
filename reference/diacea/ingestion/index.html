@@ -1812,8 +1812,8 @@
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>diacea/ingestion.py</code></summary>
-                <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="23 "></span><span class="k">class</span><span class="w"> </span><span class="nc">DiagramIngestionError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
-<span class="linenos" data-linenos="24 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Raised when a diagram file cannot be read or parsed.&quot;&quot;&quot;</span>
+                <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="24 "></span><span class="k">class</span><span class="w"> </span><span class="nc">DiagramIngestionError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<span class="linenos" data-linenos="25 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Raised when a diagram file cannot be read or parsed.&quot;&quot;&quot;</span>
 </code></pre></div>
               </details>
 
@@ -1851,14 +1851,14 @@
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>diacea/ingestion.py</code></summary>
-                <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="27 "></span><span class="nd">@dataclass</span>
-<span class="linenos" data-linenos="28 "></span><span class="k">class</span><span class="w"> </span><span class="nc">IngestionSummary</span><span class="p">:</span>
-<span class="linenos" data-linenos="29 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Result of ingesting diagram files into a workspace.&quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="30 "></span>
-<span class="linenos" data-linenos="31 "></span>    <span class="n">diagrams_parsed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
-<span class="linenos" data-linenos="32 "></span>    <span class="n">elements_added</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
-<span class="linenos" data-linenos="33 "></span>    <span class="n">deduplicated</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
-<span class="linenos" data-linenos="34 "></span>    <span class="n">warnings</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+                <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="28 "></span><span class="nd">@dataclass</span>
+<span class="linenos" data-linenos="29 "></span><span class="k">class</span><span class="w"> </span><span class="nc">IngestionSummary</span><span class="p">:</span>
+<span class="linenos" data-linenos="30 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Result of ingesting diagram files into a workspace.&quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="31 "></span>
+<span class="linenos" data-linenos="32 "></span>    <span class="n">diagrams_parsed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="linenos" data-linenos="33 "></span>    <span class="n">elements_added</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="linenos" data-linenos="34 "></span>    <span class="n">deduplicated</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="linenos" data-linenos="35 "></span>    <span class="n">warnings</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
 </code></pre></div>
               </details>
 
@@ -2011,85 +2011,85 @@ and the conflict is recorded in the summary warnings.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>diacea/ingestion.py</code></summary>
-              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos=" 89 "></span><span class="k">def</span><span class="w"> </span><span class="nf">ingest_diagrams</span><span class="p">(</span>
-<span class="linenos" data-linenos=" 90 "></span>    <span class="n">workspace</span><span class="p">:</span> <span class="n">Workspace</span><span class="p">,</span>
-<span class="linenos" data-linenos=" 91 "></span>    <span class="n">diagram_files</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]],</span>
-<span class="linenos" data-linenos=" 92 "></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">IngestionSummary</span><span class="p">:</span>
-<span class="linenos" data-linenos=" 93 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Parse diagram files and populate the workspace element library.</span>
-<span class="linenos" data-linenos=" 94 "></span>
-<span class="linenos" data-linenos=" 95 "></span><span class="sd">    Registers a DiagramView per entry (creating it if absent), extracts labeled</span>
-<span class="linenos" data-linenos=" 96 "></span><span class="sd">    shapes with their inferred semantic types into shared ElementDefinition</span>
-<span class="linenos" data-linenos=" 97 "></span><span class="sd">    entries, and records the element IDs each view uses.</span>
-<span class="linenos" data-linenos=" 98 "></span>
-<span class="linenos" data-linenos=" 99 "></span><span class="sd">    Elements are de-duplicated by normalized label (case-insensitive,</span>
-<span class="linenos" data-linenos="100 "></span><span class="sd">    whitespace-collapsed). When the same label appears with conflicting</span>
-<span class="linenos" data-linenos="101 "></span><span class="sd">    semantic types, the higher-confidence inference wins (first-wins on ties)</span>
-<span class="linenos" data-linenos="102 "></span><span class="sd">    and the conflict is recorded in the summary warnings.</span>
-<span class="linenos" data-linenos="103 "></span>
-<span class="linenos" data-linenos="104 "></span><span class="sd">    Args:</span>
-<span class="linenos" data-linenos="105 "></span><span class="sd">        workspace: Workspace to populate in place</span>
-<span class="linenos" data-linenos="106 "></span><span class="sd">        diagram_files: Mapping of view ID to (file_path, view_type)</span>
-<span class="linenos" data-linenos="107 "></span>
-<span class="linenos" data-linenos="108 "></span><span class="sd">    Returns:</span>
-<span class="linenos" data-linenos="109 "></span><span class="sd">        IngestionSummary with counts and conflict warnings</span>
-<span class="linenos" data-linenos="110 "></span>
-<span class="linenos" data-linenos="111 "></span><span class="sd">    Raises:</span>
-<span class="linenos" data-linenos="112 "></span><span class="sd">        DiagramIngestionError: If a diagram file is missing or unparseable</span>
-<span class="linenos" data-linenos="113 "></span><span class="sd">    &quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="114 "></span>    <span class="n">summary</span> <span class="o">=</span> <span class="n">IngestionSummary</span><span class="p">()</span>
-<span class="linenos" data-linenos="115 "></span>    <span class="n">elements_by_name</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ElementDefinition</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-<span class="linenos" data-linenos="116 "></span>        <span class="n">_normalize_name</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">label</span><span class="p">):</span> <span class="n">elem</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">workspace</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
-<span class="linenos" data-linenos="117 "></span>    <span class="p">}</span>
-<span class="linenos" data-linenos="118 "></span>
-<span class="linenos" data-linenos="119 "></span>    <span class="k">for</span> <span class="n">view_id</span><span class="p">,</span> <span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">view_type</span><span class="p">)</span> <span class="ow">in</span> <span class="n">diagram_files</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-<span class="linenos" data-linenos="120 "></span>        <span class="n">diagram</span> <span class="o">=</span> <span class="n">parse_diagram_file</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
-<span class="linenos" data-linenos="121 "></span>        <span class="n">summary</span><span class="o">.</span><span class="n">diagrams_parsed</span> <span class="o">+=</span> <span class="mi">1</span>
-<span class="linenos" data-linenos="122 "></span>
-<span class="linenos" data-linenos="123 "></span>        <span class="n">element_refs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-<span class="linenos" data-linenos="124 "></span>        <span class="k">for</span> <span class="n">shape</span> <span class="ow">in</span> <span class="n">diagram</span><span class="o">.</span><span class="n">get_shapes</span><span class="p">():</span>
-<span class="linenos" data-linenos="125 "></span>            <span class="n">normalized</span> <span class="o">=</span> <span class="n">_normalize_name</span><span class="p">(</span><span class="n">shape</span><span class="o">.</span><span class="n">label</span><span class="p">)</span>
-<span class="linenos" data-linenos="126 "></span>            <span class="k">if</span> <span class="ow">not</span> <span class="n">normalized</span><span class="p">:</span>
-<span class="linenos" data-linenos="127 "></span>                <span class="k">continue</span>
+              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos=" 95 "></span><span class="k">def</span><span class="w"> </span><span class="nf">ingest_diagrams</span><span class="p">(</span>
+<span class="linenos" data-linenos=" 96 "></span>    <span class="n">workspace</span><span class="p">:</span> <span class="n">Workspace</span><span class="p">,</span>
+<span class="linenos" data-linenos=" 97 "></span>    <span class="n">diagram_files</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]],</span>
+<span class="linenos" data-linenos=" 98 "></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">IngestionSummary</span><span class="p">:</span>
+<span class="linenos" data-linenos=" 99 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Parse diagram files and populate the workspace element library.</span>
+<span class="linenos" data-linenos="100 "></span>
+<span class="linenos" data-linenos="101 "></span><span class="sd">    Registers a DiagramView per entry (creating it if absent), extracts labeled</span>
+<span class="linenos" data-linenos="102 "></span><span class="sd">    shapes with their inferred semantic types into shared ElementDefinition</span>
+<span class="linenos" data-linenos="103 "></span><span class="sd">    entries, and records the element IDs each view uses.</span>
+<span class="linenos" data-linenos="104 "></span>
+<span class="linenos" data-linenos="105 "></span><span class="sd">    Elements are de-duplicated by normalized label (case-insensitive,</span>
+<span class="linenos" data-linenos="106 "></span><span class="sd">    whitespace-collapsed). When the same label appears with conflicting</span>
+<span class="linenos" data-linenos="107 "></span><span class="sd">    semantic types, the higher-confidence inference wins (first-wins on ties)</span>
+<span class="linenos" data-linenos="108 "></span><span class="sd">    and the conflict is recorded in the summary warnings.</span>
+<span class="linenos" data-linenos="109 "></span>
+<span class="linenos" data-linenos="110 "></span><span class="sd">    Args:</span>
+<span class="linenos" data-linenos="111 "></span><span class="sd">        workspace: Workspace to populate in place</span>
+<span class="linenos" data-linenos="112 "></span><span class="sd">        diagram_files: Mapping of view ID to (file_path, view_type)</span>
+<span class="linenos" data-linenos="113 "></span>
+<span class="linenos" data-linenos="114 "></span><span class="sd">    Returns:</span>
+<span class="linenos" data-linenos="115 "></span><span class="sd">        IngestionSummary with counts and conflict warnings</span>
+<span class="linenos" data-linenos="116 "></span>
+<span class="linenos" data-linenos="117 "></span><span class="sd">    Raises:</span>
+<span class="linenos" data-linenos="118 "></span><span class="sd">        DiagramIngestionError: If a diagram file is missing or unparseable</span>
+<span class="linenos" data-linenos="119 "></span><span class="sd">    &quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="120 "></span>    <span class="n">summary</span> <span class="o">=</span> <span class="n">IngestionSummary</span><span class="p">()</span>
+<span class="linenos" data-linenos="121 "></span>    <span class="n">elements_by_name</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ElementDefinition</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+<span class="linenos" data-linenos="122 "></span>        <span class="n">_normalize_name</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">label</span><span class="p">):</span> <span class="n">elem</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">workspace</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+<span class="linenos" data-linenos="123 "></span>    <span class="p">}</span>
+<span class="linenos" data-linenos="124 "></span>
+<span class="linenos" data-linenos="125 "></span>    <span class="k">for</span> <span class="n">view_id</span><span class="p">,</span> <span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">view_type</span><span class="p">)</span> <span class="ow">in</span> <span class="n">diagram_files</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+<span class="linenos" data-linenos="126 "></span>        <span class="n">diagram</span> <span class="o">=</span> <span class="n">parse_diagram_file</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+<span class="linenos" data-linenos="127 "></span>        <span class="n">summary</span><span class="o">.</span><span class="n">diagrams_parsed</span> <span class="o">+=</span> <span class="mi">1</span>
 <span class="linenos" data-linenos="128 "></span>
-<span class="linenos" data-linenos="129 "></span>            <span class="n">semantic_type</span> <span class="o">=</span> <span class="n">_semantic_type_name</span><span class="p">(</span><span class="n">shape</span><span class="o">.</span><span class="n">semantic_type</span><span class="p">)</span>
-<span class="linenos" data-linenos="130 "></span>            <span class="n">confidence</span> <span class="o">=</span> <span class="n">shape</span><span class="o">.</span><span class="n">semantic_confidence</span>
-<span class="linenos" data-linenos="131 "></span>
-<span class="linenos" data-linenos="132 "></span>            <span class="n">existing</span> <span class="o">=</span> <span class="n">elements_by_name</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">normalized</span><span class="p">)</span>
-<span class="linenos" data-linenos="133 "></span>            <span class="k">if</span> <span class="n">existing</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-<span class="linenos" data-linenos="134 "></span>                <span class="n">element</span> <span class="o">=</span> <span class="n">ElementDefinition</span><span class="p">(</span>
-<span class="linenos" data-linenos="135 "></span>                    <span class="nb">id</span><span class="o">=</span><span class="n">_slugify</span><span class="p">(</span><span class="n">normalized</span><span class="p">),</span>
-<span class="linenos" data-linenos="136 "></span>                    <span class="n">label</span><span class="o">=</span><span class="n">_collapse_whitespace</span><span class="p">(</span><span class="n">shape</span><span class="o">.</span><span class="n">label</span><span class="p">),</span>
-<span class="linenos" data-linenos="137 "></span>                    <span class="n">element_type</span><span class="o">=</span><span class="n">semantic_type</span><span class="p">,</span>
-<span class="linenos" data-linenos="138 "></span>                    <span class="n">metadata</span><span class="o">=</span><span class="p">{</span>
-<span class="linenos" data-linenos="139 "></span>                        <span class="s2">&quot;semantic_confidence&quot;</span><span class="p">:</span> <span class="n">confidence</span><span class="p">,</span>
-<span class="linenos" data-linenos="140 "></span>                        <span class="s2">&quot;source_file&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">file_path</span><span class="p">),</span>
-<span class="linenos" data-linenos="141 "></span>                    <span class="p">},</span>
-<span class="linenos" data-linenos="142 "></span>                <span class="p">)</span>
-<span class="linenos" data-linenos="143 "></span>                <span class="n">workspace</span><span class="o">.</span><span class="n">add_element</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
-<span class="linenos" data-linenos="144 "></span>                <span class="n">elements_by_name</span><span class="p">[</span><span class="n">normalized</span><span class="p">]</span> <span class="o">=</span> <span class="n">element</span>
-<span class="linenos" data-linenos="145 "></span>                <span class="n">summary</span><span class="o">.</span><span class="n">elements_added</span> <span class="o">+=</span> <span class="mi">1</span>
-<span class="linenos" data-linenos="146 "></span>                <span class="n">element_id</span> <span class="o">=</span> <span class="n">element</span><span class="o">.</span><span class="n">id</span>
-<span class="linenos" data-linenos="147 "></span>            <span class="k">else</span><span class="p">:</span>
-<span class="linenos" data-linenos="148 "></span>                <span class="n">summary</span><span class="o">.</span><span class="n">deduplicated</span> <span class="o">+=</span> <span class="mi">1</span>
-<span class="linenos" data-linenos="149 "></span>                <span class="n">element_id</span> <span class="o">=</span> <span class="n">existing</span><span class="o">.</span><span class="n">id</span>
-<span class="linenos" data-linenos="150 "></span>                <span class="k">if</span> <span class="n">existing</span><span class="o">.</span><span class="n">element_type</span> <span class="o">!=</span> <span class="n">semantic_type</span><span class="p">:</span>
-<span class="linenos" data-linenos="151 "></span>                    <span class="n">_resolve_type_conflict</span><span class="p">(</span><span class="n">existing</span><span class="p">,</span> <span class="n">semantic_type</span><span class="p">,</span> <span class="n">confidence</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">summary</span><span class="p">)</span>
-<span class="linenos" data-linenos="152 "></span>
-<span class="linenos" data-linenos="153 "></span>            <span class="k">if</span> <span class="n">element_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">element_refs</span><span class="p">:</span>
-<span class="linenos" data-linenos="154 "></span>                <span class="n">element_refs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">element_id</span><span class="p">)</span>
-<span class="linenos" data-linenos="155 "></span>
-<span class="linenos" data-linenos="156 "></span>        <span class="n">view</span> <span class="o">=</span> <span class="n">workspace</span><span class="o">.</span><span class="n">views</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">view_id</span><span class="p">)</span>
-<span class="linenos" data-linenos="157 "></span>        <span class="k">if</span> <span class="n">view</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-<span class="linenos" data-linenos="158 "></span>            <span class="n">view</span> <span class="o">=</span> <span class="n">DiagramView</span><span class="p">(</span>
-<span class="linenos" data-linenos="159 "></span>                <span class="nb">id</span><span class="o">=</span><span class="n">view_id</span><span class="p">,</span>
-<span class="linenos" data-linenos="160 "></span>                <span class="n">name</span><span class="o">=</span><span class="n">view_id</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">title</span><span class="p">(),</span>
-<span class="linenos" data-linenos="161 "></span>                <span class="n">view_type</span><span class="o">=</span><span class="n">view_type</span><span class="p">,</span>
-<span class="linenos" data-linenos="162 "></span>                <span class="n">file</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">file_path</span><span class="p">),</span>
-<span class="linenos" data-linenos="163 "></span>            <span class="p">)</span>
-<span class="linenos" data-linenos="164 "></span>            <span class="n">workspace</span><span class="o">.</span><span class="n">add_view</span><span class="p">(</span><span class="n">view</span><span class="p">)</span>
-<span class="linenos" data-linenos="165 "></span>        <span class="n">view</span><span class="o">.</span><span class="n">element_refs</span> <span class="o">=</span> <span class="n">element_refs</span>
-<span class="linenos" data-linenos="166 "></span>
-<span class="linenos" data-linenos="167 "></span>    <span class="k">return</span> <span class="n">summary</span>
+<span class="linenos" data-linenos="129 "></span>        <span class="n">element_refs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="linenos" data-linenos="130 "></span>        <span class="k">for</span> <span class="n">shape</span> <span class="ow">in</span> <span class="n">diagram</span><span class="o">.</span><span class="n">get_shapes</span><span class="p">():</span>
+<span class="linenos" data-linenos="131 "></span>            <span class="n">normalized</span> <span class="o">=</span> <span class="n">_normalize_name</span><span class="p">(</span><span class="n">shape</span><span class="o">.</span><span class="n">label</span><span class="p">)</span>
+<span class="linenos" data-linenos="132 "></span>            <span class="k">if</span> <span class="ow">not</span> <span class="n">normalized</span><span class="p">:</span>
+<span class="linenos" data-linenos="133 "></span>                <span class="k">continue</span>
+<span class="linenos" data-linenos="134 "></span>
+<span class="linenos" data-linenos="135 "></span>            <span class="n">semantic_type</span> <span class="o">=</span> <span class="n">_semantic_type_name</span><span class="p">(</span><span class="n">shape</span><span class="o">.</span><span class="n">semantic_type</span><span class="p">)</span>
+<span class="linenos" data-linenos="136 "></span>            <span class="n">confidence</span> <span class="o">=</span> <span class="n">shape</span><span class="o">.</span><span class="n">semantic_confidence</span>
+<span class="linenos" data-linenos="137 "></span>
+<span class="linenos" data-linenos="138 "></span>            <span class="n">existing</span> <span class="o">=</span> <span class="n">elements_by_name</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">normalized</span><span class="p">)</span>
+<span class="linenos" data-linenos="139 "></span>            <span class="k">if</span> <span class="n">existing</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos" data-linenos="140 "></span>                <span class="n">element</span> <span class="o">=</span> <span class="n">ElementDefinition</span><span class="p">(</span>
+<span class="linenos" data-linenos="141 "></span>                    <span class="nb">id</span><span class="o">=</span><span class="n">_slugify</span><span class="p">(</span><span class="n">normalized</span><span class="p">),</span>
+<span class="linenos" data-linenos="142 "></span>                    <span class="n">label</span><span class="o">=</span><span class="n">_collapse_whitespace</span><span class="p">(</span><span class="n">shape</span><span class="o">.</span><span class="n">label</span><span class="p">),</span>
+<span class="linenos" data-linenos="143 "></span>                    <span class="n">element_type</span><span class="o">=</span><span class="n">semantic_type</span><span class="p">,</span>
+<span class="linenos" data-linenos="144 "></span>                    <span class="n">metadata</span><span class="o">=</span><span class="p">{</span>
+<span class="linenos" data-linenos="145 "></span>                        <span class="s1">&#39;semantic_confidence&#39;</span><span class="p">:</span> <span class="n">confidence</span><span class="p">,</span>
+<span class="linenos" data-linenos="146 "></span>                        <span class="s1">&#39;source_file&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">file_path</span><span class="p">),</span>
+<span class="linenos" data-linenos="147 "></span>                    <span class="p">},</span>
+<span class="linenos" data-linenos="148 "></span>                <span class="p">)</span>
+<span class="linenos" data-linenos="149 "></span>                <span class="n">workspace</span><span class="o">.</span><span class="n">add_element</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+<span class="linenos" data-linenos="150 "></span>                <span class="n">elements_by_name</span><span class="p">[</span><span class="n">normalized</span><span class="p">]</span> <span class="o">=</span> <span class="n">element</span>
+<span class="linenos" data-linenos="151 "></span>                <span class="n">summary</span><span class="o">.</span><span class="n">elements_added</span> <span class="o">+=</span> <span class="mi">1</span>
+<span class="linenos" data-linenos="152 "></span>                <span class="n">element_id</span> <span class="o">=</span> <span class="n">element</span><span class="o">.</span><span class="n">id</span>
+<span class="linenos" data-linenos="153 "></span>            <span class="k">else</span><span class="p">:</span>
+<span class="linenos" data-linenos="154 "></span>                <span class="n">summary</span><span class="o">.</span><span class="n">deduplicated</span> <span class="o">+=</span> <span class="mi">1</span>
+<span class="linenos" data-linenos="155 "></span>                <span class="n">element_id</span> <span class="o">=</span> <span class="n">existing</span><span class="o">.</span><span class="n">id</span>
+<span class="linenos" data-linenos="156 "></span>                <span class="k">if</span> <span class="n">existing</span><span class="o">.</span><span class="n">element_type</span> <span class="o">!=</span> <span class="n">semantic_type</span><span class="p">:</span>
+<span class="linenos" data-linenos="157 "></span>                    <span class="n">_resolve_type_conflict</span><span class="p">(</span><span class="n">existing</span><span class="p">,</span> <span class="n">semantic_type</span><span class="p">,</span> <span class="n">confidence</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">summary</span><span class="p">)</span>
+<span class="linenos" data-linenos="158 "></span>
+<span class="linenos" data-linenos="159 "></span>            <span class="k">if</span> <span class="n">element_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">element_refs</span><span class="p">:</span>
+<span class="linenos" data-linenos="160 "></span>                <span class="n">element_refs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">element_id</span><span class="p">)</span>
+<span class="linenos" data-linenos="161 "></span>
+<span class="linenos" data-linenos="162 "></span>        <span class="n">view</span> <span class="o">=</span> <span class="n">workspace</span><span class="o">.</span><span class="n">views</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">view_id</span><span class="p">)</span>
+<span class="linenos" data-linenos="163 "></span>        <span class="k">if</span> <span class="n">view</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos" data-linenos="164 "></span>            <span class="n">view</span> <span class="o">=</span> <span class="n">DiagramView</span><span class="p">(</span>
+<span class="linenos" data-linenos="165 "></span>                <span class="nb">id</span><span class="o">=</span><span class="n">view_id</span><span class="p">,</span>
+<span class="linenos" data-linenos="166 "></span>                <span class="n">name</span><span class="o">=</span><span class="n">view_id</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">title</span><span class="p">(),</span>
+<span class="linenos" data-linenos="167 "></span>                <span class="n">view_type</span><span class="o">=</span><span class="n">view_type</span><span class="p">,</span>
+<span class="linenos" data-linenos="168 "></span>                <span class="n">file</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">file_path</span><span class="p">),</span>
+<span class="linenos" data-linenos="169 "></span>            <span class="p">)</span>
+<span class="linenos" data-linenos="170 "></span>            <span class="n">workspace</span><span class="o">.</span><span class="n">add_view</span><span class="p">(</span><span class="n">view</span><span class="p">)</span>
+<span class="linenos" data-linenos="171 "></span>        <span class="n">view</span><span class="o">.</span><span class="n">element_refs</span> <span class="o">=</span> <span class="n">element_refs</span>
+<span class="linenos" data-linenos="172 "></span>
+<span class="linenos" data-linenos="173 "></span>    <span class="k">return</span> <span class="n">summary</span>
 </code></pre></div>
             </details>
     </div>
@@ -2139,56 +2139,61 @@ detected, or parsing fails.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>diacea/ingestion.py</code></summary>
-              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="37 "></span><span class="k">def</span><span class="w"> </span><span class="nf">parse_diagram_file</span><span class="p">(</span><span class="n">file_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Diagram</span><span class="p">:</span>
-<span class="linenos" data-linenos="38 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Parse a diagram file to IR using format auto-detection.</span>
-<span class="linenos" data-linenos="39 "></span>
-<span class="linenos" data-linenos="40 "></span><span class="sd">    Raises:</span>
-<span class="linenos" data-linenos="41 "></span><span class="sd">        DiagramIngestionError: If the file is missing, its format cannot be</span>
-<span class="linenos" data-linenos="42 "></span><span class="sd">            detected, or parsing fails.</span>
-<span class="linenos" data-linenos="43 "></span><span class="sd">    &quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="44 "></span>    <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
-<span class="linenos" data-linenos="45 "></span>    <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-<span class="linenos" data-linenos="46 "></span>        <span class="k">raise</span> <span class="n">DiagramIngestionError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Diagram file not found: </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="linenos" data-linenos="47 "></span>
-<span class="linenos" data-linenos="48 "></span>    <span class="n">content</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span>
-<span class="linenos" data-linenos="49 "></span>    <span class="n">stripped</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-<span class="linenos" data-linenos="50 "></span>
-<span class="linenos" data-linenos="51 "></span>    <span class="k">if</span> <span class="n">stripped</span><span class="o">.</span><span class="n">startswith</span><span class="p">((</span><span class="s2">&quot;&lt;?xml&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;svg&quot;</span><span class="p">)):</span>
-<span class="linenos" data-linenos="52 "></span>        <span class="n">input_format</span> <span class="o">=</span> <span class="s2">&quot;svg&quot;</span>
-<span class="linenos" data-linenos="53 "></span>        <span class="n">input_data</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">content</span>
-<span class="linenos" data-linenos="54 "></span>    <span class="k">else</span><span class="p">:</span>
-<span class="linenos" data-linenos="55 "></span>        <span class="k">try</span><span class="p">:</span>
-<span class="linenos" data-linenos="56 "></span>            <span class="n">input_format</span> <span class="o">=</span> <span class="n">detect_input_format</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
-<span class="linenos" data-linenos="57 "></span>            <span class="n">input_data</span> <span class="o">=</span> <span class="n">content</span>
-<span class="linenos" data-linenos="58 "></span>        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-<span class="linenos" data-linenos="59 "></span>            <span class="k">try</span><span class="p">:</span>
-<span class="linenos" data-linenos="60 "></span>                <span class="n">input_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
-<span class="linenos" data-linenos="61 "></span>            <span class="k">except</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
-<span class="linenos" data-linenos="62 "></span>                <span class="k">raise</span> <span class="n">DiagramIngestionError</span><span class="p">(</span>
-<span class="linenos" data-linenos="63 "></span>                    <span class="sa">f</span><span class="s2">&quot;Could not detect diagram format of &#39;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&#39;: not SVG, &quot;</span>
-<span class="linenos" data-linenos="64 "></span>                    <span class="sa">f</span><span class="s2">&quot;Obsidian Excalidraw markdown, PlantUML, Mermaid, or valid JSON&quot;</span>
-<span class="linenos" data-linenos="65 "></span>                <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">err</span>
-<span class="linenos" data-linenos="66 "></span>            <span class="k">try</span><span class="p">:</span>
-<span class="linenos" data-linenos="67 "></span>                <span class="n">input_format</span> <span class="o">=</span> <span class="n">detect_input_format</span><span class="p">(</span><span class="n">input_data</span><span class="p">)</span>
-<span class="linenos" data-linenos="68 "></span>            <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
-<span class="linenos" data-linenos="69 "></span>                <span class="k">raise</span> <span class="n">DiagramIngestionError</span><span class="p">(</span>
-<span class="linenos" data-linenos="70 "></span>                    <span class="sa">f</span><span class="s2">&quot;Could not detect diagram format of &#39;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&#39;: </span><span class="si">{</span><span class="n">err</span><span class="si">}</span><span class="s2">&quot;</span>
-<span class="linenos" data-linenos="71 "></span>                <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">err</span>
-<span class="linenos" data-linenos="72 "></span>
-<span class="linenos" data-linenos="73 "></span>    <span class="k">try</span><span class="p">:</span>
-<span class="linenos" data-linenos="74 "></span>        <span class="k">if</span> <span class="n">input_format</span> <span class="o">==</span> <span class="s2">&quot;svg&quot;</span><span class="p">:</span>
-<span class="linenos" data-linenos="75 "></span>            <span class="k">return</span> <span class="n">SVGParser</span><span class="p">()</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">input_data</span><span class="p">)</span>
-<span class="linenos" data-linenos="76 "></span>        <span class="k">if</span> <span class="n">input_format</span> <span class="o">==</span> <span class="s2">&quot;obsidian&quot;</span><span class="p">:</span>
-<span class="linenos" data-linenos="77 "></span>            <span class="k">return</span> <span class="n">ExcalidrawParser</span><span class="p">()</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">extract_excalidraw_json</span><span class="p">(</span><span class="n">input_data</span><span class="p">))</span>
-<span class="linenos" data-linenos="78 "></span>        <span class="k">if</span> <span class="n">input_format</span> <span class="o">==</span> <span class="s2">&quot;mermaid&quot;</span><span class="p">:</span>
-<span class="linenos" data-linenos="79 "></span>            <span class="k">return</span> <span class="n">MermaidParser</span><span class="p">()</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">input_data</span><span class="p">)</span>
-<span class="linenos" data-linenos="80 "></span>        <span class="k">if</span> <span class="n">input_format</span> <span class="o">==</span> <span class="s2">&quot;plantuml&quot;</span><span class="p">:</span>
-<span class="linenos" data-linenos="81 "></span>            <span class="k">return</span> <span class="n">PlantUMLParser</span><span class="p">()</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">input_data</span><span class="p">)</span>
-<span class="linenos" data-linenos="82 "></span>        <span class="k">if</span> <span class="n">input_format</span> <span class="o">==</span> <span class="s2">&quot;tldraw&quot;</span><span class="p">:</span>
-<span class="linenos" data-linenos="83 "></span>            <span class="k">return</span> <span class="n">TLDrawParser</span><span class="p">()</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">input_data</span><span class="p">)</span>
-<span class="linenos" data-linenos="84 "></span>        <span class="k">return</span> <span class="n">ExcalidrawParser</span><span class="p">()</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">input_data</span><span class="p">)</span>
-<span class="linenos" data-linenos="85 "></span>    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
-<span class="linenos" data-linenos="86 "></span>        <span class="k">raise</span> <span class="n">DiagramIngestionError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to parse diagram &#39;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&#39;: </span><span class="si">{</span><span class="n">err</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">err</span>
+              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="38 "></span><span class="k">def</span><span class="w"> </span><span class="nf">parse_diagram_file</span><span class="p">(</span><span class="n">file_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Diagram</span><span class="p">:</span>
+<span class="linenos" data-linenos="39 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Parse a diagram file to IR using format auto-detection.</span>
+<span class="linenos" data-linenos="40 "></span>
+<span class="linenos" data-linenos="41 "></span><span class="sd">    Raises:</span>
+<span class="linenos" data-linenos="42 "></span><span class="sd">        DiagramIngestionError: If the file is missing, its format cannot be</span>
+<span class="linenos" data-linenos="43 "></span><span class="sd">            detected, or parsing fails.</span>
+<span class="linenos" data-linenos="44 "></span><span class="sd">    &quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="45 "></span>    <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+<span class="linenos" data-linenos="46 "></span>    <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+<span class="linenos" data-linenos="47 "></span>        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Diagram file not found: </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s1">&#39;</span>
+<span class="linenos" data-linenos="48 "></span>        <span class="k">raise</span> <span class="n">DiagramIngestionError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+<span class="linenos" data-linenos="49 "></span>
+<span class="linenos" data-linenos="50 "></span>    <span class="n">content</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+<span class="linenos" data-linenos="51 "></span>    <span class="n">stripped</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+<span class="linenos" data-linenos="52 "></span>
+<span class="linenos" data-linenos="53 "></span>    <span class="k">if</span> <span class="n">stripped</span><span class="o">.</span><span class="n">startswith</span><span class="p">((</span><span class="s1">&#39;&lt;?xml&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;svg&#39;</span><span class="p">)):</span>
+<span class="linenos" data-linenos="54 "></span>        <span class="n">input_format</span> <span class="o">=</span> <span class="s1">&#39;svg&#39;</span>
+<span class="linenos" data-linenos="55 "></span>        <span class="n">input_data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">content</span>
+<span class="linenos" data-linenos="56 "></span>    <span class="k">else</span><span class="p">:</span>
+<span class="linenos" data-linenos="57 "></span>        <span class="k">try</span><span class="p">:</span>
+<span class="linenos" data-linenos="58 "></span>            <span class="n">input_format</span> <span class="o">=</span> <span class="n">detect_input_format</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+<span class="linenos" data-linenos="59 "></span>            <span class="n">input_data</span> <span class="o">=</span> <span class="n">content</span>
+<span class="linenos" data-linenos="60 "></span>        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+<span class="linenos" data-linenos="61 "></span>            <span class="k">try</span><span class="p">:</span>
+<span class="linenos" data-linenos="62 "></span>                <span class="n">input_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+<span class="linenos" data-linenos="63 "></span>            <span class="k">except</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+<span class="linenos" data-linenos="64 "></span>                <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+<span class="linenos" data-linenos="65 "></span>                    <span class="sa">f</span><span class="s2">&quot;Could not detect diagram format of &#39;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&#39;: not SVG, &quot;</span>
+<span class="linenos" data-linenos="66 "></span>                    <span class="sa">f</span><span class="s1">&#39;Obsidian Excalidraw markdown, PlantUML, Mermaid, or valid JSON&#39;</span>
+<span class="linenos" data-linenos="67 "></span>                <span class="p">)</span>
+<span class="linenos" data-linenos="68 "></span>                <span class="k">raise</span> <span class="n">DiagramIngestionError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">err</span>
+<span class="linenos" data-linenos="69 "></span>            <span class="k">try</span><span class="p">:</span>
+<span class="linenos" data-linenos="70 "></span>                <span class="n">input_format</span> <span class="o">=</span> <span class="n">detect_input_format</span><span class="p">(</span><span class="n">input_data</span><span class="p">)</span>
+<span class="linenos" data-linenos="71 "></span>            <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+<span class="linenos" data-linenos="72 "></span>                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Could not detect diagram format of &#39;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&#39;: </span><span class="si">{</span><span class="n">err</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="linenos" data-linenos="73 "></span>                <span class="k">raise</span> <span class="n">DiagramIngestionError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">err</span>
+<span class="linenos" data-linenos="74 "></span>
+<span class="linenos" data-linenos="75 "></span>    <span class="k">try</span><span class="p">:</span>
+<span class="linenos" data-linenos="76 "></span>        <span class="k">if</span> <span class="n">input_format</span> <span class="o">==</span> <span class="s1">&#39;svg&#39;</span><span class="p">:</span>
+<span class="linenos" data-linenos="77 "></span>            <span class="k">return</span> <span class="n">SVGParser</span><span class="p">()</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">input_data</span><span class="p">)</span>
+<span class="linenos" data-linenos="78 "></span>        <span class="k">if</span> <span class="n">input_format</span> <span class="o">==</span> <span class="s1">&#39;obsidian&#39;</span><span class="p">:</span>
+<span class="linenos" data-linenos="79 "></span>            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">input_data</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+<span class="linenos" data-linenos="80 "></span>                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Obsidian Excalidraw requires text content: &#39;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+<span class="linenos" data-linenos="81 "></span>                <span class="k">raise</span> <span class="n">DiagramIngestionError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+<span class="linenos" data-linenos="82 "></span>            <span class="k">return</span> <span class="n">ExcalidrawParser</span><span class="p">()</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">extract_excalidraw_json</span><span class="p">(</span><span class="n">input_data</span><span class="p">))</span>
+<span class="linenos" data-linenos="83 "></span>        <span class="k">if</span> <span class="n">input_format</span> <span class="o">==</span> <span class="s1">&#39;mermaid&#39;</span><span class="p">:</span>
+<span class="linenos" data-linenos="84 "></span>            <span class="k">return</span> <span class="n">MermaidParser</span><span class="p">()</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">input_data</span><span class="p">)</span>
+<span class="linenos" data-linenos="85 "></span>        <span class="k">if</span> <span class="n">input_format</span> <span class="o">==</span> <span class="s1">&#39;plantuml&#39;</span><span class="p">:</span>
+<span class="linenos" data-linenos="86 "></span>            <span class="k">return</span> <span class="n">PlantUMLParser</span><span class="p">()</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">input_data</span><span class="p">)</span>
+<span class="linenos" data-linenos="87 "></span>        <span class="k">if</span> <span class="n">input_format</span> <span class="o">==</span> <span class="s1">&#39;tldraw&#39;</span><span class="p">:</span>
+<span class="linenos" data-linenos="88 "></span>            <span class="k">return</span> <span class="n">TLDrawParser</span><span class="p">()</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">input_data</span><span class="p">)</span>
+<span class="linenos" data-linenos="89 "></span>        <span class="k">return</span> <span class="n">ExcalidrawParser</span><span class="p">()</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">input_data</span><span class="p">)</span>
+<span class="linenos" data-linenos="90 "></span>    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+<span class="linenos" data-linenos="91 "></span>        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Failed to parse diagram &#39;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&#39;: </span><span class="si">{</span><span class="n">err</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="linenos" data-linenos="92 "></span>        <span class="k">raise</span> <span class="n">DiagramIngestionError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">err</span>
 </code></pre></div>
             </details>
     </div>
@@ -2213,13 +2218,13 @@ detected, or parsing fails.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>diacea/ingestion.py</code></summary>
-              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="170 "></span><span class="k">def</span><span class="w"> </span><span class="nf">view_id_from_path</span><span class="p">(</span><span class="n">file_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="linenos" data-linenos="171 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Derive a view ID from a diagram file name (e.g. &#39;a.excalidraw.md&#39; -&gt; &#39;a&#39;).&quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="172 "></span>    <span class="n">name</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span><span class="o">.</span><span class="n">name</span>
-<span class="linenos" data-linenos="173 "></span>    <span class="n">known_suffixes</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;.md&quot;</span><span class="p">,</span> <span class="s2">&quot;.mmd&quot;</span><span class="p">,</span> <span class="s2">&quot;.excalidraw&quot;</span><span class="p">,</span> <span class="s2">&quot;.puml&quot;</span><span class="p">,</span> <span class="s2">&quot;.tldr&quot;</span><span class="p">,</span> <span class="s2">&quot;.json&quot;</span><span class="p">,</span> <span class="s2">&quot;.svg&quot;</span><span class="p">)</span>
-<span class="linenos" data-linenos="174 "></span>    <span class="k">while</span> <span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">known_suffixes</span><span class="p">):</span>
-<span class="linenos" data-linenos="175 "></span>        <span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="p">[:</span> <span class="n">name</span><span class="o">.</span><span class="n">rfind</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)]</span>
-<span class="linenos" data-linenos="176 "></span>    <span class="k">return</span> <span class="n">_slugify</span><span class="p">(</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
+              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="176 "></span><span class="k">def</span><span class="w"> </span><span class="nf">view_id_from_path</span><span class="p">(</span><span class="n">file_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos" data-linenos="177 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Derive a view ID from a diagram file name (e.g. &#39;a.excalidraw.md&#39; -&gt; &#39;a&#39;).&quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="178 "></span>    <span class="n">name</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span><span class="o">.</span><span class="n">name</span>
+<span class="linenos" data-linenos="179 "></span>    <span class="n">known_suffixes</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;.md&#39;</span><span class="p">,</span> <span class="s1">&#39;.mmd&#39;</span><span class="p">,</span> <span class="s1">&#39;.excalidraw&#39;</span><span class="p">,</span> <span class="s1">&#39;.puml&#39;</span><span class="p">,</span> <span class="s1">&#39;.tldr&#39;</span><span class="p">,</span> <span class="s1">&#39;.json&#39;</span><span class="p">,</span> <span class="s1">&#39;.svg&#39;</span><span class="p">)</span>
+<span class="linenos" data-linenos="180 "></span>    <span class="k">while</span> <span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">known_suffixes</span><span class="p">):</span>
+<span class="linenos" data-linenos="181 "></span>        <span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="p">[:</span> <span class="n">name</span><span class="o">.</span><span class="n">rfind</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)]</span>
+<span class="linenos" data-linenos="182 "></span>    <span class="k">return</span> <span class="n">_slugify</span><span class="p">(</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
 </code></pre></div>
             </details>
     </div>

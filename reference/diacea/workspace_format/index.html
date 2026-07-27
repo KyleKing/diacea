@@ -1913,34 +1913,34 @@ label), and each registered view references the element IDs it uses.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>diacea/workspace_format.py</code></summary>
-              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="182 "></span><span class="k">def</span><span class="w"> </span><span class="nf">create_workspace_from_diagrams</span><span class="p">(</span>
-<span class="linenos" data-linenos="183 "></span>    <span class="n">workspace_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-<span class="linenos" data-linenos="184 "></span>    <span class="n">workspace_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-<span class="linenos" data-linenos="185 "></span>    <span class="n">diagram_files</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]],</span>  <span class="c1"># view_id: (file_path, view_type)</span>
-<span class="linenos" data-linenos="186 "></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Workspace</span><span class="p">,</span> <span class="n">IngestionSummary</span><span class="p">]:</span>
-<span class="linenos" data-linenos="187 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Create workspace by parsing existing diagram files.</span>
-<span class="linenos" data-linenos="188 "></span>
-<span class="linenos" data-linenos="189 "></span><span class="sd">    Each diagram file is parsed with format auto-detection, labeled shapes are</span>
-<span class="linenos" data-linenos="190 "></span><span class="sd">    extracted into the shared element library (de-duplicated by normalized</span>
-<span class="linenos" data-linenos="191 "></span><span class="sd">    label), and each registered view references the element IDs it uses.</span>
-<span class="linenos" data-linenos="192 "></span>
-<span class="linenos" data-linenos="193 "></span><span class="sd">    Args:</span>
-<span class="linenos" data-linenos="194 "></span><span class="sd">        workspace_id: Workspace identifier</span>
-<span class="linenos" data-linenos="195 "></span><span class="sd">        workspace_name: Workspace name</span>
-<span class="linenos" data-linenos="196 "></span><span class="sd">        diagram_files: Dictionary mapping view IDs to (file_path, view_type) tuples</span>
-<span class="linenos" data-linenos="197 "></span>
-<span class="linenos" data-linenos="198 "></span><span class="sd">    Returns:</span>
-<span class="linenos" data-linenos="199 "></span><span class="sd">        Tuple of (Workspace, IngestionSummary with counts and conflict warnings)</span>
-<span class="linenos" data-linenos="200 "></span>
-<span class="linenos" data-linenos="201 "></span><span class="sd">    Raises:</span>
-<span class="linenos" data-linenos="202 "></span><span class="sd">        DiagramIngestionError: If a diagram file is missing or unparseable</span>
-<span class="linenos" data-linenos="203 "></span><span class="sd">    &quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="204 "></span>    <span class="n">workspace</span> <span class="o">=</span> <span class="n">Workspace</span><span class="p">(</span>
-<span class="linenos" data-linenos="205 "></span>        <span class="nb">id</span><span class="o">=</span><span class="n">workspace_id</span><span class="p">,</span>
-<span class="linenos" data-linenos="206 "></span>        <span class="n">name</span><span class="o">=</span><span class="n">workspace_name</span><span class="p">,</span>
-<span class="linenos" data-linenos="207 "></span>    <span class="p">)</span>
-<span class="linenos" data-linenos="208 "></span>    <span class="n">summary</span> <span class="o">=</span> <span class="n">ingest_diagrams</span><span class="p">(</span><span class="n">workspace</span><span class="p">,</span> <span class="n">diagram_files</span><span class="p">)</span>
-<span class="linenos" data-linenos="209 "></span>    <span class="k">return</span> <span class="n">workspace</span><span class="p">,</span> <span class="n">summary</span>
+              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="184 "></span><span class="k">def</span><span class="w"> </span><span class="nf">create_workspace_from_diagrams</span><span class="p">(</span>
+<span class="linenos" data-linenos="185 "></span>    <span class="n">workspace_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<span class="linenos" data-linenos="186 "></span>    <span class="n">workspace_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<span class="linenos" data-linenos="187 "></span>    <span class="n">diagram_files</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]],</span>  <span class="c1"># view_id: (file_path, view_type)</span>
+<span class="linenos" data-linenos="188 "></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Workspace</span><span class="p">,</span> <span class="n">IngestionSummary</span><span class="p">]:</span>
+<span class="linenos" data-linenos="189 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Create workspace by parsing existing diagram files.</span>
+<span class="linenos" data-linenos="190 "></span>
+<span class="linenos" data-linenos="191 "></span><span class="sd">    Each diagram file is parsed with format auto-detection, labeled shapes are</span>
+<span class="linenos" data-linenos="192 "></span><span class="sd">    extracted into the shared element library (de-duplicated by normalized</span>
+<span class="linenos" data-linenos="193 "></span><span class="sd">    label), and each registered view references the element IDs it uses.</span>
+<span class="linenos" data-linenos="194 "></span>
+<span class="linenos" data-linenos="195 "></span><span class="sd">    Args:</span>
+<span class="linenos" data-linenos="196 "></span><span class="sd">        workspace_id: Workspace identifier</span>
+<span class="linenos" data-linenos="197 "></span><span class="sd">        workspace_name: Workspace name</span>
+<span class="linenos" data-linenos="198 "></span><span class="sd">        diagram_files: Dictionary mapping view IDs to (file_path, view_type) tuples</span>
+<span class="linenos" data-linenos="199 "></span>
+<span class="linenos" data-linenos="200 "></span><span class="sd">    Returns:</span>
+<span class="linenos" data-linenos="201 "></span><span class="sd">        Tuple of (Workspace, IngestionSummary with counts and conflict warnings)</span>
+<span class="linenos" data-linenos="202 "></span>
+<span class="linenos" data-linenos="203 "></span><span class="sd">    Raises:</span>
+<span class="linenos" data-linenos="204 "></span><span class="sd">        DiagramIngestionError: If a diagram file is missing or unparseable</span>
+<span class="linenos" data-linenos="205 "></span><span class="sd">    &quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="206 "></span>    <span class="n">workspace</span> <span class="o">=</span> <span class="n">Workspace</span><span class="p">(</span>
+<span class="linenos" data-linenos="207 "></span>        <span class="nb">id</span><span class="o">=</span><span class="n">workspace_id</span><span class="p">,</span>
+<span class="linenos" data-linenos="208 "></span>        <span class="n">name</span><span class="o">=</span><span class="n">workspace_name</span><span class="p">,</span>
+<span class="linenos" data-linenos="209 "></span>    <span class="p">)</span>
+<span class="linenos" data-linenos="210 "></span>    <span class="n">summary</span> <span class="o">=</span> <span class="n">ingest_diagrams</span><span class="p">(</span><span class="n">workspace</span><span class="p">,</span> <span class="n">diagram_files</span><span class="p">)</span>
+<span class="linenos" data-linenos="211 "></span>    <span class="k">return</span> <span class="n">workspace</span><span class="p">,</span> <span class="n">summary</span>
 </code></pre></div>
             </details>
     </div>
@@ -2046,62 +2046,62 @@ label), and each registered view references the element IDs it uses.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>diacea/workspace_format.py</code></summary>
-              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="124 "></span><span class="k">def</span><span class="w"> </span><span class="nf">from_dict</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Workspace</span><span class="p">:</span>
-<span class="linenos" data-linenos="125 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert dictionary to workspace.</span>
-<span class="linenos" data-linenos="126 "></span>
-<span class="linenos" data-linenos="127 "></span><span class="sd">    Args:</span>
-<span class="linenos" data-linenos="128 "></span><span class="sd">        data: Dictionary with workspace data</span>
-<span class="linenos" data-linenos="129 "></span>
-<span class="linenos" data-linenos="130 "></span><span class="sd">    Returns:</span>
-<span class="linenos" data-linenos="131 "></span><span class="sd">        Workspace object</span>
-<span class="linenos" data-linenos="132 "></span>
-<span class="linenos" data-linenos="133 "></span><span class="sd">    Raises:</span>
-<span class="linenos" data-linenos="134 "></span><span class="sd">        KeyError: If required fields are missing</span>
-<span class="linenos" data-linenos="135 "></span><span class="sd">    &quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="136 "></span>    <span class="n">ws_data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;workspace&quot;</span><span class="p">,</span> <span class="p">{})</span>
-<span class="linenos" data-linenos="137 "></span>
-<span class="linenos" data-linenos="138 "></span>    <span class="n">workspace</span> <span class="o">=</span> <span class="n">Workspace</span><span class="p">(</span>
-<span class="linenos" data-linenos="139 "></span>        <span class="nb">id</span><span class="o">=</span><span class="n">ws_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
-<span class="linenos" data-linenos="140 "></span>        <span class="n">name</span><span class="o">=</span><span class="n">ws_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
-<span class="linenos" data-linenos="141 "></span>        <span class="n">description</span><span class="o">=</span><span class="n">ws_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;description&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
-<span class="linenos" data-linenos="142 "></span>        <span class="n">version</span><span class="o">=</span><span class="n">ws_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;version&quot;</span><span class="p">,</span> <span class="s2">&quot;1.0.0&quot;</span><span class="p">),</span>
-<span class="linenos" data-linenos="143 "></span>        <span class="n">author</span><span class="o">=</span><span class="n">ws_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;author&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
-<span class="linenos" data-linenos="144 "></span>        <span class="n">created</span><span class="o">=</span><span class="n">ws_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;created&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
-<span class="linenos" data-linenos="145 "></span>        <span class="n">modified</span><span class="o">=</span><span class="n">ws_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;modified&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
-<span class="linenos" data-linenos="146 "></span>    <span class="p">)</span>
-<span class="linenos" data-linenos="147 "></span>
-<span class="linenos" data-linenos="148 "></span>    <span class="c1"># Load elements</span>
-<span class="linenos" data-linenos="149 "></span>    <span class="n">elements_data</span> <span class="o">=</span> <span class="n">ws_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;elements&quot;</span><span class="p">,</span> <span class="p">{})</span>
-<span class="linenos" data-linenos="150 "></span>    <span class="k">for</span> <span class="n">elem_id</span><span class="p">,</span> <span class="n">elem_dict</span> <span class="ow">in</span> <span class="n">elements_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-<span class="linenos" data-linenos="151 "></span>        <span class="n">element</span> <span class="o">=</span> <span class="n">ElementDefinition</span><span class="p">(</span>
-<span class="linenos" data-linenos="152 "></span>            <span class="nb">id</span><span class="o">=</span><span class="n">elem_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="n">elem_id</span><span class="p">),</span>
-<span class="linenos" data-linenos="153 "></span>            <span class="n">label</span><span class="o">=</span><span class="n">elem_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;label&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
-<span class="linenos" data-linenos="154 "></span>            <span class="n">description</span><span class="o">=</span><span class="n">elem_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;description&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
-<span class="linenos" data-linenos="155 "></span>            <span class="n">element_type</span><span class="o">=</span><span class="n">elem_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">,</span> <span class="s2">&quot;component&quot;</span><span class="p">),</span>
-<span class="linenos" data-linenos="156 "></span>            <span class="n">technology</span><span class="o">=</span><span class="n">elem_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;technology&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
-<span class="linenos" data-linenos="157 "></span>            <span class="n">style</span><span class="o">=</span><span class="n">elem_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;style&quot;</span><span class="p">,</span> <span class="p">{}),</span>
-<span class="linenos" data-linenos="158 "></span>            <span class="n">tags</span><span class="o">=</span><span class="n">elem_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;tags&quot;</span><span class="p">,</span> <span class="p">[]),</span>
-<span class="linenos" data-linenos="159 "></span>            <span class="n">metadata</span><span class="o">=</span><span class="n">elem_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;metadata&quot;</span><span class="p">,</span> <span class="p">{}),</span>
-<span class="linenos" data-linenos="160 "></span>        <span class="p">)</span>
-<span class="linenos" data-linenos="161 "></span>        <span class="n">workspace</span><span class="o">.</span><span class="n">add_element</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
-<span class="linenos" data-linenos="162 "></span>
-<span class="linenos" data-linenos="163 "></span>    <span class="c1"># Load views</span>
-<span class="linenos" data-linenos="164 "></span>    <span class="n">views_data</span> <span class="o">=</span> <span class="n">ws_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;views&quot;</span><span class="p">,</span> <span class="p">{})</span>
-<span class="linenos" data-linenos="165 "></span>    <span class="k">for</span> <span class="n">view_id</span><span class="p">,</span> <span class="n">view_dict</span> <span class="ow">in</span> <span class="n">views_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-<span class="linenos" data-linenos="166 "></span>        <span class="n">view</span> <span class="o">=</span> <span class="n">DiagramView</span><span class="p">(</span>
-<span class="linenos" data-linenos="167 "></span>            <span class="nb">id</span><span class="o">=</span><span class="n">view_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="n">view_id</span><span class="p">),</span>
-<span class="linenos" data-linenos="168 "></span>            <span class="n">name</span><span class="o">=</span><span class="n">view_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
-<span class="linenos" data-linenos="169 "></span>            <span class="n">view_type</span><span class="o">=</span><span class="n">view_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">,</span> <span class="s2">&quot;diagram&quot;</span><span class="p">),</span>
-<span class="linenos" data-linenos="170 "></span>            <span class="n">description</span><span class="o">=</span><span class="n">view_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;description&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
-<span class="linenos" data-linenos="171 "></span>            <span class="n">file</span><span class="o">=</span><span class="n">view_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;file&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
-<span class="linenos" data-linenos="172 "></span>            <span class="n">zoom_level</span><span class="o">=</span><span class="n">view_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;level&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
-<span class="linenos" data-linenos="173 "></span>            <span class="n">parent_view</span><span class="o">=</span><span class="n">view_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;parent&quot;</span><span class="p">),</span>
-<span class="linenos" data-linenos="174 "></span>            <span class="n">focused_element</span><span class="o">=</span><span class="n">view_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;focus&quot;</span><span class="p">),</span>
-<span class="linenos" data-linenos="175 "></span>            <span class="n">element_refs</span><span class="o">=</span><span class="n">view_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;elements&quot;</span><span class="p">,</span> <span class="p">[]),</span>
-<span class="linenos" data-linenos="176 "></span>        <span class="p">)</span>
-<span class="linenos" data-linenos="177 "></span>        <span class="n">workspace</span><span class="o">.</span><span class="n">add_view</span><span class="p">(</span><span class="n">view</span><span class="p">)</span>
-<span class="linenos" data-linenos="178 "></span>
-<span class="linenos" data-linenos="179 "></span>    <span class="k">return</span> <span class="n">workspace</span>
+              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="126 "></span><span class="k">def</span><span class="w"> </span><span class="nf">from_dict</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Workspace</span><span class="p">:</span>
+<span class="linenos" data-linenos="127 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert dictionary to workspace.</span>
+<span class="linenos" data-linenos="128 "></span>
+<span class="linenos" data-linenos="129 "></span><span class="sd">    Args:</span>
+<span class="linenos" data-linenos="130 "></span><span class="sd">        data: Dictionary with workspace data</span>
+<span class="linenos" data-linenos="131 "></span>
+<span class="linenos" data-linenos="132 "></span><span class="sd">    Returns:</span>
+<span class="linenos" data-linenos="133 "></span><span class="sd">        Workspace object</span>
+<span class="linenos" data-linenos="134 "></span>
+<span class="linenos" data-linenos="135 "></span><span class="sd">    Raises:</span>
+<span class="linenos" data-linenos="136 "></span><span class="sd">        KeyError: If required fields are missing</span>
+<span class="linenos" data-linenos="137 "></span><span class="sd">    &quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="138 "></span>    <span class="n">ws_data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;workspace&#39;</span><span class="p">,</span> <span class="p">{})</span>
+<span class="linenos" data-linenos="139 "></span>
+<span class="linenos" data-linenos="140 "></span>    <span class="n">workspace</span> <span class="o">=</span> <span class="n">Workspace</span><span class="p">(</span>
+<span class="linenos" data-linenos="141 "></span>        <span class="nb">id</span><span class="o">=</span><span class="n">ws_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">),</span>
+<span class="linenos" data-linenos="142 "></span>        <span class="n">name</span><span class="o">=</span><span class="n">ws_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">),</span>
+<span class="linenos" data-linenos="143 "></span>        <span class="n">description</span><span class="o">=</span><span class="n">ws_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;description&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">),</span>
+<span class="linenos" data-linenos="144 "></span>        <span class="n">version</span><span class="o">=</span><span class="n">ws_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;version&#39;</span><span class="p">,</span> <span class="s1">&#39;1.0.0&#39;</span><span class="p">),</span>
+<span class="linenos" data-linenos="145 "></span>        <span class="n">author</span><span class="o">=</span><span class="n">ws_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;author&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">),</span>
+<span class="linenos" data-linenos="146 "></span>        <span class="n">created</span><span class="o">=</span><span class="n">ws_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;created&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">),</span>
+<span class="linenos" data-linenos="147 "></span>        <span class="n">modified</span><span class="o">=</span><span class="n">ws_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;modified&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">),</span>
+<span class="linenos" data-linenos="148 "></span>    <span class="p">)</span>
+<span class="linenos" data-linenos="149 "></span>
+<span class="linenos" data-linenos="150 "></span>    <span class="c1"># Load elements</span>
+<span class="linenos" data-linenos="151 "></span>    <span class="n">elements_data</span> <span class="o">=</span> <span class="n">ws_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;elements&#39;</span><span class="p">,</span> <span class="p">{})</span>
+<span class="linenos" data-linenos="152 "></span>    <span class="k">for</span> <span class="n">elem_id</span><span class="p">,</span> <span class="n">elem_dict</span> <span class="ow">in</span> <span class="n">elements_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+<span class="linenos" data-linenos="153 "></span>        <span class="n">element</span> <span class="o">=</span> <span class="n">ElementDefinition</span><span class="p">(</span>
+<span class="linenos" data-linenos="154 "></span>            <span class="nb">id</span><span class="o">=</span><span class="n">elem_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="n">elem_id</span><span class="p">),</span>
+<span class="linenos" data-linenos="155 "></span>            <span class="n">label</span><span class="o">=</span><span class="n">elem_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;label&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">),</span>
+<span class="linenos" data-linenos="156 "></span>            <span class="n">description</span><span class="o">=</span><span class="n">elem_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;description&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">),</span>
+<span class="linenos" data-linenos="157 "></span>            <span class="n">element_type</span><span class="o">=</span><span class="n">elem_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">,</span> <span class="s1">&#39;component&#39;</span><span class="p">),</span>
+<span class="linenos" data-linenos="158 "></span>            <span class="n">technology</span><span class="o">=</span><span class="n">elem_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;technology&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">),</span>
+<span class="linenos" data-linenos="159 "></span>            <span class="n">style</span><span class="o">=</span><span class="n">elem_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;style&#39;</span><span class="p">,</span> <span class="p">{}),</span>
+<span class="linenos" data-linenos="160 "></span>            <span class="n">tags</span><span class="o">=</span><span class="n">elem_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;tags&#39;</span><span class="p">,</span> <span class="p">[]),</span>
+<span class="linenos" data-linenos="161 "></span>            <span class="n">metadata</span><span class="o">=</span><span class="n">elem_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;metadata&#39;</span><span class="p">,</span> <span class="p">{}),</span>
+<span class="linenos" data-linenos="162 "></span>        <span class="p">)</span>
+<span class="linenos" data-linenos="163 "></span>        <span class="n">workspace</span><span class="o">.</span><span class="n">add_element</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+<span class="linenos" data-linenos="164 "></span>
+<span class="linenos" data-linenos="165 "></span>    <span class="c1"># Load views</span>
+<span class="linenos" data-linenos="166 "></span>    <span class="n">views_data</span> <span class="o">=</span> <span class="n">ws_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;views&#39;</span><span class="p">,</span> <span class="p">{})</span>
+<span class="linenos" data-linenos="167 "></span>    <span class="k">for</span> <span class="n">view_id</span><span class="p">,</span> <span class="n">view_dict</span> <span class="ow">in</span> <span class="n">views_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+<span class="linenos" data-linenos="168 "></span>        <span class="n">view</span> <span class="o">=</span> <span class="n">DiagramView</span><span class="p">(</span>
+<span class="linenos" data-linenos="169 "></span>            <span class="nb">id</span><span class="o">=</span><span class="n">view_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="n">view_id</span><span class="p">),</span>
+<span class="linenos" data-linenos="170 "></span>            <span class="n">name</span><span class="o">=</span><span class="n">view_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">),</span>
+<span class="linenos" data-linenos="171 "></span>            <span class="n">view_type</span><span class="o">=</span><span class="n">view_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">,</span> <span class="s1">&#39;diagram&#39;</span><span class="p">),</span>
+<span class="linenos" data-linenos="172 "></span>            <span class="n">description</span><span class="o">=</span><span class="n">view_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;description&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">),</span>
+<span class="linenos" data-linenos="173 "></span>            <span class="n">file</span><span class="o">=</span><span class="n">view_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;file&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">),</span>
+<span class="linenos" data-linenos="174 "></span>            <span class="n">zoom_level</span><span class="o">=</span><span class="n">view_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;level&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+<span class="linenos" data-linenos="175 "></span>            <span class="n">parent_view</span><span class="o">=</span><span class="n">view_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;parent&#39;</span><span class="p">),</span>
+<span class="linenos" data-linenos="176 "></span>            <span class="n">focused_element</span><span class="o">=</span><span class="n">view_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;focus&#39;</span><span class="p">),</span>
+<span class="linenos" data-linenos="177 "></span>            <span class="n">element_refs</span><span class="o">=</span><span class="n">view_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;elements&#39;</span><span class="p">,</span> <span class="p">[]),</span>
+<span class="linenos" data-linenos="178 "></span>        <span class="p">)</span>
+<span class="linenos" data-linenos="179 "></span>        <span class="n">workspace</span><span class="o">.</span><span class="n">add_view</span><span class="p">(</span><span class="n">view</span><span class="p">)</span>
+<span class="linenos" data-linenos="180 "></span>
+<span class="linenos" data-linenos="181 "></span>    <span class="k">return</span> <span class="n">workspace</span>
 </code></pre></div>
             </details>
     </div>
@@ -2234,21 +2234,22 @@ label), and each registered view references the element IDs it uses.</p>
 <span class="linenos" data-linenos="30 "></span><span class="sd">    &quot;&quot;&quot;</span>
 <span class="linenos" data-linenos="31 "></span>    <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
 <span class="linenos" data-linenos="32 "></span>    <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-<span class="linenos" data-linenos="33 "></span>        <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Workspace file not found: </span><span class="si">{</span><span class="n">file_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="linenos" data-linenos="34 "></span>
-<span class="linenos" data-linenos="35 "></span>    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-<span class="linenos" data-linenos="36 "></span>        <span class="n">content</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+<span class="linenos" data-linenos="33 "></span>        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Workspace file not found: </span><span class="si">{</span><span class="n">file_path</span><span class="si">}</span><span class="s1">&#39;</span>
+<span class="linenos" data-linenos="34 "></span>        <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+<span class="linenos" data-linenos="35 "></span>
+<span class="linenos" data-linenos="36 "></span>    <span class="n">content</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
 <span class="linenos" data-linenos="37 "></span>
 <span class="linenos" data-linenos="38 "></span>    <span class="c1"># Detect format from extension</span>
 <span class="linenos" data-linenos="39 "></span>    <span class="n">suffix</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">suffix</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-<span class="linenos" data-linenos="40 "></span>    <span class="k">if</span> <span class="n">suffix</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;.yml&quot;</span><span class="p">,</span> <span class="s2">&quot;.yaml&quot;</span><span class="p">]:</span>
+<span class="linenos" data-linenos="40 "></span>    <span class="k">if</span> <span class="n">suffix</span> <span class="ow">in</span> <span class="p">{</span><span class="s1">&#39;.yml&#39;</span><span class="p">,</span> <span class="s1">&#39;.yaml&#39;</span><span class="p">}:</span>
 <span class="linenos" data-linenos="41 "></span>        <span class="n">data</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
-<span class="linenos" data-linenos="42 "></span>    <span class="k">elif</span> <span class="n">suffix</span> <span class="o">==</span> <span class="s2">&quot;.json&quot;</span><span class="p">:</span>
+<span class="linenos" data-linenos="42 "></span>    <span class="k">elif</span> <span class="n">suffix</span> <span class="o">==</span> <span class="s1">&#39;.json&#39;</span><span class="p">:</span>
 <span class="linenos" data-linenos="43 "></span>        <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
 <span class="linenos" data-linenos="44 "></span>    <span class="k">else</span><span class="p">:</span>
-<span class="linenos" data-linenos="45 "></span>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported workspace format: </span><span class="si">{</span><span class="n">suffix</span><span class="si">}</span><span class="s2"> (use .yml, .yaml, or .json)&quot;</span><span class="p">)</span>
-<span class="linenos" data-linenos="46 "></span>
-<span class="linenos" data-linenos="47 "></span>    <span class="k">return</span> <span class="n">from_dict</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="linenos" data-linenos="45 "></span>        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Unsupported workspace format: </span><span class="si">{</span><span class="n">suffix</span><span class="si">}</span><span class="s1"> (use .yml, .yaml, or .json)&#39;</span>
+<span class="linenos" data-linenos="46 "></span>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+<span class="linenos" data-linenos="47 "></span>
+<span class="linenos" data-linenos="48 "></span>    <span class="k">return</span> <span class="n">from_dict</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 </code></pre></div>
             </details>
     </div>
@@ -2366,29 +2367,30 @@ label), and each registered view references the element IDs it uses.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>diacea/workspace_format.py</code></summary>
-              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="50 "></span><span class="k">def</span><span class="w"> </span><span class="nf">save_workspace</span><span class="p">(</span><span class="n">workspace</span><span class="p">:</span> <span class="n">Workspace</span><span class="p">,</span> <span class="n">file_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;yaml&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="linenos" data-linenos="51 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Save workspace to YAML or JSON file.</span>
-<span class="linenos" data-linenos="52 "></span>
-<span class="linenos" data-linenos="53 "></span><span class="sd">    Args:</span>
-<span class="linenos" data-linenos="54 "></span><span class="sd">        workspace: Workspace object to save</span>
-<span class="linenos" data-linenos="55 "></span><span class="sd">        file_path: Output file path</span>
-<span class="linenos" data-linenos="56 "></span><span class="sd">        format: Output format (&quot;yaml&quot; or &quot;json&quot;)</span>
-<span class="linenos" data-linenos="57 "></span>
-<span class="linenos" data-linenos="58 "></span><span class="sd">    Raises:</span>
-<span class="linenos" data-linenos="59 "></span><span class="sd">        ValueError: If format is not supported</span>
-<span class="linenos" data-linenos="60 "></span><span class="sd">    &quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="61 "></span>    <span class="n">data</span> <span class="o">=</span> <span class="n">to_dict</span><span class="p">(</span><span class="n">workspace</span><span class="p">)</span>
-<span class="linenos" data-linenos="62 "></span>
-<span class="linenos" data-linenos="63 "></span>    <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
-<span class="linenos" data-linenos="64 "></span>    <span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="linenos" data-linenos="65 "></span>
-<span class="linenos" data-linenos="66 "></span>    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-<span class="linenos" data-linenos="67 "></span>        <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s2">&quot;yaml&quot;</span><span class="p">:</span>
-<span class="linenos" data-linenos="68 "></span>            <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">default_flow_style</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="linenos" data-linenos="69 "></span>        <span class="k">elif</span> <span class="nb">format</span> <span class="o">==</span> <span class="s2">&quot;json&quot;</span><span class="p">:</span>
-<span class="linenos" data-linenos="70 "></span>            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-<span class="linenos" data-linenos="71 "></span>        <span class="k">else</span><span class="p">:</span>
-<span class="linenos" data-linenos="72 "></span>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported format: </span><span class="si">{</span><span class="nb">format</span><span class="si">}</span><span class="s2"> (use &#39;yaml&#39; or &#39;json&#39;)&quot;</span><span class="p">)</span>
+              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="51 "></span><span class="k">def</span><span class="w"> </span><span class="nf">save_workspace</span><span class="p">(</span><span class="n">workspace</span><span class="p">:</span> <span class="n">Workspace</span><span class="p">,</span> <span class="n">file_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;yaml&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># noqa: A002</span>
+<span class="linenos" data-linenos="52 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Save workspace to YAML or JSON file.</span>
+<span class="linenos" data-linenos="53 "></span>
+<span class="linenos" data-linenos="54 "></span><span class="sd">    Args:</span>
+<span class="linenos" data-linenos="55 "></span><span class="sd">        workspace: Workspace object to save</span>
+<span class="linenos" data-linenos="56 "></span><span class="sd">        file_path: Output file path</span>
+<span class="linenos" data-linenos="57 "></span><span class="sd">        format: Output format (&quot;yaml&quot; or &quot;json&quot;)</span>
+<span class="linenos" data-linenos="58 "></span>
+<span class="linenos" data-linenos="59 "></span><span class="sd">    Raises:</span>
+<span class="linenos" data-linenos="60 "></span><span class="sd">        ValueError: If format is not supported</span>
+<span class="linenos" data-linenos="61 "></span><span class="sd">    &quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="62 "></span>    <span class="n">data</span> <span class="o">=</span> <span class="n">to_dict</span><span class="p">(</span><span class="n">workspace</span><span class="p">)</span>
+<span class="linenos" data-linenos="63 "></span>
+<span class="linenos" data-linenos="64 "></span>    <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+<span class="linenos" data-linenos="65 "></span>    <span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos" data-linenos="66 "></span>
+<span class="linenos" data-linenos="67 "></span>    <span class="k">with</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+<span class="linenos" data-linenos="68 "></span>        <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s1">&#39;yaml&#39;</span><span class="p">:</span>
+<span class="linenos" data-linenos="69 "></span>            <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">default_flow_style</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="linenos" data-linenos="70 "></span>        <span class="k">elif</span> <span class="nb">format</span> <span class="o">==</span> <span class="s1">&#39;json&#39;</span><span class="p">:</span>
+<span class="linenos" data-linenos="71 "></span>            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="linenos" data-linenos="72 "></span>        <span class="k">else</span><span class="p">:</span>
+<span class="linenos" data-linenos="73 "></span>            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Unsupported format: </span><span class="si">{</span><span class="nb">format</span><span class="si">}</span><span class="s2"> (use &#39;yaml&#39; or &#39;json&#39;)&quot;</span>
+<span class="linenos" data-linenos="74 "></span>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 </code></pre></div>
             </details>
     </div>
@@ -2470,53 +2472,53 @@ label), and each registered view references the element IDs it uses.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>diacea/workspace_format.py</code></summary>
-              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos=" 75 "></span><span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="n">workspace</span><span class="p">:</span> <span class="n">Workspace</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<span class="linenos" data-linenos=" 76 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert workspace to dictionary.</span>
-<span class="linenos" data-linenos=" 77 "></span>
-<span class="linenos" data-linenos=" 78 "></span><span class="sd">    Args:</span>
-<span class="linenos" data-linenos=" 79 "></span><span class="sd">        workspace: Workspace object</span>
-<span class="linenos" data-linenos=" 80 "></span>
-<span class="linenos" data-linenos=" 81 "></span><span class="sd">    Returns:</span>
-<span class="linenos" data-linenos=" 82 "></span><span class="sd">        Dictionary representation</span>
-<span class="linenos" data-linenos=" 83 "></span><span class="sd">    &quot;&quot;&quot;</span>
-<span class="linenos" data-linenos=" 84 "></span>    <span class="k">return</span> <span class="p">{</span>
-<span class="linenos" data-linenos=" 85 "></span>        <span class="s2">&quot;workspace&quot;</span><span class="p">:</span> <span class="p">{</span>
-<span class="linenos" data-linenos=" 86 "></span>            <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">workspace</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
-<span class="linenos" data-linenos=" 87 "></span>            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">workspace</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-<span class="linenos" data-linenos=" 88 "></span>            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">workspace</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
-<span class="linenos" data-linenos=" 89 "></span>            <span class="s2">&quot;version&quot;</span><span class="p">:</span> <span class="n">workspace</span><span class="o">.</span><span class="n">version</span><span class="p">,</span>
-<span class="linenos" data-linenos=" 90 "></span>            <span class="s2">&quot;author&quot;</span><span class="p">:</span> <span class="n">workspace</span><span class="o">.</span><span class="n">author</span><span class="p">,</span>
-<span class="linenos" data-linenos=" 91 "></span>            <span class="s2">&quot;created&quot;</span><span class="p">:</span> <span class="n">workspace</span><span class="o">.</span><span class="n">created</span><span class="p">,</span>
-<span class="linenos" data-linenos=" 92 "></span>            <span class="s2">&quot;modified&quot;</span><span class="p">:</span> <span class="n">workspace</span><span class="o">.</span><span class="n">modified</span><span class="p">,</span>
-<span class="linenos" data-linenos=" 93 "></span>            <span class="s2">&quot;elements&quot;</span><span class="p">:</span> <span class="p">{</span>
-<span class="linenos" data-linenos=" 94 "></span>                <span class="n">elem_id</span><span class="p">:</span> <span class="p">{</span>
-<span class="linenos" data-linenos=" 95 "></span>                    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">elem</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
-<span class="linenos" data-linenos=" 96 "></span>                    <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="n">elem</span><span class="o">.</span><span class="n">label</span><span class="p">,</span>
-<span class="linenos" data-linenos=" 97 "></span>                    <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">elem</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
-<span class="linenos" data-linenos=" 98 "></span>                    <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="n">elem</span><span class="o">.</span><span class="n">element_type</span><span class="p">,</span>
-<span class="linenos" data-linenos=" 99 "></span>                    <span class="s2">&quot;technology&quot;</span><span class="p">:</span> <span class="n">elem</span><span class="o">.</span><span class="n">technology</span><span class="p">,</span>
-<span class="linenos" data-linenos="100 "></span>                    <span class="s2">&quot;style&quot;</span><span class="p">:</span> <span class="n">elem</span><span class="o">.</span><span class="n">style</span><span class="p">,</span>
-<span class="linenos" data-linenos="101 "></span>                    <span class="s2">&quot;tags&quot;</span><span class="p">:</span> <span class="n">elem</span><span class="o">.</span><span class="n">tags</span><span class="p">,</span>
-<span class="linenos" data-linenos="102 "></span>                    <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="n">elem</span><span class="o">.</span><span class="n">metadata</span><span class="p">,</span>
-<span class="linenos" data-linenos="103 "></span>                <span class="p">}</span>
-<span class="linenos" data-linenos="104 "></span>                <span class="k">for</span> <span class="n">elem_id</span><span class="p">,</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">workspace</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-<span class="linenos" data-linenos="105 "></span>            <span class="p">},</span>
-<span class="linenos" data-linenos="106 "></span>            <span class="s2">&quot;views&quot;</span><span class="p">:</span> <span class="p">{</span>
-<span class="linenos" data-linenos="107 "></span>                <span class="n">view_id</span><span class="p">:</span> <span class="p">{</span>
-<span class="linenos" data-linenos="108 "></span>                    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">view</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
-<span class="linenos" data-linenos="109 "></span>                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">view</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-<span class="linenos" data-linenos="110 "></span>                    <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="n">view</span><span class="o">.</span><span class="n">view_type</span><span class="p">,</span>
-<span class="linenos" data-linenos="111 "></span>                    <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">view</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
-<span class="linenos" data-linenos="112 "></span>                    <span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="n">view</span><span class="o">.</span><span class="n">file</span><span class="p">,</span>
-<span class="linenos" data-linenos="113 "></span>                    <span class="s2">&quot;level&quot;</span><span class="p">:</span> <span class="n">view</span><span class="o">.</span><span class="n">zoom_level</span><span class="p">,</span>
-<span class="linenos" data-linenos="114 "></span>                    <span class="s2">&quot;parent&quot;</span><span class="p">:</span> <span class="n">view</span><span class="o">.</span><span class="n">parent_view</span><span class="p">,</span>
-<span class="linenos" data-linenos="115 "></span>                    <span class="s2">&quot;focus&quot;</span><span class="p">:</span> <span class="n">view</span><span class="o">.</span><span class="n">focused_element</span><span class="p">,</span>
-<span class="linenos" data-linenos="116 "></span>                    <span class="s2">&quot;elements&quot;</span><span class="p">:</span> <span class="n">view</span><span class="o">.</span><span class="n">element_refs</span><span class="p">,</span>
-<span class="linenos" data-linenos="117 "></span>                <span class="p">}</span>
-<span class="linenos" data-linenos="118 "></span>                <span class="k">for</span> <span class="n">view_id</span><span class="p">,</span> <span class="n">view</span> <span class="ow">in</span> <span class="n">workspace</span><span class="o">.</span><span class="n">views</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-<span class="linenos" data-linenos="119 "></span>            <span class="p">},</span>
-<span class="linenos" data-linenos="120 "></span>        <span class="p">}</span>
-<span class="linenos" data-linenos="121 "></span>    <span class="p">}</span>
+              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos=" 77 "></span><span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="n">workspace</span><span class="p">:</span> <span class="n">Workspace</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="linenos" data-linenos=" 78 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert workspace to dictionary.</span>
+<span class="linenos" data-linenos=" 79 "></span>
+<span class="linenos" data-linenos=" 80 "></span><span class="sd">    Args:</span>
+<span class="linenos" data-linenos=" 81 "></span><span class="sd">        workspace: Workspace object</span>
+<span class="linenos" data-linenos=" 82 "></span>
+<span class="linenos" data-linenos=" 83 "></span><span class="sd">    Returns:</span>
+<span class="linenos" data-linenos=" 84 "></span><span class="sd">        Dictionary representation</span>
+<span class="linenos" data-linenos=" 85 "></span><span class="sd">    &quot;&quot;&quot;</span>
+<span class="linenos" data-linenos=" 86 "></span>    <span class="k">return</span> <span class="p">{</span>
+<span class="linenos" data-linenos=" 87 "></span>        <span class="s1">&#39;workspace&#39;</span><span class="p">:</span> <span class="p">{</span>
+<span class="linenos" data-linenos=" 88 "></span>            <span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="n">workspace</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+<span class="linenos" data-linenos=" 89 "></span>            <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">workspace</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+<span class="linenos" data-linenos=" 90 "></span>            <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="n">workspace</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+<span class="linenos" data-linenos=" 91 "></span>            <span class="s1">&#39;version&#39;</span><span class="p">:</span> <span class="n">workspace</span><span class="o">.</span><span class="n">version</span><span class="p">,</span>
+<span class="linenos" data-linenos=" 92 "></span>            <span class="s1">&#39;author&#39;</span><span class="p">:</span> <span class="n">workspace</span><span class="o">.</span><span class="n">author</span><span class="p">,</span>
+<span class="linenos" data-linenos=" 93 "></span>            <span class="s1">&#39;created&#39;</span><span class="p">:</span> <span class="n">workspace</span><span class="o">.</span><span class="n">created</span><span class="p">,</span>
+<span class="linenos" data-linenos=" 94 "></span>            <span class="s1">&#39;modified&#39;</span><span class="p">:</span> <span class="n">workspace</span><span class="o">.</span><span class="n">modified</span><span class="p">,</span>
+<span class="linenos" data-linenos=" 95 "></span>            <span class="s1">&#39;elements&#39;</span><span class="p">:</span> <span class="p">{</span>
+<span class="linenos" data-linenos=" 96 "></span>                <span class="n">elem_id</span><span class="p">:</span> <span class="p">{</span>
+<span class="linenos" data-linenos=" 97 "></span>                    <span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="n">elem</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+<span class="linenos" data-linenos=" 98 "></span>                    <span class="s1">&#39;label&#39;</span><span class="p">:</span> <span class="n">elem</span><span class="o">.</span><span class="n">label</span><span class="p">,</span>
+<span class="linenos" data-linenos=" 99 "></span>                    <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="n">elem</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+<span class="linenos" data-linenos="100 "></span>                    <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="n">elem</span><span class="o">.</span><span class="n">element_type</span><span class="p">,</span>
+<span class="linenos" data-linenos="101 "></span>                    <span class="s1">&#39;technology&#39;</span><span class="p">:</span> <span class="n">elem</span><span class="o">.</span><span class="n">technology</span><span class="p">,</span>
+<span class="linenos" data-linenos="102 "></span>                    <span class="s1">&#39;style&#39;</span><span class="p">:</span> <span class="n">elem</span><span class="o">.</span><span class="n">style</span><span class="p">,</span>
+<span class="linenos" data-linenos="103 "></span>                    <span class="s1">&#39;tags&#39;</span><span class="p">:</span> <span class="n">elem</span><span class="o">.</span><span class="n">tags</span><span class="p">,</span>
+<span class="linenos" data-linenos="104 "></span>                    <span class="s1">&#39;metadata&#39;</span><span class="p">:</span> <span class="n">elem</span><span class="o">.</span><span class="n">metadata</span><span class="p">,</span>
+<span class="linenos" data-linenos="105 "></span>                <span class="p">}</span>
+<span class="linenos" data-linenos="106 "></span>                <span class="k">for</span> <span class="n">elem_id</span><span class="p">,</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">workspace</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+<span class="linenos" data-linenos="107 "></span>            <span class="p">},</span>
+<span class="linenos" data-linenos="108 "></span>            <span class="s1">&#39;views&#39;</span><span class="p">:</span> <span class="p">{</span>
+<span class="linenos" data-linenos="109 "></span>                <span class="n">view_id</span><span class="p">:</span> <span class="p">{</span>
+<span class="linenos" data-linenos="110 "></span>                    <span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="n">view</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+<span class="linenos" data-linenos="111 "></span>                    <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">view</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+<span class="linenos" data-linenos="112 "></span>                    <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="n">view</span><span class="o">.</span><span class="n">view_type</span><span class="p">,</span>
+<span class="linenos" data-linenos="113 "></span>                    <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="n">view</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+<span class="linenos" data-linenos="114 "></span>                    <span class="s1">&#39;file&#39;</span><span class="p">:</span> <span class="n">view</span><span class="o">.</span><span class="n">file</span><span class="p">,</span>
+<span class="linenos" data-linenos="115 "></span>                    <span class="s1">&#39;level&#39;</span><span class="p">:</span> <span class="n">view</span><span class="o">.</span><span class="n">zoom_level</span><span class="p">,</span>
+<span class="linenos" data-linenos="116 "></span>                    <span class="s1">&#39;parent&#39;</span><span class="p">:</span> <span class="n">view</span><span class="o">.</span><span class="n">parent_view</span><span class="p">,</span>
+<span class="linenos" data-linenos="117 "></span>                    <span class="s1">&#39;focus&#39;</span><span class="p">:</span> <span class="n">view</span><span class="o">.</span><span class="n">focused_element</span><span class="p">,</span>
+<span class="linenos" data-linenos="118 "></span>                    <span class="s1">&#39;elements&#39;</span><span class="p">:</span> <span class="n">view</span><span class="o">.</span><span class="n">element_refs</span><span class="p">,</span>
+<span class="linenos" data-linenos="119 "></span>                <span class="p">}</span>
+<span class="linenos" data-linenos="120 "></span>                <span class="k">for</span> <span class="n">view_id</span><span class="p">,</span> <span class="n">view</span> <span class="ow">in</span> <span class="n">workspace</span><span class="o">.</span><span class="n">views</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+<span class="linenos" data-linenos="121 "></span>            <span class="p">},</span>
+<span class="linenos" data-linenos="122 "></span>        <span class="p">}</span>
+<span class="linenos" data-linenos="123 "></span>    <span class="p">}</span>
 </code></pre></div>
             </details>
     </div>

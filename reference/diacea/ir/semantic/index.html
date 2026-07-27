@@ -1780,45 +1780,45 @@
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>diacea/ir/semantic.py</code></summary>
-                <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="28 "></span><span class="k">class</span><span class="w"> </span><span class="nc">SemanticType</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Enum</span><span class="p">):</span>
-<span class="linenos" data-linenos="29 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Semantic types for diagram elements.</span>
-<span class="linenos" data-linenos="30 "></span>
-<span class="linenos" data-linenos="31 "></span><span class="sd">    Based on common architecture diagram patterns (C4, UML, etc.)</span>
-<span class="linenos" data-linenos="32 "></span><span class="sd">    &quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="33 "></span>
-<span class="linenos" data-linenos="34 "></span>    <span class="c1"># C4 Model types</span>
-<span class="linenos" data-linenos="35 "></span>    <span class="n">PERSON</span> <span class="o">=</span> <span class="s2">&quot;person&quot;</span>
-<span class="linenos" data-linenos="36 "></span>    <span class="n">SYSTEM</span> <span class="o">=</span> <span class="s2">&quot;system&quot;</span>
-<span class="linenos" data-linenos="37 "></span>    <span class="n">CONTAINER</span> <span class="o">=</span> <span class="s2">&quot;container&quot;</span>
-<span class="linenos" data-linenos="38 "></span>    <span class="n">COMPONENT</span> <span class="o">=</span> <span class="s2">&quot;component&quot;</span>
-<span class="linenos" data-linenos="39 "></span>
-<span class="linenos" data-linenos="40 "></span>    <span class="c1"># Infrastructure types</span>
-<span class="linenos" data-linenos="41 "></span>    <span class="n">DATABASE</span> <span class="o">=</span> <span class="s2">&quot;database&quot;</span>
-<span class="linenos" data-linenos="42 "></span>    <span class="n">QUEUE</span> <span class="o">=</span> <span class="s2">&quot;queue&quot;</span>
-<span class="linenos" data-linenos="43 "></span>    <span class="n">STORAGE</span> <span class="o">=</span> <span class="s2">&quot;storage&quot;</span>
-<span class="linenos" data-linenos="44 "></span>    <span class="n">SERVICE</span> <span class="o">=</span> <span class="s2">&quot;service&quot;</span>
-<span class="linenos" data-linenos="45 "></span>
-<span class="linenos" data-linenos="46 "></span>    <span class="c1"># Network/deployment types</span>
-<span class="linenos" data-linenos="47 "></span>    <span class="n">SERVER</span> <span class="o">=</span> <span class="s2">&quot;server&quot;</span>
-<span class="linenos" data-linenos="48 "></span>    <span class="n">CLOUD</span> <span class="o">=</span> <span class="s2">&quot;cloud&quot;</span>
-<span class="linenos" data-linenos="49 "></span>    <span class="n">EXTERNAL</span> <span class="o">=</span> <span class="s2">&quot;external&quot;</span>
-<span class="linenos" data-linenos="50 "></span>
-<span class="linenos" data-linenos="51 "></span>    <span class="c1"># UI types</span>
-<span class="linenos" data-linenos="52 "></span>    <span class="n">INTERFACE</span> <span class="o">=</span> <span class="s2">&quot;interface&quot;</span>
-<span class="linenos" data-linenos="53 "></span>    <span class="n">SCREEN</span> <span class="o">=</span> <span class="s2">&quot;screen&quot;</span>
-<span class="linenos" data-linenos="54 "></span>
-<span class="linenos" data-linenos="55 "></span>    <span class="c1"># Data/document types</span>
-<span class="linenos" data-linenos="56 "></span>    <span class="n">DOCUMENT</span> <span class="o">=</span> <span class="s2">&quot;document&quot;</span>
-<span class="linenos" data-linenos="57 "></span>    <span class="n">FILE</span> <span class="o">=</span> <span class="s2">&quot;file&quot;</span>
-<span class="linenos" data-linenos="58 "></span>
-<span class="linenos" data-linenos="59 "></span>    <span class="c1"># Flow types</span>
-<span class="linenos" data-linenos="60 "></span>    <span class="n">DECISION</span> <span class="o">=</span> <span class="s2">&quot;decision&quot;</span>
-<span class="linenos" data-linenos="61 "></span>    <span class="n">PROCESS</span> <span class="o">=</span> <span class="s2">&quot;process&quot;</span>
-<span class="linenos" data-linenos="62 "></span>    <span class="n">START_END</span> <span class="o">=</span> <span class="s2">&quot;start_end&quot;</span>
-<span class="linenos" data-linenos="63 "></span>
-<span class="linenos" data-linenos="64 "></span>    <span class="c1"># Generic types (fallback)</span>
-<span class="linenos" data-linenos="65 "></span>    <span class="n">NOTE</span> <span class="o">=</span> <span class="s2">&quot;note&quot;</span>
-<span class="linenos" data-linenos="66 "></span>    <span class="n">GENERIC</span> <span class="o">=</span> <span class="s2">&quot;generic&quot;</span>
+                <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="27 "></span><span class="k">class</span><span class="w"> </span><span class="nc">SemanticType</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Enum</span><span class="p">):</span>
+<span class="linenos" data-linenos="28 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Semantic types for diagram elements.</span>
+<span class="linenos" data-linenos="29 "></span>
+<span class="linenos" data-linenos="30 "></span><span class="sd">    Based on common architecture diagram patterns (C4, UML, etc.)</span>
+<span class="linenos" data-linenos="31 "></span><span class="sd">    &quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="32 "></span>
+<span class="linenos" data-linenos="33 "></span>    <span class="c1"># C4 Model types</span>
+<span class="linenos" data-linenos="34 "></span>    <span class="n">PERSON</span> <span class="o">=</span> <span class="s1">&#39;person&#39;</span>
+<span class="linenos" data-linenos="35 "></span>    <span class="n">SYSTEM</span> <span class="o">=</span> <span class="s1">&#39;system&#39;</span>
+<span class="linenos" data-linenos="36 "></span>    <span class="n">CONTAINER</span> <span class="o">=</span> <span class="s1">&#39;container&#39;</span>
+<span class="linenos" data-linenos="37 "></span>    <span class="n">COMPONENT</span> <span class="o">=</span> <span class="s1">&#39;component&#39;</span>
+<span class="linenos" data-linenos="38 "></span>
+<span class="linenos" data-linenos="39 "></span>    <span class="c1"># Infrastructure types</span>
+<span class="linenos" data-linenos="40 "></span>    <span class="n">DATABASE</span> <span class="o">=</span> <span class="s1">&#39;database&#39;</span>
+<span class="linenos" data-linenos="41 "></span>    <span class="n">QUEUE</span> <span class="o">=</span> <span class="s1">&#39;queue&#39;</span>
+<span class="linenos" data-linenos="42 "></span>    <span class="n">STORAGE</span> <span class="o">=</span> <span class="s1">&#39;storage&#39;</span>
+<span class="linenos" data-linenos="43 "></span>    <span class="n">SERVICE</span> <span class="o">=</span> <span class="s1">&#39;service&#39;</span>
+<span class="linenos" data-linenos="44 "></span>
+<span class="linenos" data-linenos="45 "></span>    <span class="c1"># Network/deployment types</span>
+<span class="linenos" data-linenos="46 "></span>    <span class="n">SERVER</span> <span class="o">=</span> <span class="s1">&#39;server&#39;</span>
+<span class="linenos" data-linenos="47 "></span>    <span class="n">CLOUD</span> <span class="o">=</span> <span class="s1">&#39;cloud&#39;</span>
+<span class="linenos" data-linenos="48 "></span>    <span class="n">EXTERNAL</span> <span class="o">=</span> <span class="s1">&#39;external&#39;</span>
+<span class="linenos" data-linenos="49 "></span>
+<span class="linenos" data-linenos="50 "></span>    <span class="c1"># UI types</span>
+<span class="linenos" data-linenos="51 "></span>    <span class="n">INTERFACE</span> <span class="o">=</span> <span class="s1">&#39;interface&#39;</span>
+<span class="linenos" data-linenos="52 "></span>    <span class="n">SCREEN</span> <span class="o">=</span> <span class="s1">&#39;screen&#39;</span>
+<span class="linenos" data-linenos="53 "></span>
+<span class="linenos" data-linenos="54 "></span>    <span class="c1"># Data/document types</span>
+<span class="linenos" data-linenos="55 "></span>    <span class="n">DOCUMENT</span> <span class="o">=</span> <span class="s1">&#39;document&#39;</span>
+<span class="linenos" data-linenos="56 "></span>    <span class="n">FILE</span> <span class="o">=</span> <span class="s1">&#39;file&#39;</span>
+<span class="linenos" data-linenos="57 "></span>
+<span class="linenos" data-linenos="58 "></span>    <span class="c1"># Flow types</span>
+<span class="linenos" data-linenos="59 "></span>    <span class="n">DECISION</span> <span class="o">=</span> <span class="s1">&#39;decision&#39;</span>
+<span class="linenos" data-linenos="60 "></span>    <span class="n">PROCESS</span> <span class="o">=</span> <span class="s1">&#39;process&#39;</span>
+<span class="linenos" data-linenos="61 "></span>    <span class="n">START_END</span> <span class="o">=</span> <span class="s1">&#39;start_end&#39;</span>
+<span class="linenos" data-linenos="62 "></span>
+<span class="linenos" data-linenos="63 "></span>    <span class="c1"># Generic types (fallback)</span>
+<span class="linenos" data-linenos="64 "></span>    <span class="n">NOTE</span> <span class="o">=</span> <span class="s1">&#39;note&#39;</span>
+<span class="linenos" data-linenos="65 "></span>    <span class="n">GENERIC</span> <span class="o">=</span> <span class="s1">&#39;generic&#39;</span>
 </code></pre></div>
               </details>
 
@@ -1921,12 +1921,12 @@
               <p>
                   <span class="doc-param-annotation">
                     <b>TYPE:</b>
-                      <code><span title="typing.Optional">Optional</span>[<a class="autorefs autorefs-internal" title="Dimensions
+                      <code><a class="autorefs autorefs-internal" title="Dimensions
 
 
   
       dataclass
-   (diacea.ir.elements.Dimensions)" href="../elements/#diacea.ir.elements.Dimensions">Dimensions</a>]</code>
+   (diacea.ir.elements.Dimensions)" href="../elements/#diacea.ir.elements.Dimensions">Dimensions</a> | None</code>
                   </span>
                   <span class="doc-param-default">
                     <b>DEFAULT:</b>
@@ -1946,12 +1946,12 @@
               <p>
                   <span class="doc-param-annotation">
                     <b>TYPE:</b>
-                      <code><span title="typing.Optional">Optional</span>[<a class="autorefs autorefs-internal" title="Style
+                      <code><a class="autorefs autorefs-internal" title="Style
 
 
   
       dataclass
-   (diacea.ir.elements.Style)" href="../elements/#diacea.ir.elements.Style">Style</a>]</code>
+   (diacea.ir.elements.Style)" href="../elements/#diacea.ir.elements.Style">Style</a> | None</code>
                   </span>
                   <span class="doc-param-default">
                     <b>DEFAULT:</b>
@@ -1971,7 +1971,7 @@
               <p>
                   <span class="doc-param-annotation">
                     <b>TYPE:</b>
-                      <code><span title="typing.Optional">Optional</span>[<span title="dict">dict</span>]</code>
+                      <code><span title="dict">dict</span>[<span title="str">str</span>, <span title="typing.Any">Any</span>] | None</code>
                   </span>
                   <span class="doc-param-default">
                     <b>DEFAULT:</b>
@@ -1995,7 +1995,7 @@
           <tr class="doc-section-item">
             <td>
                 <span class="doc-returns-annotation">
-                    <code><span title="typing.Optional">Optional</span>[<a class="autorefs autorefs-internal" title="SemanticType (diacea.ir.semantic.SemanticType)" href="#diacea.ir.semantic.SemanticType">SemanticType</a>]</code>
+                    <code><a class="autorefs autorefs-internal" title="SemanticType (diacea.ir.semantic.SemanticType)" href="#diacea.ir.semantic.SemanticType">SemanticType</a> | None</code>
                 </span>
             </td>
             <td class="doc-returns-details">
@@ -2021,7 +2021,7 @@
           <tr class="doc-section-item">
             <td>
                 <span class="doc-returns-annotation">
-                    <code><span title="tuple">tuple</span>[<span title="typing.Optional">Optional</span>[<a class="autorefs autorefs-internal" title="SemanticType (diacea.ir.semantic.SemanticType)" href="#diacea.ir.semantic.SemanticType">SemanticType</a>], <span title="float">float</span>]</code>
+                    <code><span title="tuple">tuple</span>[<a class="autorefs autorefs-internal" title="SemanticType (diacea.ir.semantic.SemanticType)" href="#diacea.ir.semantic.SemanticType">SemanticType</a> | None, <span title="float">float</span>]</code>
                 </span>
             </td>
             <td class="doc-returns-details">
@@ -2038,80 +2038,78 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>diacea/ir/semantic.py</code></summary>
-              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="385 "></span><span class="k">def</span><span class="w"> </span><span class="nf">infer_semantic_type</span><span class="p">(</span>
-<span class="linenos" data-linenos="386 "></span>    <span class="n">shape_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-<span class="linenos" data-linenos="387 "></span>    <span class="n">label</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-<span class="linenos" data-linenos="388 "></span>    <span class="n">size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dimensions</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="linenos" data-linenos="389 "></span>    <span class="n">style</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Style</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="linenos" data-linenos="390 "></span>    <span class="n">metadata</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="linenos" data-linenos="391 "></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="n">SemanticType</span><span class="p">],</span> <span class="nb">float</span><span class="p">]:</span>
-<span class="linenos" data-linenos="392 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Infer semantic type using hybrid approach.</span>
-<span class="linenos" data-linenos="393 "></span>
-<span class="linenos" data-linenos="394 "></span><span class="sd">    Priority order:</span>
-<span class="linenos" data-linenos="395 "></span><span class="sd">    1. Explicit user hints (metadata)</span>
-<span class="linenos" data-linenos="396 "></span><span class="sd">    2. Strong heuristics (shape + size + style)</span>
-<span class="linenos" data-linenos="397 "></span><span class="sd">    3. Icon/emoji detection in label</span>
-<span class="linenos" data-linenos="398 "></span><span class="sd">    4. Text-based hints (label keywords)</span>
-<span class="linenos" data-linenos="399 "></span><span class="sd">    5. Fallback to generic</span>
-<span class="linenos" data-linenos="400 "></span>
-<span class="linenos" data-linenos="401 "></span><span class="sd">    Args:</span>
-<span class="linenos" data-linenos="402 "></span><span class="sd">        shape_type: Geometric shape type (rectangle, ellipse, etc.)</span>
-<span class="linenos" data-linenos="403 "></span><span class="sd">        label: Element label text</span>
-<span class="linenos" data-linenos="404 "></span><span class="sd">        size: Element dimensions</span>
-<span class="linenos" data-linenos="405 "></span><span class="sd">        style: Element styling</span>
-<span class="linenos" data-linenos="406 "></span><span class="sd">        metadata: Additional metadata (may contain hints)</span>
-<span class="linenos" data-linenos="407 "></span>
-<span class="linenos" data-linenos="408 "></span><span class="sd">    Returns:</span>
-<span class="linenos" data-linenos="409 "></span><span class="sd">        Tuple of (semantic_type, confidence)</span>
-<span class="linenos" data-linenos="410 "></span><span class="sd">        - semantic_type: Inferred SemanticType or None</span>
-<span class="linenos" data-linenos="411 "></span><span class="sd">        - confidence: Float from 0.0 to 1.0</span>
-<span class="linenos" data-linenos="412 "></span><span class="sd">    &quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="413 "></span>    <span class="c1"># Priority 1: Explicit user hints (highest confidence)</span>
-<span class="linenos" data-linenos="414 "></span>    <span class="k">if</span> <span class="n">metadata</span><span class="p">:</span>
-<span class="linenos" data-linenos="415 "></span>        <span class="c1"># Check for explicit semantic type hint</span>
-<span class="linenos" data-linenos="416 "></span>        <span class="k">if</span> <span class="s2">&quot;semantic_type&quot;</span> <span class="ow">in</span> <span class="n">metadata</span><span class="p">:</span>
-<span class="linenos" data-linenos="417 "></span>            <span class="n">hint</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;semantic_type&quot;</span><span class="p">]</span>
-<span class="linenos" data-linenos="418 "></span>            <span class="k">try</span><span class="p">:</span>
-<span class="linenos" data-linenos="419 "></span>                <span class="k">return</span> <span class="p">(</span><span class="n">SemanticType</span><span class="p">(</span><span class="n">hint</span><span class="p">),</span> <span class="mf">1.0</span><span class="p">)</span>
-<span class="linenos" data-linenos="420 "></span>            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-<span class="linenos" data-linenos="421 "></span>                <span class="k">pass</span>  <span class="c1"># Invalid hint, continue with other methods</span>
-<span class="linenos" data-linenos="422 "></span>
-<span class="linenos" data-linenos="423 "></span>        <span class="c1"># Check for format-specific hints</span>
-<span class="linenos" data-linenos="424 "></span>        <span class="k">if</span> <span class="s2">&quot;data-semantic&quot;</span> <span class="ow">in</span> <span class="n">metadata</span><span class="p">:</span>  <span class="c1"># From SVG</span>
-<span class="linenos" data-linenos="425 "></span>            <span class="n">hint</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;data-semantic&quot;</span><span class="p">]</span>
-<span class="linenos" data-linenos="426 "></span>            <span class="n">semantic</span> <span class="o">=</span> <span class="n">_parse_semantic_hint</span><span class="p">(</span><span class="n">hint</span><span class="p">)</span>
-<span class="linenos" data-linenos="427 "></span>            <span class="k">if</span> <span class="n">semantic</span><span class="p">:</span>
-<span class="linenos" data-linenos="428 "></span>                <span class="k">return</span> <span class="p">(</span><span class="n">semantic</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">)</span>
-<span class="linenos" data-linenos="429 "></span>
-<span class="linenos" data-linenos="430 "></span>    <span class="c1"># Priority 2: Strong heuristics (shape + size + style patterns)</span>
-<span class="linenos" data-linenos="431 "></span>    <span class="n">heuristic_result</span> <span class="o">=</span> <span class="n">_infer_from_heuristics</span><span class="p">(</span><span class="n">shape_type</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">style</span><span class="p">)</span>
-<span class="linenos" data-linenos="432 "></span>    <span class="k">if</span> <span class="n">heuristic_result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">heuristic_result</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mf">0.8</span><span class="p">:</span>
-<span class="linenos" data-linenos="433 "></span>        <span class="k">return</span> <span class="n">heuristic_result</span>
-<span class="linenos" data-linenos="434 "></span>
-<span class="linenos" data-linenos="435 "></span>    <span class="c1"># Priority 3: Icon/emoji detection in label</span>
-<span class="linenos" data-linenos="436 "></span>    <span class="n">icon_result</span> <span class="o">=</span> <span class="n">_infer_from_icons</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
-<span class="linenos" data-linenos="437 "></span>    <span class="k">if</span> <span class="n">icon_result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">icon_result</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mf">0.8</span><span class="p">:</span>
-<span class="linenos" data-linenos="438 "></span>        <span class="k">return</span> <span class="n">icon_result</span>
-<span class="linenos" data-linenos="439 "></span>
-<span class="linenos" data-linenos="440 "></span>    <span class="c1"># Priority 4: Text-based hints (label keywords)</span>
-<span class="linenos" data-linenos="441 "></span>    <span class="n">text_result</span> <span class="o">=</span> <span class="n">_infer_from_text</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
-<span class="linenos" data-linenos="442 "></span>    <span class="k">if</span> <span class="n">text_result</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-<span class="linenos" data-linenos="443 "></span>        <span class="c1"># If heuristics also found something, combine confidences</span>
-<span class="linenos" data-linenos="444 "></span>        <span class="k">if</span> <span class="n">heuristic_result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">text_result</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-<span class="linenos" data-linenos="445 "></span>            <span class="n">combined_confidence</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span>
-<span class="linenos" data-linenos="446 "></span>                <span class="mf">1.0</span><span class="p">,</span> <span class="p">(</span><span class="n">heuristic_result</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">text_result</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="mf">0.2</span>
-<span class="linenos" data-linenos="447 "></span>            <span class="p">)</span>
-<span class="linenos" data-linenos="448 "></span>            <span class="k">return</span> <span class="p">(</span><span class="n">text_result</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">combined_confidence</span><span class="p">)</span>
-<span class="linenos" data-linenos="449 "></span>        <span class="c1"># Text has higher confidence if different</span>
-<span class="linenos" data-linenos="450 "></span>        <span class="k">if</span> <span class="n">text_result</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">heuristic_result</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
-<span class="linenos" data-linenos="451 "></span>            <span class="k">return</span> <span class="n">text_result</span>
-<span class="linenos" data-linenos="452 "></span>        <span class="k">return</span> <span class="n">heuristic_result</span>
-<span class="linenos" data-linenos="453 "></span>
-<span class="linenos" data-linenos="454 "></span>    <span class="c1"># Priority 5: Fallback - return heuristic result or generic</span>
-<span class="linenos" data-linenos="455 "></span>    <span class="k">if</span> <span class="n">heuristic_result</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-<span class="linenos" data-linenos="456 "></span>        <span class="k">return</span> <span class="n">heuristic_result</span>
-<span class="linenos" data-linenos="457 "></span>
-<span class="linenos" data-linenos="458 "></span>    <span class="k">return</span> <span class="p">(</span><span class="n">SemanticType</span><span class="o">.</span><span class="n">GENERIC</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">)</span>
+              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="382 "></span><span class="k">def</span><span class="w"> </span><span class="nf">infer_semantic_type</span><span class="p">(</span>
+<span class="linenos" data-linenos="383 "></span>    <span class="n">shape_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<span class="linenos" data-linenos="384 "></span>    <span class="n">label</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+<span class="linenos" data-linenos="385 "></span>    <span class="n">size</span><span class="p">:</span> <span class="n">Dimensions</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="linenos" data-linenos="386 "></span>    <span class="n">style</span><span class="p">:</span> <span class="n">Style</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="linenos" data-linenos="387 "></span>    <span class="n">metadata</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="linenos" data-linenos="388 "></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">SemanticType</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="linenos" data-linenos="389 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Infer semantic type using hybrid approach.</span>
+<span class="linenos" data-linenos="390 "></span>
+<span class="linenos" data-linenos="391 "></span><span class="sd">    Priority order:</span>
+<span class="linenos" data-linenos="392 "></span><span class="sd">    1. Explicit user hints (metadata)</span>
+<span class="linenos" data-linenos="393 "></span><span class="sd">    2. Strong heuristics (shape + size + style)</span>
+<span class="linenos" data-linenos="394 "></span><span class="sd">    3. Icon/emoji detection in label</span>
+<span class="linenos" data-linenos="395 "></span><span class="sd">    4. Text-based hints (label keywords)</span>
+<span class="linenos" data-linenos="396 "></span><span class="sd">    5. Fallback to generic</span>
+<span class="linenos" data-linenos="397 "></span>
+<span class="linenos" data-linenos="398 "></span><span class="sd">    Args:</span>
+<span class="linenos" data-linenos="399 "></span><span class="sd">        shape_type: Geometric shape type (rectangle, ellipse, etc.)</span>
+<span class="linenos" data-linenos="400 "></span><span class="sd">        label: Element label text</span>
+<span class="linenos" data-linenos="401 "></span><span class="sd">        size: Element dimensions</span>
+<span class="linenos" data-linenos="402 "></span><span class="sd">        style: Element styling</span>
+<span class="linenos" data-linenos="403 "></span><span class="sd">        metadata: Additional metadata (may contain hints)</span>
+<span class="linenos" data-linenos="404 "></span>
+<span class="linenos" data-linenos="405 "></span><span class="sd">    Returns:</span>
+<span class="linenos" data-linenos="406 "></span><span class="sd">        Tuple of (semantic_type, confidence)</span>
+<span class="linenos" data-linenos="407 "></span><span class="sd">        - semantic_type: Inferred SemanticType or None</span>
+<span class="linenos" data-linenos="408 "></span><span class="sd">        - confidence: Float from 0.0 to 1.0</span>
+<span class="linenos" data-linenos="409 "></span><span class="sd">    &quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="410 "></span>    <span class="c1"># Priority 1: Explicit user hints (highest confidence)</span>
+<span class="linenos" data-linenos="411 "></span>    <span class="k">if</span> <span class="n">metadata</span><span class="p">:</span>
+<span class="linenos" data-linenos="412 "></span>        <span class="c1"># Check for explicit semantic type hint</span>
+<span class="linenos" data-linenos="413 "></span>        <span class="k">if</span> <span class="s1">&#39;semantic_type&#39;</span> <span class="ow">in</span> <span class="n">metadata</span><span class="p">:</span>
+<span class="linenos" data-linenos="414 "></span>            <span class="n">hint</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;semantic_type&#39;</span><span class="p">]</span>
+<span class="linenos" data-linenos="415 "></span>            <span class="k">try</span><span class="p">:</span>
+<span class="linenos" data-linenos="416 "></span>                <span class="k">return</span> <span class="p">(</span><span class="n">SemanticType</span><span class="p">(</span><span class="n">hint</span><span class="p">),</span> <span class="mf">1.0</span><span class="p">)</span>
+<span class="linenos" data-linenos="417 "></span>            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+<span class="linenos" data-linenos="418 "></span>                <span class="k">pass</span>  <span class="c1"># Invalid hint, continue with other methods</span>
+<span class="linenos" data-linenos="419 "></span>
+<span class="linenos" data-linenos="420 "></span>        <span class="c1"># Check for format-specific hints</span>
+<span class="linenos" data-linenos="421 "></span>        <span class="k">if</span> <span class="s1">&#39;data-semantic&#39;</span> <span class="ow">in</span> <span class="n">metadata</span><span class="p">:</span>  <span class="c1"># From SVG</span>
+<span class="linenos" data-linenos="422 "></span>            <span class="n">hint</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;data-semantic&#39;</span><span class="p">]</span>
+<span class="linenos" data-linenos="423 "></span>            <span class="n">semantic</span> <span class="o">=</span> <span class="n">_parse_semantic_hint</span><span class="p">(</span><span class="n">hint</span><span class="p">)</span>
+<span class="linenos" data-linenos="424 "></span>            <span class="k">if</span> <span class="n">semantic</span><span class="p">:</span>
+<span class="linenos" data-linenos="425 "></span>                <span class="k">return</span> <span class="p">(</span><span class="n">semantic</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">)</span>
+<span class="linenos" data-linenos="426 "></span>
+<span class="linenos" data-linenos="427 "></span>    <span class="c1"># Priority 2: Strong heuristics (shape + size + style patterns)</span>
+<span class="linenos" data-linenos="428 "></span>    <span class="n">heuristic_result</span> <span class="o">=</span> <span class="n">_infer_from_heuristics</span><span class="p">(</span><span class="n">shape_type</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">style</span><span class="p">)</span>
+<span class="linenos" data-linenos="429 "></span>    <span class="k">if</span> <span class="n">heuristic_result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">heuristic_result</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mf">0.8</span><span class="p">:</span>
+<span class="linenos" data-linenos="430 "></span>        <span class="k">return</span> <span class="n">heuristic_result</span>
+<span class="linenos" data-linenos="431 "></span>
+<span class="linenos" data-linenos="432 "></span>    <span class="c1"># Priority 3: Icon/emoji detection in label</span>
+<span class="linenos" data-linenos="433 "></span>    <span class="n">icon_result</span> <span class="o">=</span> <span class="n">_infer_from_icons</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+<span class="linenos" data-linenos="434 "></span>    <span class="k">if</span> <span class="n">icon_result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">icon_result</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mf">0.8</span><span class="p">:</span>
+<span class="linenos" data-linenos="435 "></span>        <span class="k">return</span> <span class="n">icon_result</span>
+<span class="linenos" data-linenos="436 "></span>
+<span class="linenos" data-linenos="437 "></span>    <span class="c1"># Priority 4: Text-based hints (label keywords)</span>
+<span class="linenos" data-linenos="438 "></span>    <span class="n">text_result</span> <span class="o">=</span> <span class="n">_infer_from_text</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+<span class="linenos" data-linenos="439 "></span>    <span class="k">if</span> <span class="n">text_result</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+<span class="linenos" data-linenos="440 "></span>        <span class="c1"># If heuristics also found something, combine confidences</span>
+<span class="linenos" data-linenos="441 "></span>        <span class="k">if</span> <span class="n">heuristic_result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">text_result</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+<span class="linenos" data-linenos="442 "></span>            <span class="n">combined_confidence</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="p">(</span><span class="n">heuristic_result</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">text_result</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="mf">0.2</span><span class="p">)</span>
+<span class="linenos" data-linenos="443 "></span>            <span class="k">return</span> <span class="p">(</span><span class="n">text_result</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">combined_confidence</span><span class="p">)</span>
+<span class="linenos" data-linenos="444 "></span>        <span class="c1"># Text has higher confidence if different</span>
+<span class="linenos" data-linenos="445 "></span>        <span class="k">if</span> <span class="n">text_result</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">heuristic_result</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+<span class="linenos" data-linenos="446 "></span>            <span class="k">return</span> <span class="n">text_result</span>
+<span class="linenos" data-linenos="447 "></span>        <span class="k">return</span> <span class="n">heuristic_result</span>
+<span class="linenos" data-linenos="448 "></span>
+<span class="linenos" data-linenos="449 "></span>    <span class="c1"># Priority 5: Fallback - return heuristic result or generic</span>
+<span class="linenos" data-linenos="450 "></span>    <span class="k">if</span> <span class="n">heuristic_result</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+<span class="linenos" data-linenos="451 "></span>        <span class="k">return</span> <span class="n">heuristic_result</span>
+<span class="linenos" data-linenos="452 "></span>
+<span class="linenos" data-linenos="453 "></span>    <span class="k">return</span> <span class="p">(</span><span class="n">SemanticType</span><span class="o">.</span><span class="n">GENERIC</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">)</span>
 </code></pre></div>
             </details>
     </div>
@@ -2153,7 +2151,7 @@
               <p>
                   <span class="doc-param-annotation">
                     <b>TYPE:</b>
-                      <code><span title="typing.Optional">Optional</span>[<a class="autorefs autorefs-internal" title="SemanticType (diacea.ir.semantic.SemanticType)" href="#diacea.ir.semantic.SemanticType">SemanticType</a>]</code>
+                      <code><a class="autorefs autorefs-internal" title="SemanticType (diacea.ir.semantic.SemanticType)" href="#diacea.ir.semantic.SemanticType">SemanticType</a> | None</code>
                   </span>
               </p>
             </td>
@@ -2189,7 +2187,7 @@
           <tr class="doc-section-item">
             <td>
                 <span class="doc-returns-annotation">
-                    <code><span title="typing.Optional">Optional</span>[<span title="str">str</span>]</code>
+                    <code><span title="str">str</span> | None</code>
                 </span>
             </td>
             <td class="doc-returns-details">
@@ -2204,24 +2202,22 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>diacea/ir/semantic.py</code></summary>
-              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="643 "></span><span class="k">def</span><span class="w"> </span><span class="nf">validate_confidence</span><span class="p">(</span>
-<span class="linenos" data-linenos="644 "></span>    <span class="n">semantic_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SemanticType</span><span class="p">],</span> <span class="n">confidence</span><span class="p">:</span> <span class="nb">float</span>
-<span class="linenos" data-linenos="645 "></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="linenos" data-linenos="646 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Validate confidence level and return warning if below threshold.</span>
-<span class="linenos" data-linenos="647 "></span>
-<span class="linenos" data-linenos="648 "></span><span class="sd">    Args:</span>
-<span class="linenos" data-linenos="649 "></span><span class="sd">        semantic_type: Inferred semantic type</span>
-<span class="linenos" data-linenos="650 "></span><span class="sd">        confidence: Confidence score</span>
-<span class="linenos" data-linenos="651 "></span>
-<span class="linenos" data-linenos="652 "></span><span class="sd">    Returns:</span>
-<span class="linenos" data-linenos="653 "></span><span class="sd">        Warning message if confidence below threshold, None otherwise</span>
-<span class="linenos" data-linenos="654 "></span><span class="sd">    &quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="655 "></span>    <span class="k">if</span> <span class="n">semantic_type</span> <span class="ow">and</span> <span class="n">confidence</span> <span class="o">&lt;</span> <span class="n">CONFIDENCE_THRESHOLD</span><span class="p">:</span>
-<span class="linenos" data-linenos="656 "></span>        <span class="k">return</span> <span class="p">(</span>
-<span class="linenos" data-linenos="657 "></span>            <span class="sa">f</span><span class="s2">&quot;Low confidence (</span><span class="si">{</span><span class="n">confidence</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">) for semantic type &#39;</span><span class="si">{</span><span class="n">semantic_type</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s2">&#39;. &quot;</span>
-<span class="linenos" data-linenos="658 "></span>            <span class="sa">f</span><span class="s2">&quot;Consider adding explicit hints in metadata.&quot;</span>
-<span class="linenos" data-linenos="659 "></span>        <span class="p">)</span>
-<span class="linenos" data-linenos="660 "></span>    <span class="k">return</span> <span class="kc">None</span>
+              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="637 "></span><span class="k">def</span><span class="w"> </span><span class="nf">validate_confidence</span><span class="p">(</span><span class="n">semantic_type</span><span class="p">:</span> <span class="n">SemanticType</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">confidence</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos" data-linenos="638 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Validate confidence level and return warning if below threshold.</span>
+<span class="linenos" data-linenos="639 "></span>
+<span class="linenos" data-linenos="640 "></span><span class="sd">    Args:</span>
+<span class="linenos" data-linenos="641 "></span><span class="sd">        semantic_type: Inferred semantic type</span>
+<span class="linenos" data-linenos="642 "></span><span class="sd">        confidence: Confidence score</span>
+<span class="linenos" data-linenos="643 "></span>
+<span class="linenos" data-linenos="644 "></span><span class="sd">    Returns:</span>
+<span class="linenos" data-linenos="645 "></span><span class="sd">        Warning message if confidence below threshold, None otherwise</span>
+<span class="linenos" data-linenos="646 "></span><span class="sd">    &quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="647 "></span>    <span class="k">if</span> <span class="n">semantic_type</span> <span class="ow">and</span> <span class="n">confidence</span> <span class="o">&lt;</span> <span class="n">CONFIDENCE_THRESHOLD</span><span class="p">:</span>
+<span class="linenos" data-linenos="648 "></span>        <span class="k">return</span> <span class="p">(</span>
+<span class="linenos" data-linenos="649 "></span>            <span class="sa">f</span><span class="s2">&quot;Low confidence (</span><span class="si">{</span><span class="n">confidence</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">) for semantic type &#39;</span><span class="si">{</span><span class="n">semantic_type</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s2">&#39;. &quot;</span>
+<span class="linenos" data-linenos="650 "></span>            <span class="sa">f</span><span class="s1">&#39;Consider adding explicit hints in metadata.&#39;</span>
+<span class="linenos" data-linenos="651 "></span>        <span class="p">)</span>
+<span class="linenos" data-linenos="652 "></span>    <span class="k">return</span> <span class="kc">None</span>
 </code></pre></div>
             </details>
     </div>

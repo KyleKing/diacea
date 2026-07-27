@@ -1852,26 +1852,25 @@
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>diacea/ir/base.py</code></summary>
-                <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="34 "></span><span class="k">class</span><span class="w"> </span><span class="nc">Generator</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
-<span class="linenos" data-linenos="35 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for format generators.</span>
-<span class="linenos" data-linenos="36 "></span>
-<span class="linenos" data-linenos="37 "></span><span class="sd">    A generator converts the universal IR into a format-specific representation.</span>
-<span class="linenos" data-linenos="38 "></span><span class="sd">    &quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="39 "></span>
-<span class="linenos" data-linenos="40 "></span>    <span class="nd">@abstractmethod</span>
-<span class="linenos" data-linenos="41 "></span>    <span class="k">def</span><span class="w"> </span><span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">diagram</span><span class="p">:</span> <span class="n">Diagram</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="linenos" data-linenos="42 "></span><span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate format-specific output from IR Diagram.</span>
-<span class="linenos" data-linenos="43 "></span>
-<span class="linenos" data-linenos="44 "></span><span class="sd">        Args:</span>
-<span class="linenos" data-linenos="45 "></span><span class="sd">            diagram: Diagram object in IR format</span>
-<span class="linenos" data-linenos="46 "></span>
-<span class="linenos" data-linenos="47 "></span><span class="sd">        Returns:</span>
-<span class="linenos" data-linenos="48 "></span><span class="sd">            Format-specific output as string</span>
-<span class="linenos" data-linenos="49 "></span>
-<span class="linenos" data-linenos="50 "></span><span class="sd">        Raises:</span>
-<span class="linenos" data-linenos="51 "></span><span class="sd">            ValueError: If diagram cannot be converted to this format</span>
-<span class="linenos" data-linenos="52 "></span><span class="sd">        &quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="53 "></span>        <span class="k">pass</span>
+                <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="33 "></span><span class="k">class</span><span class="w"> </span><span class="nc">Generator</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="linenos" data-linenos="34 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for format generators.</span>
+<span class="linenos" data-linenos="35 "></span>
+<span class="linenos" data-linenos="36 "></span><span class="sd">    A generator converts the universal IR into a format-specific representation.</span>
+<span class="linenos" data-linenos="37 "></span><span class="sd">    &quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="38 "></span>
+<span class="linenos" data-linenos="39 "></span>    <span class="nd">@abstractmethod</span>
+<span class="linenos" data-linenos="40 "></span>    <span class="k">def</span><span class="w"> </span><span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">diagram</span><span class="p">:</span> <span class="n">Diagram</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos" data-linenos="41 "></span><span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate format-specific output from IR Diagram.</span>
+<span class="linenos" data-linenos="42 "></span>
+<span class="linenos" data-linenos="43 "></span><span class="sd">        Args:</span>
+<span class="linenos" data-linenos="44 "></span><span class="sd">            diagram: Diagram object in IR format</span>
+<span class="linenos" data-linenos="45 "></span>
+<span class="linenos" data-linenos="46 "></span><span class="sd">        Returns:</span>
+<span class="linenos" data-linenos="47 "></span><span class="sd">            Format-specific output as string</span>
+<span class="linenos" data-linenos="48 "></span>
+<span class="linenos" data-linenos="49 "></span><span class="sd">        Raises:</span>
+<span class="linenos" data-linenos="50 "></span><span class="sd">            ValueError: If diagram cannot be converted to this format</span>
+<span class="linenos" data-linenos="51 "></span><span class="sd">        &quot;&quot;&quot;</span>
 </code></pre></div>
               </details>
 
@@ -1991,20 +1990,19 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>diacea/ir/base.py</code></summary>
-              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="40 "></span><span class="nd">@abstractmethod</span>
-<span class="linenos" data-linenos="41 "></span><span class="k">def</span><span class="w"> </span><span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">diagram</span><span class="p">:</span> <span class="n">Diagram</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="linenos" data-linenos="42 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate format-specific output from IR Diagram.</span>
-<span class="linenos" data-linenos="43 "></span>
-<span class="linenos" data-linenos="44 "></span><span class="sd">    Args:</span>
-<span class="linenos" data-linenos="45 "></span><span class="sd">        diagram: Diagram object in IR format</span>
-<span class="linenos" data-linenos="46 "></span>
-<span class="linenos" data-linenos="47 "></span><span class="sd">    Returns:</span>
-<span class="linenos" data-linenos="48 "></span><span class="sd">        Format-specific output as string</span>
-<span class="linenos" data-linenos="49 "></span>
-<span class="linenos" data-linenos="50 "></span><span class="sd">    Raises:</span>
-<span class="linenos" data-linenos="51 "></span><span class="sd">        ValueError: If diagram cannot be converted to this format</span>
-<span class="linenos" data-linenos="52 "></span><span class="sd">    &quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="53 "></span>    <span class="k">pass</span>
+              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="39 "></span><span class="nd">@abstractmethod</span>
+<span class="linenos" data-linenos="40 "></span><span class="k">def</span><span class="w"> </span><span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">diagram</span><span class="p">:</span> <span class="n">Diagram</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos" data-linenos="41 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate format-specific output from IR Diagram.</span>
+<span class="linenos" data-linenos="42 "></span>
+<span class="linenos" data-linenos="43 "></span><span class="sd">    Args:</span>
+<span class="linenos" data-linenos="44 "></span><span class="sd">        diagram: Diagram object in IR format</span>
+<span class="linenos" data-linenos="45 "></span>
+<span class="linenos" data-linenos="46 "></span><span class="sd">    Returns:</span>
+<span class="linenos" data-linenos="47 "></span><span class="sd">        Format-specific output as string</span>
+<span class="linenos" data-linenos="48 "></span>
+<span class="linenos" data-linenos="49 "></span><span class="sd">    Raises:</span>
+<span class="linenos" data-linenos="50 "></span><span class="sd">        ValueError: If diagram cannot be converted to this format</span>
+<span class="linenos" data-linenos="51 "></span><span class="sd">    &quot;&quot;&quot;</span>
 </code></pre></div>
             </details>
     </div>
@@ -2067,7 +2065,6 @@
 <span class="linenos" data-linenos="28 "></span><span class="sd">        Raises:</span>
 <span class="linenos" data-linenos="29 "></span><span class="sd">            ValueError: If data is invalid or cannot be parsed</span>
 <span class="linenos" data-linenos="30 "></span><span class="sd">        &quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="31 "></span>        <span class="k">pass</span>
 </code></pre></div>
               </details>
 
@@ -2200,7 +2197,6 @@
 <span class="linenos" data-linenos="28 "></span><span class="sd">    Raises:</span>
 <span class="linenos" data-linenos="29 "></span><span class="sd">        ValueError: If data is invalid or cannot be parsed</span>
 <span class="linenos" data-linenos="30 "></span><span class="sd">    &quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="31 "></span>    <span class="k">pass</span>
 </code></pre></div>
             </details>
     </div>

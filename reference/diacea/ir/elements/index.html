@@ -2628,23 +2628,23 @@ geometric information for manual alignment.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>diacea/ir/elements.py</code></summary>
-                <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="114 "></span><span class="nd">@dataclass</span>
-<span class="linenos" data-linenos="115 "></span><span class="k">class</span><span class="w"> </span><span class="nc">Connection</span><span class="p">(</span><span class="n">Element</span><span class="p">):</span>
-<span class="linenos" data-linenos="116 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;A connection/arrow between elements.&quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="117 "></span>
-<span class="linenos" data-linenos="118 "></span>    <span class="n">from_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-<span class="linenos" data-linenos="119 "></span>    <span class="n">to_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-<span class="linenos" data-linenos="120 "></span>    <span class="n">label</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-<span class="linenos" data-linenos="121 "></span>    <span class="n">connection_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;directed&quot;</span>  <span class="c1"># directed, bidirectional, undirected</span>
-<span class="linenos" data-linenos="122 "></span>
-<span class="linenos" data-linenos="123 "></span>    <span class="c1"># Connection points (optional, for precise routing)</span>
-<span class="linenos" data-linenos="124 "></span>    <span class="n">start_point</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Point</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="linenos" data-linenos="125 "></span>    <span class="n">end_point</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Point</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="linenos" data-linenos="126 "></span>    <span class="n">waypoints</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Point</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
-<span class="linenos" data-linenos="127 "></span>
-<span class="linenos" data-linenos="128 "></span>    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="linenos" data-linenos="129 "></span><span class="w">        </span><span class="sd">&quot;&quot;&quot;Set element type.&quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="130 "></span>        <span class="bp">self</span><span class="o">.</span><span class="n">element_type</span> <span class="o">=</span> <span class="s2">&quot;connection&quot;</span>
+                <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="112 "></span><span class="nd">@dataclass</span>
+<span class="linenos" data-linenos="113 "></span><span class="k">class</span><span class="w"> </span><span class="nc">Connection</span><span class="p">(</span><span class="n">Element</span><span class="p">):</span>
+<span class="linenos" data-linenos="114 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;A connection/arrow between elements.&quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="115 "></span>
+<span class="linenos" data-linenos="116 "></span>    <span class="n">from_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+<span class="linenos" data-linenos="117 "></span>    <span class="n">to_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+<span class="linenos" data-linenos="118 "></span>    <span class="n">label</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+<span class="linenos" data-linenos="119 "></span>    <span class="n">connection_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;directed&#39;</span>  <span class="c1"># directed, bidirectional, undirected</span>
+<span class="linenos" data-linenos="120 "></span>
+<span class="linenos" data-linenos="121 "></span>    <span class="c1"># Connection points (optional, for precise routing)</span>
+<span class="linenos" data-linenos="122 "></span>    <span class="n">start_point</span><span class="p">:</span> <span class="n">Point</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="linenos" data-linenos="123 "></span>    <span class="n">end_point</span><span class="p">:</span> <span class="n">Point</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="linenos" data-linenos="124 "></span>    <span class="n">waypoints</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Point</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+<span class="linenos" data-linenos="125 "></span>
+<span class="linenos" data-linenos="126 "></span>    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="linenos" data-linenos="127 "></span><span class="w">        </span><span class="sd">&quot;&quot;&quot;Set element type.&quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="128 "></span>        <span class="bp">self</span><span class="o">.</span><span class="n">element_type</span> <span class="o">=</span> <span class="s1">&#39;connection&#39;</span>
 </code></pre></div>
               </details>
 
@@ -2679,9 +2679,9 @@ geometric information for manual alignment.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>diacea/ir/elements.py</code></summary>
-              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="128 "></span><span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="linenos" data-linenos="129 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Set element type.&quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="130 "></span>    <span class="bp">self</span><span class="o">.</span><span class="n">element_type</span> <span class="o">=</span> <span class="s2">&quot;connection&quot;</span>
+              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="126 "></span><span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="linenos" data-linenos="127 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Set element type.&quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="128 "></span>    <span class="bp">self</span><span class="o">.</span><span class="n">element_type</span> <span class="o">=</span> <span class="s1">&#39;connection&#39;</span>
 </code></pre></div>
             </details>
     </div>
@@ -2727,66 +2727,66 @@ geometric information for manual alignment.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>diacea/ir/elements.py</code></summary>
-                <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="162 "></span><span class="nd">@dataclass</span>
-<span class="linenos" data-linenos="163 "></span><span class="k">class</span><span class="w"> </span><span class="nc">Diagram</span><span class="p">:</span>
-<span class="linenos" data-linenos="164 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Complete diagram representation.</span>
-<span class="linenos" data-linenos="165 "></span>
-<span class="linenos" data-linenos="166 "></span><span class="sd">    A diagram contains all elements and metadata about the diagram itself.</span>
-<span class="linenos" data-linenos="167 "></span><span class="sd">    &quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="168 "></span>
-<span class="linenos" data-linenos="169 "></span>    <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span>
-<span class="linenos" data-linenos="170 "></span>    <span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="linenos" data-linenos="171 "></span>    <span class="n">description</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="linenos" data-linenos="172 "></span>
-<span class="linenos" data-linenos="173 "></span>    <span class="c1"># All elements in the diagram</span>
-<span class="linenos" data-linenos="174 "></span>    <span class="n">elements</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Element</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
-<span class="linenos" data-linenos="175 "></span>
-<span class="linenos" data-linenos="176 "></span>    <span class="c1"># Metadata</span>
-<span class="linenos" data-linenos="177 "></span>    <span class="n">version</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">IR_VERSION</span>  <span class="c1"># IR version for compatibility</span>
-<span class="linenos" data-linenos="178 "></span>    <span class="n">created</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="linenos" data-linenos="179 "></span>    <span class="n">modified</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="linenos" data-linenos="180 "></span>    <span class="n">author</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="linenos" data-linenos="181 "></span>
-<span class="linenos" data-linenos="182 "></span>    <span class="c1"># Format-specific metadata (preserves for roundtrip)</span>
-<span class="linenos" data-linenos="183 "></span>    <span class="c1"># Example: {&quot;excalidraw&quot;: {&quot;appState&quot;: {...}}}</span>
-<span class="linenos" data-linenos="184 "></span>    <span class="n">metadata</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
-<span class="linenos" data-linenos="185 "></span>
-<span class="linenos" data-linenos="186 "></span>    <span class="k">def</span><span class="w"> </span><span class="nf">get_element</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Element</span><span class="p">]:</span>
-<span class="linenos" data-linenos="187 "></span><span class="w">        </span><span class="sd">&quot;&quot;&quot;Get element by ID.&quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="188 "></span>        <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">:</span>
-<span class="linenos" data-linenos="189 "></span>            <span class="k">if</span> <span class="n">elem</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">element_id</span><span class="p">:</span>
-<span class="linenos" data-linenos="190 "></span>                <span class="k">return</span> <span class="n">elem</span>
-<span class="linenos" data-linenos="191 "></span>        <span class="k">return</span> <span class="kc">None</span>
-<span class="linenos" data-linenos="192 "></span>
-<span class="linenos" data-linenos="193 "></span>    <span class="k">def</span><span class="w"> </span><span class="nf">get_elements_by_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Element</span><span class="p">]:</span>
-<span class="linenos" data-linenos="194 "></span><span class="w">        </span><span class="sd">&quot;&quot;&quot;Get all elements of a specific type.&quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="195 "></span>        <span class="k">return</span> <span class="p">[</span><span class="n">elem</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span> <span class="k">if</span> <span class="n">elem</span><span class="o">.</span><span class="n">element_type</span> <span class="o">==</span> <span class="n">element_type</span><span class="p">]</span>
-<span class="linenos" data-linenos="196 "></span>
-<span class="linenos" data-linenos="197 "></span>    <span class="k">def</span><span class="w"> </span><span class="nf">get_shapes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Shape</span><span class="p">]:</span>
-<span class="linenos" data-linenos="198 "></span><span class="w">        </span><span class="sd">&quot;&quot;&quot;Get all shape elements.&quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="199 "></span>        <span class="k">return</span> <span class="p">[</span><span class="n">elem</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">Shape</span><span class="p">)]</span>
-<span class="linenos" data-linenos="200 "></span>
-<span class="linenos" data-linenos="201 "></span>    <span class="k">def</span><span class="w"> </span><span class="nf">get_connections</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Connection</span><span class="p">]:</span>
-<span class="linenos" data-linenos="202 "></span><span class="w">        </span><span class="sd">&quot;&quot;&quot;Get all connection elements.&quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="203 "></span>        <span class="k">return</span> <span class="p">[</span><span class="n">elem</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">Connection</span><span class="p">)]</span>
-<span class="linenos" data-linenos="204 "></span>
-<span class="linenos" data-linenos="205 "></span>    <span class="k">def</span><span class="w"> </span><span class="nf">get_groups</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Group</span><span class="p">]:</span>
-<span class="linenos" data-linenos="206 "></span><span class="w">        </span><span class="sd">&quot;&quot;&quot;Get all group elements.&quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="207 "></span>        <span class="k">return</span> <span class="p">[</span><span class="n">elem</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">Group</span><span class="p">)]</span>
-<span class="linenos" data-linenos="208 "></span>
-<span class="linenos" data-linenos="209 "></span>    <span class="k">def</span><span class="w"> </span><span class="nf">get_texts</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Text</span><span class="p">]:</span>
-<span class="linenos" data-linenos="210 "></span><span class="w">        </span><span class="sd">&quot;&quot;&quot;Get all text elements.&quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="211 "></span>        <span class="k">return</span> <span class="p">[</span><span class="n">elem</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">Text</span><span class="p">)]</span>
-<span class="linenos" data-linenos="212 "></span>
-<span class="linenos" data-linenos="213 "></span>    <span class="k">def</span><span class="w"> </span><span class="nf">add_element</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">:</span> <span class="n">Element</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="linenos" data-linenos="214 "></span><span class="w">        </span><span class="sd">&quot;&quot;&quot;Add an element to the diagram.&quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="215 "></span>        <span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
-<span class="linenos" data-linenos="216 "></span>
-<span class="linenos" data-linenos="217 "></span>    <span class="k">def</span><span class="w"> </span><span class="nf">remove_element</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="linenos" data-linenos="218 "></span><span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove an element by ID. Returns True if removed.&quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="219 "></span>        <span class="n">initial_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">)</span>
-<span class="linenos" data-linenos="220 "></span>        <span class="bp">self</span><span class="o">.</span><span class="n">elements</span> <span class="o">=</span> <span class="p">[</span><span class="n">elem</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span> <span class="k">if</span> <span class="n">elem</span><span class="o">.</span><span class="n">id</span> <span class="o">!=</span> <span class="n">element_id</span><span class="p">]</span>
-<span class="linenos" data-linenos="221 "></span>        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">initial_length</span>
+                <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="160 "></span><span class="nd">@dataclass</span>
+<span class="linenos" data-linenos="161 "></span><span class="k">class</span><span class="w"> </span><span class="nc">Diagram</span><span class="p">:</span>
+<span class="linenos" data-linenos="162 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Complete diagram representation.</span>
+<span class="linenos" data-linenos="163 "></span>
+<span class="linenos" data-linenos="164 "></span><span class="sd">    A diagram contains all elements and metadata about the diagram itself.</span>
+<span class="linenos" data-linenos="165 "></span><span class="sd">    &quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="166 "></span>
+<span class="linenos" data-linenos="167 "></span>    <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span>
+<span class="linenos" data-linenos="168 "></span>    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="linenos" data-linenos="169 "></span>    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="linenos" data-linenos="170 "></span>
+<span class="linenos" data-linenos="171 "></span>    <span class="c1"># All elements in the diagram</span>
+<span class="linenos" data-linenos="172 "></span>    <span class="n">elements</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Element</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+<span class="linenos" data-linenos="173 "></span>
+<span class="linenos" data-linenos="174 "></span>    <span class="c1"># Metadata</span>
+<span class="linenos" data-linenos="175 "></span>    <span class="n">version</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">IR_VERSION</span>  <span class="c1"># IR version for compatibility</span>
+<span class="linenos" data-linenos="176 "></span>    <span class="n">created</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="linenos" data-linenos="177 "></span>    <span class="n">modified</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="linenos" data-linenos="178 "></span>    <span class="n">author</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="linenos" data-linenos="179 "></span>
+<span class="linenos" data-linenos="180 "></span>    <span class="c1"># Format-specific metadata (preserves for roundtrip)</span>
+<span class="linenos" data-linenos="181 "></span>    <span class="c1"># Example: {&quot;excalidraw&quot;: {&quot;appState&quot;: {...}}}  # noqa: ERA001</span>
+<span class="linenos" data-linenos="182 "></span>    <span class="n">metadata</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+<span class="linenos" data-linenos="183 "></span>
+<span class="linenos" data-linenos="184 "></span>    <span class="k">def</span><span class="w"> </span><span class="nf">get_element</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Element</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos" data-linenos="185 "></span><span class="w">        </span><span class="sd">&quot;&quot;&quot;Get element by ID.&quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="186 "></span>        <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">:</span>
+<span class="linenos" data-linenos="187 "></span>            <span class="k">if</span> <span class="n">elem</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">element_id</span><span class="p">:</span>
+<span class="linenos" data-linenos="188 "></span>                <span class="k">return</span> <span class="n">elem</span>
+<span class="linenos" data-linenos="189 "></span>        <span class="k">return</span> <span class="kc">None</span>
+<span class="linenos" data-linenos="190 "></span>
+<span class="linenos" data-linenos="191 "></span>    <span class="k">def</span><span class="w"> </span><span class="nf">get_elements_by_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Element</span><span class="p">]:</span>
+<span class="linenos" data-linenos="192 "></span><span class="w">        </span><span class="sd">&quot;&quot;&quot;Get all elements of a specific type.&quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="193 "></span>        <span class="k">return</span> <span class="p">[</span><span class="n">elem</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span> <span class="k">if</span> <span class="n">elem</span><span class="o">.</span><span class="n">element_type</span> <span class="o">==</span> <span class="n">element_type</span><span class="p">]</span>
+<span class="linenos" data-linenos="194 "></span>
+<span class="linenos" data-linenos="195 "></span>    <span class="k">def</span><span class="w"> </span><span class="nf">get_shapes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Shape</span><span class="p">]:</span>
+<span class="linenos" data-linenos="196 "></span><span class="w">        </span><span class="sd">&quot;&quot;&quot;Get all shape elements.&quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="197 "></span>        <span class="k">return</span> <span class="p">[</span><span class="n">elem</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">Shape</span><span class="p">)]</span>
+<span class="linenos" data-linenos="198 "></span>
+<span class="linenos" data-linenos="199 "></span>    <span class="k">def</span><span class="w"> </span><span class="nf">get_connections</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Connection</span><span class="p">]:</span>
+<span class="linenos" data-linenos="200 "></span><span class="w">        </span><span class="sd">&quot;&quot;&quot;Get all connection elements.&quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="201 "></span>        <span class="k">return</span> <span class="p">[</span><span class="n">elem</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">Connection</span><span class="p">)]</span>
+<span class="linenos" data-linenos="202 "></span>
+<span class="linenos" data-linenos="203 "></span>    <span class="k">def</span><span class="w"> </span><span class="nf">get_groups</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Group</span><span class="p">]:</span>
+<span class="linenos" data-linenos="204 "></span><span class="w">        </span><span class="sd">&quot;&quot;&quot;Get all group elements.&quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="205 "></span>        <span class="k">return</span> <span class="p">[</span><span class="n">elem</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">Group</span><span class="p">)]</span>
+<span class="linenos" data-linenos="206 "></span>
+<span class="linenos" data-linenos="207 "></span>    <span class="k">def</span><span class="w"> </span><span class="nf">get_texts</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Text</span><span class="p">]:</span>
+<span class="linenos" data-linenos="208 "></span><span class="w">        </span><span class="sd">&quot;&quot;&quot;Get all text elements.&quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="209 "></span>        <span class="k">return</span> <span class="p">[</span><span class="n">elem</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">Text</span><span class="p">)]</span>
+<span class="linenos" data-linenos="210 "></span>
+<span class="linenos" data-linenos="211 "></span>    <span class="k">def</span><span class="w"> </span><span class="nf">add_element</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">:</span> <span class="n">Element</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos" data-linenos="212 "></span><span class="w">        </span><span class="sd">&quot;&quot;&quot;Add an element to the diagram.&quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="213 "></span>        <span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+<span class="linenos" data-linenos="214 "></span>
+<span class="linenos" data-linenos="215 "></span>    <span class="k">def</span><span class="w"> </span><span class="nf">remove_element</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="linenos" data-linenos="216 "></span><span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove an element by ID. Returns True if removed.&quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="217 "></span>        <span class="n">initial_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">)</span>
+<span class="linenos" data-linenos="218 "></span>        <span class="bp">self</span><span class="o">.</span><span class="n">elements</span> <span class="o">=</span> <span class="p">[</span><span class="n">elem</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span> <span class="k">if</span> <span class="n">elem</span><span class="o">.</span><span class="n">id</span> <span class="o">!=</span> <span class="n">element_id</span><span class="p">]</span>
+<span class="linenos" data-linenos="219 "></span>        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">initial_length</span>
 </code></pre></div>
               </details>
 
@@ -2821,9 +2821,9 @@ geometric information for manual alignment.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>diacea/ir/elements.py</code></summary>
-              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="213 "></span><span class="k">def</span><span class="w"> </span><span class="nf">add_element</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">:</span> <span class="n">Element</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="linenos" data-linenos="214 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Add an element to the diagram.&quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="215 "></span>    <span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="211 "></span><span class="k">def</span><span class="w"> </span><span class="nf">add_element</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">:</span> <span class="n">Element</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos" data-linenos="212 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Add an element to the diagram.&quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="213 "></span>    <span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
 </code></pre></div>
             </details>
     </div>
@@ -2848,9 +2848,9 @@ geometric information for manual alignment.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>diacea/ir/elements.py</code></summary>
-              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="201 "></span><span class="k">def</span><span class="w"> </span><span class="nf">get_connections</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Connection</span><span class="p">]:</span>
-<span class="linenos" data-linenos="202 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Get all connection elements.&quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="203 "></span>    <span class="k">return</span> <span class="p">[</span><span class="n">elem</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">Connection</span><span class="p">)]</span>
+              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="199 "></span><span class="k">def</span><span class="w"> </span><span class="nf">get_connections</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Connection</span><span class="p">]:</span>
+<span class="linenos" data-linenos="200 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Get all connection elements.&quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="201 "></span>    <span class="k">return</span> <span class="p">[</span><span class="n">elem</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">Connection</span><span class="p">)]</span>
 </code></pre></div>
             </details>
     </div>
@@ -2875,12 +2875,12 @@ geometric information for manual alignment.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>diacea/ir/elements.py</code></summary>
-              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="186 "></span><span class="k">def</span><span class="w"> </span><span class="nf">get_element</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Element</span><span class="p">]:</span>
-<span class="linenos" data-linenos="187 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Get element by ID.&quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="188 "></span>    <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">:</span>
-<span class="linenos" data-linenos="189 "></span>        <span class="k">if</span> <span class="n">elem</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">element_id</span><span class="p">:</span>
-<span class="linenos" data-linenos="190 "></span>            <span class="k">return</span> <span class="n">elem</span>
-<span class="linenos" data-linenos="191 "></span>    <span class="k">return</span> <span class="kc">None</span>
+              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="184 "></span><span class="k">def</span><span class="w"> </span><span class="nf">get_element</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Element</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos" data-linenos="185 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Get element by ID.&quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="186 "></span>    <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">:</span>
+<span class="linenos" data-linenos="187 "></span>        <span class="k">if</span> <span class="n">elem</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">element_id</span><span class="p">:</span>
+<span class="linenos" data-linenos="188 "></span>            <span class="k">return</span> <span class="n">elem</span>
+<span class="linenos" data-linenos="189 "></span>    <span class="k">return</span> <span class="kc">None</span>
 </code></pre></div>
             </details>
     </div>
@@ -2905,9 +2905,9 @@ geometric information for manual alignment.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>diacea/ir/elements.py</code></summary>
-              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="193 "></span><span class="k">def</span><span class="w"> </span><span class="nf">get_elements_by_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Element</span><span class="p">]:</span>
-<span class="linenos" data-linenos="194 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Get all elements of a specific type.&quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="195 "></span>    <span class="k">return</span> <span class="p">[</span><span class="n">elem</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span> <span class="k">if</span> <span class="n">elem</span><span class="o">.</span><span class="n">element_type</span> <span class="o">==</span> <span class="n">element_type</span><span class="p">]</span>
+              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="191 "></span><span class="k">def</span><span class="w"> </span><span class="nf">get_elements_by_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Element</span><span class="p">]:</span>
+<span class="linenos" data-linenos="192 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Get all elements of a specific type.&quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="193 "></span>    <span class="k">return</span> <span class="p">[</span><span class="n">elem</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span> <span class="k">if</span> <span class="n">elem</span><span class="o">.</span><span class="n">element_type</span> <span class="o">==</span> <span class="n">element_type</span><span class="p">]</span>
 </code></pre></div>
             </details>
     </div>
@@ -2932,9 +2932,9 @@ geometric information for manual alignment.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>diacea/ir/elements.py</code></summary>
-              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="205 "></span><span class="k">def</span><span class="w"> </span><span class="nf">get_groups</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Group</span><span class="p">]:</span>
-<span class="linenos" data-linenos="206 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Get all group elements.&quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="207 "></span>    <span class="k">return</span> <span class="p">[</span><span class="n">elem</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">Group</span><span class="p">)]</span>
+              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="203 "></span><span class="k">def</span><span class="w"> </span><span class="nf">get_groups</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Group</span><span class="p">]:</span>
+<span class="linenos" data-linenos="204 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Get all group elements.&quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="205 "></span>    <span class="k">return</span> <span class="p">[</span><span class="n">elem</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">Group</span><span class="p">)]</span>
 </code></pre></div>
             </details>
     </div>
@@ -2959,9 +2959,9 @@ geometric information for manual alignment.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>diacea/ir/elements.py</code></summary>
-              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="197 "></span><span class="k">def</span><span class="w"> </span><span class="nf">get_shapes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Shape</span><span class="p">]:</span>
-<span class="linenos" data-linenos="198 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Get all shape elements.&quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="199 "></span>    <span class="k">return</span> <span class="p">[</span><span class="n">elem</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">Shape</span><span class="p">)]</span>
+              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="195 "></span><span class="k">def</span><span class="w"> </span><span class="nf">get_shapes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Shape</span><span class="p">]:</span>
+<span class="linenos" data-linenos="196 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Get all shape elements.&quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="197 "></span>    <span class="k">return</span> <span class="p">[</span><span class="n">elem</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">Shape</span><span class="p">)]</span>
 </code></pre></div>
             </details>
     </div>
@@ -2986,9 +2986,9 @@ geometric information for manual alignment.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>diacea/ir/elements.py</code></summary>
-              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="209 "></span><span class="k">def</span><span class="w"> </span><span class="nf">get_texts</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Text</span><span class="p">]:</span>
-<span class="linenos" data-linenos="210 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Get all text elements.&quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="211 "></span>    <span class="k">return</span> <span class="p">[</span><span class="n">elem</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">Text</span><span class="p">)]</span>
+              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="207 "></span><span class="k">def</span><span class="w"> </span><span class="nf">get_texts</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Text</span><span class="p">]:</span>
+<span class="linenos" data-linenos="208 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Get all text elements.&quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="209 "></span>    <span class="k">return</span> <span class="p">[</span><span class="n">elem</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">Text</span><span class="p">)]</span>
 </code></pre></div>
             </details>
     </div>
@@ -3013,11 +3013,11 @@ geometric information for manual alignment.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>diacea/ir/elements.py</code></summary>
-              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="217 "></span><span class="k">def</span><span class="w"> </span><span class="nf">remove_element</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="linenos" data-linenos="218 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Remove an element by ID. Returns True if removed.&quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="219 "></span>    <span class="n">initial_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">)</span>
-<span class="linenos" data-linenos="220 "></span>    <span class="bp">self</span><span class="o">.</span><span class="n">elements</span> <span class="o">=</span> <span class="p">[</span><span class="n">elem</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span> <span class="k">if</span> <span class="n">elem</span><span class="o">.</span><span class="n">id</span> <span class="o">!=</span> <span class="n">element_id</span><span class="p">]</span>
-<span class="linenos" data-linenos="221 "></span>    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">initial_length</span>
+              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="215 "></span><span class="k">def</span><span class="w"> </span><span class="nf">remove_element</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="linenos" data-linenos="216 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Remove an element by ID. Returns True if removed.&quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="217 "></span>    <span class="n">initial_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">)</span>
+<span class="linenos" data-linenos="218 "></span>    <span class="bp">self</span><span class="o">.</span><span class="n">elements</span> <span class="o">=</span> <span class="p">[</span><span class="n">elem</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span> <span class="k">if</span> <span class="n">elem</span><span class="o">.</span><span class="n">id</span> <span class="o">!=</span> <span class="n">element_id</span><span class="p">]</span>
+<span class="linenos" data-linenos="219 "></span>    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">initial_length</span>
 </code></pre></div>
             </details>
     </div>
@@ -3062,22 +3062,22 @@ geometric information for manual alignment.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>diacea/ir/elements.py</code></summary>
-                <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="42 "></span><span class="nd">@dataclass</span>
-<span class="linenos" data-linenos="43 "></span><span class="k">class</span><span class="w"> </span><span class="nc">Dimensions</span><span class="p">:</span>
-<span class="linenos" data-linenos="44 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Size of an element.&quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="45 "></span>
-<span class="linenos" data-linenos="46 "></span>    <span class="n">width</span><span class="p">:</span> <span class="nb">float</span>
-<span class="linenos" data-linenos="47 "></span>    <span class="n">height</span><span class="p">:</span> <span class="nb">float</span>
-<span class="linenos" data-linenos="48 "></span>
-<span class="linenos" data-linenos="49 "></span>    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="linenos" data-linenos="50 "></span><span class="w">        </span><span class="sd">&quot;&quot;&quot;Validate dimensions.&quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="51 "></span>        <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">)</span>
-<span class="linenos" data-linenos="52 "></span>        <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">)</span>
-<span class="linenos" data-linenos="53 "></span>
-<span class="linenos" data-linenos="54 "></span>    <span class="nd">@property</span>
-<span class="linenos" data-linenos="55 "></span>    <span class="k">def</span><span class="w"> </span><span class="nf">area</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="linenos" data-linenos="56 "></span><span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate area.&quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="57 "></span>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span>
+                <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="40 "></span><span class="nd">@dataclass</span>
+<span class="linenos" data-linenos="41 "></span><span class="k">class</span><span class="w"> </span><span class="nc">Dimensions</span><span class="p">:</span>
+<span class="linenos" data-linenos="42 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Size of an element.&quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="43 "></span>
+<span class="linenos" data-linenos="44 "></span>    <span class="n">width</span><span class="p">:</span> <span class="nb">float</span>
+<span class="linenos" data-linenos="45 "></span>    <span class="n">height</span><span class="p">:</span> <span class="nb">float</span>
+<span class="linenos" data-linenos="46 "></span>
+<span class="linenos" data-linenos="47 "></span>    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="linenos" data-linenos="48 "></span><span class="w">        </span><span class="sd">&quot;&quot;&quot;Validate dimensions.&quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="49 "></span>        <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">)</span>
+<span class="linenos" data-linenos="50 "></span>        <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">)</span>
+<span class="linenos" data-linenos="51 "></span>
+<span class="linenos" data-linenos="52 "></span>    <span class="nd">@property</span>
+<span class="linenos" data-linenos="53 "></span>    <span class="k">def</span><span class="w"> </span><span class="nf">area</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="linenos" data-linenos="54 "></span><span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate area.&quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="55 "></span>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span>
 </code></pre></div>
               </details>
 
@@ -3136,10 +3136,10 @@ geometric information for manual alignment.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>diacea/ir/elements.py</code></summary>
-              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="49 "></span><span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="linenos" data-linenos="50 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Validate dimensions.&quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="51 "></span>    <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">)</span>
-<span class="linenos" data-linenos="52 "></span>    <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">)</span>
+              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="47 "></span><span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="linenos" data-linenos="48 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Validate dimensions.&quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="49 "></span>    <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">)</span>
+<span class="linenos" data-linenos="50 "></span>    <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">)</span>
 </code></pre></div>
             </details>
     </div>
@@ -3184,26 +3184,26 @@ geometric information for manual alignment.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>diacea/ir/elements.py</code></summary>
-                <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="80 "></span><span class="nd">@dataclass</span>
-<span class="linenos" data-linenos="81 "></span><span class="k">class</span><span class="w"> </span><span class="nc">Element</span><span class="p">:</span>
-<span class="linenos" data-linenos="82 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for all diagram elements.&quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="83 "></span>
-<span class="linenos" data-linenos="84 "></span>    <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span>
-<span class="linenos" data-linenos="85 "></span>    <span class="n">position</span><span class="p">:</span> <span class="n">Point</span>
-<span class="linenos" data-linenos="86 "></span>    <span class="n">size</span><span class="p">:</span> <span class="n">Dimensions</span>
-<span class="linenos" data-linenos="87 "></span>    <span class="n">element_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>  <span class="c1"># shape, connection, text, group (set by subclass)</span>
-<span class="linenos" data-linenos="88 "></span>    <span class="n">style</span><span class="p">:</span> <span class="n">Style</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">Style</span><span class="p">)</span>
-<span class="linenos" data-linenos="89 "></span>
-<span class="linenos" data-linenos="90 "></span>    <span class="c1"># Semantic information</span>
-<span class="linenos" data-linenos="91 "></span>    <span class="n">semantic_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Will use enum in semantic.py</span>
-<span class="linenos" data-linenos="92 "></span>    <span class="n">semantic_confidence</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>  <span class="c1"># 0.0 to 1.0</span>
-<span class="linenos" data-linenos="93 "></span>
-<span class="linenos" data-linenos="94 "></span>    <span class="c1"># Metadata for format-specific data (preserves for roundtrip)</span>
-<span class="linenos" data-linenos="95 "></span>    <span class="c1"># Example: {&quot;excalidraw&quot;: {&quot;roughness&quot;: 1}, &quot;icon_url&quot;: &quot;...&quot;}</span>
-<span class="linenos" data-linenos="96 "></span>    <span class="n">metadata</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
-<span class="linenos" data-linenos="97 "></span>
-<span class="linenos" data-linenos="98 "></span>    <span class="c1"># Z-index for layering</span>
-<span class="linenos" data-linenos="99 "></span>    <span class="n">z_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+                <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="78 "></span><span class="nd">@dataclass</span>
+<span class="linenos" data-linenos="79 "></span><span class="k">class</span><span class="w"> </span><span class="nc">Element</span><span class="p">:</span>
+<span class="linenos" data-linenos="80 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for all diagram elements.&quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="81 "></span>
+<span class="linenos" data-linenos="82 "></span>    <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span>
+<span class="linenos" data-linenos="83 "></span>    <span class="n">position</span><span class="p">:</span> <span class="n">Point</span>
+<span class="linenos" data-linenos="84 "></span>    <span class="n">size</span><span class="p">:</span> <span class="n">Dimensions</span>
+<span class="linenos" data-linenos="85 "></span>    <span class="n">element_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>  <span class="c1"># shape, connection, text, group (set by subclass)</span>
+<span class="linenos" data-linenos="86 "></span>    <span class="n">style</span><span class="p">:</span> <span class="n">Style</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">Style</span><span class="p">)</span>
+<span class="linenos" data-linenos="87 "></span>
+<span class="linenos" data-linenos="88 "></span>    <span class="c1"># Semantic information</span>
+<span class="linenos" data-linenos="89 "></span>    <span class="n">semantic_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Will use enum in semantic.py</span>
+<span class="linenos" data-linenos="90 "></span>    <span class="n">semantic_confidence</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>  <span class="c1"># 0.0 to 1.0</span>
+<span class="linenos" data-linenos="91 "></span>
+<span class="linenos" data-linenos="92 "></span>    <span class="c1"># Metadata for format-specific data (preserves for roundtrip)</span>
+<span class="linenos" data-linenos="93 "></span>    <span class="c1"># Example: {&quot;excalidraw&quot;: {&quot;roughness&quot;: 1}, &quot;icon_url&quot;: &quot;...&quot;}  # noqa: ERA001</span>
+<span class="linenos" data-linenos="94 "></span>    <span class="n">metadata</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+<span class="linenos" data-linenos="95 "></span>
+<span class="linenos" data-linenos="96 "></span>    <span class="c1"># Z-index for layering</span>
+<span class="linenos" data-linenos="97 "></span>    <span class="n">z_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
 </code></pre></div>
               </details>
 
@@ -3265,21 +3265,21 @@ geometric information for manual alignment.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>diacea/ir/elements.py</code></summary>
-                <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="145 "></span><span class="nd">@dataclass</span>
-<span class="linenos" data-linenos="146 "></span><span class="k">class</span><span class="w"> </span><span class="nc">Group</span><span class="p">(</span><span class="n">Element</span><span class="p">):</span>
-<span class="linenos" data-linenos="147 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;A group/container of elements.&quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="148 "></span>
-<span class="linenos" data-linenos="149 "></span>    <span class="n">label</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-<span class="linenos" data-linenos="150 "></span>    <span class="n">children</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>  <span class="c1"># List of element IDs</span>
-<span class="linenos" data-linenos="151 "></span>
-<span class="linenos" data-linenos="152 "></span>    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="linenos" data-linenos="153 "></span><span class="w">        </span><span class="sd">&quot;&quot;&quot;Set element type.&quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="154 "></span>        <span class="bp">self</span><span class="o">.</span><span class="n">element_type</span> <span class="o">=</span> <span class="s2">&quot;group&quot;</span>
-<span class="linenos" data-linenos="155 "></span>
-<span class="linenos" data-linenos="156 "></span>    <span class="nd">@property</span>
-<span class="linenos" data-linenos="157 "></span>    <span class="k">def</span><span class="w"> </span><span class="nf">source_shape_id</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="linenos" data-linenos="158 "></span><span class="w">        </span><span class="sd">&quot;&quot;&quot;ID of the container shape this group was derived from, if any.&quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="159 "></span>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">removeprefix</span><span class="p">(</span><span class="n">GROUP_ID_PREFIX</span><span class="p">)</span>
+                <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="143 "></span><span class="nd">@dataclass</span>
+<span class="linenos" data-linenos="144 "></span><span class="k">class</span><span class="w"> </span><span class="nc">Group</span><span class="p">(</span><span class="n">Element</span><span class="p">):</span>
+<span class="linenos" data-linenos="145 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;A group/container of elements.&quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="146 "></span>
+<span class="linenos" data-linenos="147 "></span>    <span class="n">label</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+<span class="linenos" data-linenos="148 "></span>    <span class="n">children</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>  <span class="c1"># List of element IDs</span>
+<span class="linenos" data-linenos="149 "></span>
+<span class="linenos" data-linenos="150 "></span>    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="linenos" data-linenos="151 "></span><span class="w">        </span><span class="sd">&quot;&quot;&quot;Set element type.&quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="152 "></span>        <span class="bp">self</span><span class="o">.</span><span class="n">element_type</span> <span class="o">=</span> <span class="s1">&#39;group&#39;</span>
+<span class="linenos" data-linenos="153 "></span>
+<span class="linenos" data-linenos="154 "></span>    <span class="nd">@property</span>
+<span class="linenos" data-linenos="155 "></span>    <span class="k">def</span><span class="w"> </span><span class="nf">source_shape_id</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos" data-linenos="156 "></span><span class="w">        </span><span class="sd">&quot;&quot;&quot;ID of the container shape this group was derived from, if any.&quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="157 "></span>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">removeprefix</span><span class="p">(</span><span class="n">GROUP_ID_PREFIX</span><span class="p">)</span>
 </code></pre></div>
               </details>
 
@@ -3338,9 +3338,9 @@ geometric information for manual alignment.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>diacea/ir/elements.py</code></summary>
-              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="152 "></span><span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="linenos" data-linenos="153 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Set element type.&quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="154 "></span>    <span class="bp">self</span><span class="o">.</span><span class="n">element_type</span> <span class="o">=</span> <span class="s2">&quot;group&quot;</span>
+              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="150 "></span><span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="linenos" data-linenos="151 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Set element type.&quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="152 "></span>    <span class="bp">self</span><span class="o">.</span><span class="n">element_type</span> <span class="o">=</span> <span class="s1">&#39;group&#39;</span>
 </code></pre></div>
             </details>
     </div>
@@ -3385,17 +3385,17 @@ geometric information for manual alignment.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>diacea/ir/elements.py</code></summary>
-                <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="29 "></span><span class="nd">@dataclass</span>
-<span class="linenos" data-linenos="30 "></span><span class="k">class</span><span class="w"> </span><span class="nc">Point</span><span class="p">:</span>
-<span class="linenos" data-linenos="31 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;2D point for positioning elements.&quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="32 "></span>
-<span class="linenos" data-linenos="33 "></span>    <span class="n">x</span><span class="p">:</span> <span class="nb">float</span>
-<span class="linenos" data-linenos="34 "></span>    <span class="n">y</span><span class="p">:</span> <span class="nb">float</span>
-<span class="linenos" data-linenos="35 "></span>
-<span class="linenos" data-linenos="36 "></span>    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="linenos" data-linenos="37 "></span><span class="w">        </span><span class="sd">&quot;&quot;&quot;Validate coordinates.&quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="38 "></span>        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
-<span class="linenos" data-linenos="39 "></span>        <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+                <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="27 "></span><span class="nd">@dataclass</span>
+<span class="linenos" data-linenos="28 "></span><span class="k">class</span><span class="w"> </span><span class="nc">Point</span><span class="p">:</span>
+<span class="linenos" data-linenos="29 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;2D point for positioning elements.&quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="30 "></span>
+<span class="linenos" data-linenos="31 "></span>    <span class="n">x</span><span class="p">:</span> <span class="nb">float</span>
+<span class="linenos" data-linenos="32 "></span>    <span class="n">y</span><span class="p">:</span> <span class="nb">float</span>
+<span class="linenos" data-linenos="33 "></span>
+<span class="linenos" data-linenos="34 "></span>    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="linenos" data-linenos="35 "></span><span class="w">        </span><span class="sd">&quot;&quot;&quot;Validate coordinates.&quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="36 "></span>        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+<span class="linenos" data-linenos="37 "></span>        <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
 </code></pre></div>
               </details>
 
@@ -3430,10 +3430,10 @@ geometric information for manual alignment.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>diacea/ir/elements.py</code></summary>
-              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="36 "></span><span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="linenos" data-linenos="37 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Validate coordinates.&quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="38 "></span>    <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
-<span class="linenos" data-linenos="39 "></span>    <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="34 "></span><span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="linenos" data-linenos="35 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Validate coordinates.&quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="36 "></span>    <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+<span class="linenos" data-linenos="37 "></span>    <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
 </code></pre></div>
             </details>
     </div>
@@ -3485,16 +3485,16 @@ geometric information for manual alignment.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>diacea/ir/elements.py</code></summary>
-                <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="102 "></span><span class="nd">@dataclass</span>
-<span class="linenos" data-linenos="103 "></span><span class="k">class</span><span class="w"> </span><span class="nc">Shape</span><span class="p">(</span><span class="n">Element</span><span class="p">):</span>
-<span class="linenos" data-linenos="104 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;A shape element (rectangle, ellipse, etc.).&quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="105 "></span>
-<span class="linenos" data-linenos="106 "></span>    <span class="n">label</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-<span class="linenos" data-linenos="107 "></span>    <span class="n">shape_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;rectangle&quot;</span>  <span class="c1"># rectangle, ellipse, diamond, etc.</span>
-<span class="linenos" data-linenos="108 "></span>
-<span class="linenos" data-linenos="109 "></span>    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="linenos" data-linenos="110 "></span><span class="w">        </span><span class="sd">&quot;&quot;&quot;Set element type.&quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="111 "></span>        <span class="bp">self</span><span class="o">.</span><span class="n">element_type</span> <span class="o">=</span> <span class="s2">&quot;shape&quot;</span>
+                <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="100 "></span><span class="nd">@dataclass</span>
+<span class="linenos" data-linenos="101 "></span><span class="k">class</span><span class="w"> </span><span class="nc">Shape</span><span class="p">(</span><span class="n">Element</span><span class="p">):</span>
+<span class="linenos" data-linenos="102 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;A shape element (rectangle, ellipse, etc.).&quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="103 "></span>
+<span class="linenos" data-linenos="104 "></span>    <span class="n">label</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+<span class="linenos" data-linenos="105 "></span>    <span class="n">shape_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;rectangle&#39;</span>  <span class="c1"># rectangle, ellipse, diamond, etc.</span>
+<span class="linenos" data-linenos="106 "></span>
+<span class="linenos" data-linenos="107 "></span>    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="linenos" data-linenos="108 "></span><span class="w">        </span><span class="sd">&quot;&quot;&quot;Set element type.&quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="109 "></span>        <span class="bp">self</span><span class="o">.</span><span class="n">element_type</span> <span class="o">=</span> <span class="s1">&#39;shape&#39;</span>
 </code></pre></div>
               </details>
 
@@ -3529,9 +3529,9 @@ geometric information for manual alignment.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>diacea/ir/elements.py</code></summary>
-              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="109 "></span><span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="linenos" data-linenos="110 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Set element type.&quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="111 "></span>    <span class="bp">self</span><span class="o">.</span><span class="n">element_type</span> <span class="o">=</span> <span class="s2">&quot;shape&quot;</span>
+              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="107 "></span><span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="linenos" data-linenos="108 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Set element type.&quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="109 "></span>    <span class="bp">self</span><span class="o">.</span><span class="n">element_type</span> <span class="o">=</span> <span class="s1">&#39;shape&#39;</span>
 </code></pre></div>
             </details>
     </div>
@@ -3578,24 +3578,24 @@ should be stored in metadata for round-tripping.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>diacea/ir/elements.py</code></summary>
-                <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="60 "></span><span class="nd">@dataclass</span>
-<span class="linenos" data-linenos="61 "></span><span class="k">class</span><span class="w"> </span><span class="nc">Style</span><span class="p">:</span>
-<span class="linenos" data-linenos="62 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Visual styling for elements.</span>
-<span class="linenos" data-linenos="63 "></span>
-<span class="linenos" data-linenos="64 "></span><span class="sd">    Preserves basic styling information. Format-specific advanced styling</span>
-<span class="linenos" data-linenos="65 "></span><span class="sd">    should be stored in metadata for round-tripping.</span>
-<span class="linenos" data-linenos="66 "></span><span class="sd">    &quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="67 "></span>
-<span class="linenos" data-linenos="68 "></span>    <span class="n">fill_color</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Hex color or name</span>
-<span class="linenos" data-linenos="69 "></span>    <span class="n">stroke_color</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Hex color or name</span>
-<span class="linenos" data-linenos="70 "></span>    <span class="n">stroke_width</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="linenos" data-linenos="71 "></span>    <span class="n">stroke_style</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;solid&quot;</span>  <span class="c1"># solid, dashed, dotted</span>
-<span class="linenos" data-linenos="72 "></span>    <span class="n">opacity</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># 0.0 to 1.0</span>
-<span class="linenos" data-linenos="73 "></span>    <span class="n">font_family</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="linenos" data-linenos="74 "></span>    <span class="n">font_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="linenos" data-linenos="75 "></span>
-<span class="linenos" data-linenos="76 "></span>    <span class="c1"># Metadata for format-specific styling (preserves data for roundtrip)</span>
-<span class="linenos" data-linenos="77 "></span>    <span class="n">metadata</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+                <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="58 "></span><span class="nd">@dataclass</span>
+<span class="linenos" data-linenos="59 "></span><span class="k">class</span><span class="w"> </span><span class="nc">Style</span><span class="p">:</span>
+<span class="linenos" data-linenos="60 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Visual styling for elements.</span>
+<span class="linenos" data-linenos="61 "></span>
+<span class="linenos" data-linenos="62 "></span><span class="sd">    Preserves basic styling information. Format-specific advanced styling</span>
+<span class="linenos" data-linenos="63 "></span><span class="sd">    should be stored in metadata for round-tripping.</span>
+<span class="linenos" data-linenos="64 "></span><span class="sd">    &quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="65 "></span>
+<span class="linenos" data-linenos="66 "></span>    <span class="n">fill_color</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Hex color or name</span>
+<span class="linenos" data-linenos="67 "></span>    <span class="n">stroke_color</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Hex color or name</span>
+<span class="linenos" data-linenos="68 "></span>    <span class="n">stroke_width</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="linenos" data-linenos="69 "></span>    <span class="n">stroke_style</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;solid&#39;</span>  <span class="c1"># solid, dashed, dotted</span>
+<span class="linenos" data-linenos="70 "></span>    <span class="n">opacity</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># 0.0 to 1.0</span>
+<span class="linenos" data-linenos="71 "></span>    <span class="n">font_family</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="linenos" data-linenos="72 "></span>    <span class="n">font_size</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="linenos" data-linenos="73 "></span>
+<span class="linenos" data-linenos="74 "></span>    <span class="c1"># Metadata for format-specific styling (preserves data for roundtrip)</span>
+<span class="linenos" data-linenos="75 "></span>    <span class="n">metadata</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
 </code></pre></div>
               </details>
 
@@ -3657,16 +3657,16 @@ should be stored in metadata for round-tripping.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>diacea/ir/elements.py</code></summary>
-                <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="133 "></span><span class="nd">@dataclass</span>
-<span class="linenos" data-linenos="134 "></span><span class="k">class</span><span class="w"> </span><span class="nc">Text</span><span class="p">(</span><span class="n">Element</span><span class="p">):</span>
-<span class="linenos" data-linenos="135 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;A text element.&quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="136 "></span>
-<span class="linenos" data-linenos="137 "></span>    <span class="n">content</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-<span class="linenos" data-linenos="138 "></span>    <span class="n">alignment</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;left&quot;</span>  <span class="c1"># left, center, right</span>
-<span class="linenos" data-linenos="139 "></span>
-<span class="linenos" data-linenos="140 "></span>    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="linenos" data-linenos="141 "></span><span class="w">        </span><span class="sd">&quot;&quot;&quot;Set element type.&quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="142 "></span>        <span class="bp">self</span><span class="o">.</span><span class="n">element_type</span> <span class="o">=</span> <span class="s2">&quot;text&quot;</span>
+                <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="131 "></span><span class="nd">@dataclass</span>
+<span class="linenos" data-linenos="132 "></span><span class="k">class</span><span class="w"> </span><span class="nc">Text</span><span class="p">(</span><span class="n">Element</span><span class="p">):</span>
+<span class="linenos" data-linenos="133 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;A text element.&quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="134 "></span>
+<span class="linenos" data-linenos="135 "></span>    <span class="n">content</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+<span class="linenos" data-linenos="136 "></span>    <span class="n">alignment</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;left&#39;</span>  <span class="c1"># left, center, right</span>
+<span class="linenos" data-linenos="137 "></span>
+<span class="linenos" data-linenos="138 "></span>    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="linenos" data-linenos="139 "></span><span class="w">        </span><span class="sd">&quot;&quot;&quot;Set element type.&quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="140 "></span>        <span class="bp">self</span><span class="o">.</span><span class="n">element_type</span> <span class="o">=</span> <span class="s1">&#39;text&#39;</span>
 </code></pre></div>
               </details>
 
@@ -3701,9 +3701,9 @@ should be stored in metadata for round-tripping.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>diacea/ir/elements.py</code></summary>
-              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="140 "></span><span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="linenos" data-linenos="141 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Set element type.&quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="142 "></span>    <span class="bp">self</span><span class="o">.</span><span class="n">element_type</span> <span class="o">=</span> <span class="s2">&quot;text&quot;</span>
+              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="138 "></span><span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="linenos" data-linenos="139 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Set element type.&quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="140 "></span>    <span class="bp">self</span><span class="o">.</span><span class="n">element_type</span> <span class="o">=</span> <span class="s1">&#39;text&#39;</span>
 </code></pre></div>
             </details>
     </div>
