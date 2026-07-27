@@ -10,8 +10,6 @@ Design decisions (from Phase 2 open questions):
 
 from __future__ import annotations
 
-from typing import Optional
-
 from ..ir import Connection, Diagram, Generator, Group, SemanticType, Shape
 from ._text import sanitize_alnum_id
 
@@ -41,7 +39,7 @@ _LABEL_CHARS_REQUIRING_QUOTES = frozenset('"()[]{}|')
 class MermaidGenerator(Generator):
     """Generate Mermaid diagrams from IR with auto-detection."""
 
-    def __init__(self, diagram_type: Optional[str] = None):
+    def __init__(self, diagram_type: str | None = None) -> None:
         """Initialize generator.
 
         Args:
@@ -49,7 +47,7 @@ class MermaidGenerator(Generator):
                          or None for auto-detection
         """
         self.diagram_type = diagram_type
-        self.detected_type: Optional[str] = None
+        self.detected_type: str | None = None
         self.max_subgraph_depth = 3
 
     def generate(self, diagram: Diagram) -> str:
@@ -67,10 +65,10 @@ class MermaidGenerator(Generator):
 
         if diagram_type == 'c4':
             return self._generate_c4(diagram)
-        elif diagram_type == 'sequence':
+        if diagram_type == 'sequence':
             return self._generate_sequence(diagram)
-        else:  # flowchart (default)
-            return self._generate_flowchart(diagram)
+        # flowchart (default)
+        return self._generate_flowchart(diagram)
 
     def _detect_diagram_type(self, diagram: Diagram) -> str:
         """Auto-detect best Mermaid diagram type.
@@ -128,8 +126,7 @@ class MermaidGenerator(Generator):
             s for s in shapes if not any(s.id in g.children for g in groups) and s.id not in group_source_ids
         ]
 
-        for shape in top_level_shapes:
-            lines.append(self._format_flowchart_node(shape))
+        lines.extend(self._format_flowchart_node(shape) for shape in top_level_shapes)
 
         # Generate subgraphs (groups)
         for group in groups:
@@ -137,8 +134,7 @@ class MermaidGenerator(Generator):
             lines.extend(subgraph_lines)
 
         # Generate connections
-        for conn in connections:
-            lines.append(self._format_flowchart_connection(conn))
+        lines.extend(self._format_flowchart_connection(conn) for conn in connections)
 
         # Add styling (basic colors)
         style_lines = self._generate_flowchart_styles(shapes)
@@ -171,11 +167,11 @@ class MermaidGenerator(Generator):
             semantic = shape.semantic_type
             if semantic == SemanticType.DECISION:
                 return ('{', '}')  # Diamond
-            elif semantic == SemanticType.DATABASE:
+            if semantic == SemanticType.DATABASE:
                 return ('[(', ')]')  # Cylindrical
-            elif semantic == SemanticType.PERSON:
+            if semantic == SemanticType.PERSON:
                 return ('([', '])')  # Stadium/rounded
-            elif semantic == SemanticType.START_END:
+            if semantic == SemanticType.START_END:
                 return ('([', '])')  # Stadium
 
         # Fall back to geometric shape
@@ -343,8 +339,7 @@ class MermaidGenerator(Generator):
         escaped = escaped.replace('"', '#quot;')
         escaped = escaped.replace('<', '&lt;')
         escaped = escaped.replace('>', '&gt;')
-        escaped = escaped.replace('\n', '<br/>')
-        return escaped
+        return escaped.replace('\n', '<br/>')
 
     def _escape_quoted_label(self, label: str) -> str:
         """Escape label for Mermaid quoted string contexts (C4, sequence)."""
@@ -353,8 +348,7 @@ class MermaidGenerator(Generator):
         escaped = escaped.replace('&', '&amp;')
         escaped = escaped.replace('<', '&lt;')
         escaped = escaped.replace('>', '&gt;')
-        escaped = escaped.replace('\n', '<br/>')
-        return escaped
+        return escaped.replace('\n', '<br/>')
 
     def _escape_pipe_label(self, label: str) -> str:
         """Escape label for Mermaid pipe-delimited connection labels."""
@@ -362,5 +356,4 @@ class MermaidGenerator(Generator):
         escaped = escaped.replace('|', '&#124;')
         escaped = escaped.replace('<', '&lt;')
         escaped = escaped.replace('>', '&gt;')
-        escaped = escaped.replace('\n', '<br/>')
-        return escaped
+        return escaped.replace('\n', '<br/>')

@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import re
 from collections import defaultdict, deque
-from typing import Any, Optional
+from typing import Any
 
 from ..ir import (
     GROUP_ID_PREFIX,
@@ -171,7 +171,7 @@ def is_mermaid_sequence(content: str) -> bool:
     return first is not None and _SEQUENCE_HEADER_RE.match(first) is not None
 
 
-def _split_frontmatter(content: str) -> tuple[str, Optional[str]]:
+def _split_frontmatter(content: str) -> tuple[str, str | None]:
     lines = content.split('\n')
     start = next((i for i, line in enumerate(lines) if line.strip()), None)
     if start is None or lines[start].strip() != '---':
@@ -188,11 +188,11 @@ def _split_frontmatter(content: str) -> tuple[str, Optional[str]]:
     return (content, None)
 
 
-def _first_meaningful_line(content: str) -> Optional[str]:
+def _first_meaningful_line(content: str) -> str | None:
     content, _ = _split_frontmatter(content)
     for raw in content.splitlines():
         line = raw.strip()
-        if not line or line.startswith('%%') or line.startswith('```'):
+        if not line or line.startswith(('%%', '```')):
             continue
         return line
     return None
@@ -207,8 +207,7 @@ def _unescape_label(label: str) -> str:
     text = text.replace('&lt;', '<')
     text = text.replace('&gt;', '>')
     text = text.replace('&#124;', '|')
-    text = text.replace('&amp;', '&')
-    return text
+    return text.replace('&amp;', '&')
 
 
 def _extract_fa_icons(label: str) -> tuple[str, list[str]]:
@@ -228,7 +227,7 @@ def _icon_metadata(icons: list[str]) -> dict[str, Any]:
     return metadata
 
 
-def _split_arrow_attrs(arrow: str) -> tuple[str, str, Optional[float]]:
+def _split_arrow_attrs(arrow: str) -> tuple[str, str, float | None]:
     has_head = arrow[-1] in '>xo'
     if arrow.startswith('<') and has_head:
         connection_type = 'bidirectional'
@@ -265,7 +264,7 @@ def _split_on_ampersand(segment: str) -> list[str]:
 class MermaidParser(Parser):
     """Parse Mermaid flowchart/graph text into the IR."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.warnings: list[str] = []
 
     def parse(self, data: Any) -> Diagram:
@@ -333,9 +332,7 @@ class MermaidParser(Parser):
                 parts = line.split(';')
                 self._parse_header(parts[0].strip(), line_number)
                 header_seen = True
-                for part in parts[1:]:
-                    if part.strip():
-                        statements.append((line_number, part.strip()))
+                statements.extend((line_number, part.strip()) for part in parts[1:] if part.strip())
                 continue
             statements.append((line_number, line.rstrip(';').strip()))
         if not header_seen:
@@ -343,24 +340,26 @@ class MermaidParser(Parser):
         return statements
 
     def _parse_header(self, line: str, line_number: int) -> None:
-        if match := _HEADER_RE.match(line.split(';')[0].strip()):
+        if match := _HEADER_RE.match(line.split(';', maxsplit=1)[0].strip()):
             self._direction = (match.group(1) or 'TD').upper()
             return
-        keyword = line.split()[0].rstrip(':;')
+        keyword = line.split(maxsplit=1)[0].rstrip(':;')
         if keyword in _OTHER_DIAGRAM_KEYWORDS:
-            raise ValueError(
+            msg = (
                 f"Unsupported Mermaid diagram type '{keyword}': "
                 'only flowchart/graph and sequence diagrams are supported'
             )
-        raise ValueError(f"line {line_number}: not a Mermaid flowchart (expected 'flowchart' or 'graph' header)")
+            raise ValueError(msg)
+        msg = f"line {line_number}: not a Mermaid flowchart (expected 'flowchart' or 'graph' header)"
+        raise ValueError(msg)
 
-    def _parse_sequence(self, data: str, title: Optional[str]) -> Diagram:
+    def _parse_sequence(self, data: str, title: str | None) -> Diagram:
         self._shapes = {}
         self._shape_order = []
         self._connections = []
         self._groups = []
         self._group_stack = []
-        self._sequence_title: Optional[str] = None
+        self._sequence_title: str | None = None
 
         header_seen = False
         for line_number, raw in enumerate(data.splitlines(), start=1):
@@ -444,7 +443,7 @@ class MermaidParser(Parser):
     def _declare_participant(
         self,
         participant_id: str,
-        label: Optional[str] = None,
+        label: str | None = None,
         is_actor: bool = False,
     ) -> None:
         if (shape := self._shapes.get(participant_id)) is not None:
@@ -547,7 +546,7 @@ class MermaidParser(Parser):
                 return False
             resolved.append(node_ids)
 
-        for index, (arrow, label) in enumerate(zip(arrows, labels)):
+        for index, (arrow, label) in enumerate(zip(arrows, labels, strict=False)):
             connection_type, stroke_style, stroke_width = _split_arrow_attrs(arrow)
             for from_id in resolved[index]:
                 for to_id in resolved[index + 1]:
@@ -566,7 +565,7 @@ class MermaidParser(Parser):
                     )
         return True
 
-    def _declare_node(self, token: str, line_number: int) -> Optional[str]:
+    def _declare_node(self, token: str, line_number: int) -> str | None:
         match = _NODE_TOKEN_RE.match(_CLASS_SUFFIX_RE.sub('', token.strip()))
         if not match:
             return None
@@ -607,7 +606,7 @@ class MermaidParser(Parser):
         node_id: str,
         label: str,
         shape_type: str,
-        metadata: Optional[dict[str, Any]] = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         label_lines = label.splitlines() or ['']
         width = max(_NODE_WIDTH_MIN, 12.0 * max(len(line) for line in label_lines) + 40.0)
@@ -680,7 +679,7 @@ class MermaidParser(Parser):
                 successors[connection.from_id].append(connection.to_id)
                 in_degree[connection.to_id] += 1
 
-        layers = {node_id: 0 for node_id in in_degree}
+        layers = dict.fromkeys(in_degree, 0)
         queue = deque(node_id for node_id, degree in in_degree.items() if degree == 0)
         remaining = dict(in_degree)
         while queue:

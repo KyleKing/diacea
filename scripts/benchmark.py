@@ -158,7 +158,7 @@ def run_benchmark(track_memory: bool = False) -> None:
         memory_results[size_name] = {}
         output_sizes[size_name] = {}
 
-        with open(data_file) as f:
+        with Path(data_file).open(encoding='utf-8') as f:
             data = json.load(f)
 
         parse_times = []
@@ -268,10 +268,9 @@ def _format_bytes(num_bytes: int) -> str:
     """Format bytes in human-readable form."""
     if num_bytes < 1024:
         return f'{num_bytes}B'
-    elif num_bytes < 1024 * 1024:
+    if num_bytes < 1024 * 1024:
         return f'{num_bytes / 1024:.1f}KB'
-    else:
-        return f'{num_bytes / (1024 * 1024):.1f}MB'
+    return f'{num_bytes / (1024 * 1024):.1f}MB'
 
 
 def main() -> int:

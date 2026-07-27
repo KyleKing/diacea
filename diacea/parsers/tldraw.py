@@ -112,9 +112,9 @@ def _v2_style(record: dict[str, Any]) -> Style:
     props = record.get('props', {})
     stroke_color = _V2_COLOR_MAP.get(props.get('color', 'black'), '#1d1d1d')
     fill = props.get('fill', 'none')
-    fill_color = stroke_color if fill not in (None, 'none') else None
+    fill_color = stroke_color if fill not in {None, 'none'} else None
     dash = props.get('dash', 'draw')
-    stroke_style = 'dashed' if dash in ('dashed', 'dotted') else 'solid'
+    stroke_style = 'dashed' if dash in {'dashed', 'dotted'} else 'solid'
     stroke_width = _V2_STROKE_WIDTH_MAP.get(props.get('size', 'm'), 3.5)
 
     opacity_raw = record.get('opacity', props.get('opacity'))
@@ -192,7 +192,7 @@ class TLDrawParser(Parser):
         page_index: int | None = 0,
         page_id: str | None = None,
         include_freehand: bool = False,
-    ):
+    ) -> None:
         """Initialize parser with options."""
         self.page_index = page_index
         self.page_id = page_id
@@ -228,7 +228,7 @@ class TLDrawParser(Parser):
         diagram_name = 'TLDraw Diagram'
         diagram_id = 'diagram'
 
-        for page_id, page in pages_to_process:
+        for _page_id, page in pages_to_process:
             elements = self._parse_page(page)
             all_elements.extend(elements)
 
@@ -280,7 +280,7 @@ class TLDrawParser(Parser):
         bindings_by_arrow: dict[str, dict[str, str]] = {}
         for binding in arrow_bindings:
             terminal = binding.get('props', {}).get('terminal')
-            if terminal in ('start', 'end'):
+            if terminal in {'start', 'end'}:
                 bindings_by_arrow.setdefault(binding['fromId'], {})[terminal] = binding['toId']
 
         for record in page_shapes:
@@ -754,7 +754,7 @@ class TLDrawParser(Parser):
         fill_color = stroke_color if is_filled else None
 
         dash = style_data.get('dash', 'solid')
-        stroke_style = 'dashed' if dash in ['dashed', 'dotted'] else 'solid'
+        stroke_style = 'dashed' if dash in {'dashed', 'dotted'} else 'solid'
 
         return Style(
             fill_color=fill_color,

@@ -11,7 +11,6 @@ Design decisions (from Phase 3 open questions):
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional
 
 from ..ir import Connection, Diagram, Generator, Group, SemanticType, Shape
 
@@ -20,7 +19,7 @@ from ..ir import Connection, Diagram, Generator, Group, SemanticType, Shape
 class GraphVizConfig:
     """Configuration for GraphViz generator."""
 
-    direction: Optional[str] = None  # LR, TB, RL, BT (None = auto-detect)
+    direction: str | None = None  # LR, TB, RL, BT (None = auto-detect)
     graph_type: str = 'digraph'  # digraph or graph
     use_clusters: bool = True
     cluster_prefix: str = 'cluster_'
@@ -47,7 +46,7 @@ class GraphVizConfig:
 class GraphVizGenerator(Generator):
     """Generate GraphViz DOT from IR."""
 
-    def __init__(self, config: Optional[GraphVizConfig] = None):
+    def __init__(self, config: GraphVizConfig | None = None) -> None:
         """Initialize generator.
 
         Args:
@@ -77,9 +76,7 @@ class GraphVizGenerator(Generator):
         if direction:
             lines.append(f'    rankdir="{direction}";')
 
-        lines.append('    node [fontname="Helvetica"];')
-        lines.append('    edge [fontname="Helvetica"];')
-        lines.append('')
+        lines.extend(('    node [fontname="Helvetica"];', '    edge [fontname="Helvetica"];', ''))
 
         # Process groups as clusters
         groups = diagram.get_groups()
@@ -92,15 +89,13 @@ class GraphVizGenerator(Generator):
 
         # Process standalone nodes (not in clusters)
         standalone_shapes = self._get_standalone_shapes(shapes, groups)
-        for shape in standalone_shapes:
-            lines.append(self._format_node(shape))
+        lines.extend(self._format_node(shape) for shape in standalone_shapes)
 
         if standalone_shapes:
             lines.append('')
 
         # Process connections
-        for conn in connections:
-            lines.append(self._format_edge(conn))
+        lines.extend(self._format_edge(conn) for conn in connections)
 
         # Footer
         lines.append('}')
@@ -129,7 +124,7 @@ class GraphVizGenerator(Generator):
         if width > height * 1.5:
             return 'LR'
         # If significantly taller than wide, use TB
-        elif height > width * 1.5:
+        if height > width * 1.5:
             return 'TB'
 
         return 'LR'  # Default horizontal
@@ -154,8 +149,9 @@ class GraphVizGenerator(Generator):
             cluster_id = self._sanitize_id(group.id)
             label = self._escape_label(group.label or cluster_id)
 
-            lines.append(f'{indent}subgraph {self.config.cluster_prefix}{cluster_id} {{')
-            lines.append(f'{indent}    label="{label}";')
+            lines.extend(
+                (f'{indent}subgraph {self.config.cluster_prefix}{cluster_id} {{', f'{indent}    label="{label}";')
+            )
 
             # Add child nodes
             for child_id in group.children:
@@ -182,8 +178,7 @@ class GraphVizGenerator(Generator):
 
         # Add styling
         if shape.style.fill_color:
-            attrs.append(f'fillcolor="{shape.style.fill_color}"')
-            attrs.append('style="filled"')
+            attrs.extend((f'fillcolor="{shape.style.fill_color}"', 'style="filled"'))
 
         if shape.style.stroke_color:
             attrs.append(f'color="{shape.style.stroke_color}"')

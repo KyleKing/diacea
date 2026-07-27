@@ -11,7 +11,7 @@ from __future__ import annotations
 import re
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any
 
 from ..ir import (
     Connection,
@@ -64,7 +64,7 @@ _SEQUENCE_KEYWORDS = frozenset(
     }
 )
 
-_KEYWORD_INFO: dict[str, tuple[str, Optional[SemanticType]]] = {
+_KEYWORD_INFO: dict[str, tuple[str, SemanticType | None]] = {
     'actor': ('actor', SemanticType.PERSON),
     'agent': ('rectangle', None),
     'card': ('rectangle', None),
@@ -185,7 +185,7 @@ def _unescape_label(text: str) -> str:
                 result.append('\n')
                 i += 2
                 continue
-            if nxt in ('\\', '"'):
+            if nxt in {'\\', '"'}:
                 result.append(nxt)
                 i += 2
                 continue
@@ -235,7 +235,7 @@ def _split_macro_args(args: str) -> list[str]:
 
 @dataclass
 class _ParseState:
-    diagram_name: Optional[str] = None
+    diagram_name: str | None = None
     direction: str = 'top_to_bottom'
     is_c4: bool = False
     elements: list[Element] = field(default_factory=list)
@@ -248,7 +248,7 @@ class _ParseState:
 class PlantUMLParser(Parser):
     """Parse deployment/component-style PlantUML (and C4-PlantUML) to IR."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.warnings: list[str] = []
 
     def parse(self, data: Any) -> Diagram:
@@ -265,7 +265,7 @@ class PlantUMLParser(Parser):
         state = _ParseState()
         in_diagram = False
         in_block_comment = False
-        skip_until: Optional[str] = None
+        skip_until: str | None = None
 
         for lineno, raw_line in enumerate(data.splitlines(), start=1):
             line = raw_line.strip()
@@ -299,18 +299,20 @@ class PlantUMLParser(Parser):
 
         return self._build_diagram(state)
 
-    def _parse_line(self, line: str, lineno: int, state: _ParseState) -> Optional[str]:
-        token = line.split()[0].lower()
+    def _parse_line(self, line: str, lineno: int, state: _ParseState) -> str | None:
+        token = line.split(maxsplit=1)[0].lower()
 
         if token in _SEQUENCE_KEYWORDS:
-            raise ValueError(f'Line {lineno}: sequence diagrams are not supported (found "{token}")')
+            msg = f'Line {lineno}: sequence diagrams are not supported (found "{token}")'
+            raise ValueError(msg)
 
         if line.lower() in _ACTIVITY_KEYWORDS or _ACTIVITY_LINE_RE.match(line):
-            raise ValueError(
+            msg = (
                 f'Line {lineno}: PlantUML activity diagrams are not supported '
                 f'(found "{line}"); only deployment/component and C4 diagrams '
                 'are supported'
             )
+            raise ValueError(msg)
 
         if m := re.match(r'^(left to right|top to bottom) direction$', line.lower()):
             state.direction = m.group(1).replace(' ', '_')
@@ -320,11 +322,11 @@ class PlantUMLParser(Parser):
             self.warnings.append(f'Line {lineno}: skipped skinparam directive')
             return '}' if line.rstrip().endswith('{') else None
 
-        if token in ('caption', 'footer', 'header', 'title'):
+        if token in {'caption', 'footer', 'header', 'title'}:
             self.warnings.append(f'Line {lineno}: skipped {token} directive')
             return f'end {token}' if line.lower() == token else None
 
-        if token in ('hide', 'show'):
+        if token in {'hide', 'show'}:
             self.warnings.append(f'Line {lineno}: skipped {token} directive')
             return None
 
@@ -473,9 +475,9 @@ class PlantUMLParser(Parser):
         elem_id: str,
         label: str,
         shape_type: str,
-        semantic: Optional[SemanticType],
+        semantic: SemanticType | None,
         confidence: float = _KEYWORD_CONFIDENCE,
-        metadata: Optional[dict[str, Any]] = None,
+        metadata: dict[str, Any] | None = None,
     ) -> Shape:
         shape = Shape(
             id=elem_id,
@@ -500,7 +502,7 @@ class PlantUMLParser(Parser):
         state: _ParseState,
         elem_id: str,
         label: str,
-        semantic: Optional[SemanticType],
+        semantic: SemanticType | None,
     ) -> Group:
         group = Group(
             id=elem_id,
@@ -522,7 +524,7 @@ class PlantUMLParser(Parser):
         to_id: str,
         label: str,
         connection_type: str,
-        metadata: Optional[dict[str, Any]] = None,
+        metadata: dict[str, Any] | None = None,
     ) -> Connection:
         conn = Connection(
             id=f'conn-{state.connection_count}',
@@ -587,13 +589,13 @@ class PlantUMLParser(Parser):
         connections = [e for e in state.elements if isinstance(e, Connection)]
 
         adjacency: dict[str, list[str]] = defaultdict(list)
-        in_degree: dict[str, int] = {sid: 0 for sid in shape_ids}
+        in_degree: dict[str, int] = dict.fromkeys(shape_ids, 0)
         for conn in connections:
             if conn.from_id in shape_ids and conn.to_id in shape_ids and conn.from_id != conn.to_id:
                 adjacency[conn.from_id].append(conn.to_id)
                 in_degree[conn.to_id] += 1
 
-        layers: dict[str, int] = {sid: 0 for sid in shape_ids}
+        layers: dict[str, int] = dict.fromkeys(shape_ids, 0)
         queue = deque(s.id for s in shapes if in_degree[s.id] == 0)
         visited: set[str] = set()
         while queue:

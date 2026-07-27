@@ -7,7 +7,7 @@ particularly useful for C4 model hierarchies and other multi-view scenarios.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any
 
 
 @dataclass
@@ -41,8 +41,8 @@ class DiagramView:
     description: str = ''
     file: str = ''  # Path to diagram file
     zoom_level: int = 0  # C4: 1=Context, 2=Container, 3=Component, 4=Code
-    parent_view: Optional[str] = None  # For drill-down relationships
-    focused_element: Optional[str] = None  # Which element this zooms into
+    parent_view: str | None = None  # For drill-down relationships
+    focused_element: str | None = None  # Which element this zooms into
     element_refs: list[str] = field(default_factory=list)  # Elements used in this view
 
 
@@ -70,7 +70,7 @@ class Workspace:
     author: str = ''
     version: str = '1.0.0'
 
-    def get_element(self, element_id: str) -> Optional[ElementDefinition]:
+    def get_element(self, element_id: str) -> ElementDefinition | None:
         """Get element definition by ID.
 
         Args:
@@ -81,7 +81,7 @@ class Workspace:
         """
         return self.elements.get(element_id)
 
-    def get_view(self, view_id: str) -> Optional[DiagramView]:
+    def get_view(self, view_id: str) -> DiagramView | None:
         """Get diagram view by ID.
 
         Args:
@@ -114,9 +114,7 @@ class Workspace:
                 related.append(parent)
 
         # Child views (views that have this as parent)
-        for v in self.views.values():
-            if v.parent_view == view_id:
-                related.append(v)
+        related.extend(v for v in self.views.values() if v.parent_view == view_id)
 
         return related
 
@@ -129,13 +127,9 @@ class Workspace:
         Returns:
             List of child DiagramView objects
         """
-        children = []
-        for v in self.views.values():
-            if v.parent_view == view_id:
-                children.append(v)
-        return children
+        return [v for v in self.views.values() if v.parent_view == view_id]
 
-    def get_parent_view(self, view_id: str) -> Optional[DiagramView]:
+    def get_parent_view(self, view_id: str) -> DiagramView | None:
         """Get parent view of a given view.
 
         Args:
@@ -155,12 +149,14 @@ class Workspace:
         Returns:
             List of error messages (empty if valid)
         """
-        errors = []
+        errors: list[str] = []
 
         for view_id, view in self.views.items():
-            for elem_ref in view.element_refs:
-                if elem_ref not in self.elements:
-                    errors.append(f"View '{view_id}' references undefined element '{elem_ref}'")
+            errors.extend(
+                f"View '{view_id}' references undefined element '{elem_ref}'"
+                for elem_ref in view.element_refs
+                if elem_ref not in self.elements
+            )
 
             # Validate parent view exists
             if view.parent_view and view.parent_view not in self.views:

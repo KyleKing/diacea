@@ -495,8 +495,7 @@ class TestSVGTestData:
         if not svg_path.exists():
             pytest.skip('Test data file not found')
 
-        with open(svg_path) as f:
-            svg_content = f.read()
+        svg_content = Path(svg_path).read_text(encoding='utf-8')
 
         parser = SVGParser()
         diagram = parser.parse(svg_content)
@@ -515,8 +514,7 @@ class TestSVGTestData:
         if not svg_path.exists():
             pytest.skip('Test data file not found')
 
-        with open(svg_path) as f:
-            svg_content = f.read()
+        svg_content = Path(svg_path).read_text(encoding='utf-8')
 
         parser = SVGParser()
         diagram = parser.parse(svg_content)
@@ -540,8 +538,7 @@ class TestSVGTestData:
         if not svg_path.exists():
             pytest.skip('Test data file not found')
 
-        with open(svg_path) as f:
-            svg_content = f.read()
+        svg_content = Path(svg_path).read_text(encoding='utf-8')
 
         parser = SVGParser()
         diagram = parser.parse(svg_content)

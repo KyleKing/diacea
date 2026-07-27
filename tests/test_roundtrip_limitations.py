@@ -7,12 +7,7 @@ Round-trip conversion is NOT supported (e.g., Excalidraw -> Mermaid -> Excalidra
 These tests document the one-way conversion limitations.
 """
 
-import json
-
-import pytest
-
 from diacea.generators import (
-    C4PlantUMLGenerator,
     D2Generator,
     GraphVizGenerator,
     MermaidGenerator,
@@ -120,7 +115,7 @@ class TestExcalidrawToIRPreservation:
         diagram = parser.parse(data)
 
         shapes = diagram.get_shapes()
-        assert shapes[0].style.stroke_style in ('solid', 'dashed', None)
+        assert shapes[0].style.stroke_style in {'solid', 'dashed', None}
 
     def test_seed_not_preserved(self):
         """Excalidraw seed (randomization) is not preserved in IR."""
@@ -337,13 +332,13 @@ class TestSemanticTypePreservation:
     def test_database_cylinder_recognized(self):
         from diacea.ir.semantic import SemanticType, infer_semantic_type
 
-        semantic, confidence = infer_semantic_type(shape_type='cylinder')
+        semantic, _confidence = infer_semantic_type(shape_type='cylinder')
         assert semantic == SemanticType.DATABASE
 
     def test_diamond_is_decision(self):
         from diacea.ir.semantic import SemanticType, infer_semantic_type
 
-        semantic, confidence = infer_semantic_type(shape_type='diamond')
+        semantic, _confidence = infer_semantic_type(shape_type='diamond')
         assert semantic == SemanticType.DECISION
 
     def test_semantic_type_affects_output(self):

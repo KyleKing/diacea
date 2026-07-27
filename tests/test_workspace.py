@@ -375,7 +375,7 @@ class TestWorkspaceFormat:
         view = DiagramView(id='view1', name='View 1', view_type='context', element_refs=['elem1'])
         workspace.add_view(view)
 
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.yml', delete=False) as f:
+        with tempfile.NamedTemporaryFile(encoding='utf-8', mode='w', suffix='.yml', delete=False) as f:
             temp_path = f.name
 
         try:
@@ -400,7 +400,7 @@ class TestWorkspaceFormat:
         view = DiagramView(id='view1', name='View 1', view_type='context', element_refs=['elem1'])
         workspace.add_view(view)
 
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+        with tempfile.NamedTemporaryFile(encoding='utf-8', mode='w', suffix='.json', delete=False) as f:
             temp_path = f.name
 
         try:
@@ -471,30 +471,30 @@ class TestWorkspaceIntegration:
 
 
 def _write_excalidraw(path, shapes):
-    elements = []
+    elements: list[dict[str, object]] = []
     for idx, (label, width, height) in enumerate(shapes):
         x = idx * 1000.0
-        elements.append(
-            {
-                'id': f'shape{idx}',
-                'type': 'rectangle',
-                'x': x,
-                'y': 0.0,
-                'width': float(width),
-                'height': float(height),
-            }
-        )
-        elements.append(
-            {
-                'id': f'text{idx}',
-                'type': 'text',
-                'x': x + 10.0,
-                'y': 10.0,
-                'width': 50.0,
-                'height': 20.0,
-                'text': label,
-                'containerId': f'shape{idx}',
-            }
+        elements.extend(
+            (
+                {
+                    'id': f'shape{idx}',
+                    'type': 'rectangle',
+                    'x': x,
+                    'y': 0.0,
+                    'width': float(width),
+                    'height': float(height),
+                },
+                {
+                    'id': f'text{idx}',
+                    'type': 'text',
+                    'x': x + 10.0,
+                    'y': 10.0,
+                    'width': 50.0,
+                    'height': 20.0,
+                    'text': label,
+                    'containerId': f'shape{idx}',
+                },
+            )
         )
     path.write_text(json.dumps({'elements': elements}))
 

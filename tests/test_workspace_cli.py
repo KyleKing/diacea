@@ -63,7 +63,7 @@ class TestWorkspaceCreate:
         assert result == 0
         assert output_file.exists()
 
-        with Path(output_file).open() as f:
+        with Path(output_file).open(encoding='utf-8') as f:
             data = json.load(f)
         assert data['workspace']['name'] == 'JSON Workspace'
 

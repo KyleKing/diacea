@@ -9,7 +9,6 @@ To skip slow tests:
     pytest tests/test_performance.py -v -m "not slow"
 """
 
-import json
 import random
 import time
 from typing import Any

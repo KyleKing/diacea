@@ -12,8 +12,7 @@ def _escape_plantuml_label(label: str) -> str:
     escaped = escaped.replace('\n', '\\n')
     escaped = escaped.replace('<', '~<')
     escaped = escaped.replace('>', '~>')
-    escaped = escaped.replace('&', '&amp;')
-    return escaped
+    return escaped.replace('&', '&amp;')
 
 
 class PlantUMLGenerator(Generator):
@@ -48,8 +47,7 @@ class PlantUMLGenerator(Generator):
             lines.extend(self._generate_group(group, shapes))
 
         # Generate connections
-        for conn in connections:
-            lines.append(self._generate_connection(conn))
+        lines.extend(self._generate_connection(conn) for conn in connections)
 
         lines.append('@enduml')
         return '\n'.join(lines)
@@ -83,10 +81,7 @@ class PlantUMLGenerator(Generator):
         to_id = self._sanitize_id(conn.to_id)
 
         # Determine arrow type
-        if conn.connection_type == 'bidirectional':
-            arrow = '<-->'
-        else:
-            arrow = '-->'
+        arrow = '<-->' if conn.connection_type == 'bidirectional' else '-->'
 
         if conn.label:
             label = self._escape_label(conn.label)
@@ -100,11 +95,11 @@ class PlantUMLGenerator(Generator):
             semantic = shape.semantic_type
             if semantic == SemanticType.DATABASE:
                 return 'database'
-            elif semantic == SemanticType.QUEUE:
+            if semantic == SemanticType.QUEUE:
                 return 'queue'
-            elif semantic == SemanticType.STORAGE:
+            if semantic == SemanticType.STORAGE:
                 return 'storage'
-            elif semantic == SemanticType.CLOUD:
+            if semantic == SemanticType.CLOUD:
                 return 'cloud'
 
         # Fallback to geometric shape
@@ -172,24 +167,19 @@ class C4PlantUMLGenerator(Generator):
                 containers.append(shape)
 
         # Generate people
-        for person in people:
-            lines.append(self._generate_person(person))
+        lines.extend(self._generate_person(person) for person in people)
 
         # Generate systems
-        for system in systems:
-            lines.append(self._generate_system(system))
+        lines.extend(self._generate_system(system) for system in systems)
 
         # Generate containers
-        for container in containers:
-            lines.append(self._generate_container(container))
+        lines.extend(self._generate_container(container) for container in containers)
 
         # Generate components
-        for component in components:
-            lines.append(self._generate_component(component))
+        lines.extend(self._generate_component(component) for component in components)
 
         # Generate databases
-        for database in databases:
-            lines.append(self._generate_database(database))
+        lines.extend(self._generate_database(database) for database in databases)
 
         lines.append('')
 
@@ -200,8 +190,7 @@ class C4PlantUMLGenerator(Generator):
         lines.append('')
 
         # Generate relationships
-        for conn in connections:
-            lines.append(self._generate_relationship(conn))
+        lines.extend(self._generate_relationship(conn) for conn in connections)
 
         lines.append('@enduml')
         return '\n'.join(lines)

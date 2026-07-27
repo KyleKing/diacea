@@ -6,7 +6,7 @@ import textwrap
 import pytest
 
 from diacea.generators.mermaid import MermaidGenerator
-from diacea.ir import Connection, Diagram, Group, Shape
+from diacea.ir import Diagram, Shape
 from diacea.ir.semantic import SemanticType
 from diacea.parsers.excalidraw import ExcalidrawParser
 from diacea.parsers.mermaid import (

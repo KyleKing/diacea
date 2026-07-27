@@ -38,7 +38,8 @@ def _parse(path):
             return TLDrawParser().parse(json.loads(content))
         case '.excalidraw':
             return ExcalidrawParser().parse(json.loads(content))
-    raise ValueError(f'Unhandled fixture suffix: {path}')
+    msg = f'Unhandled fixture suffix: {path}'
+    raise ValueError(msg)
 
 
 def _params():

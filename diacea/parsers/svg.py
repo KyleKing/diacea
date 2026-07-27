@@ -79,7 +79,7 @@ def _sample_quadratic(p0: _XY, p1: _XY, p2: _XY) -> list[_XY]:
     return points
 
 
-def _sample_arc(  # noqa: PLR0913
+def _sample_arc(
     start: _XY,
     rx: float,
     ry: float,
@@ -197,7 +197,7 @@ class Transform:
         """Apply scale transformation to dimensions."""
         return (width * abs(self.scale_x), height * abs(self.scale_y))
 
-    def combine(self, other: 'Transform') -> 'Transform':
+    def combine(self, other: Transform) -> Transform:
         """Combine with another transform (self applied first, then other)."""
         return Transform(
             translate_x=self.translate_x * other.scale_x + other.translate_x,
@@ -244,7 +244,7 @@ class SVGParser(Parser):
 
     SVG_NS = '{http://www.w3.org/2000/svg}'
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize parser."""
         self._id_counter = 0
         self._text_elements: dict[str, Text] = {}
@@ -260,10 +260,7 @@ class SVGParser(Parser):
         Returns:
             IR Diagram object
         """
-        if isinstance(data, str):
-            root = ET.fromstring(data)
-        else:
-            root = data
+        root = ET.fromstring(data) if isinstance(data, str) else data
 
         self._lines = []
         self._text_elements = {}
@@ -325,9 +322,8 @@ class SVGParser(Parser):
 
         elif tag == 'path':
             result = self._parse_path(elem, current_transform)
-            if result:
-                if isinstance(result, Shape):
-                    elements.append(result)
+            if result and isinstance(result, Shape):
+                elements.append(result)
 
         elif tag == 'line':
             self._parse_line(elem, current_transform)

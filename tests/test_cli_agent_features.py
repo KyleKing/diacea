@@ -91,7 +91,7 @@ class TestJsonEnvelope:
         }
         assert envelope['input_format'] == 'excalidraw'
         assert envelope['output_format'] == 'mermaid'
-        assert envelope['diagram_type'] in ('flowchart', 'c4', 'sequence')
+        assert envelope['diagram_type'] in {'flowchart', 'c4', 'sequence'}
         assert envelope['diagram_type'] in envelope['output'].lower() or envelope['diagram_type'] == 'c4'
         assert isinstance(envelope['warnings'], list)
 

@@ -9,15 +9,14 @@ import logging
 from typing import Any
 
 from ..ir import (
+    GROUP_ID_PREFIX,
     Connection,
     Diagram,
     Dimensions,
     Element,
-    GROUP_ID_PREFIX,
     Group,
     Parser,
     Point,
-    SemanticType,
     Shape,
     Style,
     Text,
@@ -30,7 +29,7 @@ _logger = logging.getLogger(__name__)
 class ExcalidrawParser(Parser):
     """Parse Excalidraw JSON format to IR."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize parser."""
         self.warnings: list[str] = []
 
@@ -51,7 +50,7 @@ class ExcalidrawParser(Parser):
         # Handle both full Excalidraw format and just elements list
         if isinstance(data, dict):
             elements = data.get('elements', [])
-            excalidraw_metadata = {k: v for k, v in data.items() if k not in ['elements']}
+            excalidraw_metadata = {k: v for k, v in data.items() if k != 'elements'}
         elif isinstance(data, list):
             elements = data
             excalidraw_metadata = {}
@@ -68,7 +67,7 @@ class ExcalidrawParser(Parser):
         for elem in elements:
             elem_type = elem.get('type', '')
 
-            if elem_type == 'rectangle' or elem_type == 'ellipse' or elem_type == 'diamond':
+            if elem_type in {'rectangle', 'ellipse', 'diamond'}:
                 shape = self._parse_shape(elem)
                 ir_elements.append(shape)
                 shapes.append(shape)
@@ -96,13 +95,11 @@ class ExcalidrawParser(Parser):
         ir_elements.extend(groups)
 
         # Create diagram
-        diagram = Diagram(
+        return Diagram(
             id='excalidraw-diagram',
             elements=ir_elements,
             metadata={'excalidraw': excalidraw_metadata},
         )
-
-        return diagram
 
     def _parse_shape(self, elem: dict[str, Any]) -> Shape:
         """Parse Excalidraw shape to IR Shape."""
@@ -220,10 +217,7 @@ class ExcalidrawParser(Parser):
         start_arrowhead = elem.get('startArrowhead')
         end_arrowhead = elem.get('endArrowhead')
 
-        if start_arrowhead == 'arrow' and end_arrowhead == 'arrow':
-            connection_type = 'bidirectional'
-        else:
-            connection_type = 'directed'
+        connection_type = 'bidirectional' if start_arrowhead == 'arrow' and end_arrowhead == 'arrow' else 'directed'
 
         # Style
         stroke_width = elem.get('strokeWidth')
@@ -298,10 +292,7 @@ class ExcalidrawParser(Parser):
             return None
 
         # First check if point is inside any shape
-        inside_shapes = []
-        for shape in shapes:
-            if self._point_in_shape(point, shape):
-                inside_shapes.append(shape)
+        inside_shapes = [shape for shape in shapes if self._point_in_shape(point, shape)]
 
         # If inside multiple shapes, return the smallest
         if inside_shapes:

@@ -6,7 +6,8 @@ Run property-based tests:
     pytest tests/test_property_based.py -v
 """
 
-from hypothesis import HealthCheck, given, settings, strategies as st
+from hypothesis import HealthCheck, given, settings
+from hypothesis import strategies as st
 
 from diacea.generators import (
     C4PlantUMLGenerator,

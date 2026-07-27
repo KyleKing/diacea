@@ -28,7 +28,6 @@ class Parser(ABC):
         Raises:
             ValueError: If data is invalid or cannot be parsed
         """
-        pass
 
 
 class Generator(ABC):
@@ -50,4 +49,3 @@ class Generator(ABC):
         Raises:
             ValueError: If diagram cannot be converted to this format
         """
-        pass

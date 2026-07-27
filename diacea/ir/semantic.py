@@ -16,10 +16,9 @@ from __future__ import annotations
 
 import re
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 from .elements import Dimensions, Style
-
 
 # Confidence threshold for semantic inference warnings
 CONFIDENCE_THRESHOLD = 0.7
@@ -383,10 +382,10 @@ ICON_SEMANTIC_MAP = {
 def infer_semantic_type(
     shape_type: str,
     label: str = '',
-    size: Optional[Dimensions] = None,
-    style: Optional[Style] = None,
-    metadata: Optional[dict[str, Any]] = None,
-) -> tuple[Optional[SemanticType], float]:
+    size: Dimensions | None = None,
+    style: Style | None = None,
+    metadata: dict[str, Any] | None = None,
+) -> tuple[SemanticType | None, float]:
     """Infer semantic type using hybrid approach.
 
     Priority order:
@@ -454,7 +453,7 @@ def infer_semantic_type(
     return (SemanticType.GENERIC, 0.3)
 
 
-def _parse_semantic_hint(hint: str) -> Optional[SemanticType]:
+def _parse_semantic_hint(hint: str) -> SemanticType | None:
     """Parse semantic type from hint string."""
     hint_lower = hint.lower()
 
@@ -476,7 +475,7 @@ def _parse_semantic_hint(hint: str) -> Optional[SemanticType]:
     return alias_map.get(hint_lower)
 
 
-def _infer_from_icons(label: str) -> tuple[Optional[SemanticType], float]:
+def _infer_from_icons(label: str) -> tuple[SemanticType | None, float]:
     """Infer semantic type from icons/emojis in label."""
     if not label:
         return (None, 0.0)
@@ -490,9 +489,9 @@ def _infer_from_icons(label: str) -> tuple[Optional[SemanticType], float]:
 
 def _infer_from_heuristics(
     shape_type: str,
-    size: Optional[Dimensions],
-    style: Optional[Style] = None,
-) -> tuple[Optional[SemanticType], float]:
+    size: Dimensions | None,
+    style: Style | None = None,
+) -> tuple[SemanticType | None, float]:
     """Infer semantic type from shape, size, and style heuristics.
 
     Heuristic rules:
@@ -517,22 +516,22 @@ def _infer_from_heuristics(
     style_result = _infer_from_style(style)
 
     # Shape-based inference
-    if shape_type == 'ellipse' or shape_type == 'circle':
+    if shape_type in {'ellipse', 'circle'}:
         if size:
             aspect_ratio = size.width / size.height if size.height > 0 else 1.0
             if aspect_ratio > 2.0:  # Very wide ellipse
                 return (SemanticType.DATABASE, 0.7)
-            elif size.area < 5000:  # Small circle/ellipse
+            if size.area < 5000:  # Small circle/ellipse
                 return (SemanticType.PERSON, 0.65)
         return (SemanticType.PERSON, 0.5)
 
-    elif shape_type == 'diamond':
+    if shape_type == 'diamond':
         return (SemanticType.DECISION, 0.9)
 
-    elif shape_type == 'triangle':
+    if shape_type == 'triangle':
         return (SemanticType.DECISION, 0.6)
 
-    elif shape_type == 'rectangle':
+    if shape_type == 'rectangle':
         # Check style hints first
         if style_result[0] and style_result[1] > 0.6:
             return style_result
@@ -546,20 +545,19 @@ def _infer_from_heuristics(
                 return (SemanticType.SYSTEM, 0.7)
 
             # Wide and short → Database/Storage
-            elif aspect_ratio > 3.0 and size.height < 100:
+            if aspect_ratio > 3.0 and size.height < 100:
                 return (SemanticType.DATABASE, 0.6)
 
             # Large → Container
-            elif area > 30000:
+            if area > 30000:
                 return (SemanticType.CONTAINER, 0.6)
 
             # Medium → Component
-            elif area > 5000:
+            if area > 5000:
                 return (SemanticType.COMPONENT, 0.55)
 
             # Small → Component or Note
-            else:
-                return (SemanticType.COMPONENT, 0.4)
+            return (SemanticType.COMPONENT, 0.4)
 
         return (SemanticType.COMPONENT, 0.4)
 
@@ -570,7 +568,7 @@ def _infer_from_heuristics(
     return (None, 0.0)
 
 
-def _infer_from_style(style: Optional[Style]) -> tuple[Optional[SemanticType], float]:
+def _infer_from_style(style: Style | None) -> tuple[SemanticType | None, float]:
     """Infer semantic type from visual style.
 
     Color conventions:
@@ -623,7 +621,7 @@ def _normalize_label_words(label: str) -> str:
     return _CAMEL_BOUNDARY_RE.sub(' ', label).replace('_', ' ').lower()
 
 
-def _infer_from_text(label: str) -> tuple[Optional[SemanticType], float]:
+def _infer_from_text(label: str) -> tuple[SemanticType | None, float]:
     """Infer semantic type from whole-word keyword matches in the label."""
     if not label:
         return (None, 0.0)
@@ -636,7 +634,7 @@ def _infer_from_text(label: str) -> tuple[Optional[SemanticType], float]:
     return (None, 0.0)
 
 
-def validate_confidence(semantic_type: Optional[SemanticType], confidence: float) -> Optional[str]:
+def validate_confidence(semantic_type: SemanticType | None, confidence: float) -> str | None:
     """Validate confidence level and return warning if below threshold.
 
     Args:

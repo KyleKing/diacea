@@ -463,7 +463,7 @@ class TestC4:
         assert _only_connection(diagram).metadata['direction_hint'] == direction
 
     def test_layout_macros_skipped_silently(self):
-        diagram, parser = _parse(_wrap('LAYOUT_WITH_LEGEND()\nSystem(s, "S")'))
+        _diagram, parser = _parse(_wrap('LAYOUT_WITH_LEGEND()\nSystem(s, "S")'))
         assert not parser.warnings
 
     def test_unknown_macro_warns(self):

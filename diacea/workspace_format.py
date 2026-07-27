@@ -30,19 +30,20 @@ def load_workspace(file_path: str | Path) -> Workspace:
     """
     path = Path(file_path)
     if not path.exists():
-        raise FileNotFoundError(f'Workspace file not found: {file_path}')
+        msg = f'Workspace file not found: {file_path}'
+        raise FileNotFoundError(msg)
 
-    with open(path) as f:
-        content = f.read()
+    content = Path(path).read_text(encoding='utf-8')
 
     # Detect format from extension
     suffix = path.suffix.lower()
-    if suffix in ['.yml', '.yaml']:
+    if suffix in {'.yml', '.yaml'}:
         data = yaml.safe_load(content)
     elif suffix == '.json':
         data = json.loads(content)
     else:
-        raise ValueError(f'Unsupported workspace format: {suffix} (use .yml, .yaml, or .json)')
+        msg = f'Unsupported workspace format: {suffix} (use .yml, .yaml, or .json)'
+        raise ValueError(msg)
 
     return from_dict(data)
 
@@ -63,13 +64,14 @@ def save_workspace(workspace: Workspace, file_path: str | Path, format: str = 'y
     path = Path(file_path)
     path.parent.mkdir(parents=True, exist_ok=True)
 
-    with open(path, 'w') as f:
+    with Path(path).open('w', encoding='utf-8') as f:
         if format == 'yaml':
             yaml.dump(data, f, default_flow_style=False, sort_keys=False)
         elif format == 'json':
             json.dump(data, f, indent=2)
         else:
-            raise ValueError(f"Unsupported format: {format} (use 'yaml' or 'json')")
+            msg = f"Unsupported format: {format} (use 'yaml' or 'json')"
+            raise ValueError(msg)
 
 
 def to_dict(workspace: Workspace) -> dict[str, Any]:

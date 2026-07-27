@@ -46,7 +46,7 @@ def _make_connection(from_id, to_id, label=''):
 def excalidraw_data():
     """Load test Excalidraw data."""
     data_file = Path('tests/data/excalidraw.json')
-    with open(data_file) as f:
+    with Path(data_file).open(encoding='utf-8') as f:
         return json.load(f)
 
 

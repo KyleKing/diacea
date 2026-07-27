@@ -11,7 +11,6 @@ Design decisions (from Phase 4 open questions):
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional
 
 from ..ir import Connection, Diagram, Generator, Group, SemanticType, Shape
 
@@ -20,7 +19,7 @@ from ..ir import Connection, Diagram, Generator, Group, SemanticType, Shape
 class D2Config:
     """Configuration for D2 generator."""
 
-    direction: Optional[str] = None  # up, down, left, right (None = auto-detect)
+    direction: str | None = None  # up, down, left, right (None = auto-detect)
     sketch: bool = False  # Sketch mode for hand-drawn look
     shape_map: dict[str, str] = field(default_factory=dict)
 
@@ -41,7 +40,7 @@ class D2Config:
 class D2Generator(Generator):
     """Generate D2 from IR."""
 
-    def __init__(self, config: Optional[D2Config] = None):
+    def __init__(self, config: D2Config | None = None) -> None:
         """Initialize generator.
 
         Args:
@@ -59,13 +58,12 @@ class D2Generator(Generator):
         Returns:
             D2 diagram string
         """
-        lines = []
+        lines: list[str] = []
 
         # Direction
         direction = self.config.direction or self._detect_direction(diagram)
         if direction:
-            lines.append(f'direction: {direction}')
-            lines.append('')
+            lines.extend((f'direction: {direction}', ''))
 
         # Build element paths for hierarchy
         self._build_element_paths(diagram)
@@ -77,12 +75,11 @@ class D2Generator(Generator):
         connections = diagram.get_connections()
         if connections:
             lines.append('')
-            for conn in connections:
-                lines.append(self._format_connection(conn))
+            lines.extend(self._format_connection(conn) for conn in connections)
 
         return '\n'.join(lines)
 
-    def _detect_direction(self, diagram: Diagram) -> Optional[str]:
+    def _detect_direction(self, diagram: Diagram) -> str | None:
         """Auto-detect optimal direction based on layout."""
         shapes = diagram.get_shapes()
         if not shapes:
@@ -101,7 +98,7 @@ class D2Generator(Generator):
         if width > height * 1.5:
             return 'right'
         # If taller than wide, use down
-        elif height > width * 1.5:
+        if height > width * 1.5:
             return 'down'
 
         return None  # Let D2 decide
@@ -131,8 +128,7 @@ class D2Generator(Generator):
                 parent_path = get_path(parent_id, visited)
                 sanitized_id = self._sanitize_id(elem_id)
                 return f'{parent_path}.{sanitized_id}' if parent_path else sanitized_id
-            else:
-                return self._sanitize_id(elem_id)
+            return self._sanitize_id(elem_id)
 
         for elem in diagram.elements:
             self._element_paths[elem.id] = get_path(elem.id, set())
@@ -152,8 +148,7 @@ class D2Generator(Generator):
 
         group_source_ids = {g.source_shape_id for g in groups}
         standalone_shapes = [s for s in shapes if s.id not in grouped_ids and s.id not in group_source_ids]
-        for shape in standalone_shapes:
-            lines.append(self._format_shape(shape))
+        lines.extend(self._format_shape(shape) for shape in standalone_shapes)
 
     def _write_group(self, group: Group, all_shapes: list[Shape], lines: list[str]) -> None:
         """Write a group as a D2 container."""
@@ -172,8 +167,7 @@ class D2Generator(Generator):
                 lines.extend(f'  {line}' for line in child_line.split('\n'))
 
         # Close container
-        lines.append('}')
-        lines.append('')
+        lines.extend(('}', ''))
 
     def _format_shape(self, shape: Shape, use_relative_path: bool = False) -> str:
         """Format a D2 shape declaration."""
@@ -206,7 +200,7 @@ class D2Generator(Generator):
 
         return '\n'.join(lines)
 
-    def _get_d2_shape(self, shape: Shape) -> Optional[str]:
+    def _get_d2_shape(self, shape: Shape) -> str | None:
         """Get D2 shape name based on semantic or geometric type."""
         # Check semantic type first
         if shape.semantic_type and shape.semantic_type in self.config.shape_map:

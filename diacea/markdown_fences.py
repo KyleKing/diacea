@@ -80,18 +80,20 @@ def _parse_fence_body(body: str) -> dict[str, str]:
         key, separator, value = line.partition(':')
         key, value = key.strip(), value.strip()
         if not separator or not value:
-            raise DiaceaFenceError(f"diacea fence lines must be 'key: value', got {line!r}")
+            msg = f"diacea fence lines must be 'key: value', got {line!r}"
+            raise DiaceaFenceError(msg)
         if key not in {'format', 'mermaid-type', 'source'}:
-            raise DiaceaFenceError(f'unknown diacea fence option {key!r}')
+            msg = f'unknown diacea fence option {key!r}'
+            raise DiaceaFenceError(msg)
         options[key] = value
     if 'source' not in options:
         raise DiaceaFenceError("diacea fence is missing the required 'source' option")
     if options['format'] not in _FENCE_LANGUAGES:
-        raise DiaceaFenceError(
-            f'unknown diacea fence format {options["format"]!r}; expected one of {sorted(_FENCE_LANGUAGES)}'
-        )
+        msg = f'unknown diacea fence format {options["format"]!r}; expected one of {sorted(_FENCE_LANGUAGES)}'
+        raise DiaceaFenceError(msg)
     if (mermaid_type := options.get('mermaid-type')) is not None and mermaid_type not in _MERMAID_TYPES:
-        raise DiaceaFenceError(f'unknown mermaid-type {mermaid_type!r}; expected one of {sorted(_MERMAID_TYPES)}')
+        msg = f'unknown mermaid-type {mermaid_type!r}; expected one of {sorted(_MERMAID_TYPES)}'
+        raise DiaceaFenceError(msg)
     return options
 
 
@@ -101,7 +103,8 @@ def _resolve_source(source: str, base_dirs: Sequence[str | Path]) -> Path:
         if candidate.exists():
             return candidate
     searched = ', '.join(str(c) for c in candidates)
-    raise DiaceaFenceError(f'diacea fence source {source!r} not found (searched: {searched})')
+    msg = f'diacea fence source {source!r} not found (searched: {searched})'
+    raise DiaceaFenceError(msg)
 
 
 def _generate(diagram: Diagram, output_format: str, mermaid_type: str | None) -> str:
@@ -116,4 +119,5 @@ def _generate(diagram: Diagram, output_format: str, mermaid_type: str | None) ->
             return MermaidGenerator(diagram_type=mermaid_type).generate(diagram)
         case 'plantuml':
             return PlantUMLGenerator().generate(diagram)
-    raise DiaceaFenceError(f'unknown diacea fence format {output_format!r}')
+    msg = f'unknown diacea fence format {output_format!r}'
+    raise DiaceaFenceError(msg)

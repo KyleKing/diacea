@@ -7,7 +7,7 @@ import json
 import sys
 import traceback
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from .generators import (
     C4PlantUMLGenerator,
@@ -96,7 +96,7 @@ _OUTPUT_FORMATS = [
 class _CLIError(Exception):
     """CLI failure with an associated exit code."""
 
-    def __init__(self, message: str, exit_code: int = EXIT_ERROR):
+    def __init__(self, message: str, exit_code: int = EXIT_ERROR) -> None:
         super().__init__(message)
         self.exit_code = exit_code
 
@@ -140,7 +140,7 @@ def detect_input_format(data: dict[str, Any] | str) -> str:
     raise ValueError('Unknown input format - expected SVG, TLDraw, or Excalidraw')
 
 
-def main(argv: Optional[list[str]] = None) -> int:
+def main(argv: list[str] | None = None) -> int:
     """Main CLI entry point.
 
     Dispatches to the `formats`, `inspect`, or `convert` subcommands. For
@@ -172,13 +172,14 @@ def _read_content(input_arg: str) -> str:
         return sys.stdin.read()
     input_path = Path(input_arg)
     if not input_path.exists():
-        raise _CLIError(f'Input file not found: {input_arg}')
-    return input_path.read_text()
+        msg = f'Input file not found: {input_arg}'
+        raise _CLIError(msg)
+    return input_path.read_text(encoding='utf-8')
 
 
 def _resolve_input_format(content: str, requested: str) -> tuple[str, Any]:
     """Resolve the input format name and parser-ready data for content."""
-    if requested in ('svg', 'mermaid', 'plantuml'):
+    if requested in {'svg', 'mermaid', 'plantuml'}:
         return (requested, content)
     if requested == 'obsidian':
         return ('obsidian', extract_excalidraw_json(content))
@@ -203,7 +204,8 @@ def _resolve_input_format(content: str, requested: str) -> tuple[str, Any]:
     try:
         return (detect_input_format(data), data)
     except ValueError as err:
-        raise _CLIError(f'Unrecognized input format: {err}') from err
+        msg = f'Unrecognized input format: {err}'
+        raise _CLIError(msg) from err
 
 
 def _parse_to_diagram(input_format: str, input_data: Any) -> tuple[Diagram, list[str]]:
@@ -221,16 +223,18 @@ def _parse_to_diagram(input_format: str, input_data: Any) -> tuple[Diagram, list
         case 'plantuml':
             input_parser = PlantUMLParser()
         case _:
-            raise _CLIError(f'Unsupported input format: {input_format}')
+            msg = f'Unsupported input format: {input_format}'
+            raise _CLIError(msg)
 
     try:
         diagram = input_parser.parse(input_data)
     except ValueError as err:
-        raise _CLIError(f'Failed to parse {input_format} input: {err}') from err
+        msg = f'Failed to parse {input_format} input: {err}'
+        raise _CLIError(msg) from err
     return diagram, list(getattr(input_parser, 'warnings', []))
 
 
-def _generate_output(diagram: Diagram, args: argparse.Namespace) -> tuple[str, Optional[str]]:
+def _generate_output(diagram: Diagram, args: argparse.Namespace) -> tuple[str, str | None]:
     """Generate output text; returns (output, mermaid diagram type when applicable)."""
     match args.format:
         case 'plantuml':
@@ -254,10 +258,11 @@ def _generate_output(diagram: Diagram, args: argparse.Namespace) -> tuple[str, O
             )
             return (D2Generator(config=d2_config).generate(diagram), None)
         case _:
-            raise _CLIError(f'Unknown format: {args.format}')
+            msg = f'Unknown format: {args.format}'
+            raise _CLIError(msg)
 
 
-def _semantic_type_name(semantic_type: Any) -> Optional[str]:
+def _semantic_type_name(semantic_type: Any) -> str | None:
     if semantic_type is None:
         return None
     return getattr(semantic_type, 'value', semantic_type)
@@ -289,7 +294,7 @@ def _emit_error(message: str, exit_code: int, as_json: bool) -> int:
 def _write_output_file(output: str, output_arg: str) -> None:
     output_path = Path(output_arg)
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_text(output)
+    output_path.write_text(output, encoding='utf-8')
 
 
 def _run_convert(argv: list[str]) -> int:
@@ -422,12 +427,9 @@ def _run_formats(argv: list[str]) -> int:
 _SYNC_SUFFIXES = {'c4': '.puml', 'd2': '.d2', 'graphviz': '.dot', 'mermaid': '.mmd', 'plantuml': '.puml'}
 
 
-def _sync_output_path(source: Path, output_format: str, output_dir: Optional[str]) -> Path:
+def _sync_output_path(source: Path, output_format: str, output_dir: str | None) -> Path:
     name = source.name
-    if name.endswith('.excalidraw.md'):
-        stem = name.removesuffix('.excalidraw.md')
-    else:
-        stem = source.stem
+    stem = name.removesuffix('.excalidraw.md') if name.endswith('.excalidraw.md') else source.stem
     directory = Path(output_dir) if output_dir else source.parent
     return directory / f'{stem}{_SYNC_SUFFIXES[output_format]}'
 

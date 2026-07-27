@@ -44,9 +44,10 @@ def parse_diagram_file(file_path: str | Path) -> Diagram:
     """
     path = Path(file_path)
     if not path.exists():
-        raise DiagramIngestionError(f'Diagram file not found: {path}')
+        msg = f'Diagram file not found: {path}'
+        raise DiagramIngestionError(msg)
 
-    content = path.read_text()
+    content = path.read_text(encoding='utf-8')
     stripped = content.strip()
 
     if stripped.startswith(('<?xml', '<svg')):
@@ -60,21 +61,24 @@ def parse_diagram_file(file_path: str | Path) -> Diagram:
             try:
                 input_data = json.loads(content)
             except json.JSONDecodeError as err:
-                raise DiagramIngestionError(
+                msg = (
                     f"Could not detect diagram format of '{path}': not SVG, "
                     f'Obsidian Excalidraw markdown, PlantUML, Mermaid, or valid JSON'
-                ) from err
+                )
+                raise DiagramIngestionError(msg) from err
             try:
                 input_format = detect_input_format(input_data)
             except ValueError as err:
-                raise DiagramIngestionError(f"Could not detect diagram format of '{path}': {err}") from err
+                msg = f"Could not detect diagram format of '{path}': {err}"
+                raise DiagramIngestionError(msg) from err
 
     try:
         if input_format == 'svg':
             return SVGParser().parse(input_data)
         if input_format == 'obsidian':
             if not isinstance(input_data, str):
-                raise DiagramIngestionError(f"Obsidian Excalidraw requires text content: '{path}'")
+                msg = f"Obsidian Excalidraw requires text content: '{path}'"
+                raise DiagramIngestionError(msg)
             return ExcalidrawParser().parse(extract_excalidraw_json(input_data))
         if input_format == 'mermaid':
             return MermaidParser().parse(input_data)
@@ -84,7 +88,8 @@ def parse_diagram_file(file_path: str | Path) -> Diagram:
             return TLDrawParser().parse(input_data)
         return ExcalidrawParser().parse(input_data)
     except ValueError as err:
-        raise DiagramIngestionError(f"Failed to parse diagram '{path}': {err}") from err
+        msg = f"Failed to parse diagram '{path}': {err}"
+        raise DiagramIngestionError(msg) from err
 
 
 def ingest_diagrams(

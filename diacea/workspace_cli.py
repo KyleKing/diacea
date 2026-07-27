@@ -4,11 +4,10 @@ from __future__ import annotations
 
 import argparse
 import sys
-from pathlib import Path
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from .ingestion import DiagramIngestionError, view_id_from_path
-from .ir.workspace import DiagramView, ElementDefinition, Workspace
+from .ir.workspace import DiagramView, ElementDefinition
 from .workspace_format import create_workspace_from_diagrams, load_workspace, save_workspace
 
 if TYPE_CHECKING:
@@ -105,11 +104,10 @@ def workspace_validate(args: argparse.Namespace) -> int:
         print(f'  - {len(workspace.elements)} elements defined')
         print(f'  - {len(workspace.views)} views defined')
         return 0
-    else:
-        print('✗ Validation errors found:')
-        for error in errors:
-            print(f'  - {error}')
-        return 1
+    print('✗ Validation errors found:')
+    for error in errors:
+        print(f'  - {error}')
+    return 1
 
 
 def workspace_info(args: argparse.Namespace) -> int:
@@ -331,7 +329,7 @@ def add_workspace_subcommands(subparsers: _SubParsersAction) -> None:
     view_add_parser.set_defaults(func=workspace_add_view)
 
 
-def main_workspace(argv: Optional[list[str]] = None) -> int:
+def main_workspace(argv: list[str] | None = None) -> int:
     """Main entry point for workspace CLI.
 
     Args:

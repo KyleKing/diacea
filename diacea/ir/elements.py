@@ -15,9 +15,7 @@ Design principles (aligned with pandoc):
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from enum import Enum
-from typing import Any, Optional
-
+from typing import Any
 
 # Version of the IR format
 IR_VERSION = '1.0.0'
@@ -65,13 +63,13 @@ class Style:
     should be stored in metadata for round-tripping.
     """
 
-    fill_color: Optional[str] = None  # Hex color or name
-    stroke_color: Optional[str] = None  # Hex color or name
-    stroke_width: Optional[float] = None
+    fill_color: str | None = None  # Hex color or name
+    stroke_color: str | None = None  # Hex color or name
+    stroke_width: float | None = None
     stroke_style: str = 'solid'  # solid, dashed, dotted
-    opacity: Optional[float] = None  # 0.0 to 1.0
-    font_family: Optional[str] = None
-    font_size: Optional[float] = None
+    opacity: float | None = None  # 0.0 to 1.0
+    font_family: str | None = None
+    font_size: float | None = None
 
     # Metadata for format-specific styling (preserves data for roundtrip)
     metadata: dict[str, Any] = field(default_factory=dict)
@@ -88,7 +86,7 @@ class Element:
     style: Style = field(default_factory=Style)
 
     # Semantic information
-    semantic_type: Optional[str] = None  # Will use enum in semantic.py
+    semantic_type: str | None = None  # Will use enum in semantic.py
     semantic_confidence: float = 0.0  # 0.0 to 1.0
 
     # Metadata for format-specific data (preserves for roundtrip)
@@ -121,8 +119,8 @@ class Connection(Element):
     connection_type: str = 'directed'  # directed, bidirectional, undirected
 
     # Connection points (optional, for precise routing)
-    start_point: Optional[Point] = None
-    end_point: Optional[Point] = None
+    start_point: Point | None = None
+    end_point: Point | None = None
     waypoints: list[Point] = field(default_factory=list)
 
     def __post_init__(self):
@@ -167,23 +165,23 @@ class Diagram:
     """
 
     id: str
-    name: Optional[str] = None
-    description: Optional[str] = None
+    name: str | None = None
+    description: str | None = None
 
     # All elements in the diagram
     elements: list[Element] = field(default_factory=list)
 
     # Metadata
     version: str = IR_VERSION  # IR version for compatibility
-    created: Optional[str] = None
-    modified: Optional[str] = None
-    author: Optional[str] = None
+    created: str | None = None
+    modified: str | None = None
+    author: str | None = None
 
     # Format-specific metadata (preserves for roundtrip)
     # Example: {"excalidraw": {"appState": {...}}}
     metadata: dict[str, Any] = field(default_factory=dict)
 
-    def get_element(self, element_id: str) -> Optional[Element]:
+    def get_element(self, element_id: str) -> Element | None:
         """Get element by ID."""
         for elem in self.elements:
             if elem.id == element_id:
