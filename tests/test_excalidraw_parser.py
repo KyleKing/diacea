@@ -89,3 +89,38 @@ class TestExcalidrawFloatCoercion:
         assert len(arrow.waypoints) == 1
         assert isinstance(arrow.waypoints[0].x, float)
         assert isinstance(arrow.waypoints[0].y, float)
+
+
+def _rect(elem_id, x, y, width, height):
+    return {'id': elem_id, 'type': 'rectangle', 'x': x, 'y': y, 'width': width, 'height': height}
+
+
+def _text(elem_id, x, y, content):
+    return {'id': elem_id, 'type': 'text', 'x': x, 'y': y, 'width': 40.0, 'height': 20.0, 'text': content}
+
+
+class TestExcalidrawSpatialIndex:
+    """The bucket grid used by label association and group detection must stay exact."""
+
+    def test_container_far_larger_than_the_grid_cell_still_groups_children(self):
+        elements = [_rect('outer', 0.0, 0.0, 20000.0, 20000.0)]
+        elements += [_rect(f'inner{idx}', 100.0 + idx * 200.0, 100.0, 50.0, 50.0) for idx in range(40)]
+
+        diagram = ExcalidrawParser().parse({'elements': elements})
+
+        groups = diagram.get_groups()
+        assert len(groups) == 1
+        assert sorted(groups[0].children) == sorted(f'inner{idx}' for idx in range(40))
+
+    def test_label_binds_to_the_first_matching_shape_when_shapes_overlap(self):
+        elements = [
+            _rect('first', 0.0, 0.0, 400.0, 400.0),
+            _rect('second', 0.0, 0.0, 300.0, 300.0),
+            _text('t1', 100.0, 100.0, 'Shared'),
+        ]
+
+        diagram = ExcalidrawParser().parse({'elements': elements})
+
+        labels = {shape.id: shape.label for shape in diagram.get_shapes()}
+        assert labels['first'] == 'Shared'
+        assert not labels['second']

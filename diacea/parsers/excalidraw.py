@@ -6,6 +6,8 @@ Excalidraw format: https://docs.excalidraw.com/
 from __future__ import annotations
 
 import logging
+from collections import defaultdict
+from math import floor
 from typing import Any
 
 from ..ir import (
@@ -24,6 +26,69 @@ from ..ir import (
 )
 
 _logger = logging.getLogger(__name__)
+
+_MIN_CELL_SIZE = 1.0
+"""Smallest grid cell, so degenerate zero-size shapes cannot collapse the index."""
+
+_MAX_CELLS_PER_SHAPE = 64
+"""A shape spanning more cells than this is held aside instead of indexed."""
+
+_MAX_CELLS_PER_QUERY = 4096
+"""A region query spanning more cells than this falls back to a full scan."""
+
+
+class _ShapeGrid:
+    """Uniform bucket grid over shape bounding boxes.
+
+    Queries return a superset of the true hits in the order shapes were indexed,
+    so callers must still apply the exact geometric test to each candidate.
+    """
+
+    def __init__(self, shapes: list[Shape]) -> None:
+        self._shapes = shapes
+        dimensions = sorted(d for shape in shapes for d in (shape.size.width, shape.size.height) if d > 0)
+        median = dimensions[len(dimensions) // 2] if dimensions else _MIN_CELL_SIZE
+        self._cell = max(median, _MIN_CELL_SIZE)
+        self._cells: dict[tuple[int, int], list[int]] = defaultdict(list)
+        self._oversized: list[int] = []
+        for index, shape in enumerate(shapes):
+            x_min, y_min, x_max, y_max = self._cell_bounds(shape)
+            if (x_max - x_min + 1) * (y_max - y_min + 1) > _MAX_CELLS_PER_SHAPE:
+                self._oversized.append(index)
+                continue
+            for cell_x in range(x_min, x_max + 1):
+                for cell_y in range(y_min, y_max + 1):
+                    self._cells[cell_x, cell_y].append(index)
+
+    def _cell_bounds(self, shape: Shape) -> tuple[int, int, int, int]:
+        cell = self._cell
+        return (
+            floor(shape.position.x / cell),
+            floor(shape.position.y / cell),
+            floor((shape.position.x + shape.size.width) / cell),
+            floor((shape.position.y + shape.size.height) / cell),
+        )
+
+    def _resolve(self, indexes: list[int]) -> list[Shape]:
+        if self._oversized:
+            indexes = sorted({*indexes, *self._oversized})
+        return [self._shapes[index] for index in indexes]
+
+    def at_point(self, point: Point) -> list[Shape]:
+        """Return shapes whose bounding box may contain the point."""
+        key = (floor(point.x / self._cell), floor(point.y / self._cell))
+        return self._resolve(self._cells.get(key, []))
+
+    def within(self, shape: Shape) -> list[Shape]:
+        """Return shapes whose bounding box may be enclosed by the given shape."""
+        x_min, y_min, x_max, y_max = self._cell_bounds(shape)
+        if (x_max - x_min + 1) * (y_max - y_min + 1) > _MAX_CELLS_PER_QUERY:
+            return self._shapes
+        indexes: set[int] = set()
+        for cell_x in range(x_min, x_max + 1):
+            for cell_y in range(y_min, y_max + 1):
+                indexes.update(self._cells.get((cell_x, cell_y), []))
+        return self._resolve(sorted(indexes))
 
 
 class ExcalidrawParser(Parser):
@@ -315,14 +380,16 @@ class ExcalidrawParser(Parser):
 
     def _associate_text_labels(self, shapes: list[Shape], texts: list[Text]) -> None:
         """Associate text elements with shapes as labels."""
-        for text in texts:
-            # Find shapes that contain this text
-            for shape in shapes:
-                # Check if text center is inside shape
-                text_center_x = text.position.x + text.size.width / 2
-                text_center_y = text.position.y + text.size.height / 2
-                text_center = Point(x=text_center_x, y=text_center_y)
+        grid = _ShapeGrid(shapes)
 
+        for text in texts:
+            text_center = Point(
+                x=text.position.x + text.size.width / 2,
+                y=text.position.y + text.size.height / 2,
+            )
+
+            # Find shapes that contain this text
+            for shape in grid.at_point(text_center):
                 if self._point_in_shape(text_center, shape):
                     # Assign text content as shape label
                     shape.label = text.content
@@ -347,11 +414,15 @@ class ExcalidrawParser(Parser):
 
         # Sort shapes by area (largest first)
         sorted_shapes = sorted(shapes, key=lambda s: s.size.area, reverse=True)
+        shapes_by_id: dict[str, Shape] = {}
+        for shape in shapes:
+            shapes_by_id.setdefault(shape.id, shape)
+        grid = _ShapeGrid(sorted_shapes)
 
         for outer_shape in sorted_shapes:
             # Find shapes inside this one
             children = []
-            for inner_shape in sorted_shapes:
+            for inner_shape in grid.within(outer_shape):
                 if outer_shape.id == inner_shape.id:
                     continue
 
@@ -363,8 +434,11 @@ class ExcalidrawParser(Parser):
             if children:
                 # Only create group if it's the smallest container for these children
                 # (avoid duplicate groups for nested containment)
+                # TODO: every candidate is itself a child, so the `all` below always compares a
+                # shape against itself and this check can never fire; decide the intended rule
                 is_smallest_container = True
-                for other_shape in sorted_shapes:
+                for child_id_ in children:
+                    other_shape = shapes_by_id[child_id_]
                     if other_shape.id == outer_shape.id:
                         continue
                     # If another smaller shape also contains all children, skip this one
@@ -372,8 +446,7 @@ class ExcalidrawParser(Parser):
                         other_shape.size.area < outer_shape.size.area
                         and self._shape_contains_shape(outer_shape, other_shape)
                         and all(
-                            self._shape_contains_shape(other_shape, next(s for s in shapes if s.id == child_id))
-                            for child_id in children
+                            self._shape_contains_shape(other_shape, shapes_by_id[child_id]) for child_id in children
                         )
                     ):
                         is_smallest_container = False
