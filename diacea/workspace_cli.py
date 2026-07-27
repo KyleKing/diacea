@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import re
 import sys
 from typing import TYPE_CHECKING
 
@@ -14,6 +15,17 @@ if TYPE_CHECKING:
     _SubParsersAction = argparse._SubParsersAction[argparse.ArgumentParser]
 else:
     _SubParsersAction = argparse._SubParsersAction
+
+_WINDOWS_DRIVE = re.compile(r'^[A-Za-z]:[\\/]')
+
+
+def _split_diagram_spec(spec: str) -> list[str]:
+    drive = ''
+    if _WINDOWS_DRIVE.match(spec):
+        drive, spec = spec[:2], spec[2:]
+    parts = spec.split(':')
+    parts[0] = drive + parts[0]
+    return parts
 
 
 def workspace_create(args: argparse.Namespace) -> int:
@@ -30,7 +42,7 @@ def workspace_create(args: argparse.Namespace) -> int:
 
     for spec in args.add:
         # Format: file_path:view_id:view_type or file_path:view_id
-        parts = spec.split(':')
+        parts = _split_diagram_spec(spec)
         if len(parts) < 2:
             print(f"Error: Invalid diagram spec '{spec}' (use file:view_id or file:view_id:type)", file=sys.stderr)
             return 1

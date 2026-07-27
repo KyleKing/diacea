@@ -8,6 +8,7 @@ import pytest
 
 from diacea.ir.workspace import DiagramView, ElementDefinition, Workspace
 from diacea.workspace_cli import (
+    _split_diagram_spec,
     main_workspace,
     workspace_add_element,
     workspace_add_view,
@@ -509,3 +510,21 @@ class TestMainWorkspace:
             main_workspace([])
 
         assert exc.value.code != 0
+
+
+class TestDiagramSpecSplitting:
+    """A Windows drive letter must not read as the `file:view_id` separator."""
+
+    @pytest.mark.parametrize(
+        ('spec', 'expected'),
+        [
+            ('diagram.json:view', ['diagram.json', 'view']),
+            ('diagram.json:view:context', ['diagram.json', 'view', 'context']),
+            ('/tmp/diagram.json:view', ['/tmp/diagram.json', 'view']),
+            (r'D:\a\diacea\diagram.json:view', [r'D:\a\diacea\diagram.json', 'view']),
+            (r'D:\a\diagram.json:view:context', [r'D:\a\diagram.json', 'view', 'context']),
+            ('C:/a/diagram.json:view', ['C:/a/diagram.json', 'view']),
+        ],
+    )
+    def test_split_diagram_spec(self, spec, expected):
+        assert _split_diagram_spec(spec) == expected
