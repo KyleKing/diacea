@@ -145,6 +145,19 @@ class TestExcalidrawGroupDetection:
         assert sorted(groups['group-backend'].children) == ['api', 'db']
         assert sorted(groups['group-system'].children) == ['group-backend', 'web']
 
+    def test_container_id_binding_beats_geometry_for_labels(self):
+        elements = [
+            _rect('under', 0.0, 0.0, 100.0, 50.0),
+            _rect('over', 5.0, 5.0, 110.0, 55.0),
+            {**_text('t-under', 20.0, 15.0, 'under-label'), 'containerId': 'under'},
+            {**_text('t-over', 25.0, 25.0, 'over-label'), 'containerId': 'over'},
+        ]
+
+        diagram = ExcalidrawParser().parse({'elements': elements})
+
+        labels = {shape.id: shape.label for shape in diagram.get_shapes()}
+        assert labels == {'under': 'under-label', 'over': 'over-label'}
+
     def test_soft_deleted_elements_are_skipped(self):
         elements = [
             _rect('kept', 0.0, 0.0, 100.0, 100.0),

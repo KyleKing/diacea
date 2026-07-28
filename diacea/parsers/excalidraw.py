@@ -388,28 +388,44 @@ class ExcalidrawParser(Parser):
         )
 
     def _associate_text_labels(self, shapes: list[Shape], texts: list[Text]) -> None:
-        """Associate each text with the smallest shape containing its center."""
+        """Associate texts with shapes: containerId binding wins, else the smallest shape containing the text center."""
         grid = _ShapeGrid(shapes)
+        shapes_by_id = {shape.id: shape for shape in shapes}
+        bound_shape_ids = set()
 
         for text in texts:
+            container_id = text.metadata.get('excalidraw', {}).get('containerId')
+            if container_id in shapes_by_id:
+                self._apply_label(shapes_by_id[container_id], text.content)
+                bound_shape_ids.add(container_id)
+
+        for text in texts:
+            if text.metadata.get('excalidraw', {}).get('containerId') in shapes_by_id:
+                continue
             text_center = Point(
                 x=text.position.x + text.size.width / 2,
                 y=text.position.y + text.size.height / 2,
             )
 
-            containing = [shape for shape in grid.at_point(text_center) if self._point_in_shape(text_center, shape)]
+            containing = [
+                shape
+                for shape in grid.at_point(text_center)
+                if shape.id not in bound_shape_ids and self._point_in_shape(text_center, shape)
+            ]
             if not containing:
                 continue
 
-            shape = min(containing, key=lambda s: s.size.area)
-            shape.label = text.content
-            shape.semantic_type, shape.semantic_confidence = infer_semantic_type(
-                shape_type=shape.shape_type,
-                label=shape.label,
-                size=shape.size,
-                style=shape.style,
-                metadata=shape.metadata,
-            )
+            self._apply_label(min(containing, key=lambda s: s.size.area), text.content)
+
+    def _apply_label(self, shape: Shape, content: str) -> None:
+        shape.label = content
+        shape.semantic_type, shape.semantic_confidence = infer_semantic_type(
+            shape_type=shape.shape_type,
+            label=shape.label,
+            size=shape.size,
+            style=shape.style,
+            metadata=shape.metadata,
+        )
 
     def _detect_groups(self, shapes: list[Shape], frames: list[dict[str, Any]]) -> list[Group]:
         """Build groups from native Excalidraw structure, then geometric containment for the rest.
