@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import logging
 from collections import defaultdict
+from itertools import pairwise
 from math import floor
 from typing import Any
 
@@ -127,6 +128,7 @@ class ExcalidrawParser(Parser):
         shapes: list[Shape] = []
         connections: list[dict[str, Any]] = []
         texts: list[Text] = []
+        frames: list[dict[str, Any]] = []
 
         # First pass: Parse all elements
         for elem in elements:
@@ -146,6 +148,9 @@ class ExcalidrawParser(Parser):
                 ir_elements.append(text)
                 texts.append(text)
 
+            elif elem_type == 'frame':
+                frames.append(elem)
+
         # Second pass: Associate text labels with shapes
         self._associate_text_labels(shapes, texts)
 
@@ -155,8 +160,8 @@ class ExcalidrawParser(Parser):
             if connection:
                 ir_elements.append(connection)
 
-        # Fourth pass: Detect groups based on containment
-        groups = self._detect_groups(shapes)
+        # Fourth pass: Detect groups from native structure, then containment
+        groups = self._detect_groups(shapes, frames)
         ir_elements.extend(groups)
 
         # Create diagram
@@ -202,6 +207,7 @@ class ExcalidrawParser(Parser):
             'fillStyle': elem.get('fillStyle'),
             'roundness': elem.get('roundness'),
             'seed': elem.get('seed'),
+            'frameId': elem.get('frameId'),
             'groupIds': elem.get('groupIds', []),
             'boundElements': elem.get('boundElements', []),
         }
@@ -379,7 +385,7 @@ class ExcalidrawParser(Parser):
         )
 
     def _associate_text_labels(self, shapes: list[Shape], texts: list[Text]) -> None:
-        """Associate text elements with shapes as labels."""
+        """Associate each text with the smallest shape containing its center."""
         grid = _ShapeGrid(shapes)
 
         for text in texts:
@@ -388,89 +394,179 @@ class ExcalidrawParser(Parser):
                 y=text.position.y + text.size.height / 2,
             )
 
-            # Find shapes that contain this text
-            for shape in grid.at_point(text_center):
-                if self._point_in_shape(text_center, shape):
-                    # Assign text content as shape label
-                    shape.label = text.content
+            containing = [shape for shape in grid.at_point(text_center) if self._point_in_shape(text_center, shape)]
+            if not containing:
+                continue
 
-                    # Re-run semantic inference with label
-                    shape.semantic_type, shape.semantic_confidence = infer_semantic_type(
-                        shape_type=shape.shape_type,
-                        label=shape.label,
-                        size=shape.size,
-                        style=shape.style,
-                        metadata=shape.metadata,
-                    )
+            shape = min(containing, key=lambda s: s.size.area)
+            shape.label = text.content
+            shape.semantic_type, shape.semantic_confidence = infer_semantic_type(
+                shape_type=shape.shape_type,
+                label=shape.label,
+                size=shape.size,
+                style=shape.style,
+                metadata=shape.metadata,
+            )
 
-                    break  # Each text belongs to at most one shape
+    def _detect_groups(self, shapes: list[Shape], frames: list[dict[str, Any]]) -> list[Group]:
+        """Build groups from native Excalidraw structure, then geometric containment for the rest.
 
-    def _detect_groups(self, shapes: list[Shape]) -> list[Group]:
-        """Detect groups based on containment relationships.
-
-        Shapes that contain other shapes become groups.
+        Groups hold direct children only; a nested group appears in its parent's
+        children as its group id, never as its source shape id.
         """
-        groups = []
+        native_groups, covered_ids = self._build_native_groups(shapes, frames)
+        remaining = [shape for shape in shapes if shape.id not in covered_ids]
+        return [*native_groups, *self._build_geometric_groups(remaining)]
 
-        # Sort shapes by area (largest first)
-        sorted_shapes = sorted(shapes, key=lambda s: s.size.area, reverse=True)
+    def _native_group_chains(self, shapes: list[Shape]) -> dict[str, list[str]]:
+        """Map each shape id to its structural groupIds chain, innermost first.
+
+        A groupId is structural only when at least two shapes share it; ids used
+        solely to bundle a shape with its label or decorations are dropped.
+        """
+        member_ids: dict[str, set[str]] = defaultdict(set)
+        raw_chains: dict[str, list[str]] = {}
+        for shape in shapes:
+            chain = shape.metadata.get('excalidraw', {}).get('groupIds') or []
+            raw_chains.setdefault(shape.id, chain)
+            for group_id in chain:
+                member_ids[group_id].add(shape.id)
+        structural = {group_id for group_id, ids in member_ids.items() if len(ids) >= 2}
+        return {shape_id: [gid for gid in chain if gid in structural] for shape_id, chain in raw_chains.items()}
+
+    def _build_native_groups(self, shapes: list[Shape], frames: list[dict[str, Any]]) -> tuple[list[Group], set[str]]:
         shapes_by_id: dict[str, Shape] = {}
         for shape in shapes:
             shapes_by_id.setdefault(shape.id, shape)
-        grid = _ShapeGrid(sorted_shapes)
 
-        for outer_shape in sorted_shapes:
-            # Find shapes inside this one
-            children = []
-            for inner_shape in grid.within(outer_shape):
-                if outer_shape.id == inner_shape.id:
-                    continue
+        chains = self._native_group_chains(shapes)
+        covered: set[str] = set()
+        member_ids: dict[str, list[str]] = defaultdict(list)
+        direct_shape_ids: dict[str, list[str]] = defaultdict(list)
+        group_parents: dict[str, str | None] = {}
+        for shape in shapes:
+            chain = chains[shape.id]
+            if not chain:
+                continue
+            covered.add(shape.id)
+            direct_shape_ids[chain[0]].append(shape.id)
+            for group_id in chain:
+                member_ids[group_id].append(shape.id)
+            group_parents.update(pairwise(chain))
+            group_parents.setdefault(chain[-1], None)
 
-                # Check if inner is completely inside outer
-                if self._shape_contains_shape(outer_shape, inner_shape):
-                    children.append(inner_shape.id)
+        groups: list[Group] = []
+        claimed_by_frame: set[str] = set()
+        for frame in frames:
+            frame_id = frame['id']
+            frame_members = [
+                shape for shape in shapes if shape.metadata.get('excalidraw', {}).get('frameId') == frame_id
+            ]
+            if not frame_members:
+                continue
+            child_shape_ids = [shape.id for shape in frame_members if not chains[shape.id]]
+            child_group_ids = [
+                group_id
+                for group_id, parent in group_parents.items()
+                if parent is None
+                and group_id not in claimed_by_frame
+                and all(
+                    shapes_by_id[member_id].metadata.get('excalidraw', {}).get('frameId') == frame_id
+                    for member_id in member_ids[group_id]
+                )
+            ]
+            claimed_by_frame.update(child_group_ids)
+            covered.update(shape.id for shape in frame_members)
+            groups.append(
+                Group(
+                    id=f'{GROUP_ID_PREFIX}{frame_id}',
+                    label=frame.get('name') or '',
+                    position=Point(x=float(frame.get('x', 0)), y=float(frame.get('y', 0))),
+                    size=Dimensions(width=float(frame.get('width', 0)), height=float(frame.get('height', 0))),
+                    style=Style(),
+                    children=[*child_shape_ids, *(f'{GROUP_ID_PREFIX}{gid}' for gid in child_group_ids)],
+                )
+            )
 
-            # If this shape contains others, create a group
-            if children:
-                # Only create group if it's the smallest container for these children
-                # (avoid duplicate groups for nested containment)
-                # TODO: every candidate is itself a child, so the `all` below always compares a
-                # shape against itself and this check can never fire; decide the intended rule
-                is_smallest_container = True
-                for child_id_ in children:
-                    other_shape = shapes_by_id[child_id_]
-                    if other_shape.id == outer_shape.id:
-                        continue
-                    # If another smaller shape also contains all children, skip this one
-                    if (
-                        other_shape.size.area < outer_shape.size.area
-                        and self._shape_contains_shape(outer_shape, other_shape)
-                        and all(
-                            self._shape_contains_shape(other_shape, shapes_by_id[child_id]) for child_id in children
-                        )
-                    ):
-                        is_smallest_container = False
-                        break
+        child_groups_by_parent: dict[str, list[str]] = defaultdict(list)
+        for group_id, parent in group_parents.items():
+            if parent is not None:
+                child_groups_by_parent[parent].append(group_id)
 
-                if is_smallest_container:
-                    group = Group(
-                        id=f'{GROUP_ID_PREFIX}{outer_shape.id}',
-                        label=outer_shape.label,
-                        position=outer_shape.position,
-                        size=outer_shape.size,
-                        style=outer_shape.style,
-                        children=children,
-                    )
-                    group.metadata = outer_shape.metadata.copy()
-                    groups.append(group)
+        for group_id, shape_ids in member_ids.items():
+            member_shapes = [shapes_by_id[shape_id] for shape_id in shape_ids]
+            position, size = self._bounding_box(member_shapes)
+            groups.append(
+                Group(
+                    id=f'{GROUP_ID_PREFIX}{group_id}',
+                    label='',
+                    position=position,
+                    size=size,
+                    style=Style(),
+                    children=[
+                        *direct_shape_ids[group_id],
+                        *(f'{GROUP_ID_PREFIX}{gid}' for gid in child_groups_by_parent[group_id]),
+                    ],
+                )
+            )
 
+        return groups, covered
+
+    def _bounding_box(self, shapes: list[Shape]) -> tuple[Point, Dimensions]:
+        x_min = min(shape.position.x for shape in shapes)
+        y_min = min(shape.position.y for shape in shapes)
+        x_max = max(shape.position.x + shape.size.width for shape in shapes)
+        y_max = max(shape.position.y + shape.size.height for shape in shapes)
+        return Point(x=x_min, y=y_min), Dimensions(width=x_max - x_min, height=y_max - y_min)
+
+    def _build_geometric_groups(self, shapes: list[Shape]) -> list[Group]:
+        if not shapes:
+            return []
+        shapes_by_id: dict[str, Shape] = {}
+        for shape in shapes:
+            shapes_by_id.setdefault(shape.id, shape)
+
+        grid = _ShapeGrid(shapes)
+        children_by_parent: dict[str, list[str]] = defaultdict(list)
+        for shape in shapes:
+            parent = self._smallest_container(shape, grid)
+            if parent is not None:
+                children_by_parent[parent.id].append(shape.id)
+
+        groups: list[Group] = []
+        for parent_id, child_ids in children_by_parent.items():
+            parent = shapes_by_id[parent_id]
+            children = [
+                f'{GROUP_ID_PREFIX}{child_id}' if child_id in children_by_parent else child_id
+                for child_id in child_ids
+            ]
+            group = Group(
+                id=f'{GROUP_ID_PREFIX}{parent_id}',
+                label=parent.label,
+                position=parent.position,
+                size=parent.size,
+                style=parent.style,
+                children=children,
+            )
+            group.metadata = parent.metadata.copy()
+            groups.append(group)
         return groups
 
-    def _shape_contains_shape(self, outer: Shape, inner: Shape) -> bool:
-        """Check if outer shape completely contains inner shape."""
-        return (
-            outer.position.x < inner.position.x
-            and outer.position.y < inner.position.y
-            and outer.position.x + outer.size.width > inner.position.x + inner.size.width
-            and outer.position.y + outer.size.height > inner.position.y + inner.size.height
+    def _smallest_container(self, shape: Shape, grid: _ShapeGrid) -> Shape | None:
+        """Find the smallest larger shape covering this shape's center.
+
+        Center coverage, not full containment, so a shape sloppily straddling a
+        container border still joins that container.
+        """
+        center = Point(
+            x=shape.position.x + shape.size.width / 2,
+            y=shape.position.y + shape.size.height / 2,
         )
+        containers = [
+            candidate
+            for candidate in grid.at_point(center)
+            if candidate.id != shape.id
+            and candidate.size.area > shape.size.area
+            and self._point_in_shape(center, candidate)
+        ]
+        return min(containers, key=lambda s: s.size.area) if containers else None

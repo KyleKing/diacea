@@ -112,7 +112,7 @@ class TestExcalidrawSpatialIndex:
         assert len(groups) == 1
         assert sorted(groups[0].children) == sorted(f'inner{idx}' for idx in range(40))
 
-    def test_label_binds_to_the_first_matching_shape_when_shapes_overlap(self):
+    def test_label_binds_to_the_smallest_containing_shape_when_shapes_overlap(self):
         elements = [
             _rect('first', 0.0, 0.0, 400.0, 400.0),
             _rect('second', 0.0, 0.0, 300.0, 300.0),
@@ -122,5 +122,116 @@ class TestExcalidrawSpatialIndex:
         diagram = ExcalidrawParser().parse({'elements': elements})
 
         labels = {shape.id: shape.label for shape in diagram.get_shapes()}
-        assert labels['first'] == 'Shared'
-        assert not labels['second']
+        assert labels['second'] == 'Shared'
+        assert not labels['first']
+
+
+class TestExcalidrawGroupDetection:
+    """Groups hold direct children only; nested groups are referenced by group id."""
+
+    def test_three_level_nesting_produces_direct_children_groups(self):
+        elements = [
+            _rect('system', 0.0, 0.0, 1000.0, 1000.0),
+            _rect('backend', 100.0, 100.0, 600.0, 600.0),
+            _rect('api', 150.0, 150.0, 100.0, 100.0),
+            _rect('db', 300.0, 150.0, 100.0, 100.0),
+            _rect('web', 750.0, 100.0, 100.0, 100.0),
+        ]
+
+        diagram = ExcalidrawParser().parse({'elements': elements})
+
+        groups = {group.id: group for group in diagram.get_groups()}
+        assert sorted(groups) == ['group-backend', 'group-system']
+        assert sorted(groups['group-backend'].children) == ['api', 'db']
+        assert sorted(groups['group-system'].children) == ['group-backend', 'web']
+
+    def test_shape_straddling_a_border_joins_the_container_covering_its_center(self):
+        elements = [
+            _rect('system', 0.0, 0.0, 1000.0, 1000.0),
+            _rect('backend', 400.0, 100.0, 500.0, 800.0),
+            _rect('straddler', 300.0, 400.0, 250.0, 100.0),
+        ]
+
+        diagram = ExcalidrawParser().parse({'elements': elements})
+
+        groups = {group.id: group for group in diagram.get_groups()}
+        assert sorted(groups['group-backend'].children) == ['straddler']
+        assert sorted(groups['group-system'].children) == ['group-backend']
+
+    def test_container_label_comes_from_smallest_containing_shape(self):
+        elements = [
+            _rect('system', 0.0, 0.0, 1000.0, 1000.0),
+            _rect('backend', 100.0, 100.0, 600.0, 600.0),
+            _rect('api', 150.0, 150.0, 100.0, 100.0),
+            _text('t-system', 800.0, 900.0, 'System'),
+            _text('t-backend', 500.0, 600.0, 'Backend'),
+            _text('t-api', 180.0, 190.0, 'API'),
+        ]
+
+        diagram = ExcalidrawParser().parse({'elements': elements})
+
+        labels = {shape.id: shape.label for shape in diagram.get_shapes()}
+        assert labels == {'system': 'System', 'backend': 'Backend', 'api': 'API'}
+
+    def test_frame_members_become_a_group(self):
+        elements = [
+            {'id': 'f1', 'type': 'frame', 'x': 0.0, 'y': 0.0, 'width': 500.0, 'height': 300.0, 'name': 'Backend'},
+            {**_rect('api', 20.0, 20.0, 100.0, 60.0), 'frameId': 'f1'},
+            {**_rect('db', 200.0, 20.0, 100.0, 60.0), 'frameId': 'f1'},
+            _rect('web', 700.0, 20.0, 100.0, 60.0),
+        ]
+
+        diagram = ExcalidrawParser().parse({'elements': elements})
+
+        groups = diagram.get_groups()
+        assert len(groups) == 1
+        group = groups[0]
+        assert group.id == 'group-f1'
+        assert group.label == 'Backend'
+        assert sorted(group.children) == ['api', 'db']
+
+    def test_shared_group_ids_produce_nested_groups(self):
+        elements = [
+            {**_rect('a', 0.0, 0.0, 100.0, 60.0), 'groupIds': ['inner', 'outer']},
+            {**_rect('b', 200.0, 0.0, 100.0, 60.0), 'groupIds': ['inner', 'outer']},
+            {**_rect('c', 400.0, 0.0, 100.0, 60.0), 'groupIds': ['outer']},
+        ]
+
+        diagram = ExcalidrawParser().parse({'elements': elements})
+
+        groups = {group.id: group for group in diagram.get_groups()}
+        assert sorted(groups) == ['group-inner', 'group-outer']
+        assert sorted(groups['group-inner'].children) == ['a', 'b']
+        assert sorted(groups['group-outer'].children) == ['c', 'group-inner']
+
+    def test_group_id_shared_only_with_a_label_falls_back_to_geometry(self):
+        elements = [
+            {**_rect('container', 0.0, 0.0, 500.0, 500.0), 'groupIds': ['bundle']},
+            {**_text('t1', 10.0, 10.0, 'Container'), 'groupIds': ['bundle']},
+            _rect('child', 100.0, 100.0, 100.0, 100.0),
+        ]
+
+        diagram = ExcalidrawParser().parse({'elements': elements})
+
+        groups = diagram.get_groups()
+        assert len(groups) == 1
+        assert groups[0].id == 'group-container'
+        assert groups[0].children == ['child']
+
+    def test_real_fixture_groups_hold_direct_children_only(self):
+        data = json.loads((REAL_DATA_DIR / 'intertwin_dte_infra_containers.excalidraw').read_text())
+
+        diagram = ExcalidrawParser().parse(data)
+
+        groups = diagram.get_groups()
+        assert groups
+        child_sets = {group.id: set(group.children) for group in groups}
+        seen: dict[str, str] = {}
+        for group_id, children in child_sets.items():
+            for child_id in children:
+                assert child_id not in seen, f'{child_id} claimed by both {seen.get(child_id)} and {group_id}'
+                seen[child_id] = group_id
+        for group_id, children in child_sets.items():
+            for other_id, other_children in child_sets.items():
+                if group_id != other_id:
+                    assert not (children > other_children)
