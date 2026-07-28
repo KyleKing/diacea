@@ -1,0 +1,50 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+
+Person(customer, "Customer engineer")
+Person(oncall, "On-call operator")
+System(recipients, "Recipient mail servers")
+System(dnsprov, "DNS provider")
+
+System_Boundary(emailsvc, "Email service") {
+  Container(apigw, "Public API", "REST + SMTP ingest")
+  Container(console, "Admin console", "React SPA")
+  ComponentDb(maindb, "Control DB")
+  System_Boundary(pipeline, "Delivery pipeline") {
+    Container(validator, "Validator", "syntax, suppression list, DKIM signing")
+    Container(sendq, "Send queue", "Kafka")
+    Container(scheduler, "Scheduler", "rate limits per recipient domain")
+    Container(smtpout, "SMTP out pool", "connection cache, retry ladder")
+    ComponentDb(eventdb, "Event store")
+  }
+  System_Boundary(feedback, "Feedback loop") {
+    Container(bouncer, "Bounce classifier")
+    Container(fbl, "FBL processor", "abuse reports")
+    Container(eventq, "Event queue", "Kafka")
+  }
+  Container(webhookd, "Webhook dispatcher", "at-least-once, HMAC signed")
+  Container(reputation, "Reputation monitor", "IP warmup, blocklist checks")
+}
+
+Rel(customer, apigw, "sends mail")
+Rel(oncall, console, "operates")
+Rel(console, maindb, "reads config")
+Rel(apigw, maindb, "authenticates against")
+Rel(apigw, validator, "enqueues")
+Rel(validator, sendq, "publishes")
+Rel(sendq, scheduler, "consumes")
+Rel(scheduler, smtpout, "dispatches")
+Rel(smtpout, recipients, "delivers")
+Rel(recipients, bouncer, "DSN bounces")
+Rel(recipients, fbl, "abuse reports")
+Rel(bouncer, eventq, "publishes")
+Rel(fbl, eventq, "publishes")
+Rel(eventq, eventdb, "sinks to")
+Rel(eventq, webhookd, "fans out to")
+Rel(webhookd, customer, "notifies")
+Rel(reputation, dnsprov, "verifies records")
+Rel(reputation, smtpout, "throttles")
+Rel(scheduler, eventdb, "reads domain stats")
+@enduml

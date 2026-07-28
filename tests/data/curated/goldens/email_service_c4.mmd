@@ -1,0 +1,44 @@
+C4Context
+    title Architecture Diagram
+    Person(customer, "Customer engineer")
+    Person(oncall, "On-call operator")
+    System(recipients, "Recipient mail servers")
+    System(dnsprov, "DNS provider")
+    Boundary(emailsvc, "Email service") {
+        Container(apigw, "Public API")
+        Container(console, "Admin console")
+        ContainerDb(maindb, "Control DB")
+    Boundary(pipeline, "Delivery pipeline") {
+        Container(validator, "Validator")
+        ContainerQueue(sendq, "Send queue")
+        Container(scheduler, "Scheduler")
+        Container(smtpout, "SMTP out pool")
+        ContainerDb(eventdb, "Event store")
+    }
+    Boundary(feedback, "Feedback loop") {
+        Container(bouncer, "Bounce classifier")
+        Container(fbl, "FBL processor")
+        ContainerQueue(eventq, "Event queue")
+    }
+        Container(webhookd, "Webhook dispatcher")
+        Container(reputation, "Reputation monitor")
+    }
+    Rel(customer, apigw, "sends mail")
+    Rel(oncall, console, "operates")
+    Rel(console, maindb, "reads config")
+    Rel(apigw, maindb, "authenticates against")
+    Rel(apigw, validator, "enqueues")
+    Rel(validator, sendq, "publishes")
+    Rel(sendq, scheduler, "consumes")
+    Rel(scheduler, smtpout, "dispatches")
+    Rel(smtpout, recipients, "delivers")
+    Rel(recipients, bouncer, "DSN bounces")
+    Rel(recipients, fbl, "abuse reports")
+    Rel(bouncer, eventq, "publishes")
+    Rel(fbl, eventq, "publishes")
+    Rel(eventq, eventdb, "sinks to")
+    Rel(eventq, webhookd, "fans out to")
+    Rel(webhookd, customer, "notifies")
+    Rel(reputation, dnsprov, "verifies records")
+    Rel(reputation, smtpout, "throttles")
+    Rel(scheduler, eventdb, "reads domain stats")

@@ -1,0 +1,63 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+
+System(mobile, "Mobile app")
+Container(stripe, "Stripe")
+Container(github, "GitHub OAuth")
+Component(browser, "Browser SPA")
+Component(sentry, "Sentry")
+
+System_Boundary(group_cloudflare, "Cloudflare") {
+  Container(dns, "DNS + CDN")
+  Component(waf, "WAF rules")
+  System_Boundary(group_pages, "Pages") {
+    System(app, "app.example.com")
+    Component(marketing, "www static site")
+  }
+  System_Boundary(group_workers, "Workers platform") {
+    Container(api, "api worker")
+    Container(auth, "auth worker")
+    Container(webhooks, "webhook worker")
+    Container(cron, "cron trigger worker")
+    System_Boundary(group_durable, "Durable Objects") {
+      Component(session, "SessionDO")
+      Container(doc, "DocumentDO per tenant")
+    }
+  }
+  System_Boundary(group_storage, "Storage") {
+    ComponentDb(kv, "Workers KV config")
+    ComponentDb(d1, "D1 tenants + billing")
+    ComponentDb(r2, "R2 uploads")
+    Container(queues, "[Queue: thumbnails]")
+  }
+}
+System_Boundary(group_origin, "Legacy origin - Hetzner") {
+  ComponentDb(pg, "Postgres", "PostgreSQL")
+  Component(search, "Meilisearch")
+}
+
+Rel(browser, dns, "uses")
+Rel(mobile, dns, "uses")
+Rel(dns, waf, "uses")
+Rel(waf, app, "uses")
+Rel(waf, api, "uses")
+Rel(app, api, "uses")
+Rel(api, auth, "uses")
+Rel(auth, github, "uses")
+Rel(auth, session, "uses")
+Rel(api, doc, "uses")
+Rel(api, d1, "uses")
+Rel(api, kv, "uses")
+Rel(api, r2, "uses")
+Rel(api, pg, "cache miss")
+Rel(api, search, "uses")
+Rel(webhooks, stripe, "uses")
+Rel(stripe, webhooks, "payment events")
+Rel(webhooks, d1, "uses")
+Rel(cron, queues, "uses")
+Rel(queues, r2, "uses")
+Rel(api, sentry, "errors")
+Rel(marketing, r2, "uses")
+@enduml

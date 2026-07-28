@@ -1,0 +1,69 @@
+digraph "Edge-first SaaS on Cloudflare" {
+    rankdir="LR";
+    node [fontname="Helvetica"];
+    edge [fontname="Helvetica"];
+
+    subgraph cluster_group_cloudflare {
+        label="Cloudflare";
+        dns [label="DNS + CDN", shape="cylinder"];
+        waf [label="WAF rules"];
+        subgraph cluster_group_pages {
+            label="Pages";
+            app [label="app.example.com", shape="box3d"];
+            marketing [label="www static site"];
+        }
+        subgraph cluster_group_workers {
+            label="Workers platform";
+            api [label="api worker"];
+            auth [label="auth worker"];
+            webhooks [label="webhook worker"];
+            cron [label="cron trigger worker"];
+            subgraph cluster_group_durable {
+                label="Durable Objects";
+                session [label="SessionDO"];
+                doc [label="DocumentDO per tenant"];
+            }
+        }
+        subgraph cluster_group_storage {
+            label="Storage";
+            kv [label="Workers KV config", shape="cylinder"];
+            d1 [label="D1 tenants + billing", shape="cylinder"];
+            r2 [label="R2 uploads", shape="cylinder"];
+            queues [label="[Queue: thumbnails]", shape="folder"];
+        }
+    }
+    subgraph cluster_group_origin {
+        label="Legacy origin - Hetzner";
+        pg [label="Postgres", shape="cylinder"];
+        search [label="Meilisearch"];
+    }
+
+    browser [label="Browser SPA"];
+    mobile [label="Mobile app", shape="box3d"];
+    stripe [label="Stripe", shape="octagon"];
+    github [label="GitHub OAuth", shape="octagon"];
+    sentry [label="Sentry"];
+
+    browser -> dns;
+    mobile -> dns;
+    dns -> waf;
+    waf -> app;
+    waf -> api;
+    app -> api;
+    api -> auth;
+    auth -> github;
+    auth -> session;
+    api -> doc;
+    api -> d1;
+    api -> kv;
+    api -> r2;
+    api -> pg [label="cache miss"];
+    api -> search;
+    webhooks -> stripe;
+    stripe -> webhooks [label="payment events"];
+    webhooks -> d1;
+    cron -> queues;
+    queues -> r2;
+    api -> sentry [label="errors", style="dashed"];
+    marketing -> r2;
+}

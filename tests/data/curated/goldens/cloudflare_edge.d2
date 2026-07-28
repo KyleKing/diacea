@@ -1,0 +1,82 @@
+direction: right
+
+group-cloudflare: Cloudflare {
+  dns: DNS + CDN {
+    shape: cylinder
+  }
+  waf: WAF rules
+  group-pages: Pages {
+    app: app.example.com
+    marketing: www static site
+  }
+
+  group-workers: Workers platform {
+    api: api worker
+    auth: auth worker
+    webhooks: webhook worker
+    cron: cron trigger worker
+    group-durable: Durable Objects {
+      session: SessionDO
+      doc: DocumentDO per tenant {
+        shape: document
+      }
+    }
+
+  }
+
+  group-storage: Storage {
+    kv: Workers KV config {
+      shape: cylinder
+    }
+    d1: D1 tenants + billing {
+      shape: cylinder
+    }
+    r2: R2 uploads {
+      shape: cylinder
+    }
+    queues: "[Queue: thumbnails]" {
+      shape: queue
+    }
+  }
+
+}
+
+group-origin: Legacy origin - Hetzner {
+  pg: Postgres {
+    shape: cylinder
+  }
+  search: Meilisearch
+}
+
+browser: Browser SPA
+mobile: Mobile app
+stripe: Stripe
+github: GitHub OAuth
+sentry: Sentry
+
+browser -> group-cloudflare.dns
+mobile -> group-cloudflare.dns
+group-cloudflare.dns -> group-cloudflare.waf
+group-cloudflare.waf -> group-cloudflare.group-pages.app
+group-cloudflare.waf -> group-cloudflare.group-workers.api
+group-cloudflare.group-pages.app -> group-cloudflare.group-workers.api
+group-cloudflare.group-workers.api -> group-cloudflare.group-workers.auth
+group-cloudflare.group-workers.auth -> github
+group-cloudflare.group-workers.auth -> group-cloudflare.group-workers.group-durable.session
+group-cloudflare.group-workers.api -> group-cloudflare.group-workers.group-durable.doc
+group-cloudflare.group-workers.api -> group-cloudflare.group-storage.d1
+group-cloudflare.group-workers.api -> group-cloudflare.group-storage.kv
+group-cloudflare.group-workers.api -> group-cloudflare.group-storage.r2
+group-cloudflare.group-workers.api -> group-origin.pg: cache miss
+group-cloudflare.group-workers.api -> group-origin.search
+group-cloudflare.group-workers.webhooks -> stripe
+stripe -> group-cloudflare.group-workers.webhooks: payment events
+group-cloudflare.group-workers.webhooks -> group-cloudflare.group-storage.d1
+group-cloudflare.group-workers.cron -> group-cloudflare.group-storage.queues
+group-cloudflare.group-storage.queues -> group-cloudflare.group-storage.r2
+group-cloudflare.group-workers.api -> sentry: errors {
+  style: {
+    stroke-dash: 3
+  }
+}
+group-cloudflare.group-pages.marketing -> group-cloudflare.group-storage.r2

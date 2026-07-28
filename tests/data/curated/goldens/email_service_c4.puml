@@ -1,0 +1,44 @@
+@startuml
+rectangle "Customer engineer" as customer
+rectangle "On-call operator" as oncall
+rectangle "Recipient mail servers" as recipients
+rectangle "DNS provider" as dnsprov
+rectangle "Email service" as emailsvc {
+  rectangle "Public API" as apigw
+  rectangle "Admin console" as console
+  database "Control DB" as maindb
+  rectangle "Delivery pipeline" as pipeline {
+    rectangle "Validator" as validator
+    queue "Send queue" as sendq
+    rectangle "Scheduler" as scheduler
+    rectangle "SMTP out pool" as smtpout
+    database "Event store" as eventdb
+  }
+  rectangle "Feedback loop" as feedback {
+    rectangle "Bounce classifier" as bouncer
+    rectangle "FBL processor" as fbl
+    queue "Event queue" as eventq
+  }
+  rectangle "Webhook dispatcher" as webhookd
+  rectangle "Reputation monitor" as reputation
+}
+customer --> apigw : "sends mail"
+oncall --> console : "operates"
+console --> maindb : "reads config"
+apigw --> maindb : "authenticates against"
+apigw --> validator : "enqueues"
+validator --> sendq : "publishes"
+sendq --> scheduler : "consumes"
+scheduler --> smtpout : "dispatches"
+smtpout --> recipients : "delivers"
+recipients --> bouncer : "DSN bounces"
+recipients --> fbl : "abuse reports"
+bouncer --> eventq : "publishes"
+fbl --> eventq : "publishes"
+eventq --> eventdb : "sinks to"
+eventq --> webhookd : "fans out to"
+webhookd --> customer : "notifies"
+reputation --> dnsprov : "verifies records"
+reputation --> smtpout : "throttles"
+scheduler --> eventdb : "reads domain stats"
+@enduml

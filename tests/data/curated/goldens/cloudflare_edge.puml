@@ -1,0 +1,57 @@
+@startuml
+rectangle "Browser SPA" as browser
+rectangle "Mobile app" as mobile
+rectangle "Stripe" as stripe
+rectangle "GitHub OAuth" as github
+rectangle "Sentry" as sentry
+rectangle "Cloudflare" as group_cloudflare {
+  storage "DNS + CDN" as dns
+  rectangle "WAF rules" as waf
+  rectangle "Pages" as group_pages {
+    rectangle "app.example.com" as app
+    rectangle "www static site" as marketing
+  }
+  rectangle "Workers platform" as group_workers {
+    rectangle "api worker" as api
+    rectangle "auth worker" as auth
+    rectangle "webhook worker" as webhooks
+    rectangle "cron trigger worker" as cron
+    rectangle "Durable Objects" as group_durable {
+      rectangle "SessionDO" as session
+      rectangle "DocumentDO per tenant" as doc
+    }
+  }
+  rectangle "Storage" as group_storage {
+    database "Workers KV config" as kv
+    database "D1 tenants + billing" as d1
+    database "R2 uploads" as r2
+    queue "[Queue: thumbnails]" as queues
+  }
+}
+rectangle "Legacy origin - Hetzner" as group_origin {
+  database "Postgres" as pg
+  rectangle "Meilisearch" as search
+}
+browser --> dns
+mobile --> dns
+dns --> waf
+waf --> app
+waf --> api
+app --> api
+api --> auth
+auth --> github
+auth --> session
+api --> doc
+api --> d1
+api --> kv
+api --> r2
+api --> pg : "cache miss"
+api --> search
+webhooks --> stripe
+stripe --> webhooks : "payment events"
+webhooks --> d1
+cron --> queues
+queues --> r2
+api --> sentry : "errors"
+marketing --> r2
+@enduml

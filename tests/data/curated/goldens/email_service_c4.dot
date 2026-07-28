@@ -1,0 +1,53 @@
+digraph "diagram" {
+    rankdir="LR";
+    node [fontname="Helvetica"];
+    edge [fontname="Helvetica"];
+
+    subgraph cluster_emailsvc {
+        label="Email service";
+        apigw [label="Public API", shape="component"];
+        console [label="Admin console", shape="component"];
+        maindb [label="Control DB", shape="cylinder"];
+        subgraph cluster_pipeline {
+            label="Delivery pipeline";
+            validator [label="Validator", shape="component"];
+            sendq [label="Send queue", shape="folder"];
+            scheduler [label="Scheduler", shape="component"];
+            smtpout [label="SMTP out pool", shape="component"];
+            eventdb [label="Event store", shape="cylinder"];
+        }
+        subgraph cluster_feedback {
+            label="Feedback loop";
+            bouncer [label="Bounce classifier", shape="component"];
+            fbl [label="FBL processor", shape="component"];
+            eventq [label="Event queue", shape="folder"];
+        }
+        webhookd [label="Webhook dispatcher", shape="component"];
+        reputation [label="Reputation monitor", shape="component"];
+    }
+
+    customer [label="Customer engineer", shape="ellipse"];
+    oncall [label="On-call operator", shape="ellipse"];
+    recipients [label="Recipient mail servers", shape="box3d"];
+    dnsprov [label="DNS provider", shape="box3d"];
+
+    customer -> apigw [label="sends mail"];
+    oncall -> console [label="operates"];
+    console -> maindb [label="reads config"];
+    apigw -> maindb [label="authenticates against"];
+    apigw -> validator [label="enqueues"];
+    validator -> sendq [label="publishes"];
+    sendq -> scheduler [label="consumes"];
+    scheduler -> smtpout [label="dispatches"];
+    smtpout -> recipients [label="delivers"];
+    recipients -> bouncer [label="DSN bounces"];
+    recipients -> fbl [label="abuse reports"];
+    bouncer -> eventq [label="publishes"];
+    fbl -> eventq [label="publishes"];
+    eventq -> eventdb [label="sinks to"];
+    eventq -> webhookd [label="fans out to"];
+    webhookd -> customer [label="notifies"];
+    reputation -> dnsprov [label="verifies records"];
+    reputation -> smtpout [label="throttles"];
+    scheduler -> eventdb [label="reads domain stats"];
+}

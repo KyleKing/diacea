@@ -1,0 +1,56 @@
+flowchart LR
+    browser[Browser SPA]
+    mobile[Mobile app]
+    stripe[Stripe]
+    github[GitHub OAuth]
+    sentry[Sentry]
+    subgraph group_cloudflare[Cloudflare]
+        dns[DNS + CDN]
+        waf[WAF rules]
+        subgraph group_pages[Pages]
+            app[app.example.com]
+            marketing[www static site]
+        end
+        subgraph group_workers[Workers platform]
+            api[api worker]
+            auth[auth worker]
+            webhooks[webhook worker]
+            cron[cron trigger worker]
+            subgraph group_durable[Durable Objects]
+                session[SessionDO]
+                doc[DocumentDO per tenant]
+            end
+        end
+        subgraph group_storage[Storage]
+            kv[(Workers KV config)]
+            d1[(D1 tenants + billing)]
+            r2[(R2 uploads)]
+            queues["[Queue: thumbnails]"]
+        end
+    end
+    subgraph group_origin[Legacy origin - Hetzner]
+        pg[(Postgres)]
+        search[Meilisearch]
+    end
+    browser --> dns
+    mobile --> dns
+    dns --> waf
+    waf --> app
+    waf --> api
+    app --> api
+    api --> auth
+    auth --> github
+    auth --> session
+    api --> doc
+    api --> d1
+    api --> kv
+    api --> r2
+    api -->|cache miss| pg
+    api --> search
+    webhooks --> stripe
+    stripe -->|payment events| webhooks
+    webhooks --> d1
+    cron --> queues
+    queues --> r2
+    api -.->|errors| sentry
+    marketing --> r2

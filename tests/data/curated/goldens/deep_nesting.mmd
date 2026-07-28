@@ -1,18 +1,17 @@
-C4Context
-    title Architecture Diagram
-    Person(client, "Client")
-    Boundary(group_cloud, "Cloud") {
-    Boundary(group_vpc, "VPC") {
-    Boundary(group_cluster, "Cluster") {
-        Container(api, "API")
-        Container(worker, "Worker")
-    }
-        ContainerDb(db, "Database")
-    }
-        Container(gateway, "Gateway")
-    }
-    Rel(client, gateway, "uses")
-    Rel(gateway, api, "uses")
-    Rel(api, worker, "uses")
-    Rel(worker, db, "uses")
-    Rel(api, db, "uses")
+flowchart LR
+    client([Client])
+    subgraph group_cloud[Cloud]
+        subgraph group_vpc[VPC]
+            subgraph group_cluster[Cluster]
+                api[API]
+                worker[Worker]
+            end
+            db[(Database)]
+        end
+        gateway[Gateway]
+    end
+    client --> gateway
+    gateway --> api
+    api --> worker
+    worker --> db
+    api --> db

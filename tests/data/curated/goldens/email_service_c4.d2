@@ -1,0 +1,60 @@
+direction: right
+
+emailsvc: Email service {
+  apigw: Public API
+  console: Admin console
+  maindb: Control DB {
+    shape: cylinder
+  }
+  pipeline: Delivery pipeline {
+    validator: Validator
+    sendq: Send queue {
+      shape: queue
+    }
+    scheduler: Scheduler
+    smtpout: SMTP out pool
+    eventdb: Event store {
+      shape: cylinder
+    }
+  }
+
+  feedback: Feedback loop {
+    bouncer: Bounce classifier
+    fbl: FBL processor
+    eventq: Event queue {
+      shape: queue
+    }
+  }
+
+  webhookd: Webhook dispatcher
+  reputation: Reputation monitor
+}
+
+customer: Customer engineer {
+  shape: person
+}
+oncall: On-call operator {
+  shape: person
+}
+recipients: Recipient mail servers
+dnsprov: DNS provider
+
+customer -> emailsvc.apigw: sends mail
+oncall -> emailsvc.console: operates
+emailsvc.console -> emailsvc.maindb: reads config
+emailsvc.apigw -> emailsvc.maindb: authenticates against
+emailsvc.apigw -> emailsvc.pipeline.validator: enqueues
+emailsvc.pipeline.validator -> emailsvc.pipeline.sendq: publishes
+emailsvc.pipeline.sendq -> emailsvc.pipeline.scheduler: consumes
+emailsvc.pipeline.scheduler -> emailsvc.pipeline.smtpout: dispatches
+emailsvc.pipeline.smtpout -> recipients: delivers
+recipients -> emailsvc.feedback.bouncer: DSN bounces
+recipients -> emailsvc.feedback.fbl: abuse reports
+emailsvc.feedback.bouncer -> emailsvc.feedback.eventq: publishes
+emailsvc.feedback.fbl -> emailsvc.feedback.eventq: publishes
+emailsvc.feedback.eventq -> emailsvc.pipeline.eventdb: sinks to
+emailsvc.feedback.eventq -> emailsvc.webhookd: fans out to
+emailsvc.webhookd -> customer: notifies
+emailsvc.reputation -> dnsprov: verifies records
+emailsvc.reputation -> emailsvc.pipeline.smtpout: throttles
+emailsvc.pipeline.scheduler -> emailsvc.pipeline.eventdb: reads domain stats
