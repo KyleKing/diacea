@@ -140,7 +140,7 @@ def test_mermaid_roundtrip_preserves_nesting(depth):
     diagram = MermaidParser().parse(MERMAID_SOURCES[depth])
     assert _containment(diagram) == EXPECTED_CONTAINMENT[depth]
 
-    regenerated = MermaidGenerator(diagram_type='flowchart').generate(diagram)
+    regenerated = MermaidGenerator().generate(diagram)
     reparsed = MermaidParser().parse(regenerated)
 
     assert _containment(reparsed) == EXPECTED_CONTAINMENT[depth]

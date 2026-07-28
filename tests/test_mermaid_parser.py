@@ -15,6 +15,7 @@ from diacea.parsers.mermaid import (
     is_mermaid_flowchart,
     is_mermaid_sequence,
 )
+from diacea.parsers.plantuml import PlantUMLParser
 
 from .configuration import TEST_DATA_DIR
 
@@ -41,6 +42,10 @@ class TestHeader:
     def test_legacy_graph_header(self):
         _, diagram = _parse('graph TD\n    A --> B')
         assert diagram.metadata['mermaid']['direction'] == 'TD'
+
+    def test_flowchart_diagram_type_recorded(self):
+        _, diagram = _parse('flowchart LR\n    A --> B')
+        assert diagram.metadata['mermaid']['diagram_type'] == 'flowchart'
 
     def test_header_defaults_direction(self):
         _, diagram = _parse('flowchart\n    A --> B')
@@ -541,6 +546,36 @@ class TestRoundTrip:
         reparsed_group = reparsed.get_groups()[0]
         assert reparsed_group.label == source_group.label
         assert set(reparsed_group.children) == set(source_group.children)
+
+
+class TestGeneratorAutoDetection:
+    def test_parsed_flowchart_regenerates_as_flowchart(self):
+        diagram = MermaidParser().parse('flowchart LR\n    A[Alpha] --> B[Beta]\n    A --> C[Gamma]')
+        generator = MermaidGenerator()
+        output = generator.generate(diagram)
+        assert generator.detected_type == 'flowchart'
+        assert output.startswith('flowchart')
+        assert MermaidParser().parse(output).metadata['mermaid']['diagram_type'] == 'flowchart'
+
+    def test_dashed_labeled_edge_round_trips_to_valid_syntax(self):
+        diagram = MermaidParser().parse('flowchart LR\n    A[Alpha] -.->|errors| B[Beta]')
+        output = MermaidGenerator().generate(diagram)
+        assert '-.->|errors|' in output
+        assert MermaidParser().parse(output) is not None
+
+    def test_plantuml_c4_still_detected_as_c4(self):
+        source = textwrap.dedent("""\
+            @startuml
+            System(a, "Alpha")
+            System(b, "Beta")
+            Rel(a, b, "calls")
+            @enduml
+            """)
+        diagram = PlantUMLParser().parse(source)
+        generator = MermaidGenerator()
+        output = generator.generate(diagram)
+        assert generator.detected_type == 'c4'
+        assert output.startswith('C4Context')
 
 
 class TestSequenceDiagrams:

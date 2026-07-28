@@ -195,7 +195,7 @@ class MermaidGenerator(Generator):
         if conn.connection_type == 'bidirectional':
             arrow = '<-->'
         elif conn.style.stroke_style == 'dashed':
-            arrow = '-..'
+            arrow = '-.->'
         else:
             arrow = '-->'
 

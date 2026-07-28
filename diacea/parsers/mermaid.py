@@ -306,7 +306,7 @@ class MermaidParser(Parser):
             id='mermaid-flowchart',
             name=title,
             metadata={
-                'mermaid': {'direction': self._direction},
+                'mermaid': {'diagram_type': 'flowchart', 'direction': self._direction},
                 'synthesized_layout': True,
             },
         )
