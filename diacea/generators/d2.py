@@ -10,6 +10,7 @@ Design decisions (from Phase 4 open questions):
 
 from __future__ import annotations
 
+import warnings
 from dataclasses import dataclass, field
 
 from ..ir import Connection, Diagram, Generator, Group, SemanticType, Shape
@@ -73,12 +74,27 @@ class D2Generator(Generator):
         self._write_elements(diagram, lines)
 
         # Generate connections
-        connections = diagram.get_connections()
+        connections = [conn for conn in diagram.get_connections() if not self._is_ancestor_connection(conn)]
         if connections:
             lines.append('')
             lines.extend(self._format_connection(conn) for conn in connections)
 
         return '\n'.join(lines)
+
+    def _is_ancestor_connection(self, conn: Connection) -> bool:
+        """Detect connections between a container and its own descendant.
+
+        d2's dagre layout rejects them, so they are dropped with a warning.
+        """
+        from_path = self._element_paths.get(conn.from_id, self._sanitize_id(conn.from_id))
+        to_path = self._element_paths.get(conn.to_id, self._sanitize_id(conn.to_id))
+        if to_path.startswith(f'{from_path}.') or from_path.startswith(f'{to_path}.'):
+            warnings.warn(
+                f'Dropping connection between container and its descendant: {from_path} -> {to_path}',
+                stacklevel=2,
+            )
+            return True
+        return False
 
     def _detect_direction(self, diagram: Diagram) -> str | None:
         """Auto-detect optimal direction based on layout."""
