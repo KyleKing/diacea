@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from ..ir import Connection, Diagram, Generator, Group, SemanticType, Shape
-from ._text import sanitize_alnum_id
+from ._text import sanitize_alnum_id, top_level_groups
 
 
 def _escape_plantuml_label(label: str) -> str:
@@ -35,16 +35,16 @@ class PlantUMLGenerator(Generator):
         groups = diagram.get_groups()
 
         group_source_ids = {g.source_shape_id for g in groups}
+        child_ids = {child_id for g in groups for child_id in g.children}
         for shape in shapes:
-            if any(shape.id in group.children for group in groups):
-                continue
-            if shape.id in group_source_ids:
+            if shape.id in child_ids or shape.id in group_source_ids:
                 continue
             lines.append(self._generate_shape(shape))
 
-        # Generate groups/packages
-        for group in groups:
-            lines.extend(self._generate_group(group, shapes))
+        shapes_by_id = {s.id: s for s in shapes}
+        groups_by_id = {g.id: g for g in groups}
+        for group in top_level_groups(groups):
+            lines.extend(self._generate_group(group, shapes_by_id, groups_by_id, depth=0))
 
         # Generate connections
         lines.extend(self._generate_connection(conn) for conn in connections)
@@ -59,20 +59,29 @@ class PlantUMLGenerator(Generator):
         label = self._escape_label(shape.label or safe_id)
         return f'{plantuml_type} "{label}" as {safe_id}'
 
-    def _generate_group(self, group: Group, all_shapes: list[Shape]) -> list[str]:
-        """Generate PlantUML package/rectangle for a group."""
-        lines = []
+    def _generate_group(
+        self,
+        group: Group,
+        shapes_by_id: dict[str, Shape],
+        groups_by_id: dict[str, Group],
+        depth: int,
+    ) -> list[str]:
+        """Generate PlantUML rectangle for a group, recursing into child groups."""
+        indent = '  ' * depth
         safe_id = self._sanitize_id(group.id)
         label = self._escape_label(group.label or safe_id)
-        lines.append(f'rectangle "{label}" as {safe_id} {{')
+        lines = [f'{indent}rectangle "{label}" as {safe_id} {{']
 
-        # Add child shapes
         for child_id in group.children:
-            child_shape = next((s for s in all_shapes if s.id == child_id), None)
+            child_group = groups_by_id.get(child_id)
+            if child_group:
+                lines.extend(self._generate_group(child_group, shapes_by_id, groups_by_id, depth + 1))
+                continue
+            child_shape = shapes_by_id.get(child_id)
             if child_shape:
-                lines.append(f'  {self._generate_shape(child_shape)}')
+                lines.append(f'{indent}  {self._generate_shape(child_shape)}')
 
-        lines.append('}')
+        lines.append(f'{indent}}}')
         return lines
 
     def _generate_connection(self, conn: Connection) -> str:
@@ -146,10 +155,9 @@ class C4PlantUMLGenerator(Generator):
         people = []
 
         group_source_ids = {g.source_shape_id for g in groups}
+        child_ids = {child_id for g in groups for child_id in g.children}
         for shape in shapes:
-            if any(shape.id in group.children for group in groups):
-                continue
-            if shape.id in group_source_ids:
+            if shape.id in child_ids or shape.id in group_source_ids:
                 continue
             semantic = shape.semantic_type
             if semantic == SemanticType.SYSTEM:
@@ -184,8 +192,11 @@ class C4PlantUMLGenerator(Generator):
         lines.append('')
 
         # Generate groups as system boundaries
-        for group in groups:
-            lines.extend(self._generate_boundary(group, shapes))
+        shapes_by_id = {s.id: s for s in shapes}
+        groups_by_id = {g.id: g for g in groups}
+        declared_ids = {s.id for s in shapes if s.id not in child_ids and s.id not in group_source_ids}
+        for group in top_level_groups(groups):
+            lines.extend(self._generate_boundary(group, shapes_by_id, groups_by_id, declared_ids, depth=0))
 
         lines.append('')
 
@@ -198,19 +209,19 @@ class C4PlantUMLGenerator(Generator):
     def _generate_person(self, shape: Shape) -> str:
         """Generate C4 Person element."""
         safe_id = self._sanitize_id(shape.id)
-        label = self._escape_label(shape.label or 'Person')
+        label = self._escape_label(shape.label or safe_id)
         return f'Person({safe_id}, "{label}")'
 
     def _generate_system(self, shape: Shape) -> str:
         """Generate C4 System element."""
         safe_id = self._sanitize_id(shape.id)
-        label = self._escape_label(shape.label or 'System')
+        label = self._escape_label(shape.label or safe_id)
         return f'System({safe_id}, "{label}")'
 
     def _generate_container(self, shape: Shape) -> str:
         """Generate C4 Container element."""
         safe_id = self._sanitize_id(shape.id)
-        label = self._escape_label(shape.label or 'Container')
+        label = self._escape_label(shape.label or safe_id)
         tech = shape.metadata.get('technology', '')
         if tech:
             tech = self._escape_label(tech)
@@ -220,13 +231,13 @@ class C4PlantUMLGenerator(Generator):
     def _generate_component(self, shape: Shape) -> str:
         """Generate C4 Component element."""
         safe_id = self._sanitize_id(shape.id)
-        label = self._escape_label(shape.label or 'Component')
+        label = self._escape_label(shape.label or safe_id)
         return f'Component({safe_id}, "{label}")'
 
     def _generate_database(self, shape: Shape) -> str:
         """Generate C4 Database element."""
         safe_id = self._sanitize_id(shape.id)
-        raw_label = shape.label or 'Database'
+        raw_label = shape.label or safe_id
         label = self._escape_label(raw_label)
         label_lower = raw_label.lower()
         tech = ''
@@ -243,30 +254,44 @@ class C4PlantUMLGenerator(Generator):
             return f'ComponentDb({safe_id}, "{label}", "{tech}")'
         return f'ComponentDb({safe_id}, "{label}")'
 
-    def _generate_boundary(self, group: Group, all_shapes: list[Shape]) -> list[str]:
-        """Generate C4 System_Boundary for a group."""
-        lines = []
+    def _generate_boundary(
+        self,
+        group: Group,
+        shapes_by_id: dict[str, Shape],
+        groups_by_id: dict[str, Group],
+        declared_ids: set[str],
+        depth: int,
+    ) -> list[str]:
+        """Generate C4 System_Boundary for a group, recursing into child groups."""
+        indent = '  ' * depth
         safe_id = self._sanitize_id(group.id)
-        label = self._escape_label(group.label or 'System')
-        lines.append(f'System_Boundary({safe_id}, "{label}") {{')
+        label = self._escape_label(group.label or self._sanitize_id(group.source_shape_id))
+        lines = [f'{indent}System_Boundary({safe_id}, "{label}") {{']
 
-        # Add child elements
         for child_id in group.children:
-            child_shape = next((s for s in all_shapes if s.id == child_id), None)
-            if child_shape:
-                semantic = child_shape.semantic_type
-                if semantic == SemanticType.CONTAINER:
-                    lines.append(f'  {self._generate_container(child_shape)}')
-                elif semantic == SemanticType.COMPONENT:
-                    lines.append(f'  {self._generate_component(child_shape)}')
-                elif semantic == SemanticType.DATABASE:
-                    lines.append(f'  {self._generate_database(child_shape)}')
-                else:
-                    # Default to container
-                    lines.append(f'  {self._generate_container(child_shape)}')
+            child_group = groups_by_id.get(child_id)
+            if child_group:
+                lines.extend(self._generate_boundary(child_group, shapes_by_id, groups_by_id, declared_ids, depth + 1))
+                continue
+            child_shape = shapes_by_id.get(child_id)
+            if child_shape and child_shape.id not in declared_ids:
+                declared_ids.add(child_shape.id)
+                lines.append(f'{indent}  {self._generate_boundary_element(child_shape)}')
 
-        lines.append('}')
+        lines.append(f'{indent}}}')
         return lines
+
+    def _generate_boundary_element(self, shape: Shape) -> str:
+        semantic = shape.semantic_type
+        if semantic == SemanticType.COMPONENT:
+            return self._generate_component(shape)
+        if semantic == SemanticType.DATABASE:
+            return self._generate_database(shape)
+        if semantic == SemanticType.PERSON:
+            return self._generate_person(shape)
+        if semantic == SemanticType.SYSTEM:
+            return self._generate_system(shape)
+        return self._generate_container(shape)
 
     def _generate_relationship(self, conn: Connection) -> str:
         """Generate C4 Rel (relationship)."""

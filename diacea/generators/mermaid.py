@@ -10,8 +10,10 @@ Design decisions (from Phase 2 open questions):
 
 from __future__ import annotations
 
+import warnings
+
 from ..ir import Connection, Diagram, Generator, Group, SemanticType, Shape
-from ._text import sanitize_alnum_id
+from ._text import sanitize_alnum_id, top_level_groups
 
 _C4_BOUNDARY_KEYWORDS: dict[str, str] = {
     SemanticType.COMPONENT: 'Component',
@@ -122,15 +124,15 @@ class MermaidGenerator(Generator):
         groups = diagram.get_groups()
 
         group_source_ids = {g.source_shape_id for g in groups}
-        top_level_shapes = [
-            s for s in shapes if not any(s.id in g.children for g in groups) and s.id not in group_source_ids
-        ]
+        child_ids = {child_id for g in groups for child_id in g.children}
+        top_level_shapes = [s for s in shapes if s.id not in child_ids and s.id not in group_source_ids]
 
         lines.extend(self._format_flowchart_node(shape) for shape in top_level_shapes)
 
-        # Generate subgraphs (groups)
-        for group in groups:
-            subgraph_lines = self._generate_subgraph(group, shapes, depth=1)
+        shapes_by_id = {s.id: s for s in shapes}
+        groups_by_id = {g.id: g for g in groups}
+        for group in top_level_groups(groups):
+            subgraph_lines = self._generate_subgraph(group, shapes_by_id, groups_by_id, depth=1)
             lines.extend(subgraph_lines)
 
         # Generate connections
@@ -202,10 +204,20 @@ class MermaidGenerator(Generator):
             return f'    {from_id} {arrow}|{label}| {to_id}'
         return f'    {from_id} {arrow} {to_id}'
 
-    def _generate_subgraph(self, group: Group, all_shapes: list[Shape], depth: int) -> list[str]:
-        """Generate Mermaid subgraph for a group."""
+    def _generate_subgraph(
+        self,
+        group: Group,
+        shapes_by_id: dict[str, Shape],
+        groups_by_id: dict[str, Group],
+        depth: int,
+    ) -> list[str]:
+        """Generate Mermaid subgraph for a group, recursing into child groups."""
         if depth > self.max_subgraph_depth:
-            return []  # Skip too deeply nested groups
+            warnings.warn(
+                f'group {group.id!r} exceeds max subgraph depth {self.max_subgraph_depth}; truncating',
+                stacklevel=2,
+            )
+            return []
 
         lines = []
         indent = '    ' * depth
@@ -213,9 +225,12 @@ class MermaidGenerator(Generator):
         label = self._format_bracket_label(group.label or subgraph_id)
         lines.append(f'{indent}subgraph {subgraph_id}[{label}]')
 
-        # Add child shapes
         for child_id in group.children:
-            child_shape = next((s for s in all_shapes if s.id == child_id), None)
+            child_group = groups_by_id.get(child_id)
+            if child_group:
+                lines.extend(self._generate_subgraph(child_group, shapes_by_id, groups_by_id, depth + 1))
+                continue
+            child_shape = shapes_by_id.get(child_id)
             if child_shape:
                 node_line = self._format_flowchart_node(child_shape)
                 lines.append(indent + node_line)
@@ -257,7 +272,10 @@ class MermaidGenerator(Generator):
 
         group_source_ids = {g.source_shape_id for g in groups}
         child_ids = {cid for g in groups for cid in g.children}
+        shapes_by_id = {s.id: s for s in shapes}
+        groups_by_id = {g.id: g for g in groups}
         declared_ids: set[str] = set()
+        group_representatives: dict[str, str] = {}
 
         for shape in shapes:
             if shape.id in child_ids or shape.id in group_source_ids:
@@ -267,18 +285,10 @@ class MermaidGenerator(Generator):
             lines.append(self._format_c4_element(shape, in_boundary=False))
             declared_ids.add(shape.id)
 
-        for group in groups:
-            label = self._escape_quoted_label(group.label or 'System')
-            boundary_id = self._sanitize_id(group.id)
-            lines.append(f'    Boundary({boundary_id}, "{label}") {{')
-
-            for child_id in group.children:
-                child = next((s for s in shapes if s.id == child_id), None)
-                if child and child.id not in declared_ids:
-                    lines.append(self._format_c4_element(child, in_boundary=True))
-                    declared_ids.add(child.id)
-
-            lines.append('    }')
+        for group in top_level_groups(groups):
+            lines.extend(
+                self._generate_c4_boundary(group, shapes_by_id, groups_by_id, declared_ids, group_representatives)
+            )
 
         for shape in shapes:
             if shape.id in declared_ids or shape.id in group_source_ids:
@@ -286,13 +296,74 @@ class MermaidGenerator(Generator):
             lines.append(self._format_c4_element(shape, in_boundary=False))
             declared_ids.add(shape.id)
 
+        source_to_group = {g.source_shape_id: g.id for g in groups}
         for conn in connections:
-            from_id = self._sanitize_id(conn.from_id)
-            to_id = self._sanitize_id(conn.to_id)
-            label = self._escape_quoted_label(conn.label or 'uses')
-            lines.append(f'    Rel({from_id}, {to_id}, "{label}")')
+            rel_line = self._format_c4_rel(conn, declared_ids, source_to_group, group_representatives)
+            if rel_line:
+                lines.append(rel_line)
 
         return '\n'.join(lines)
+
+    def _generate_c4_boundary(
+        self,
+        group: Group,
+        shapes_by_id: dict[str, Shape],
+        groups_by_id: dict[str, Group],
+        declared_ids: set[str],
+        group_representatives: dict[str, str],
+    ) -> list[str]:
+        """Generate a C4 boundary, recursing into child groups and skipping empty groups."""
+        body: list[str] = []
+        for child_id in group.children:
+            child_group = groups_by_id.get(child_id)
+            if child_group:
+                body.extend(
+                    self._generate_c4_boundary(
+                        child_group, shapes_by_id, groups_by_id, declared_ids, group_representatives
+                    )
+                )
+                if child_group.id in group_representatives:
+                    group_representatives.setdefault(group.id, group_representatives[child_group.id])
+                continue
+            child_shape = shapes_by_id.get(child_id)
+            if child_shape and child_shape.id not in declared_ids:
+                body.append(self._format_c4_element(child_shape, in_boundary=True))
+                declared_ids.add(child_shape.id)
+                group_representatives.setdefault(group.id, child_shape.id)
+
+        if not body:
+            warnings.warn(f'group {group.id!r} has no resolvable children; skipping empty C4 boundary', stacklevel=2)
+            return []
+
+        label = self._escape_quoted_label(group.label or group.source_shape_id)
+        boundary_id = self._sanitize_id(group.id)
+        return [f'    Boundary({boundary_id}, "{label}") {{', *body, '    }']
+
+    def _format_c4_rel(
+        self,
+        conn: Connection,
+        declared_ids: set[str],
+        source_to_group: dict[str, str],
+        group_representatives: dict[str, str],
+    ) -> str | None:
+        """Format a C4 Rel, remapping endpoints suppressed as group source shapes.
+
+        Mermaid C4 rejects boundary ids as Rel endpoints, so a suppressed endpoint
+        maps to a declared element inside that group's boundary.
+        """
+        endpoints = []
+        for endpoint_id in (conn.from_id, conn.to_id):
+            resolved = endpoint_id
+            if endpoint_id not in declared_ids:
+                group_id = source_to_group.get(endpoint_id)
+                resolved = group_representatives.get(group_id) if group_id else None
+            if resolved is None:
+                warnings.warn(f'dropping C4 Rel with unresolvable endpoint {endpoint_id!r}', stacklevel=2)
+                return None
+            endpoints.append(self._sanitize_id(resolved))
+
+        label = self._escape_quoted_label(conn.label or 'uses')
+        return f'    Rel({endpoints[0]}, {endpoints[1]}, "{label}")'
 
     def _format_c4_element(self, shape: Shape, in_boundary: bool) -> str:
         keywords = _C4_BOUNDARY_KEYWORDS if in_boundary else _C4_TOP_LEVEL_KEYWORDS

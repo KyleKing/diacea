@@ -13,6 +13,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 from ..ir import Connection, Diagram, Generator, Group, SemanticType, Shape
+from ._text import top_level_groups
 
 
 @dataclass
@@ -133,14 +134,20 @@ class D2Generator(Generator):
         for elem in diagram.elements:
             self._element_paths[elem.id] = get_path(elem.id, set())
 
+        for group in groups:
+            source_id = group.source_shape_id
+            if source_id != group.id and source_id not in child_to_parent:
+                self._element_paths[source_id] = self._element_paths.get(group.id, self._sanitize_id(group.id))
+
     def _write_elements(self, diagram: Diagram, lines: list[str]) -> None:
         """Write all elements (shapes and groups)."""
         groups = diagram.get_groups()
         shapes = diagram.get_shapes()
 
-        # Write groups first (containers)
-        for group in groups:
-            self._write_group(group, shapes, lines)
+        shapes_by_id = {s.id: s for s in shapes}
+        groups_by_id = {g.id: g for g in groups}
+        for group in top_level_groups(groups):
+            self._write_group(group, shapes_by_id, groups_by_id, lines)
 
         grouped_ids = set()
         for group in groups:
@@ -150,23 +157,31 @@ class D2Generator(Generator):
         standalone_shapes = [s for s in shapes if s.id not in grouped_ids and s.id not in group_source_ids]
         lines.extend(self._format_shape(shape) for shape in standalone_shapes)
 
-    def _write_group(self, group: Group, all_shapes: list[Shape], lines: list[str]) -> None:
-        """Write a group as a D2 container."""
+    def _write_group(
+        self,
+        group: Group,
+        shapes_by_id: dict[str, Shape],
+        groups_by_id: dict[str, Group],
+        lines: list[str],
+    ) -> None:
+        """Write a group as a D2 container, recursing into child groups."""
         group_id = self._sanitize_id(group.id)
         label = self._escape_label(group.label or group_id)
 
-        # Start container
         lines.append(f'{group_id}: {label} {{')
 
-        # Write child shapes
         for child_id in group.children:
-            child_shape = next((s for s in all_shapes if s.id == child_id), None)
+            child_group = groups_by_id.get(child_id)
+            if child_group:
+                nested_lines: list[str] = []
+                self._write_group(child_group, shapes_by_id, groups_by_id, nested_lines)
+                lines.extend(f'  {line}' if line else line for line in nested_lines)
+                continue
+            child_shape = shapes_by_id.get(child_id)
             if child_shape:
-                # For children, use relative path (just the ID)
                 child_line = self._format_shape(child_shape, use_relative_path=True)
                 lines.extend(f'  {line}' for line in child_line.split('\n'))
 
-        # Close container
         lines.extend(('}', ''))
 
     def _format_shape(self, shape: Shape, use_relative_path: bool = False) -> str:
@@ -227,10 +242,10 @@ class D2Generator(Generator):
 
         style_props = []
         if style.fill_color:
-            style_props.append(f'fill: {style.fill_color}')
+            style_props.append(f'fill: "{style.fill_color}"')
 
         if style.stroke_color:
-            style_props.append(f'stroke: {style.stroke_color}')
+            style_props.append(f'stroke: "{style.stroke_color}"')
 
         if style.stroke_width:
             style_props.append(f'stroke-width: {int(style.stroke_width)}')
@@ -288,7 +303,7 @@ class D2Generator(Generator):
 
         style_props = []
         if style.stroke_color:
-            style_props.append(f'stroke: {style.stroke_color}')
+            style_props.append(f'stroke: "{style.stroke_color}"')
 
         if style.stroke_width:
             style_props.append(f'stroke-width: {int(style.stroke_width)}')

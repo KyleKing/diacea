@@ -10,9 +10,11 @@ Design decisions (from Phase 3 open questions):
 
 from __future__ import annotations
 
+import warnings
 from dataclasses import dataclass, field
 
 from ..ir import Connection, Diagram, Generator, Group, SemanticType, Shape
+from ._text import top_level_groups
 
 
 @dataclass
@@ -23,6 +25,7 @@ class GraphVizConfig:
     graph_type: str = 'digraph'  # digraph or graph
     use_clusters: bool = True
     cluster_prefix: str = 'cluster_'
+    max_cluster_depth: int = 4
     node_shape_map: dict[str, str] = field(default_factory=dict)
 
     def __post_init__(self):
@@ -84,7 +87,10 @@ class GraphVizGenerator(Generator):
         connections = diagram.get_connections()
 
         if self.config.use_clusters and groups:
-            self._write_clusters(groups, shapes, lines, depth=1)
+            shapes_by_id = {s.id: s for s in shapes}
+            groups_by_id = {g.id: g for g in groups}
+            for group in top_level_groups(groups):
+                self._write_cluster(group, shapes_by_id, groups_by_id, lines, depth=1)
             lines.append('')
 
         # Process standalone nodes (not in clusters)
@@ -138,29 +144,40 @@ class GraphVizGenerator(Generator):
         group_source_ids = {g.source_shape_id for g in groups}
         return [s for s in shapes if s.id not in grouped_ids and s.id not in group_source_ids]
 
-    def _write_clusters(self, groups: list[Group], all_shapes: list[Shape], lines: list[str], depth: int) -> None:
-        """Write clusters (subgraphs) for groups."""
-        if depth > 2:  # Max 2 levels of nesting
+    def _write_cluster(
+        self,
+        group: Group,
+        shapes_by_id: dict[str, Shape],
+        groups_by_id: dict[str, Group],
+        lines: list[str],
+        depth: int,
+    ) -> None:
+        """Write a cluster (subgraph) for a group, recursing into child groups."""
+        if depth > self.config.max_cluster_depth:
+            warnings.warn(
+                f'group {group.id!r} exceeds max cluster depth {self.config.max_cluster_depth}; truncating',
+                stacklevel=2,
+            )
             return
 
         indent = '    ' * depth
+        cluster_id = self._sanitize_id(group.id)
+        label = self._escape_label(group.label or cluster_id)
 
-        for group in groups:
-            cluster_id = self._sanitize_id(group.id)
-            label = self._escape_label(group.label or cluster_id)
+        lines.extend(
+            (f'{indent}subgraph {self.config.cluster_prefix}{cluster_id} {{', f'{indent}    label="{label}";')
+        )
 
-            lines.extend(
-                (f'{indent}subgraph {self.config.cluster_prefix}{cluster_id} {{', f'{indent}    label="{label}";')
-            )
+        for child_id in group.children:
+            child_group = groups_by_id.get(child_id)
+            if child_group:
+                self._write_cluster(child_group, shapes_by_id, groups_by_id, lines, depth + 1)
+                continue
+            child = shapes_by_id.get(child_id)
+            if child:
+                lines.append(self._format_node(child, indent=indent + '    '))
 
-            # Add child nodes
-            for child_id in group.children:
-                child = next((s for s in all_shapes if s.id == child_id), None)
-                if child:
-                    node_line = self._format_node(child, indent=indent + '    ')
-                    lines.append(node_line)
-
-            lines.append(f'{indent}}}')
+        lines.append(f'{indent}}}')
 
     def _format_node(self, shape: Shape, indent: str = '    ') -> str:
         """Format a GraphViz node."""

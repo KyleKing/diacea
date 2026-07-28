@@ -17,7 +17,8 @@ from diacea.generators import (
     PlantUMLGenerator,
 )
 from diacea.ir import Diagram
-from diacea.ir.elements import Connection, Dimensions, Point, Shape, Style
+from diacea.ir.elements import Connection, Dimensions, Group, Point, Shape, Style
+from diacea.ir.semantic import SemanticType
 from diacea.parsers import ExcalidrawParser
 
 
@@ -709,9 +710,18 @@ class TestEdgeCases:
         plantuml = PlantUMLGenerator().generate(diagram)
         assert '@startuml' in plantuml
         assert '@enduml' in plantuml
+        assert plantuml.index('rectangle "Outer" as outer {') < plantuml.index('rectangle "Level 1" as level1 {')
+        assert plantuml.index('rectangle "Level 1" as level1 {') < plantuml.index('rectangle "Level 2" as level2 {')
+        assert plantuml.index('rectangle "Level 2" as level2 {') < plantuml.index('rectangle "Inner" as inner')
+        assert plantuml.count('rectangle') == 4
 
         mermaid = MermaidGenerator(diagram_type='flowchart').generate(diagram)
         assert 'flowchart' in mermaid
+        assert mermaid.count('subgraph') == 3
+        assert mermaid.index('subgraph outer[Outer]') < mermaid.index('subgraph level1[Level 1]')
+        assert mermaid.index('subgraph level1[Level 1]') < mermaid.index('subgraph level2[Level 2]')
+        assert mermaid.index('subgraph level2[Level 2]') < mermaid.index('inner[Inner]')
+        assert mermaid.count('end') == 3
 
     def test_unicode_labels(self):
         shape = Shape(
@@ -779,6 +789,126 @@ class TestDuplicateElementFix:
         inner2_declarations = [line for line in lines if 'rectangle' in line and 'inner2' in line]
         assert len(inner1_declarations) == 1
         assert len(inner2_declarations) == 1
+
+
+def _c4_shape(shape_id: str, label: str, semantic: str | None = None) -> Shape:
+    return Shape(
+        id=shape_id,
+        label=label,
+        shape_type='rectangle',
+        position=Point(x=0.0, y=0.0),
+        size=Dimensions(width=100.0, height=50.0),
+        style=Style(),
+        semantic_type=semantic,
+    )
+
+
+def _c4_connection(conn_id: str, from_id: str, to_id: str, label: str) -> Connection:
+    return Connection(
+        id=conn_id,
+        from_id=from_id,
+        to_id=to_id,
+        label=label,
+        position=Point(x=0.0, y=0.0),
+        size=Dimensions(width=1.0, height=1.0),
+        style=Style(),
+    )
+
+
+def _nested_c4_diagram(*, include_empty_group: bool = False) -> Diagram:
+    elements = [
+        _c4_shape('user', 'User', SemanticType.PERSON),
+        _c4_shape('sys', 'Payment System', SemanticType.SYSTEM),
+        _c4_shape('api', 'API Service', SemanticType.CONTAINER),
+        _c4_shape('svc', ''),
+        _c4_shape('db', 'Postgres', SemanticType.DATABASE),
+        Group(
+            id='group-sys',
+            label='Payment System',
+            position=Point(x=0.0, y=0.0),
+            size=Dimensions(width=400.0, height=300.0),
+            style=Style(),
+            children=['api', 'svc', 'group-inner'],
+        ),
+        Group(
+            id='group-inner',
+            label='Data Layer',
+            position=Point(x=0.0, y=0.0),
+            size=Dimensions(width=200.0, height=150.0),
+            style=Style(),
+            children=['db'],
+        ),
+        _c4_connection('c1', 'user', 'sys', 'uses'),
+        _c4_connection('c2', 'api', 'db', 'reads'),
+    ]
+    if include_empty_group:
+        elements.append(
+            Group(
+                id='group-empty',
+                label='Empty',
+                position=Point(x=0.0, y=0.0),
+                size=Dimensions(width=50.0, height=50.0),
+                style=Style(),
+                children=[],
+            )
+        )
+    return Diagram(id='nested-c4', name='Nested C4', elements=elements)
+
+
+class TestNestedC4Boundaries:
+    """Nested group rendering in the C4 generators."""
+
+    def test_mermaid_c4_nested_boundaries(self):
+        diagram = _nested_c4_diagram()
+
+        output = MermaidGenerator(diagram_type='c4').generate(diagram)
+
+        outer_start = output.index('Boundary(group_sys, "Payment System") {')
+        inner_start = output.index('Boundary(group_inner, "Data Layer") {')
+        assert outer_start < inner_start
+        assert inner_start < output.rindex('}')
+        assert output.count('Container(api, "API Service")') == 1
+        assert output.count('ContainerDb(db, "Postgres")') == 1
+
+    def test_mermaid_c4_skips_empty_boundary(self):
+        diagram = _nested_c4_diagram(include_empty_group=True)
+
+        with pytest.warns(UserWarning, match='empty C4 boundary'):
+            output = MermaidGenerator(diagram_type='c4').generate(diagram)
+
+        assert 'group_empty' not in output
+
+    def test_mermaid_c4_remaps_rel_from_suppressed_source_shape(self):
+        diagram = _nested_c4_diagram()
+
+        output = MermaidGenerator(diagram_type='c4').generate(diagram)
+
+        assert 'Rel(user, api, "uses")' in output
+        assert 'Rel(user, sys' not in output
+        assert 'Rel(api, db, "reads")' in output
+
+    def test_plantuml_c4_nested_boundaries_use_labels(self):
+        diagram = _nested_c4_diagram()
+
+        output = C4PlantUMLGenerator().generate(diagram)
+
+        outer_start = output.index('System_Boundary(group_sys, "Payment System") {')
+        inner_start = output.index('System_Boundary(group_inner, "Data Layer") {')
+        assert outer_start < inner_start
+        assert 'Container(api, "API Service")' in output
+        assert 'Container(svc, "svc")' in output
+        assert '"Container")' not in output
+        assert '"Component")' not in output
+
+    def test_plantuml_c4_declares_each_element_once(self):
+        diagram = _nested_c4_diagram()
+
+        output = C4PlantUMLGenerator().generate(diagram)
+
+        assert output.count('Container(api,') == 1
+        assert output.count('ComponentDb(db,') == 1
+        assert output.count('Person(user,') == 1
+        assert output.count('(sys,') == 0
 
 
 class TestSemanticInference:
