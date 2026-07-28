@@ -1,0 +1,52 @@
+digraph "diagram" {
+    rankdir="LR";
+    node [fontname="Helvetica"];
+    edge [fontname="Helvetica"];
+
+    subgraph cluster_group_7EMFW__e06wBO0pv2vzW0 {
+        label="AWS us-east-1";
+        subgraph cluster_group_Y6qyauU04YBWRvOvun0Td {
+            label="Serverless";
+            fA4ppqogHKNnUSGdkfW95 [label="Ingest\nLambda", color="#1e1e1e", penwidth="2.0"];
+            zGch7h2DYWR31qpFj4IH4 [label="Resize\nLambda", color="#1e1e1e", penwidth="2.0"];
+        }
+        subgraph cluster_group_JhC8RMsArM_Hhr3Cj_SV6 {
+            label="VPC";
+            subgraph cluster_group_LeKEeXKMx_3PrgHpStIzR {
+                label="Hatchet on ECS";
+                M7Mqk9078rDKuucwSCf88 [label="Hatchet\nEngine", color="#1e1e1e", penwidth="2.0"];
+                _4KTwF9HtBFLrnToskO02 [label="Postgres", shape="cylinder", color="#1e1e1e", penwidth="2.0"];
+                zmAnl1J9JPPrEPmpjMoIg [label="Worker: email", color="#1e1e1e", penwidth="2.0"];
+                vRFaRcAl48H8NE_PFK03K [label="Worker: resize", color="#1e1e1e", penwidth="2.0"];
+                WXviVpJ1WpbghOZQbXkrk [label="Dashboard", color="#1e1e1e", penwidth="2.0"];
+            }
+            W5aG9pVJIu9J9mWuKj7a_ [label="ALB", color="#1e1e1e", penwidth="2.0"];
+        }
+        MqLbEPS8dRbsvPwSlBJsZ [label="API GW", color="#1e1e1e", penwidth="2.0"];
+        cGFAh1YpHffOfyiBU4f_H [label="Cognito", color="#1e1e1e", penwidth="2.0"];
+        aXzvozpPHMfFsp2gRiDN8 [label="EventBridge", color="#1e1e1e", penwidth="2.0"];
+        jfN2GligvRlvXI4ZTdxiR [label="S3\nuploads", shape="cylinder", color="#1e1e1e", penwidth="2.0"];
+        jNlnhDH1bKL1ycx_lcFHc [label="Notify\nLambda", color="#1e1e1e", penwidth="2.0"];
+        MNx_LzplutZTZFROnZjkv [label="SQS jobs", shape="folder", color="#1e1e1e", penwidth="2.0"];
+        n_4Jm7NtyVlPOLQbwzk0yK3 [label="DynamoDB", shape="cylinder", color="#1e1e1e", penwidth="2.0"];
+        n_5O6g0Skk4knK8D0JVZjIN [label="SES", color="#1e1e1e", penwidth="2.0"];
+    }
+
+    vapRpvna4Qio1_zgMc5D3 [label="Client", shape="ellipse", color="#1e1e1e", penwidth="2.0"];
+
+    vapRpvna4Qio1_zgMc5D3 -> MqLbEPS8dRbsvPwSlBJsZ [color="#1e1e1e", penwidth="2.0"];
+    MqLbEPS8dRbsvPwSlBJsZ -> fA4ppqogHKNnUSGdkfW95 [color="#1e1e1e", penwidth="2.0"];
+    MqLbEPS8dRbsvPwSlBJsZ -> cGFAh1YpHffOfyiBU4f_H [color="#1e1e1e", penwidth="2.0"];
+    fA4ppqogHKNnUSGdkfW95 -> MNx_LzplutZTZFROnZjkv [color="#1e1e1e", penwidth="2.0"];
+    MNx_LzplutZTZFROnZjkv -> M7Mqk9078rDKuucwSCf88 [color="#1e1e1e", penwidth="2.0"];
+    M7Mqk9078rDKuucwSCf88 -> _4KTwF9HtBFLrnToskO02 [color="#1e1e1e", penwidth="2.0"];
+    M7Mqk9078rDKuucwSCf88 -> zmAnl1J9JPPrEPmpjMoIg [color="#1e1e1e", penwidth="2.0"];
+    M7Mqk9078rDKuucwSCf88 -> vRFaRcAl48H8NE_PFK03K [color="#1e1e1e", penwidth="2.0"];
+    zmAnl1J9JPPrEPmpjMoIg -> n_5O6g0Skk4knK8D0JVZjIN [color="#1e1e1e", penwidth="2.0"];
+    zGch7h2DYWR31qpFj4IH4 -> jfN2GligvRlvXI4ZTdxiR [color="#1e1e1e", penwidth="2.0"];
+    aXzvozpPHMfFsp2gRiDN8 -> jNlnhDH1bKL1ycx_lcFHc [color="#1e1e1e", penwidth="2.0"];
+    zGch7h2DYWR31qpFj4IH4 -> W5aG9pVJIu9J9mWuKj7a_ [color="#1e1e1e", penwidth="2.0"];
+    LeKEeXKMx_3PrgHpStIzR -> jNlnhDH1bKL1ycx_lcFHc [color="#1e1e1e", penwidth="2.0"];
+    W5aG9pVJIu9J9mWuKj7a_ -> M7Mqk9078rDKuucwSCf88 [color="#1e1e1e", penwidth="2.0"];
+    LeKEeXKMx_3PrgHpStIzR -> zmAnl1J9JPPrEPmpjMoIg [color="#1e1e1e", penwidth="2.0"];
+}

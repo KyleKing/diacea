@@ -1,0 +1,42 @@
+C4Context
+    title Architecture Diagram
+    Person(vapRpvna4Qio1_zgMc5D3, "Client")
+    Boundary(group_7EMFW__e06wBO0pv2vzW0, "AWS us-east-1") {
+    Boundary(group_Y6qyauU04YBWRvOvun0Td, "Serverless") {
+        Container(fA4ppqogHKNnUSGdkfW95, "Ingest<br/>Lambda")
+        Container(zGch7h2DYWR31qpFj4IH4, "Resize<br/>Lambda")
+    }
+    Boundary(group_JhC8RMsArM_Hhr3Cj_SV6, "VPC") {
+    Boundary(group_LeKEeXKMx_3PrgHpStIzR, "Hatchet on ECS") {
+        Component(M7Mqk9078rDKuucwSCf88, "Hatchet<br/>Engine")
+        ContainerDb(_4KTwF9HtBFLrnToskO02, "Postgres")
+        Container(zmAnl1J9JPPrEPmpjMoIg, "Worker: email")
+        Container(vRFaRcAl48H8NE_PFK03K, "Worker: resize")
+        Container(WXviVpJ1WpbghOZQbXkrk, "Dashboard")
+    }
+        Component(W5aG9pVJIu9J9mWuKj7a_, "ALB")
+    }
+        Container(MqLbEPS8dRbsvPwSlBJsZ, "API GW")
+        Component(cGFAh1YpHffOfyiBU4f_H, "Cognito")
+        Component(aXzvozpPHMfFsp2gRiDN8, "EventBridge")
+        ContainerDb(jfN2GligvRlvXI4ZTdxiR, "S3<br/>uploads")
+        Container(jNlnhDH1bKL1ycx_lcFHc, "Notify<br/>Lambda")
+        ContainerQueue(MNx_LzplutZTZFROnZjkv, "SQS jobs")
+        ContainerDb(4Jm7NtyVlPOLQbwzk0yK3, "DynamoDB")
+        Component(5O6g0Skk4knK8D0JVZjIN, "SES")
+    }
+    Rel(vapRpvna4Qio1_zgMc5D3, MqLbEPS8dRbsvPwSlBJsZ, "uses")
+    Rel(MqLbEPS8dRbsvPwSlBJsZ, fA4ppqogHKNnUSGdkfW95, "uses")
+    Rel(MqLbEPS8dRbsvPwSlBJsZ, cGFAh1YpHffOfyiBU4f_H, "uses")
+    Rel(fA4ppqogHKNnUSGdkfW95, MNx_LzplutZTZFROnZjkv, "uses")
+    Rel(MNx_LzplutZTZFROnZjkv, M7Mqk9078rDKuucwSCf88, "uses")
+    Rel(M7Mqk9078rDKuucwSCf88, _4KTwF9HtBFLrnToskO02, "uses")
+    Rel(M7Mqk9078rDKuucwSCf88, zmAnl1J9JPPrEPmpjMoIg, "uses")
+    Rel(M7Mqk9078rDKuucwSCf88, vRFaRcAl48H8NE_PFK03K, "uses")
+    Rel(zmAnl1J9JPPrEPmpjMoIg, 5O6g0Skk4knK8D0JVZjIN, "uses")
+    Rel(zGch7h2DYWR31qpFj4IH4, jfN2GligvRlvXI4ZTdxiR, "uses")
+    Rel(aXzvozpPHMfFsp2gRiDN8, jNlnhDH1bKL1ycx_lcFHc, "uses")
+    Rel(zGch7h2DYWR31qpFj4IH4, W5aG9pVJIu9J9mWuKj7a_, "uses")
+    Rel(M7Mqk9078rDKuucwSCf88, jNlnhDH1bKL1ycx_lcFHc, "uses")
+    Rel(W5aG9pVJIu9J9mWuKj7a_, M7Mqk9078rDKuucwSCf88, "uses")
+    Rel(M7Mqk9078rDKuucwSCf88, zmAnl1J9JPPrEPmpjMoIg, "uses")

@@ -1,0 +1,206 @@
+direction: right
+
+group-7EMFW_-e06wBO0pv2vzW0: AWS us-east-1 {
+  group-Y6qyauU04YBWRvOvun0Td: Serverless {
+    fA4ppqogHKNnUSGdkfW95: Ingest\nLambda {
+      style: {
+        stroke: "#1e1e1e"
+        stroke-width: 2
+      }
+    }
+    zGch7h2DYWR31qpFj4IH4: Resize\nLambda {
+      style: {
+        stroke: "#1e1e1e"
+        stroke-width: 2
+      }
+    }
+  }
+
+  group-JhC8RMsArM-Hhr3Cj-SV6: VPC {
+    group-LeKEeXKMx-3PrgHpStIzR: Hatchet on ECS {
+      M7Mqk9078rDKuucwSCf88: Hatchet\nEngine {
+        style: {
+          stroke: "#1e1e1e"
+          stroke-width: 2
+        }
+      }
+      -4KTwF9HtBFLrnToskO02: Postgres {
+        shape: cylinder
+        style: {
+          stroke: "#1e1e1e"
+          stroke-width: 2
+        }
+      }
+      zmAnl1J9JPPrEPmpjMoIg: "Worker: email" {
+        style: {
+          stroke: "#1e1e1e"
+          stroke-width: 2
+        }
+      }
+      vRFaRcAl48H8NE_PFK03K: "Worker: resize" {
+        style: {
+          stroke: "#1e1e1e"
+          stroke-width: 2
+        }
+      }
+      WXviVpJ1WpbghOZQbXkrk: Dashboard {
+        style: {
+          stroke: "#1e1e1e"
+          stroke-width: 2
+        }
+      }
+    }
+
+    W5aG9pVJIu9J9mWuKj7a-: ALB {
+      style: {
+        stroke: "#1e1e1e"
+        stroke-width: 2
+      }
+    }
+  }
+
+  MqLbEPS8dRbsvPwSlBJsZ: API GW {
+    style: {
+      stroke: "#1e1e1e"
+      stroke-width: 2
+    }
+  }
+  cGFAh1YpHffOfyiBU4f-H: Cognito {
+    style: {
+      stroke: "#1e1e1e"
+      stroke-width: 2
+    }
+  }
+  aXzvozpPHMfFsp2gRiDN8: EventBridge {
+    style: {
+      stroke: "#1e1e1e"
+      stroke-width: 2
+    }
+  }
+  jfN2GligvRlvXI4ZTdxiR: S3\nuploads {
+    shape: cylinder
+    style: {
+      stroke: "#1e1e1e"
+      stroke-width: 2
+    }
+  }
+  jNlnhDH1bKL1ycx_lcFHc: Notify\nLambda {
+    style: {
+      stroke: "#1e1e1e"
+      stroke-width: 2
+    }
+  }
+  MNx-LzplutZTZFROnZjkv: SQS jobs {
+    shape: queue
+    style: {
+      stroke: "#1e1e1e"
+      stroke-width: 2
+    }
+  }
+  n_4Jm7NtyVlPOLQbwzk0yK3: DynamoDB {
+    shape: cylinder
+    style: {
+      stroke: "#1e1e1e"
+      stroke-width: 2
+    }
+  }
+  n_5O6g0Skk4knK8D0JVZjIN: SES {
+    style: {
+      stroke: "#1e1e1e"
+      stroke-width: 2
+    }
+  }
+}
+
+vapRpvna4Qio1_zgMc5D3: Client {
+  shape: person
+  style: {
+    stroke: "#1e1e1e"
+    stroke-width: 2
+  }
+}
+
+vapRpvna4Qio1_zgMc5D3 -> group-7EMFW_-e06wBO0pv2vzW0.MqLbEPS8dRbsvPwSlBJsZ {
+  style: {
+    stroke: "#1e1e1e"
+    stroke-width: 2
+  }
+}
+group-7EMFW_-e06wBO0pv2vzW0.MqLbEPS8dRbsvPwSlBJsZ -> group-7EMFW_-e06wBO0pv2vzW0.group-Y6qyauU04YBWRvOvun0Td.fA4ppqogHKNnUSGdkfW95 {
+  style: {
+    stroke: "#1e1e1e"
+    stroke-width: 2
+  }
+}
+group-7EMFW_-e06wBO0pv2vzW0.MqLbEPS8dRbsvPwSlBJsZ -> group-7EMFW_-e06wBO0pv2vzW0.cGFAh1YpHffOfyiBU4f-H {
+  style: {
+    stroke: "#1e1e1e"
+    stroke-width: 2
+  }
+}
+group-7EMFW_-e06wBO0pv2vzW0.group-Y6qyauU04YBWRvOvun0Td.fA4ppqogHKNnUSGdkfW95 -> group-7EMFW_-e06wBO0pv2vzW0.MNx-LzplutZTZFROnZjkv {
+  style: {
+    stroke: "#1e1e1e"
+    stroke-width: 2
+  }
+}
+group-7EMFW_-e06wBO0pv2vzW0.MNx-LzplutZTZFROnZjkv -> group-7EMFW_-e06wBO0pv2vzW0.group-JhC8RMsArM-Hhr3Cj-SV6.group-LeKEeXKMx-3PrgHpStIzR.M7Mqk9078rDKuucwSCf88 {
+  style: {
+    stroke: "#1e1e1e"
+    stroke-width: 2
+  }
+}
+group-7EMFW_-e06wBO0pv2vzW0.group-JhC8RMsArM-Hhr3Cj-SV6.group-LeKEeXKMx-3PrgHpStIzR.M7Mqk9078rDKuucwSCf88 -> group-7EMFW_-e06wBO0pv2vzW0.group-JhC8RMsArM-Hhr3Cj-SV6.group-LeKEeXKMx-3PrgHpStIzR.-4KTwF9HtBFLrnToskO02 {
+  style: {
+    stroke: "#1e1e1e"
+    stroke-width: 2
+  }
+}
+group-7EMFW_-e06wBO0pv2vzW0.group-JhC8RMsArM-Hhr3Cj-SV6.group-LeKEeXKMx-3PrgHpStIzR.M7Mqk9078rDKuucwSCf88 -> group-7EMFW_-e06wBO0pv2vzW0.group-JhC8RMsArM-Hhr3Cj-SV6.group-LeKEeXKMx-3PrgHpStIzR.zmAnl1J9JPPrEPmpjMoIg {
+  style: {
+    stroke: "#1e1e1e"
+    stroke-width: 2
+  }
+}
+group-7EMFW_-e06wBO0pv2vzW0.group-JhC8RMsArM-Hhr3Cj-SV6.group-LeKEeXKMx-3PrgHpStIzR.M7Mqk9078rDKuucwSCf88 -> group-7EMFW_-e06wBO0pv2vzW0.group-JhC8RMsArM-Hhr3Cj-SV6.group-LeKEeXKMx-3PrgHpStIzR.vRFaRcAl48H8NE_PFK03K {
+  style: {
+    stroke: "#1e1e1e"
+    stroke-width: 2
+  }
+}
+group-7EMFW_-e06wBO0pv2vzW0.group-JhC8RMsArM-Hhr3Cj-SV6.group-LeKEeXKMx-3PrgHpStIzR.zmAnl1J9JPPrEPmpjMoIg -> group-7EMFW_-e06wBO0pv2vzW0.n_5O6g0Skk4knK8D0JVZjIN {
+  style: {
+    stroke: "#1e1e1e"
+    stroke-width: 2
+  }
+}
+group-7EMFW_-e06wBO0pv2vzW0.group-Y6qyauU04YBWRvOvun0Td.zGch7h2DYWR31qpFj4IH4 -> group-7EMFW_-e06wBO0pv2vzW0.jfN2GligvRlvXI4ZTdxiR {
+  style: {
+    stroke: "#1e1e1e"
+    stroke-width: 2
+  }
+}
+group-7EMFW_-e06wBO0pv2vzW0.aXzvozpPHMfFsp2gRiDN8 -> group-7EMFW_-e06wBO0pv2vzW0.jNlnhDH1bKL1ycx_lcFHc {
+  style: {
+    stroke: "#1e1e1e"
+    stroke-width: 2
+  }
+}
+group-7EMFW_-e06wBO0pv2vzW0.group-Y6qyauU04YBWRvOvun0Td.zGch7h2DYWR31qpFj4IH4 -> group-7EMFW_-e06wBO0pv2vzW0.group-JhC8RMsArM-Hhr3Cj-SV6.W5aG9pVJIu9J9mWuKj7a- {
+  style: {
+    stroke: "#1e1e1e"
+    stroke-width: 2
+  }
+}
+group-7EMFW_-e06wBO0pv2vzW0.group-JhC8RMsArM-Hhr3Cj-SV6.group-LeKEeXKMx-3PrgHpStIzR -> group-7EMFW_-e06wBO0pv2vzW0.jNlnhDH1bKL1ycx_lcFHc {
+  style: {
+    stroke: "#1e1e1e"
+    stroke-width: 2
+  }
+}
+group-7EMFW_-e06wBO0pv2vzW0.group-JhC8RMsArM-Hhr3Cj-SV6.W5aG9pVJIu9J9mWuKj7a- -> group-7EMFW_-e06wBO0pv2vzW0.group-JhC8RMsArM-Hhr3Cj-SV6.group-LeKEeXKMx-3PrgHpStIzR.M7Mqk9078rDKuucwSCf88 {
+  style: {
+    stroke: "#1e1e1e"
+    stroke-width: 2
+  }
+}

@@ -1,0 +1,42 @@
+@startuml
+rectangle "Client" as vapRpvna4Qio1_zgMc5D3
+rectangle "AWS us-east-1" as group_7EMFW__e06wBO0pv2vzW0 {
+  rectangle "Serverless" as group_Y6qyauU04YBWRvOvun0Td {
+    rectangle "Ingest\nLambda" as fA4ppqogHKNnUSGdkfW95
+    rectangle "Resize\nLambda" as zGch7h2DYWR31qpFj4IH4
+  }
+  rectangle "VPC" as group_JhC8RMsArM_Hhr3Cj_SV6 {
+    rectangle "Hatchet on ECS" as group_LeKEeXKMx_3PrgHpStIzR {
+      rectangle "Hatchet\nEngine" as M7Mqk9078rDKuucwSCf88
+      database "Postgres" as _4KTwF9HtBFLrnToskO02
+      rectangle "Worker: email" as zmAnl1J9JPPrEPmpjMoIg
+      rectangle "Worker: resize" as vRFaRcAl48H8NE_PFK03K
+      rectangle "Dashboard" as WXviVpJ1WpbghOZQbXkrk
+    }
+    rectangle "ALB" as W5aG9pVJIu9J9mWuKj7a_
+  }
+  rectangle "API GW" as MqLbEPS8dRbsvPwSlBJsZ
+  rectangle "Cognito" as cGFAh1YpHffOfyiBU4f_H
+  rectangle "EventBridge" as aXzvozpPHMfFsp2gRiDN8
+  storage "S3\nuploads" as jfN2GligvRlvXI4ZTdxiR
+  rectangle "Notify\nLambda" as jNlnhDH1bKL1ycx_lcFHc
+  queue "SQS jobs" as MNx_LzplutZTZFROnZjkv
+  database "DynamoDB" as 4Jm7NtyVlPOLQbwzk0yK3
+  rectangle "SES" as 5O6g0Skk4knK8D0JVZjIN
+}
+vapRpvna4Qio1_zgMc5D3 --> MqLbEPS8dRbsvPwSlBJsZ
+MqLbEPS8dRbsvPwSlBJsZ --> fA4ppqogHKNnUSGdkfW95
+MqLbEPS8dRbsvPwSlBJsZ --> cGFAh1YpHffOfyiBU4f_H
+fA4ppqogHKNnUSGdkfW95 --> MNx_LzplutZTZFROnZjkv
+MNx_LzplutZTZFROnZjkv --> M7Mqk9078rDKuucwSCf88
+M7Mqk9078rDKuucwSCf88 --> _4KTwF9HtBFLrnToskO02
+M7Mqk9078rDKuucwSCf88 --> zmAnl1J9JPPrEPmpjMoIg
+M7Mqk9078rDKuucwSCf88 --> vRFaRcAl48H8NE_PFK03K
+zmAnl1J9JPPrEPmpjMoIg --> 5O6g0Skk4knK8D0JVZjIN
+zGch7h2DYWR31qpFj4IH4 --> jfN2GligvRlvXI4ZTdxiR
+aXzvozpPHMfFsp2gRiDN8 --> jNlnhDH1bKL1ycx_lcFHc
+zGch7h2DYWR31qpFj4IH4 --> W5aG9pVJIu9J9mWuKj7a_
+LeKEeXKMx_3PrgHpStIzR --> jNlnhDH1bKL1ycx_lcFHc
+W5aG9pVJIu9J9mWuKj7a_ --> M7Mqk9078rDKuucwSCf88
+LeKEeXKMx_3PrgHpStIzR --> zmAnl1J9JPPrEPmpjMoIg
+@enduml
