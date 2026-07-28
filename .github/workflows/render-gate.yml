@@ -1,0 +1,31 @@
+# Standalone workflow (not managed by calcipy_template): renders the curated
+# fixture matrix with the real diagram tools. Kept separate from ci_pipeline.yml
+# so missing or broken renderers never block the main test job.
+name: Render Gate
+
+"on":
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/setup
+        with:
+          python-version: "3.10"
+
+      - name: Install renderers
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes graphviz plantuml
+          npm install --global @mermaid-js/mermaid-cli
+          curl -fsSL https://d2lang.com/install.sh | sh -s --
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Allow Chrome sandbox for mermaid-cli
+        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0 || true
+
+      - name: Run render-gated tests
+        run: uv run nox -s render_gate
