@@ -130,8 +130,11 @@ class ExcalidrawParser(Parser):
         texts: list[Text] = []
         frames: list[dict[str, Any]] = []
 
-        # First pass: Parse all elements
+        # First pass: Parse all elements. Excalidraw soft-deletes: clearing the
+        # canvas or erasing marks elements isDeleted and exports still carry them.
         for elem in elements:
+            if elem.get('isDeleted'):
+                continue
             elem_type = elem.get('type', '')
 
             if elem_type in {'rectangle', 'ellipse', 'diamond'}:

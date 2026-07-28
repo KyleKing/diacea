@@ -145,6 +145,16 @@ class TestExcalidrawGroupDetection:
         assert sorted(groups['group-backend'].children) == ['api', 'db']
         assert sorted(groups['group-system'].children) == ['group-backend', 'web']
 
+    def test_soft_deleted_elements_are_skipped(self):
+        elements = [
+            _rect('kept', 0.0, 0.0, 100.0, 100.0),
+            {**_rect('cleared', 200.0, 0.0, 100.0, 100.0), 'isDeleted': True},
+        ]
+
+        diagram = ExcalidrawParser().parse({'elements': elements})
+
+        assert [shape.id for shape in diagram.get_shapes()] == ['kept']
+
     def test_shape_straddling_a_border_joins_the_container_covering_its_center(self):
         elements = [
             _rect('system', 0.0, 0.0, 1000.0, 1000.0),
