@@ -200,8 +200,10 @@ class C4PlantUMLGenerator(Generator):
 
         lines.append('')
 
-        # Generate relationships
-        lines.extend(self._generate_relationship(conn) for conn in connections)
+        # Generate relationships; endpoints naming a suppressed container shape
+        # remap to that group's declared boundary alias
+        boundary_alias_by_source = {g.source_shape_id: g.id for g in groups}
+        lines.extend(self._generate_relationship(conn, boundary_alias_by_source) for conn in connections)
 
         lines.append('@enduml')
         return '\n'.join(lines)
@@ -293,10 +295,10 @@ class C4PlantUMLGenerator(Generator):
             return self._generate_system(shape)
         return self._generate_container(shape)
 
-    def _generate_relationship(self, conn: Connection) -> str:
+    def _generate_relationship(self, conn: Connection, boundary_alias_by_source: dict[str, str]) -> str:
         """Generate C4 Rel (relationship)."""
-        from_id = self._sanitize_id(conn.from_id)
-        to_id = self._sanitize_id(conn.to_id)
+        from_id = self._sanitize_id(boundary_alias_by_source.get(conn.from_id, conn.from_id))
+        to_id = self._sanitize_id(boundary_alias_by_source.get(conn.to_id, conn.to_id))
         label = self._escape_label(conn.label or 'uses')
         return f'Rel({from_id}, {to_id}, "{label}")'
 
