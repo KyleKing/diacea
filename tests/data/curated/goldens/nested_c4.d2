@@ -1,0 +1,20 @@
+direction: down
+
+platform: Platform {
+  api_app: API Application {
+    auth: Auth Controller
+    jobs: Job Scheduler
+  }
+
+  db: Database {
+    shape: cylinder
+  }
+}
+
+user: User {
+  shape: person
+}
+
+user -> platform.api_app.auth: Signs in
+platform.api_app.auth -> platform.api_app.jobs: Enqueues
+platform.api_app.jobs -> platform.db: Reads/writes

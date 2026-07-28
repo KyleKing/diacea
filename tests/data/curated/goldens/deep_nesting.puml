@@ -1,0 +1,18 @@
+@startuml
+rectangle "Client" as client
+rectangle "Cloud" as group_cloud {
+  rectangle "VPC" as group_vpc {
+    rectangle "Cluster" as group_cluster {
+      rectangle "API" as api
+      rectangle "Worker" as worker
+    }
+    database "Database" as db
+  }
+  rectangle "Gateway" as gateway
+}
+client --> gateway
+gateway --> api
+api --> worker
+worker --> db
+api --> db
+@enduml

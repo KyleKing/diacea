@@ -1,0 +1,15 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+
+
+System_Boundary(shape_host_frame, "Host") {
+  System_Boundary(shape_runtime_frame, "Runtime") {
+    Component(shape_editor, "Editor")
+  }
+  Component(shape_sidecar, "Sidecar")
+}
+
+Rel(shape_editor, shape_sidecar, "sync")
+@enduml

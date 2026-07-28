@@ -1,0 +1,41 @@
+group-outer: Platform {
+  group-inner: Services {
+    api: API {
+      style: {
+        fill: "#a5d8ff"
+        stroke: "#1e1e1e"
+        stroke-width: 1
+      }
+    }
+    worker: Worker {
+      style: {
+        fill: "#a5d8ff"
+        stroke: "#1e1e1e"
+        stroke-width: 1
+      }
+    }
+  }
+
+  cache: Cache {
+    shape: cylinder
+    style: {
+      fill: "#ffec99"
+      stroke: "#1e1e1e"
+      stroke-width: 1
+    }
+  }
+}
+
+
+group-outer.group-inner.api -> group-outer.group-inner.worker {
+  style: {
+    stroke: "#1e1e1e"
+    stroke-width: 1
+  }
+}
+group-outer.cache -> group-outer.group-inner.api {
+  style: {
+    stroke: "#1e1e1e"
+    stroke-width: 1
+  }
+}

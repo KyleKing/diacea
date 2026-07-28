@@ -1,0 +1,16 @@
+digraph "Page 1" {
+    rankdir="LR";
+    node [fontname="Helvetica"];
+    edge [fontname="Helvetica"];
+
+    subgraph cluster_shape_host_frame {
+        label="Host";
+        subgraph cluster_shape_runtime_frame {
+            label="Runtime";
+            shape_editor [label="Editor", color="#1d1d1d", penwidth="3.5"];
+        }
+        shape_sidecar [label="Sidecar", color="#1d1d1d", penwidth="3.5"];
+    }
+
+    shape_editor -> shape_sidecar [label="sync", color="#1d1d1d", penwidth="2.0"];
+}

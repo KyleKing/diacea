@@ -1,0 +1,18 @@
+digraph "diagram" {
+    rankdir="LR";
+    node [fontname="Helvetica"];
+    edge [fontname="Helvetica"];
+
+    subgraph cluster_group_outer {
+        label="Platform";
+        subgraph cluster_group_inner {
+            label="Services";
+            api [label="API", fillcolor="#a5d8ff", style="filled", color="#1e1e1e", penwidth="1.0"];
+            worker [label="Worker", fillcolor="#a5d8ff", style="filled", color="#1e1e1e", penwidth="1.0"];
+        }
+        cache [label="Cache", shape="cylinder", fillcolor="#ffec99", style="filled", color="#1e1e1e", penwidth="1.0"];
+    }
+
+    api -> worker [color="#1e1e1e", penwidth="1.0"];
+    cache -> api [color="#1e1e1e", penwidth="1.0"];
+}

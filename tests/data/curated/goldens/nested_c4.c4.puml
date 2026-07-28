@@ -1,0 +1,19 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+
+Person(user, "User")
+
+System_Boundary(platform, "Platform") {
+  System_Boundary(api_app, "API Application") {
+    Component(auth, "Auth Controller")
+    Component(jobs, "Job Scheduler")
+  }
+  ComponentDb(db, "Database")
+}
+
+Rel(user, auth, "Signs in")
+Rel(auth, jobs, "Enqueues")
+Rel(jobs, db, "Reads/writes")
+@enduml

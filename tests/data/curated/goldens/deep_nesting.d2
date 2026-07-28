@@ -1,0 +1,26 @@
+direction: down
+
+group-cloud: Cloud {
+  group-vpc: VPC {
+    group-cluster: Cluster {
+      api: API
+      worker: Worker
+    }
+
+    db: Database {
+      shape: cylinder
+    }
+  }
+
+  gateway: Gateway
+}
+
+client: Client {
+  shape: person
+}
+
+client -> group-cloud.gateway
+group-cloud.gateway -> group-cloud.group-vpc.group-cluster.api
+group-cloud.group-vpc.group-cluster.api -> group-cloud.group-vpc.group-cluster.worker
+group-cloud.group-vpc.group-cluster.worker -> group-cloud.group-vpc.db
+group-cloud.group-vpc.group-cluster.api -> group-cloud.group-vpc.db

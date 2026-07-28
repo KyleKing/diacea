@@ -1,0 +1,17 @@
+flowchart TD
+    subgraph cloud[Cloud]
+        subgraph vpc[VPC]
+            subgraph cluster[Cluster]
+                api[API]
+                worker[Worker]
+            end
+            db[Database]
+        end
+        gateway[Gateway]
+    end
+    client[Client]
+    client --> gateway
+    gateway --> api
+    api --> worker
+    worker --> db
+    api --> db

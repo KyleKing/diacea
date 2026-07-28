@@ -1,0 +1,11 @@
+@startuml
+rectangle "Platform" as group_outer {
+  rectangle "Services" as group_inner {
+    rectangle "API" as api
+    rectangle "Worker" as worker
+  }
+  database "Cache" as cache
+}
+api --> worker
+cache --> api
+@enduml

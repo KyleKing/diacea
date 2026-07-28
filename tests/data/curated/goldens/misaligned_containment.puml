@@ -1,0 +1,6 @@
+@startuml
+rectangle "Store" as group_zone {
+  rectangle "store" as store
+  rectangle "Edge Service" as edge_rider
+}
+@enduml

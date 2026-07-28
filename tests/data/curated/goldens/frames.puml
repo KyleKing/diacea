@@ -1,0 +1,9 @@
+@startuml
+rectangle "Host" as shape_host_frame {
+  rectangle "Runtime" as shape_runtime_frame {
+    rectangle "Editor" as shape_editor
+  }
+  rectangle "Sidecar" as shape_sidecar
+}
+shape_editor --> shape_sidecar : "sync"
+@enduml

@@ -1,0 +1,17 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Person(user, "User", "Operates the dashboard")
+
+System_Boundary(platform, "Platform") {
+    Container_Boundary(api_app, "API Application") {
+        Component(auth, "Auth Controller", "FastAPI", "Validates sessions")
+        Component(jobs, "Job Scheduler", "APScheduler", "Queues background work")
+    }
+    ContainerDb(db, "Database", "PostgreSQL", "Stores jobs and users")
+}
+
+Rel(user, auth, "Signs in", "HTTPS")
+Rel(auth, jobs, "Enqueues")
+Rel(jobs, db, "Reads/writes", "SQL")
+@enduml

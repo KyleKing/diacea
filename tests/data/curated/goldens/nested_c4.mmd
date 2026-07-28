@@ -1,0 +1,13 @@
+C4Context
+    title Architecture Diagram
+    Person(user, "User")
+    Boundary(platform, "Platform") {
+    Boundary(api_app, "API Application") {
+        Component(auth, "Auth Controller")
+        Component(jobs, "Job Scheduler")
+    }
+        ContainerDb(db, "Database")
+    }
+    Rel(user, auth, "Signs in")
+    Rel(auth, jobs, "Enqueues")
+    Rel(jobs, db, "Reads/writes")

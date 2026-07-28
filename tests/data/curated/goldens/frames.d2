@@ -1,0 +1,27 @@
+direction: right
+
+shape_host_frame: Host {
+  shape_runtime_frame: Runtime {
+    shape_editor: Editor {
+      style: {
+        stroke: "#1d1d1d"
+        stroke-width: 3
+      }
+    }
+  }
+
+  shape_sidecar: Sidecar {
+    style: {
+      stroke: "#1d1d1d"
+      stroke-width: 3
+    }
+  }
+}
+
+
+shape_host_frame.shape_runtime_frame.shape_editor -> shape_host_frame.shape_sidecar: sync {
+  style: {
+    stroke: "#1d1d1d"
+    stroke-width: 2
+  }
+}

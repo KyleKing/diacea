@@ -1,0 +1,13 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+
+Person(oval, "Ellipse")
+Container(choice, "Decision")
+Component(solid_fill, "Solid Fill")
+Component(dashed_box, "Dashed")
+
+
+Rel(oval, choice, "uses")
+@enduml

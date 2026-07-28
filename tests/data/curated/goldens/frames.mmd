@@ -1,0 +1,9 @@
+C4Context
+    title Page 1
+    Boundary(shape_host_frame, "Host") {
+    Boundary(shape_runtime_frame, "Runtime") {
+        Component(shape_editor, "Editor")
+    }
+        Component(shape_sidecar, "Sidecar")
+    }
+    Rel(shape_editor, shape_sidecar, "sync")

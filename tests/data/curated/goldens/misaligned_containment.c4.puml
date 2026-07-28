@@ -1,0 +1,12 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+
+
+System_Boundary(group_zone, "Store") {
+  Component(store, "store")
+  Container(edge_rider, "Edge Service")
+}
+
+@enduml

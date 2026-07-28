@@ -1,0 +1,156 @@
+{
+  "tldrawFileFormatVersion": 1,
+  "schema": {
+    "schemaVersion": 1,
+    "storeVersion": 4,
+    "recordVersions": {}
+  },
+  "records": [
+    {
+      "gridSize": 10,
+      "name": "",
+      "meta": {},
+      "id": "document:document",
+      "typeName": "document"
+    },
+    {
+      "meta": {},
+      "id": "page:page1",
+      "name": "Page 1",
+      "index": "a1",
+      "typeName": "page"
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "rotation": 0,
+      "isLocked": false,
+      "id": "shape:host_frame",
+      "type": "frame",
+      "parentId": "page:page1",
+      "index": "a1",
+      "props": {
+        "opacity": "1",
+        "w": 600,
+        "h": 400,
+        "name": "Host"
+      },
+      "typeName": "shape"
+    },
+    {
+      "x": 40,
+      "y": 60,
+      "rotation": 0,
+      "isLocked": false,
+      "id": "shape:runtime_frame",
+      "type": "frame",
+      "parentId": "shape:host_frame",
+      "index": "a1",
+      "props": {
+        "opacity": "1",
+        "w": 300,
+        "h": 260,
+        "name": "Runtime"
+      },
+      "typeName": "shape"
+    },
+    {
+      "x": 30,
+      "y": 40,
+      "rotation": 0,
+      "isLocked": false,
+      "id": "shape:editor",
+      "type": "geo",
+      "parentId": "shape:runtime_frame",
+      "index": "a1",
+      "props": {
+        "opacity": "1",
+        "geo": "rectangle",
+        "w": 140,
+        "h": 60,
+        "color": "black",
+        "labelColor": "black",
+        "fill": "none",
+        "dash": "draw",
+        "size": "m",
+        "font": "draw",
+        "text": "Editor",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "growY": 0,
+        "url": ""
+      },
+      "typeName": "shape"
+    },
+    {
+      "x": 400,
+      "y": 120,
+      "rotation": 0,
+      "isLocked": false,
+      "id": "shape:sidecar",
+      "type": "geo",
+      "parentId": "shape:host_frame",
+      "index": "a2",
+      "props": {
+        "opacity": "1",
+        "geo": "rectangle",
+        "w": 140,
+        "h": 60,
+        "color": "black",
+        "labelColor": "black",
+        "fill": "none",
+        "dash": "draw",
+        "size": "m",
+        "font": "draw",
+        "text": "Sidecar",
+        "align": "middle",
+        "verticalAlign": "middle",
+        "growY": 0,
+        "url": ""
+      },
+      "typeName": "shape"
+    },
+    {
+      "x": 210,
+      "y": 130,
+      "rotation": 0,
+      "isLocked": false,
+      "id": "shape:sync_arrow",
+      "type": "arrow",
+      "parentId": "page:page1",
+      "index": "a2",
+      "props": {
+        "opacity": "1",
+        "dash": "draw",
+        "size": "s",
+        "fill": "none",
+        "color": "black",
+        "labelColor": "black",
+        "bend": 0,
+        "start": {
+          "type": "binding",
+          "boundShapeId": "shape:editor",
+          "normalizedAnchor": {
+            "x": 1,
+            "y": 0.5
+          },
+          "isExact": false
+        },
+        "end": {
+          "type": "binding",
+          "boundShapeId": "shape:sidecar",
+          "normalizedAnchor": {
+            "x": 0,
+            "y": 0.5
+          },
+          "isExact": false
+        },
+        "arrowheadStart": "none",
+        "arrowheadEnd": "arrow",
+        "text": "sync",
+        "font": "draw"
+      },
+      "typeName": "shape"
+    }
+  ]
+}

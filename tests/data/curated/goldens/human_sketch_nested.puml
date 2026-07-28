@@ -1,0 +1,11 @@
+@startuml
+rectangle "Payments Platform" as group_3jeOnfab9kbPTD_4SxZvU {
+  rectangle "Workers" as group_riVvo6v6oSjLgnYy2g9xt {
+    queue "Queue" as tJZC03icZzKatyfULqnua
+    rectangle "Processor" as qgyiBi2HdtSFOuecXganz
+  }
+  rectangle "Gateway" as swFO3KgzmFt0I5NdqrvVf
+}
+swFO3KgzmFt0I5NdqrvVf --> tJZC03icZzKatyfULqnua
+tJZC03icZzKatyfULqnua --> qgyiBi2HdtSFOuecXganz
+@enduml

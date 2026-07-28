@@ -1,0 +1,21 @@
+digraph "diagram" {
+    rankdir="TB";
+    node [fontname="Helvetica"];
+    edge [fontname="Helvetica"];
+
+    subgraph cluster_platform {
+        label="Platform";
+        subgraph cluster_api_app {
+            label="API Application";
+            auth [label="Auth Controller"];
+            jobs [label="Job Scheduler"];
+        }
+        db [label="Database", shape="cylinder"];
+    }
+
+    user [label="User", shape="ellipse"];
+
+    user -> auth [label="Signs in"];
+    auth -> jobs [label="Enqueues"];
+    jobs -> db [label="Reads/writes"];
+}

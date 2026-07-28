@@ -1,0 +1,7 @@
+@startuml
+rectangle "Solid Fill" as solid_fill
+rectangle "Dashed" as dashed_box
+actor "Ellipse" as oval
+hexagon "Decision" as choice
+oval --> choice
+@enduml

@@ -1,0 +1,27 @@
+digraph "diagram" {
+    rankdir="TB";
+    node [fontname="Helvetica"];
+    edge [fontname="Helvetica"];
+
+    subgraph cluster_group_cloud {
+        label="Cloud";
+        subgraph cluster_group_vpc {
+            label="VPC";
+            subgraph cluster_group_cluster {
+                label="Cluster";
+                api [label="API"];
+                worker [label="Worker"];
+            }
+            db [label="Database", shape="cylinder"];
+        }
+        gateway [label="Gateway"];
+    }
+
+    client [label="Client", shape="ellipse"];
+
+    client -> gateway;
+    gateway -> api;
+    api -> worker;
+    worker -> db;
+    api -> db;
+}

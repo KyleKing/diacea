@@ -1,0 +1,17 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+
+
+System_Boundary(group_3jeOnfab9kbPTD_4SxZvU, "Payments Platform") {
+  System_Boundary(group_riVvo6v6oSjLgnYy2g9xt, "Workers") {
+    Container(tJZC03icZzKatyfULqnua, "Queue")
+    Component(qgyiBi2HdtSFOuecXganz, "Processor")
+  }
+  Container(swFO3KgzmFt0I5NdqrvVf, "Gateway")
+}
+
+Rel(swFO3KgzmFt0I5NdqrvVf, tJZC03icZzKatyfULqnua, "uses")
+Rel(tJZC03icZzKatyfULqnua, qgyiBi2HdtSFOuecXganz, "uses")
+@enduml

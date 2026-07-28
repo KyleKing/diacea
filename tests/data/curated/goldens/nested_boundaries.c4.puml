@@ -1,0 +1,17 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+
+
+System_Boundary(group_outer, "Platform") {
+  System_Boundary(group_inner, "Services") {
+    Container(api, "API")
+    Container(worker, "Worker")
+  }
+  ComponentDb(cache, "Cache")
+}
+
+Rel(api, worker, "uses")
+Rel(cache, api, "uses")
+@enduml

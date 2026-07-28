@@ -1,0 +1,13 @@
+@startuml
+rectangle "User" as user
+rectangle "Platform" as platform {
+  rectangle "API Application" as api_app {
+    rectangle "Auth Controller" as auth
+    rectangle "Job Scheduler" as jobs
+  }
+  database "Database" as db
+}
+user --> auth : "Signs in"
+auth --> jobs : "Enqueues"
+jobs --> db : "Reads/writes"
+@enduml

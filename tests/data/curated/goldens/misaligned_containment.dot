@@ -1,0 +1,12 @@
+digraph "diagram" {
+    rankdir="LR";
+    node [fontname="Helvetica"];
+    edge [fontname="Helvetica"];
+
+    subgraph cluster_group_zone {
+        label="Store";
+        store [label="store", fillcolor="#b2f2bb", style="filled", color="#1e1e1e", penwidth="1.0"];
+        edge_rider [label="Edge Service", fillcolor="#ffec99", style="filled", color="#1e1e1e", penwidth="1.0"];
+    }
+
+}
