@@ -1,0 +1,5 @@
+# 2026-08-01
+
+Stashed before this pass: `freshen 672bb50f: pre-existing WIP` (still in the stash list; not applied, not dropped).
+
+- doing.txt — a dated 2026-07-27 backlog of eleven open items (ruff ignore-list cleanup, defusedxml migration, the dead `is_smallest_container` check, `prek run --all-files` drift, pytest/Hypothesis deprecations). Next step: restore it with `git stash apply` and commit it as the repo's notes file so the backlog stops living in a stash
