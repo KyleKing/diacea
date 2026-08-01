@@ -3,3 +3,5 @@
 Stashed before this pass: `freshen 672bb50f: pre-existing WIP` (still in the stash list; not applied, not dropped).
 
 - doing.txt — a dated 2026-07-27 backlog of eleven open items (ruff ignore-list cleanup, defusedxml migration, the dead `is_smallest_container` check, `prek run --all-files` drift, pytest/Hypothesis deprecations). Next step: restore it with `git stash apply` and commit it as the repo's notes file so the backlog stops living in a stash
+
+Two of that backlog's entries are already done and should be struck when it comes back: the SVG parser moved to `defusedxml` (only the stdlib `ET.Element` type import remains, under `# noqa: S405`), and the dead `is_smallest_container` check was replaced by `_smallest_container`.
