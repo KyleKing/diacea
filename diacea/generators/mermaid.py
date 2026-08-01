@@ -353,7 +353,7 @@ class MermaidGenerator(Generator):
         """
         endpoints = []
         for endpoint_id in (conn.from_id, conn.to_id):
-            resolved = endpoint_id
+            resolved: str | None = endpoint_id
             if endpoint_id not in declared_ids:
                 group_id = source_to_group.get(endpoint_id)
                 resolved = group_representatives.get(group_id) if group_id else None
