@@ -1734,29 +1734,29 @@ the note uses compressed-json and lzstring is not installed.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>diacea/parsers/obsidian.py</code></summary>
-              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="38 "></span><span class="k">def</span><span class="w"> </span><span class="nf">extract_excalidraw_json</span><span class="p">(</span><span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<span class="linenos" data-linenos="39 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract the Excalidraw scene dict from an Obsidian .excalidraw.md note.</span>
-<span class="linenos" data-linenos="40 "></span>
-<span class="linenos" data-linenos="41 "></span><span class="sd">    Raises:</span>
-<span class="linenos" data-linenos="42 "></span><span class="sd">        ValueError: If no Drawing section is found, decompression fails, or</span>
-<span class="linenos" data-linenos="43 "></span><span class="sd">            the note uses compressed-json and lzstring is not installed.</span>
-<span class="linenos" data-linenos="44 "></span><span class="sd">    &quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="45 "></span>    <span class="k">if</span> <span class="n">match</span> <span class="o">:=</span> <span class="n">_DRAWING_JSON_RE</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">content</span><span class="p">):</span>
-<span class="linenos" data-linenos="46 "></span>        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
-<span class="linenos" data-linenos="47 "></span>
-<span class="linenos" data-linenos="48 "></span>    <span class="k">if</span> <span class="n">match</span> <span class="o">:=</span> <span class="n">_DRAWING_COMPRESSED_RE</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">content</span><span class="p">):</span>
-<span class="linenos" data-linenos="49 "></span>        <span class="k">if</span> <span class="n">lzstring</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">_HAS_LZSTRING</span><span class="p">:</span>
-<span class="linenos" data-linenos="50 "></span>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-<span class="linenos" data-linenos="51 "></span>                <span class="s1">&#39;This Obsidian Excalidraw file uses a compressed-json Drawing block. &#39;</span>
-<span class="linenos" data-linenos="52 "></span>                <span class="s2">&quot;Install the optional dependency to decompress it: pip install &#39;diacea[obsidian]&#39;&quot;</span>
-<span class="linenos" data-linenos="53 "></span>            <span class="p">)</span>
-<span class="linenos" data-linenos="54 "></span>        <span class="n">compressed</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\s+&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
-<span class="linenos" data-linenos="55 "></span>        <span class="n">decompressed</span> <span class="o">=</span> <span class="n">lzstring</span><span class="o">.</span><span class="n">LZString</span><span class="p">()</span><span class="o">.</span><span class="n">decompressFromBase64</span><span class="p">(</span><span class="n">compressed</span><span class="p">)</span>
-<span class="linenos" data-linenos="56 "></span>        <span class="k">if</span> <span class="ow">not</span> <span class="n">decompressed</span><span class="p">:</span>
-<span class="linenos" data-linenos="57 "></span>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Failed to decompress the compressed-json Drawing block&#39;</span><span class="p">)</span>
-<span class="linenos" data-linenos="58 "></span>        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">decompressed</span><span class="p">)</span>
-<span class="linenos" data-linenos="59 "></span>
-<span class="linenos" data-linenos="60 "></span>    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No &#39;# Drawing&#39; section with a json or compressed-json code block was found&quot;</span><span class="p">)</span>
+              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="41 "></span><span class="k">def</span><span class="w"> </span><span class="nf">extract_excalidraw_json</span><span class="p">(</span><span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="linenos" data-linenos="42 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract the Excalidraw scene dict from an Obsidian .excalidraw.md note.</span>
+<span class="linenos" data-linenos="43 "></span>
+<span class="linenos" data-linenos="44 "></span><span class="sd">    Raises:</span>
+<span class="linenos" data-linenos="45 "></span><span class="sd">        ValueError: If no Drawing section is found, decompression fails, or</span>
+<span class="linenos" data-linenos="46 "></span><span class="sd">            the note uses compressed-json and lzstring is not installed.</span>
+<span class="linenos" data-linenos="47 "></span><span class="sd">    &quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="48 "></span>    <span class="k">if</span> <span class="n">match</span> <span class="o">:=</span> <span class="n">_DRAWING_JSON_RE</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">content</span><span class="p">):</span>
+<span class="linenos" data-linenos="49 "></span>        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+<span class="linenos" data-linenos="50 "></span>
+<span class="linenos" data-linenos="51 "></span>    <span class="k">if</span> <span class="n">match</span> <span class="o">:=</span> <span class="n">_DRAWING_COMPRESSED_RE</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">content</span><span class="p">):</span>
+<span class="linenos" data-linenos="52 "></span>        <span class="k">if</span> <span class="n">lzstring</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">_HAS_LZSTRING</span><span class="p">:</span>
+<span class="linenos" data-linenos="53 "></span>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+<span class="linenos" data-linenos="54 "></span>                <span class="s1">&#39;This Obsidian Excalidraw file uses a compressed-json Drawing block. &#39;</span>
+<span class="linenos" data-linenos="55 "></span>                <span class="s2">&quot;Install the optional dependency to decompress it: pip install &#39;diacea[obsidian]&#39;&quot;</span>
+<span class="linenos" data-linenos="56 "></span>            <span class="p">)</span>
+<span class="linenos" data-linenos="57 "></span>        <span class="n">compressed</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\s+&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+<span class="linenos" data-linenos="58 "></span>        <span class="n">decompressed</span> <span class="o">=</span> <span class="n">lzstring</span><span class="o">.</span><span class="n">LZString</span><span class="p">()</span><span class="o">.</span><span class="n">decompressFromBase64</span><span class="p">(</span><span class="n">compressed</span><span class="p">)</span>
+<span class="linenos" data-linenos="59 "></span>        <span class="k">if</span> <span class="ow">not</span> <span class="n">decompressed</span><span class="p">:</span>
+<span class="linenos" data-linenos="60 "></span>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Failed to decompress the compressed-json Drawing block&#39;</span><span class="p">)</span>
+<span class="linenos" data-linenos="61 "></span>        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">decompressed</span><span class="p">)</span>
+<span class="linenos" data-linenos="62 "></span>
+<span class="linenos" data-linenos="63 "></span>    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No &#39;# Drawing&#39; section with a json or compressed-json code block was found&quot;</span><span class="p">)</span>
 </code></pre></div>
             </details>
     </div>
@@ -1781,13 +1781,13 @@ the note uses compressed-json and lzstring is not installed.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>diacea/parsers/obsidian.py</code></summary>
-              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="29 "></span><span class="k">def</span><span class="w"> </span><span class="nf">is_obsidian_excalidraw</span><span class="p">(</span><span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="linenos" data-linenos="30 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Check whether text looks like an Obsidian Excalidraw markdown note.&quot;&quot;&quot;</span>
-<span class="linenos" data-linenos="31 "></span>    <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span>
-<span class="linenos" data-linenos="32 "></span>        <span class="n">_FRONTMATTER_PLUGIN_RE</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
-<span class="linenos" data-linenos="33 "></span>        <span class="ow">or</span> <span class="n">_DRAWING_JSON_RE</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
-<span class="linenos" data-linenos="34 "></span>        <span class="ow">or</span> <span class="n">_DRAWING_COMPRESSED_RE</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
-<span class="linenos" data-linenos="35 "></span>    <span class="p">)</span>
+              <div class="highlight"><pre><span></span><code><span class="linenos" data-linenos="32 "></span><span class="k">def</span><span class="w"> </span><span class="nf">is_obsidian_excalidraw</span><span class="p">(</span><span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="linenos" data-linenos="33 "></span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Check whether text looks like an Obsidian Excalidraw markdown note.&quot;&quot;&quot;</span>
+<span class="linenos" data-linenos="34 "></span>    <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span>
+<span class="linenos" data-linenos="35 "></span>        <span class="n">_FRONTMATTER_PLUGIN_RE</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+<span class="linenos" data-linenos="36 "></span>        <span class="ow">or</span> <span class="n">_DRAWING_JSON_RE</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+<span class="linenos" data-linenos="37 "></span>        <span class="ow">or</span> <span class="n">_DRAWING_COMPRESSED_RE</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+<span class="linenos" data-linenos="38 "></span>    <span class="p">)</span>
 </code></pre></div>
             </details>
     </div>
