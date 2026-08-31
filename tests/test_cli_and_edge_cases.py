@@ -17,7 +17,7 @@ from diacea.generators import (
     PlantUMLGenerator,
 )
 from diacea.ir import Diagram
-from diacea.ir.elements import Connection, Dimensions, Group, Point, Shape, Style
+from diacea.ir.elements import Connection, Dimensions, Element, Group, Point, Shape, Style
 from diacea.ir.semantic import SemanticType
 from diacea.parsers import ExcalidrawParser
 
@@ -816,7 +816,7 @@ def _c4_connection(conn_id: str, from_id: str, to_id: str, label: str) -> Connec
 
 
 def _nested_c4_diagram(*, include_empty_group: bool = False) -> Diagram:
-    elements = [
+    elements: list[Element] = [
         _c4_shape('user', 'User', SemanticType.PERSON),
         _c4_shape('sys', 'Payment System', SemanticType.SYSTEM),
         _c4_shape('api', 'API Service', SemanticType.CONTAINER),

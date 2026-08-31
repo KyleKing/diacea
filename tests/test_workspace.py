@@ -475,28 +475,25 @@ def _write_excalidraw(path, shapes):
     elements: list[dict[str, object]] = []
     for idx, (label, width, height) in enumerate(shapes):
         x = idx * 1000.0
-        elements.extend(
-            (
-                {
-                    'id': f'shape{idx}',
-                    'type': 'rectangle',
-                    'x': x,
-                    'y': 0.0,
-                    'width': float(width),
-                    'height': float(height),
-                },
-                {
-                    'id': f'text{idx}',
-                    'type': 'text',
-                    'x': x + 10.0,
-                    'y': 10.0,
-                    'width': 50.0,
-                    'height': 20.0,
-                    'text': label,
-                    'containerId': f'shape{idx}',
-                },
-            )
-        )
+        shape: dict[str, object] = {
+            'id': f'shape{idx}',
+            'type': 'rectangle',
+            'x': x,
+            'y': 0.0,
+            'width': float(width),
+            'height': float(height),
+        }
+        text: dict[str, object] = {
+            'id': f'text{idx}',
+            'type': 'text',
+            'x': x + 10.0,
+            'y': 10.0,
+            'width': 50.0,
+            'height': 20.0,
+            'text': label,
+            'containerId': f'shape{idx}',
+        }
+        elements.extend((shape, text))
     path.write_text(json.dumps({'elements': elements}))
 
 

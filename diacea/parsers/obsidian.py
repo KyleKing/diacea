@@ -13,13 +13,16 @@ import json
 import re
 from typing import Any
 
-try:
-    import lzstring  # type: ignore[import-untyped]  # lzstring ships no type stubs
+lzstring: Any = None
+_HAS_LZSTRING = False
 
-    _HAS_LZSTRING = True
+try:
+    import lzstring as _lzstring  # type: ignore[import-untyped]  # lzstring ships no type stubs
 except ImportError:
-    lzstring = None
-    _HAS_LZSTRING = False
+    pass
+else:
+    lzstring = _lzstring
+    _HAS_LZSTRING = True
 
 _DRAWING_JSON_RE = re.compile(r'\n##? Drawing\n[^`]*```json\n([\s\S]*?)```')
 _DRAWING_COMPRESSED_RE = re.compile(r'\n##? Drawing\n[^`]*```compressed-json\n([\s\S]*?)```')
