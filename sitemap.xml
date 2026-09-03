@@ -2,106 +2,106 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://diacea.kyleking.me/</loc>
-         <lastmod>2026-08-31</lastmod>
+         <lastmod>2026-09-03</lastmod>
     </url>
     <url>
          <loc>https://diacea.kyleking.me/docs/CHANGELOG/</loc>
-         <lastmod>2026-08-31</lastmod>
+         <lastmod>2026-09-03</lastmod>
     </url>
     <url>
          <loc>https://diacea.kyleking.me/docs/DEVELOPER_GUIDE/</loc>
-         <lastmod>2026-08-31</lastmod>
+         <lastmod>2026-09-03</lastmod>
     </url>
     <url>
          <loc>https://diacea.kyleking.me/docs/STYLE_GUIDE/</loc>
-         <lastmod>2026-08-31</lastmod>
+         <lastmod>2026-09-03</lastmod>
     </url>
     <url>
          <loc>https://diacea.kyleking.me/notes/Constraint%20satisfaction%20problems%20Combinatorial%20Optimization%20Class%20Notes%20Fiveable/</loc>
-         <lastmod>2026-08-31</lastmod>
+         <lastmod>2026-09-03</lastmod>
     </url>
     <url>
          <loc>https://diacea.kyleking.me/reference/diacea/cli/</loc>
-         <lastmod>2026-08-31</lastmod>
+         <lastmod>2026-09-03</lastmod>
     </url>
     <url>
          <loc>https://diacea.kyleking.me/reference/diacea/ingestion/</loc>
-         <lastmod>2026-08-31</lastmod>
+         <lastmod>2026-09-03</lastmod>
     </url>
     <url>
          <loc>https://diacea.kyleking.me/reference/diacea/markdown_fences/</loc>
-         <lastmod>2026-08-31</lastmod>
+         <lastmod>2026-09-03</lastmod>
     </url>
     <url>
          <loc>https://diacea.kyleking.me/reference/diacea/mkdocs_plugin/</loc>
-         <lastmod>2026-08-31</lastmod>
+         <lastmod>2026-09-03</lastmod>
     </url>
     <url>
          <loc>https://diacea.kyleking.me/reference/diacea/workspace_cli/</loc>
-         <lastmod>2026-08-31</lastmod>
+         <lastmod>2026-09-03</lastmod>
     </url>
     <url>
          <loc>https://diacea.kyleking.me/reference/diacea/workspace_format/</loc>
-         <lastmod>2026-08-31</lastmod>
+         <lastmod>2026-09-03</lastmod>
     </url>
     <url>
          <loc>https://diacea.kyleking.me/reference/diacea/generators/d2/</loc>
-         <lastmod>2026-08-31</lastmod>
+         <lastmod>2026-09-03</lastmod>
     </url>
     <url>
          <loc>https://diacea.kyleking.me/reference/diacea/generators/graphviz/</loc>
-         <lastmod>2026-08-31</lastmod>
+         <lastmod>2026-09-03</lastmod>
     </url>
     <url>
          <loc>https://diacea.kyleking.me/reference/diacea/generators/mermaid/</loc>
-         <lastmod>2026-08-31</lastmod>
+         <lastmod>2026-09-03</lastmod>
     </url>
     <url>
          <loc>https://diacea.kyleking.me/reference/diacea/generators/plantuml/</loc>
-         <lastmod>2026-08-31</lastmod>
+         <lastmod>2026-09-03</lastmod>
     </url>
     <url>
          <loc>https://diacea.kyleking.me/reference/diacea/ir/base/</loc>
-         <lastmod>2026-08-31</lastmod>
+         <lastmod>2026-09-03</lastmod>
     </url>
     <url>
          <loc>https://diacea.kyleking.me/reference/diacea/ir/elements/</loc>
-         <lastmod>2026-08-31</lastmod>
+         <lastmod>2026-09-03</lastmod>
     </url>
     <url>
          <loc>https://diacea.kyleking.me/reference/diacea/ir/semantic/</loc>
-         <lastmod>2026-08-31</lastmod>
+         <lastmod>2026-09-03</lastmod>
     </url>
     <url>
          <loc>https://diacea.kyleking.me/reference/diacea/ir/workspace/</loc>
-         <lastmod>2026-08-31</lastmod>
+         <lastmod>2026-09-03</lastmod>
     </url>
     <url>
          <loc>https://diacea.kyleking.me/reference/diacea/parsers/excalidraw/</loc>
-         <lastmod>2026-08-31</lastmod>
+         <lastmod>2026-09-03</lastmod>
     </url>
     <url>
          <loc>https://diacea.kyleking.me/reference/diacea/parsers/mermaid/</loc>
-         <lastmod>2026-08-31</lastmod>
+         <lastmod>2026-09-03</lastmod>
     </url>
     <url>
          <loc>https://diacea.kyleking.me/reference/diacea/parsers/obsidian/</loc>
-         <lastmod>2026-08-31</lastmod>
+         <lastmod>2026-09-03</lastmod>
     </url>
     <url>
          <loc>https://diacea.kyleking.me/reference/diacea/parsers/plantuml/</loc>
-         <lastmod>2026-08-31</lastmod>
+         <lastmod>2026-09-03</lastmod>
     </url>
     <url>
          <loc>https://diacea.kyleking.me/reference/diacea/parsers/svg/</loc>
-         <lastmod>2026-08-31</lastmod>
+         <lastmod>2026-09-03</lastmod>
     </url>
     <url>
          <loc>https://diacea.kyleking.me/reference/diacea/parsers/tldraw/</loc>
-         <lastmod>2026-08-31</lastmod>
+         <lastmod>2026-09-03</lastmod>
     </url>
     <url>
          <loc>https://diacea.kyleking.me/superpowers/plans/2026-04-06-fix-copier-regressions/</loc>
-         <lastmod>2026-08-31</lastmod>
+         <lastmod>2026-09-03</lastmod>
     </url>
 </urlset>
