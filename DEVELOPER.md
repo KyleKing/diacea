@@ -232,7 +232,7 @@ Use these scripts for prototyping or creating reference examples.
 | `diacea/workspace_format.py`          | 50         | 3       | 0        | 92.2%    |
 | **Totals**                            | 3838       | 266     | 39       | 91.1%    |
 
-Generated on: 2026-08-31
+Generated on: 2026-09-02
 <!-- {cte} -->
 
 Note: Coverage table may be outdated. Run `./run test` for current coverage.

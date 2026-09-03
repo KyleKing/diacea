@@ -26,6 +26,7 @@
 
 ### Fix
 
+- clear ty type errors surfaced by the calcipy bump
 - **mermaid**: type C4 Rel endpoint as optional so the unresolved guard stays live
 - **excalidraw**: prefer native containerId binding for labels
 - **mermaid**: record source diagram type and emit valid dashed edges
