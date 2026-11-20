@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="373" height="742" viewBox="-24.0 -24.0 373.0 742.0">
+<style>text{font-family:Helvetica,Arial,sans-serif;font-size:14px;fill:#1e1e1e}.group-label{font-size:12px;fill:#868e96}.edge-label{font-size:12px;paint-order:stroke;stroke:#ffffff;stroke-width:4px}</style>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1e1e1e"/></marker></defs>
+<rect x="-24.0" y="-24.0" width="373.0" height="742.0" fill="#ffffff"/>
+<g id="platform" data-semantic="group"><rect x="0.0" y="151.0" width="325.0" height="543.0" rx="8" fill="none" fill-opacity="0.25" stroke="#868e96" stroke-dasharray="6 4"/><text class="group-label" x="10.0" y="169.0">Platform</text></g>
+<g id="api_app" data-semantic="group"><rect x="30.0" y="211.0" width="265.0" height="302.0" rx="8" fill="none" fill-opacity="0.25" stroke="#868e96" stroke-dasharray="6 4"/><text class="group-label" x="40.0" y="229.0">API Application</text></g>
+<g id="user" data-semantic="person"><ellipse cx="162.5" cy="30.5" rx="60.0" ry="30.5" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="162.5" y="35.2" text-anchor="middle">User</text></g>
+<g id="auth" data-semantic="component"><rect x="60.0" y="271.0" width="205.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="162.5" y="306.2" text-anchor="middle">Auth Controller</text></g>
+<g id="jobs" data-semantic="component"><rect x="71.0" y="422.0" width="183.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="162.5" y="457.2" text-anchor="middle">Job Scheduler</text></g>
+<g id="db" data-semantic="database"><path d="M98.5,613.0 a64.0,10.0 0 0 1 128.0,0 v41.0 a64.0,10.0 0 0 1 -128.0,0 z" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><path d="M98.5,613.0 a64.0,10.0 0 0 0 128.0,0" fill="none" stroke="#1e1e1e" stroke-width="1.5"/><text x="162.5" y="638.2" text-anchor="middle">Database</text></g>
+<polyline points="162.5,61.0 162.5,271.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/><text class="edge-label" x="162.5" y="166.0" text-anchor="middle">Signs in</text>
+<polyline points="162.5,332.0 162.5,422.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/><text class="edge-label" x="162.5" y="377.0" text-anchor="middle">Enqueues</text>
+<polyline points="162.5,483.0 162.5,603.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/><text class="edge-label" x="162.5" y="543.0" text-anchor="middle">Reads/writes</text>
+</svg>

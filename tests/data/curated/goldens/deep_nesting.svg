@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="348" height="983" viewBox="-24.0 -24.0 348.0 983.0">
+<style>text{font-family:Helvetica,Arial,sans-serif;font-size:14px;fill:#1e1e1e}.group-label{font-size:12px;fill:#868e96}.edge-label{font-size:12px;paint-order:stroke;stroke:#ffffff;stroke-width:4px}</style>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1e1e1e"/></marker></defs>
+<rect x="-24.0" y="-24.0" width="348.0" height="983.0" fill="#ffffff"/>
+<g id="group-cloud" data-semantic="group"><rect x="0.0" y="151.0" width="300.0" height="784.0" rx="8" fill="none" fill-opacity="0.25" stroke="#868e96" stroke-dasharray="6 4"/><text class="group-label" x="10.0" y="169.0">Cloud</text></g>
+<g id="group-vpc" data-semantic="group"><rect x="30.0" y="362.0" width="240.0" height="543.0" rx="8" fill="none" fill-opacity="0.25" stroke="#868e96" stroke-dasharray="6 4"/><text class="group-label" x="40.0" y="380.0">VPC</text></g>
+<g id="group-cluster" data-semantic="group"><rect x="60.0" y="422.0" width="180.0" height="302.0" rx="8" fill="none" fill-opacity="0.25" stroke="#868e96" stroke-dasharray="6 4"/><text class="group-label" x="70.0" y="440.0">Cluster</text></g>
+<g id="api" data-semantic="service"><rect x="90.0" y="482.0" width="120.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="150.0" y="517.2" text-anchor="middle">API</text></g>
+<g id="worker" data-semantic="service"><rect x="90.0" y="633.0" width="120.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="150.0" y="668.2" text-anchor="middle">Worker</text></g>
+<g id="db" data-semantic="database"><rect x="86.0" y="814.0" width="128.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="150.0" y="849.2" text-anchor="middle">Database</text></g>
+<g id="gateway" data-semantic="service"><rect x="90.0" y="211.0" width="120.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="150.0" y="246.2" text-anchor="middle">Gateway</text></g>
+<g id="client" data-semantic="person"><rect x="90.0" y="0.0" width="120.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="150.0" y="35.2" text-anchor="middle">Client</text></g>
+<polyline points="150.0,61.0 150.0,211.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="150.0,272.0 150.0,482.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="150.0,543.0 150.0,633.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="150.0,694.0 150.0,814.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="150.0,543.0 150.0,814.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+</svg>

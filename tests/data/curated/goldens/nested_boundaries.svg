@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="648" height="488" viewBox="-24.0 -24.0 648.0 488.0">
+<style>text{font-family:Helvetica,Arial,sans-serif;font-size:14px;fill:#1e1e1e}.group-label{font-size:12px;fill:#868e96}.edge-label{font-size:12px;paint-order:stroke;stroke:#ffffff;stroke-width:4px}</style>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1e1e1e"/></marker></defs>
+<rect x="-24.0" y="-24.0" width="648.0" height="488.0" fill="#ffffff"/>
+<g id="group-outer" data-semantic="group"><rect x="0.0" y="0.0" width="600.0" height="440.0" rx="8" fill="none" fill-opacity="0.25" stroke="#868e96" stroke-dasharray="6 4"/><text class="group-label" x="10.0" y="18.0">Platform</text></g>
+<g id="group-inner" data-semantic="group"><rect x="40.0" y="80.0" width="320.0" height="300.0" rx="8" fill="none" fill-opacity="0.25" stroke="#868e96" stroke-dasharray="6 4"/><text class="group-label" x="50.0" y="98.0">Services</text></g>
+<g id="api" data-semantic="service"><rect x="70.0" y="150.0" width="120.0" height="60.0" rx="2.0" fill="#a5d8ff" stroke="#1e1e1e" stroke-width="1.0"/><text x="130.0" y="184.7" text-anchor="middle">API</text></g>
+<g id="worker" data-semantic="service"><rect x="230.0" y="280.0" width="110.0" height="60.0" rx="2.0" fill="#a5d8ff" stroke="#1e1e1e" stroke-width="1.0"/><text x="285.0" y="314.7" text-anchor="middle">Worker</text></g>
+<g id="cache" data-semantic="database"><rect x="420.0" y="160.0" width="140.0" height="60.0" rx="2.0" fill="#ffec99" stroke="#1e1e1e" stroke-width="1.0"/><text x="490.0" y="194.7" text-anchor="middle">Cache</text></g>
+<polyline points="195.0,185.0 235.0,285.0" fill="none" stroke="#1e1e1e" stroke-width="1.0" marker-end="url(#arrow)"/>
+<polyline points="415.0,188.0 195.0,182.0" fill="none" stroke="#1e1e1e" stroke-width="1.0" marker-end="url(#arrow)"/>
+</svg>

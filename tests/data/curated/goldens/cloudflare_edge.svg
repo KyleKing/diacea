@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1009" height="2008" viewBox="-24.0 -24.0 1009.0 2008.0">
+<style>text{font-family:Helvetica,Arial,sans-serif;font-size:14px;fill:#1e1e1e}.group-label{font-size:12px;fill:#868e96}.edge-label{font-size:12px;paint-order:stroke;stroke:#ffffff;stroke-width:4px}</style>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1e1e1e"/></marker></defs>
+<rect x="-24.0" y="-24.0" width="1009.0" height="2008.0" fill="#ffffff"/>
+<g id="group-cloudflare" data-semantic="group"><rect x="13.5" y="151.0" width="934.0" height="1568.0" rx="8" fill="none" fill-opacity="0.25" stroke="#868e96" stroke-dasharray="6 4"/><text class="group-label" x="23.5" y="169.0">Cloudflare</text></g>
+<g id="group-workers" data-semantic="group"><rect x="141.0" y="754.0" width="753.0" height="543.0" rx="8" fill="none" fill-opacity="0.25" stroke="#868e96" stroke-dasharray="6 4"/><text class="group-label" x="151.0" y="772.0">Workers platform</text></g>
+<g id="group-storage" data-semantic="group"><rect x="43.5" y="1387.0" width="874.0" height="302.0" rx="8" fill="none" fill-opacity="0.25" stroke="#868e96" stroke-dasharray="6 4"/><text class="group-label" x="53.5" y="1405.0">Storage</text></g>
+<g id="group-pages" data-semantic="group"><rect x="183.5" y="513.0" width="520.0" height="151.0" rx="8" fill="none" fill-opacity="0.25" stroke="#868e96" stroke-dasharray="6 4"/><text class="group-label" x="193.5" y="531.0">Pages</text></g>
+<g id="group-durable" data-semantic="group"><rect x="257.5" y="1116.0" width="520.0" height="151.0" rx="8" fill="none" fill-opacity="0.25" stroke="#868e96" stroke-dasharray="6 4"/><text class="group-label" x="267.5" y="1134.0">Durable Objects</text></g>
+<g id="group-origin" data-semantic="group"><rect x="562.0" y="1809.0" width="399.0" height="151.0" rx="8" fill="none" fill-opacity="0.25" stroke="#868e96" stroke-dasharray="6 4"/><text class="group-label" x="572.0" y="1827.0">Legacy origin - Hetzner</text></g>
+<g id="browser" data-semantic="component"><rect x="300.0" y="0.0" width="161.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="380.5" y="35.2" text-anchor="middle">Browser SPA</text></g>
+<g id="mobile" data-semantic="system"><rect x="511.0" y="0.0" width="150.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="586.0" y="35.2" text-anchor="middle">Mobile app</text></g>
+<g id="stripe" data-semantic="external"><rect x="0.0" y="1854.0" width="120.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="60.0" y="1889.2" text-anchor="middle">Stripe</text></g>
+<g id="github" data-semantic="external"><rect x="170.0" y="1854.0" width="172.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="256.0" y="1889.2" text-anchor="middle">GitHub OAuth</text></g>
+<g id="sentry" data-semantic="component"><rect x="392.0" y="1854.0" width="120.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="452.0" y="1889.2" text-anchor="middle">Sentry</text></g>
+<g id="dns" data-semantic="storage"><rect x="411.0" y="211.0" width="139.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="480.5" y="246.2" text-anchor="middle">DNS + CDN</text></g>
+<g id="waf" data-semantic="component"><rect x="411.0" y="362.0" width="139.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="480.5" y="397.2" text-anchor="middle">WAF rules</text></g>
+<g id="app" data-semantic="system"><rect x="213.5" y="573.0" width="205.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="316.0" y="608.2" text-anchor="middle">app.example.com</text></g>
+<g id="marketing" data-semantic="component"><rect x="468.5" y="573.0" width="205.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="571.0" y="608.2" text-anchor="middle">www static site</text></g>
+<g id="api" data-semantic="service"><rect x="171.0" y="814.0" width="150.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="246.0" y="849.2" text-anchor="middle">api worker</text></g>
+<g id="auth" data-semantic="service"><rect x="400.0" y="965.0" width="161.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="480.5" y="1000.2" text-anchor="middle">auth worker</text></g>
+<g id="webhooks" data-semantic="service"><rect x="371.0" y="814.0" width="194.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="468.0" y="849.2" text-anchor="middle">webhook worker</text></g>
+<g id="cron" data-semantic="service"><rect x="615.0" y="814.0" width="249.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="739.5" y="849.2" text-anchor="middle">cron trigger worker</text></g>
+<g id="session" data-semantic="component"><rect x="287.5" y="1176.0" width="139.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="357.0" y="1211.2" text-anchor="middle">SessionDO</text></g>
+<g id="doc" data-semantic="document"><rect x="476.5" y="1176.0" width="271.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="612.0" y="1211.2" text-anchor="middle">DocumentDO per tenant</text></g>
+<g id="kv" data-semantic="database"><path d="M73.5,1457.0 a113.5,10.0 0 0 1 227.0,0 v41.0 a113.5,10.0 0 0 1 -227.0,0 z" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><path d="M73.5,1457.0 a113.5,10.0 0 0 0 227.0,0" fill="none" stroke="#1e1e1e" stroke-width="1.5"/><text x="187.0" y="1482.2" text-anchor="middle">Workers KV config</text></g>
+<g id="d1" data-semantic="database"><path d="M627.5,1457.0 a130.0,10.0 0 0 1 260.0,0 v41.0 a130.0,10.0 0 0 1 -260.0,0 z" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><path d="M627.5,1457.0 a130.0,10.0 0 0 0 260.0,0" fill="none" stroke="#1e1e1e" stroke-width="1.5"/><text x="757.5" y="1482.2" text-anchor="middle">D1 tenants + billing</text></g>
+<g id="r2" data-semantic="database"><path d="M405.5,1608.0 a75.0,10.0 0 0 1 150.0,0 v41.0 a75.0,10.0 0 0 1 -150.0,0 z" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><path d="M405.5,1608.0 a75.0,10.0 0 0 0 150.0,0" fill="none" stroke="#1e1e1e" stroke-width="1.5"/><text x="480.5" y="1633.2" text-anchor="middle">R2 uploads</text></g>
+<g id="queues" data-semantic="queue"><rect x="350.5" y="1447.0" width="227.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="464.0" y="1482.2" text-anchor="middle">Queue: thumbnails</text></g>
+<g id="pg" data-semantic="database"><path d="M592.0,1879.0 a64.0,10.0 0 0 1 128.0,0 v41.0 a64.0,10.0 0 0 1 -128.0,0 z" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><path d="M592.0,1879.0 a64.0,10.0 0 0 0 128.0,0" fill="none" stroke="#1e1e1e" stroke-width="1.5"/><text x="656.0" y="1904.2" text-anchor="middle">Postgres</text></g>
+<g id="search" data-semantic="component"><rect x="770.0" y="1869.0" width="161.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="850.5" y="1904.2" text-anchor="middle">Meilisearch</text></g>
+<polyline points="395.0,61.0 466.0,211.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="570.8,61.0 495.8,211.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="480.5,272.0 480.5,362.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="456.7,423.0 339.8,573.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="524.8,423.0 765.5,588.5 307.9,814.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="307.1,634.0 254.9,814.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="293.4,875.0 433.1,965.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="472.8,1026.0 263.7,1854.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="462.6,1026.0 374.9,1176.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="321.0,874.5 623.0,995.5 613.6,1176.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="270.6,875.0 732.9,1447.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="243.2,875.0 189.8,1447.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="255.1,875.0 471.4,1598.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="257.9,875.0 644.1,1869.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/><text class="edge-label" x="451.0" y="1372.0" text-anchor="middle">cache miss</text>
+<polyline points="263.5,875.0 833.0,1869.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="456.0,875.0 72.0,1854.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="72.0,1854.0 456.0,875.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/><text class="edge-label" x="264.0" y="1364.5" text-anchor="middle">payment events</text>
+<polyline points="481.9,875.0 743.6,1447.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="726.2,875.0 477.3,1447.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="467.3,1508.0 477.2,1598.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="252.0,875.0 446.0,1854.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" stroke-dasharray="6 4" marker-end="url(#arrow)"/><text class="edge-label" x="349.0" y="1364.5" text-anchor="middle">errors</text>
+<polyline points="535.4,634.0 79.0,1025.5 460.2,1598.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+</svg>

@@ -323,7 +323,7 @@ class TestSubgraphs:
         parser, _ = _parse('flowchart TD\n    subgraph sg[Open]\n        A')
         assert any('unclosed subgraph' in w for w in parser.warnings)
 
-    def test_subgraph_and_node_sharing_name(self):
+    def test_edge_to_subgraph_targets_the_group(self):
         _, diagram = _parse(
             """
             flowchart LR
@@ -335,10 +335,9 @@ class TestSubgraphs:
         )
         group = diagram.get_groups()[0]
         assert group.id == 'group-Results'
-        node = _shape(diagram, 'Results')
-        assert isinstance(node, Shape)
+        assert {shape.id for shape in diagram.get_shapes()} == {'A', 'B'}
         edges = {(c.from_id, c.to_id) for c in diagram.get_connections()}
-        assert edges == {('B', 'Results')}
+        assert edges == {('B', 'group-Results')}
 
 
 class TestFaIcons:

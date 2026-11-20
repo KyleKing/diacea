@@ -380,6 +380,12 @@ class MermaidGenerator(Generator):
             if resolved is None:
                 warnings.warn(f'dropping C4 Rel with unresolvable endpoint {endpoint_id!r}', stacklevel=2)
                 return None
+            if resolved != endpoint_id:
+                warnings.warn(
+                    f'Re-pointing C4 Rel from boundary {endpoint_id!r} to {resolved!r} inside it: '
+                    'Mermaid C4 cannot link a boundary',
+                    stacklevel=2,
+                )
             endpoints.append(self._sanitize_id(resolved))
 
         label = self._escape_quoted_label(conn.label or 'uses')

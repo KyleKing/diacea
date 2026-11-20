@@ -14,12 +14,19 @@ import re
 from .elements import GROUP_ID_PREFIX, Diagram, Group
 
 _GENERATED_ID_MIN_LENGTH = 16
+_SHORT_GENERATED_ID_MIN_LENGTH = 8
 _MAX_SLUG_LENGTH = 40
 
 
 def looks_generated(element_id: str) -> bool:
     """Whether an id reads as tool-generated rather than written by a person."""
     return ':' in element_id or (len(element_id) >= _GENERATED_ID_MIN_LENGTH and ' ' not in element_id)
+
+
+def _is_tool_id(element_id: str) -> bool:
+    """Stricter test used for drawing formats, where short mixed-case ids (``Z0x5ijTS``) are also tool-made."""
+    mixed_case = any(char.isupper() for char in element_id) and any(char.islower() for char in element_id)
+    return looks_generated(element_id) or (len(element_id) >= _SHORT_GENERATED_ID_MIN_LENGTH and mixed_case)
 
 
 def _slug(label: str) -> str:
@@ -35,8 +42,8 @@ def assign_readable_ids(diagram: Diagram) -> dict[str, str]:
     """
     groups = diagram.get_groups()
     shapes = diagram.get_shapes()
-    taken = {shape.id for shape in shapes if not looks_generated(shape.id)}
-    taken |= {group.source_shape_id for group in groups if not looks_generated(group.source_shape_id)}
+    taken = {shape.id for shape in shapes if not _is_tool_id(shape.id)}
+    taken |= {group.source_shape_id for group in groups if not _is_tool_id(group.source_shape_id)}
 
     def claim(base: str) -> str:
         candidate, counter = base, 1
@@ -49,7 +56,7 @@ def assign_readable_ids(diagram: Diagram) -> dict[str, str]:
     renames: dict[str, str] = {}
     unlabeled = 0
     for shape in shapes:
-        if not looks_generated(shape.id):
+        if not _is_tool_id(shape.id):
             continue
         slug = _slug(shape.label)
         if not slug:
@@ -62,7 +69,7 @@ def assign_readable_ids(diagram: Diagram) -> dict[str, str]:
         source_id = group.source_shape_id
         if source_id in renames:
             renames[group.id] = GROUP_ID_PREFIX + renames[source_id]
-        elif looks_generated(source_id):
+        elif _is_tool_id(source_id):
             slug = _slug(group.label)
             if not slug:
                 unlabeled += 1

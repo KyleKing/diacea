@@ -215,6 +215,7 @@ class GraphVizParser(Parser):
         self._connections: list[Connection] = []
         self._graph_attrs: dict[str, str] = {}
         self._anonymous_clusters = 0
+        self._cluster_ids: dict[str, str] = {}  # DOT subgraph name -> group id
 
         if self._peek().value.lower() == 'strict':
             self._next()
@@ -259,6 +260,9 @@ class GraphVizParser(Parser):
         for group in self._groups.values():
             group.children = [renames.get(child_id, child_id) for child_id in group.children]
             group.id = renames.get(group.id, group.id)
+        for connection in self._connections:
+            connection.from_id = renames.get(connection.from_id, connection.from_id)
+            connection.to_id = renames.get(connection.to_id, connection.to_id)
         self._groups = {group.id: group for group in self._groups.values()}
 
     def _peek(self, offset: int = 0) -> _Token:
@@ -385,6 +389,7 @@ class GraphVizParser(Parser):
             self._anonymous_clusters += 1
             suffix = f'cluster_{self._anonymous_clusters}'
         group_id = GROUP_ID_PREFIX + re.sub(r'^group[-_]', '', suffix)
+        self._cluster_ids[name] = group_id
         if (existing := self._groups.get(group_id)) is not None:
             return existing
         group = Group(
@@ -462,6 +467,9 @@ class GraphVizParser(Parser):
         return _unescape_label(label).replace('\\N', node_id)
 
     def _add_connection(self, from_id: str, to_id: str, operator: str, attrs: dict[str, str]) -> None:
+        # An edge clipped at a cluster border (lhead/ltail) links the cluster, not the node it is anchored to
+        from_id = self._cluster_ids.get(attrs.get('ltail', ''), from_id)
+        to_id = self._cluster_ids.get(attrs.get('lhead', ''), to_id)
         direction = attrs.get('dir', 'forward' if operator == '->' else 'none').lower()
         if direction == 'back':
             from_id, to_id = to_id, from_id
