@@ -314,7 +314,7 @@ class TestTLDrawCLI:
     def test_auto_detect_unknown(self):
         """Test error on unknown format."""
         unknown_data = {'something': 'else'}
-        with pytest.raises(ValueError, match='Unknown input format'):
+        with pytest.raises(ValueError, match='Unrecognized input format'):
             detect_input_format(unknown_data)
 
 

@@ -9,7 +9,6 @@ text has no coordinates, a simple layered layout is synthesized and
 from __future__ import annotations
 
 import re
-from collections import defaultdict, deque
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -24,12 +23,10 @@ from ..ir import (
     Shape,
 )
 from ..ir.semantic import SemanticType, infer_semantic_type
+from ..layout import estimate_label_size, layout_diagram
 
 _DEFAULT_WIDTH = 160.0
 _DEFAULT_HEIGHT = 80.0
-_GAP_X = 60.0
-_GAP_Y = 100.0
-_GROUP_PADDING = 20.0
 _KEYWORD_CONFIDENCE = 0.9
 
 _ACTIVITY_KEYWORDS = frozenset(
@@ -101,10 +98,17 @@ _C4_BOUNDARY_MACROS = frozenset(
     {
         'Boundary',
         'Container_Boundary',
+        'Deployment_Node',
         'Enterprise_Boundary',
+        'Node',
+        'Node_L',
+        'Node_R',
         'System_Boundary',
     }
 )
+
+# Macros that configure rendering rather than declare an element
+_NON_ELEMENT_MACRO_PREFIXES = ('Add', 'HIDE', 'Hide', 'LAYOUT', 'Lay_', 'RelIndex', 'SHOW', 'Set', 'Show', 'Update')
 
 _C4_REL_DIRECTIONS = {
     'D': 'down',
@@ -420,7 +424,36 @@ class PlantUMLParser(Parser):
             self._add_c4_relationship(name, args, state)
             return
 
+        if self._handle_library_macro(m, args, state):
+            return
+
         self.warnings.append(f'Line {lineno}: skipped unknown macro: {name}(...)')
+
+    def _handle_library_macro(self, m: re.Match[str], args: list[str], state: _ParseState) -> bool:
+        """Treat `Name(alias, "Label", ...)` from an icon library (AWS, Azure, K8s, ...) as an element.
+
+        The macro definitions live in `!include`d files that are not
+        fetched, so the element type is inferred from the macro name and
+        label instead.
+        """
+        name = m.group('name')
+        if name.startswith(_NON_ELEMENT_MACRO_PREFIXES) or len(args) < 2:
+            return False
+        elem_id, raw_label = args[0], args[1]
+        if not re.fullmatch(_IDENT, elem_id) or not raw_label.startswith('"'):
+            return False
+        label = _unquote(raw_label)
+        metadata: dict[str, Any] = {'plantuml': {'macro': name}}
+        if len(args) > 2 and args[2]:
+            metadata['technology'] = _unquote(args[2])
+        if m.group('brace'):
+            self._add_group(state, elem_id, label, None)
+            return True
+        shape = self._add_shape(state, elem_id, label, 'rectangle', None, metadata=metadata)
+        macro_semantic, macro_confidence = infer_semantic_type('rectangle', name)
+        if macro_confidence > shape.semantic_confidence:
+            shape.semantic_type, shape.semantic_confidence = macro_semantic, macro_confidence
+        return True
 
     def _add_c4_relationship(self, name: str, args: list[str], state: _ParseState) -> None:
         from_id = self._resolve_endpoint(args[0], state)
@@ -482,7 +515,7 @@ class PlantUMLParser(Parser):
         shape = Shape(
             id=elem_id,
             position=Point(0.0, 0.0),
-            size=Dimensions(_DEFAULT_WIDTH, _DEFAULT_HEIGHT),
+            size=estimate_label_size(label),
             label=label,
             shape_type=shape_type,
             metadata=metadata or {},
@@ -569,83 +602,16 @@ class PlantUMLParser(Parser):
         return candidate
 
     def _build_diagram(self, state: _ParseState) -> Diagram:
-        self._synthesize_layout(state)
         diagram = Diagram(
             id='plantuml-diagram',
             name=state.diagram_name,
             elements=state.elements,
             metadata={
                 'direction': state.direction,
-                'synthesized_layout': True,
+                'explicit_shapes': True,
             },
         )
         if state.is_c4:
             diagram.metadata['c4_plantuml'] = True
+        layout_diagram(diagram, diagram.direction or 'TB')
         return diagram
-
-    def _synthesize_layout(self, state: _ParseState) -> None:
-        shapes = [e for e in state.elements if isinstance(e, Shape)]
-        shape_ids = {s.id for s in shapes}
-        connections = [e for e in state.elements if isinstance(e, Connection)]
-
-        adjacency: dict[str, list[str]] = defaultdict(list)
-        in_degree: dict[str, int] = dict.fromkeys(shape_ids, 0)
-        for conn in connections:
-            if conn.from_id in shape_ids and conn.to_id in shape_ids and conn.from_id != conn.to_id:
-                adjacency[conn.from_id].append(conn.to_id)
-                in_degree[conn.to_id] += 1
-
-        layers: dict[str, int] = dict.fromkeys(shape_ids, 0)
-        queue = deque(s.id for s in shapes if in_degree[s.id] == 0)
-        visited: set[str] = set()
-        while queue:
-            current = queue.popleft()
-            visited.add(current)
-            for target in adjacency[current]:
-                layers[target] = max(layers[target], layers[current] + 1)
-                in_degree[target] -= 1
-                if in_degree[target] == 0:
-                    queue.append(target)
-
-        if unvisited := shape_ids - visited:
-            overflow_layer = max(layers.values(), default=0) + 1
-            for sid in unvisited:
-                layers[sid] = overflow_layer
-
-        buckets: dict[int, list[Shape]] = defaultdict(list)
-        for shape in shapes:
-            buckets[layers[shape.id]].append(shape)
-
-        horizontal = state.direction == 'left_to_right'
-        for layer_index in sorted(buckets):
-            for position_index, shape in enumerate(buckets[layer_index]):
-                along = layer_index * ((_DEFAULT_WIDTH + _GAP_X) if horizontal else (_DEFAULT_HEIGHT + _GAP_Y))
-                across = position_index * ((_DEFAULT_HEIGHT + _GAP_Y) if horizontal else (_DEFAULT_WIDTH + _GAP_X))
-                if horizontal:
-                    shape.position = Point(along, across)
-                else:
-                    shape.position = Point(across, along)
-
-        for group in (e for e in state.elements if isinstance(e, Group)):
-            descendants = self._descendant_shapes(group, state, set())
-            if not descendants:
-                continue
-            min_x = min(s.position.x for s in descendants) - _GROUP_PADDING
-            min_y = min(s.position.y for s in descendants) - _GROUP_PADDING
-            max_x = max(s.position.x + s.size.width for s in descendants) + _GROUP_PADDING
-            max_y = max(s.position.y + s.size.height for s in descendants) + _GROUP_PADDING
-            group.position = Point(min_x, min_y)
-            group.size = Dimensions(max_x - min_x, max_y - min_y)
-
-    def _descendant_shapes(self, group: Group, state: _ParseState, seen: set[str]) -> list[Shape]:
-        result: list[Shape] = []
-        for child_id in group.children:
-            if child_id in seen:
-                continue
-            seen.add(child_id)
-            child = state.by_id.get(child_id)
-            if isinstance(child, Shape):
-                result.append(child)
-            elif isinstance(child, Group):
-                result.extend(self._descendant_shapes(child, state, seen))
-        return result

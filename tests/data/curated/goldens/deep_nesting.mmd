@@ -1,12 +1,12 @@
-flowchart LR
-    client([Client])
+flowchart TD
+    client[Client]
     subgraph group_cloud[Cloud]
         subgraph group_vpc[VPC]
             subgraph group_cluster[Cluster]
                 api[API]
                 worker[Worker]
             end
-            db[(Database)]
+            db[Database]
         end
         gateway[Gateway]
     end

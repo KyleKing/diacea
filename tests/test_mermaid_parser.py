@@ -95,7 +95,7 @@ class TestFrontmatter:
 
 
 class TestRejection:
-    @pytest.mark.parametrize('header', ['C4Context', 'classDiagram', 'gantt'])
+    @pytest.mark.parametrize('header', ['erDiagram', 'classDiagram', 'gantt'])
     def test_unsupported_diagram_types_rejected(self, header):
         with pytest.raises(ValueError, match=header):
             MermaidParser().parse(f'{header}\n    A->>B: hi')

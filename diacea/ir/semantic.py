@@ -453,6 +453,25 @@ def infer_semantic_type(
     return (SemanticType.GENERIC, 0.3)
 
 
+_STEREOTYPE_RE = re.compile(r'\s*(?:<<|«)\s*([\w -]+?)\s*(?:>>|»)\s*')
+
+
+def split_stereotype(label: str) -> tuple[str, SemanticType | None]:
+    """Split a UML-style ``<<type>>`` stereotype out of a label.
+
+    Writing ``Orders <<database>>`` in any drawing tool states the element's
+    type outright instead of leaving it to inference. Returns the label
+    without the stereotype and the semantic type it names, or the label
+    unchanged and None when it holds no recognized stereotype.
+    """
+    for match in _STEREOTYPE_RE.finditer(label):
+        semantic = _parse_semantic_hint(match.group(1).replace(' ', '_').replace('-', '_'))
+        if semantic is not None:
+            cleaned = (label[: match.start()] + ' ' + label[match.end() :]).strip()
+            return ('\n'.join(line.strip() for line in cleaned.splitlines() if line.strip()), semantic)
+    return (label, None)
+
+
 def _parse_semantic_hint(hint: str) -> SemanticType | None:
     """Parse semantic type from hint string."""
     hint_lower = hint.lower()

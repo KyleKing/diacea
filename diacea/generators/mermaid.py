@@ -13,7 +13,7 @@ from __future__ import annotations
 import warnings
 
 from ..ir import Connection, Diagram, Generator, Group, SemanticType, Shape
-from ._text import sanitize_alnum_id, top_level_groups
+from ._text import Containers, canonical_shape, sanitize_alnum_id, top_level_groups, visual_semantic
 
 _C4_BOUNDARY_KEYWORDS: dict[str, str] = {
     SemanticType.COMPONENT: 'Component',
@@ -36,6 +36,30 @@ _C4_TOP_LEVEL_KEYWORDS: dict[str, str] = {
 }
 
 _LABEL_CHARS_REQUIRING_QUOTES = frozenset('"()[]{}|')
+
+_FLOWCHART_BRACKETS: dict[str, tuple[str, str]] = {
+    'circle': ('((', '))'),
+    'cylinder': ('[(', ')]'),
+    'diamond': ('{', '}'),
+    'ellipse': ('([', '])'),
+    'hexagon': ('{{', '}}'),
+    'parallelogram': ('[/', '/]'),
+    'person': ('([', '])'),
+    'rectangle': ('[', ']'),
+    'rounded_rectangle': ('(', ')'),
+    'stadium': ('([', '])'),
+}
+
+_FLOWCHART_SEMANTIC_BRACKETS: dict[str, tuple[str, str]] = {
+    SemanticType.DATABASE: ('[(', ')]'),
+    SemanticType.DECISION: ('{', '}'),
+    SemanticType.PERSON: ('([', '])'),
+    SemanticType.START_END: ('([', '])'),
+}
+
+_THICK_STROKE_WIDTH = 3.0
+
+_FLOWCHART_DIRECTIONS = {'BT': 'BT', 'LR': 'LR', 'RL': 'RL', 'TB': 'TD'}
 
 
 class MermaidGenerator(Generator):
@@ -64,6 +88,7 @@ class MermaidGenerator(Generator):
         # Auto-detect diagram type if not specified
         diagram_type = self.diagram_type or self._detect_diagram_type(diagram)
         self.detected_type = diagram_type
+        self._diagram = diagram
 
         if diagram_type == 'c4':
             return self._generate_c4(diagram)
@@ -73,51 +98,37 @@ class MermaidGenerator(Generator):
         return self._generate_flowchart(diagram)
 
     def _detect_diagram_type(self, diagram: Diagram) -> str:
-        """Auto-detect best Mermaid diagram type.
+        """Auto-detect the best Mermaid diagram type.
 
-        Detection logic:
-        - If has Person/System/Container semantic types → C4
-        - If connections form sequential flow → Sequence
-        - Default → Flowchart
-
-        A parser-provided ``metadata["mermaid"]["diagram_type"]`` wins over
-        the heuristics.
+        The source's own diagram type wins: a parser-provided
+        ``metadata["mermaid"]["diagram_type"]`` or the C4-PlantUML flag.
+        Otherwise a drawing whose shapes were recognized as C4 elements
+        (person, system, container, component) becomes a C4 diagram, and
+        everything else a flowchart. Sequence diagrams are only produced on
+        request or from a sequence source, since a drawn chain of boxes is
+        far more often a pipeline than a message exchange.
         """
         source_type = diagram.metadata.get('mermaid', {}).get('diagram_type')
         if source_type in {'c4', 'flowchart', 'sequence'}:
             return source_type
+        if diagram.metadata.get('c4_plantuml'):
+            return 'c4'
+        if diagram.has_explicit_shapes:
+            return 'flowchart'
 
-        shapes = diagram.get_shapes()
-        connections = diagram.get_connections()
-
-        # Check for C4 semantic types
         c4_types = {
             SemanticType.PERSON,
             SemanticType.SYSTEM,
             SemanticType.CONTAINER,
             SemanticType.COMPONENT,
         }
-
-        semantic_types = {s.semantic_type for s in shapes if s.semantic_type}
-
-        if semantic_types & c4_types:  # Intersection
+        if {shape.semantic_type for shape in diagram.get_shapes()} & c4_types:
             return 'c4'
-
-        # Check for sequential pattern (each shape has at most one out connection)
-        # This is a simple heuristic - could be improved
-        out_counts: dict[str, int] = {}
-        for conn in connections:
-            out_counts[conn.from_id] = out_counts.get(conn.from_id, 0) + 1
-
-        if connections and all(count <= 1 for count in out_counts.values()):
-            return 'sequence'
-
-        # Default to flowchart
         return 'flowchart'
 
     def _generate_flowchart(self, diagram: Diagram) -> str:
         """Generate Mermaid flowchart."""
-        lines = ['flowchart LR']  # Left-to-right by default
+        lines = [f'flowchart {_FLOWCHART_DIRECTIONS.get(diagram.direction or "", "LR")}']
 
         shapes = diagram.get_shapes()
         connections = diagram.get_connections()
@@ -136,7 +147,15 @@ class MermaidGenerator(Generator):
             lines.extend(subgraph_lines)
 
         # Generate connections
-        lines.extend(self._format_flowchart_connection(conn) for conn in connections)
+        self._containers = Containers(diagram)
+        for conn in connections:
+            if self._containers.links_container_to_own_content(conn):
+                warnings.warn(
+                    f'Dropping connection between container and its own content: {conn.from_id} -> {conn.to_id}',
+                    stacklevel=2,
+                )
+                continue
+            lines.append(self._format_flowchart_connection(conn))
 
         # Add styling (basic colors)
         style_lines = self._generate_flowchart_styles(shapes)
@@ -164,38 +183,29 @@ class MermaidGenerator(Generator):
 
         Returns tuple of (opening, closing) brackets.
         """
-        # Check semantic type first
-        if shape.semantic_type:
-            semantic = shape.semantic_type
-            if semantic == SemanticType.DECISION:
-                return ('{', '}')  # Diamond
-            if semantic == SemanticType.DATABASE:
-                return ('[(', ')]')  # Cylindrical
-            if semantic == SemanticType.PERSON:
-                return ('([', '])')  # Stadium/rounded
-            if semantic == SemanticType.START_END:
-                return ('([', '])')  # Stadium
-
-        # Fall back to geometric shape
-        shape_map = {
-            'rectangle': ('[', ']'),
-            'ellipse': ('([', '])'),
-            'diamond': ('{', '}'),
-            'circle': ('((', '))'),
-        }
-
-        return shape_map.get(shape.shape_type, ('[', ']'))  # Default rectangle
+        semantic = visual_semantic(shape, self._diagram)
+        if semantic in _FLOWCHART_SEMANTIC_BRACKETS:
+            return _FLOWCHART_SEMANTIC_BRACKETS[semantic]
+        return _FLOWCHART_BRACKETS.get(canonical_shape(shape.shape_type), ('[', ']'))
 
     def _format_flowchart_connection(self, conn: Connection) -> str:
         """Format a Mermaid flowchart connection."""
-        from_id = self._sanitize_id(conn.from_id)
-        to_id = self._sanitize_id(conn.to_id)
+        from_group = self._containers.group_for(conn.from_id)
+        to_group = self._containers.group_for(conn.to_id)
+        from_id = self._sanitize_id(from_group.id if from_group else conn.from_id)
+        to_id = self._sanitize_id(to_group.id if to_group else conn.to_id)
 
         # Determine arrow style
+        dashed = conn.style.stroke_style in {'dashed', 'dotted'}
+        thick = bool(conn.style.stroke_width and conn.style.stroke_width >= _THICK_STROKE_WIDTH)
         if conn.connection_type == 'bidirectional':
-            arrow = '<-->'
-        elif conn.style.stroke_style == 'dashed':
+            arrow = '<-.->' if dashed else '<-->'
+        elif conn.connection_type == 'undirected':
+            arrow = '-.-' if dashed else '---'
+        elif dashed:
             arrow = '-.->'
+        elif thick:
+            arrow = '==>'
         else:
             arrow = '-->'
 
@@ -337,7 +347,8 @@ class MermaidGenerator(Generator):
 
         label = self._escape_quoted_label(group.label or group.source_shape_id)
         boundary_id = self._sanitize_id(group.id)
-        return [f'    Boundary({boundary_id}, "{label}") {{', *body, '    }']
+        nested = [f'    {line}' for line in body]
+        return [f'    Boundary({boundary_id}, "{label}") {{', *nested, '    }']
 
     def _format_c4_rel(
         self,
@@ -371,8 +382,7 @@ class MermaidGenerator(Generator):
         keyword = keywords.get(shape.semantic_type or '', default)
         node_id = self._sanitize_id(shape.id)
         label = self._escape_quoted_label(shape.label or node_id)
-        indent = '        ' if in_boundary else '    '
-        return f'{indent}{keyword}({node_id}, "{label}")'
+        return f'    {keyword}({node_id}, "{label}")'
 
     def _generate_sequence(self, diagram: Diagram) -> str:
         """Generate Mermaid sequence diagram."""

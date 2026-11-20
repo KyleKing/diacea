@@ -17,7 +17,7 @@ from .elements import (
     Style,
     Text,
 )
-from .semantic import SemanticType, infer_semantic_type, validate_confidence
+from .semantic import SemanticType, infer_semantic_type, split_stereotype, validate_confidence
 from .workspace import DiagramView, ElementDefinition, Workspace
 
 __all__ = [
@@ -44,5 +44,6 @@ __all__ = [
     # Workspace
     'Workspace',
     'infer_semantic_type',
+    'split_stereotype',
     'validate_confidence',
 ]

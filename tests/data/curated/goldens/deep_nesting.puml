@@ -6,7 +6,7 @@ rectangle "Cloud" as group_cloud {
       rectangle "API" as api
       rectangle "Worker" as worker
     }
-    database "Database" as db
+    rectangle "Database" as db
   }
   rectangle "Gateway" as gateway
 }

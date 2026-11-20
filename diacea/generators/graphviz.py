@@ -14,7 +14,23 @@ import warnings
 from dataclasses import dataclass, field
 
 from ..ir import Connection, Diagram, Generator, Group, SemanticType, Shape
-from ._text import top_level_groups
+from ._text import Containers, canonical_shape, top_level_groups, visual_semantic
+
+_DOT_SHAPES = {
+    'circle': 'circle',
+    'cloud': 'cloud',
+    'cylinder': 'cylinder',
+    'diamond': 'diamond',
+    'document': 'note',
+    'ellipse': 'ellipse',
+    'hexagon': 'hexagon',
+    'parallelogram': 'parallelogram',
+    'person': 'ellipse',
+    'queue': 'folder',
+    'rectangle': 'box',
+    'rounded_rectangle': 'box',
+    'stadium': 'box',
+}
 
 
 @dataclass
@@ -67,9 +83,14 @@ class GraphVizGenerator(Generator):
             GraphViz DOT string
         """
         lines = []
+        self._diagram = diagram
 
         # Determine direction
-        direction = self.config.direction or self._detect_direction(diagram)
+        direction = (
+            self.config.direction
+            or diagram.direction
+            or ('TB' if diagram.metadata.get('synthesized_layout') else self._detect_direction(diagram))
+        )
 
         # Header
         graph_type = self.config.graph_type
@@ -79,7 +100,7 @@ class GraphVizGenerator(Generator):
         if direction:
             lines.append(f'    rankdir="{direction}";')
 
-        lines.extend(('    node [fontname="Helvetica"];', '    edge [fontname="Helvetica"];', ''))
+        lines.extend(('    node [shape="box", fontname="Helvetica"];', '    edge [fontname="Helvetica"];', ''))
 
         # Process groups as clusters
         groups = diagram.get_groups()
@@ -101,7 +122,11 @@ class GraphVizGenerator(Generator):
             lines.append('')
 
         # Process connections
-        lines.extend(self._format_edge(conn) for conn in connections)
+        self._containers = Containers(diagram)
+        edge_lines = [line for conn in connections if (line := self._format_edge(conn)) is not None]
+        if any('lhead=' in line or 'ltail=' in line for line in edge_lines):
+            lines.insert(1, '    compound=true;')
+        lines.extend(edge_lines)
 
         # Footer
         lines.append('}')
@@ -209,24 +234,37 @@ class GraphVizGenerator(Generator):
 
     def _get_node_shape(self, shape: Shape) -> str:
         """Get GraphViz node shape based on semantic or geometric type."""
-        # Check semantic type first
-        if shape.semantic_type and shape.semantic_type in self.config.node_shape_map:
-            return self.config.node_shape_map[shape.semantic_type]
+        semantic = visual_semantic(shape, self._diagram)
+        if semantic in self.config.node_shape_map:
+            return self.config.node_shape_map[semantic]
+        return _DOT_SHAPES.get(canonical_shape(shape.shape_type), 'box')
 
-        # Fallback to geometric shape
-        shape_map = {
-            'rectangle': 'box',
-            'ellipse': 'ellipse',
-            'diamond': 'diamond',
-            'circle': 'circle',
-        }
+    def _cluster_endpoint(self, endpoint_id: str, other_id: str) -> tuple[str, str | None] | None:
+        """Resolve an endpoint to (node id, cluster name); None when a cluster has no usable node.
 
-        return shape_map.get(shape.shape_type, 'box')
+        DOT edges join nodes, so an edge to a cluster attaches to a node
+        inside it and is clipped at the cluster border with lhead/ltail.
+        """
+        group = self._containers.group_for(endpoint_id) if self.config.use_clusters else None
+        if group is None:
+            return (self._sanitize_id(endpoint_id), None)
+        anchors = [leaf for leaf in self._containers.leaves(group) if leaf != other_id]
+        if not anchors:
+            return None
+        return (self._sanitize_id(anchors[0]), f'{self.config.cluster_prefix}{self._sanitize_id(group.id)}')
 
-    def _format_edge(self, conn: Connection) -> str:
-        """Format a GraphViz edge."""
-        from_id = self._sanitize_id(conn.from_id)
-        to_id = self._sanitize_id(conn.to_id)
+    def _format_edge(self, conn: Connection) -> str | None:
+        """Format a GraphViz edge, or None when it cannot be expressed in DOT."""
+        source = self._cluster_endpoint(conn.from_id, conn.to_id)
+        target = self._cluster_endpoint(conn.to_id, conn.from_id)
+        if source is None or target is None or self._containers.links_container_to_own_content(conn):
+            warnings.warn(
+                f'Dropping connection between container and its own content: {conn.from_id} -> {conn.to_id}',
+                stacklevel=2,
+            )
+            return None
+        from_id, ltail = source
+        to_id, lhead = target
 
         # Determine arrow type
         dir_attr = None
@@ -235,6 +273,9 @@ class GraphVizGenerator(Generator):
         elif conn.connection_type == 'bidirectional':
             arrow = '->'
             dir_attr = 'dir="both"'
+        elif conn.connection_type == 'undirected':
+            arrow = '->'
+            dir_attr = 'dir="none"'
         else:
             arrow = '->'
 
@@ -245,8 +286,8 @@ class GraphVizGenerator(Generator):
             label = self._escape_label(conn.label)
             attrs.append(f'label="{label}"')
 
-        if conn.style.stroke_style == 'dashed':
-            attrs.append('style="dashed"')
+        if conn.style.stroke_style in {'dashed', 'dotted'}:
+            attrs.append(f'style="{conn.style.stroke_style}"')
 
         if conn.style.stroke_color:
             attrs.append(f'color="{conn.style.stroke_color}"')
@@ -256,6 +297,11 @@ class GraphVizGenerator(Generator):
 
         if dir_attr:
             attrs.append(dir_attr)
+
+        if ltail:
+            attrs.append(f'ltail="{ltail}"')
+        if lhead:
+            attrs.append(f'lhead="{lhead}"')
 
         # Format edge
         if attrs:

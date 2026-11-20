@@ -6,19 +6,10 @@ import json
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
 
-from .cli import detect_input_format
+from .formats import parse_file
 from .ir.elements import Diagram
 from .ir.workspace import DiagramView, ElementDefinition, Workspace
-from .parsers import (
-    ExcalidrawParser,
-    MermaidParser,
-    PlantUMLParser,
-    SVGParser,
-    TLDrawParser,
-    extract_excalidraw_json,
-)
 
 
 class DiagramIngestionError(Exception):
@@ -46,49 +37,16 @@ def parse_diagram_file(file_path: str | Path) -> Diagram:
     if not path.exists():
         msg = f'Diagram file not found: {path}'
         raise DiagramIngestionError(msg)
-
-    content = path.read_text(encoding='utf-8')
-    stripped = content.strip()
-
-    if stripped.startswith(('<?xml', '<svg')):
-        input_format = 'svg'
-        input_data: dict[str, Any] | str = content
-    else:
-        try:
-            input_format = detect_input_format(content)
-            input_data = content
-        except ValueError:
-            try:
-                input_data = json.loads(content)
-            except json.JSONDecodeError as err:
-                msg = (
-                    f"Could not detect diagram format of '{path}': not SVG, "
-                    f'Obsidian Excalidraw markdown, PlantUML, Mermaid, or valid JSON'
-                )
-                raise DiagramIngestionError(msg) from err
-            try:
-                input_format = detect_input_format(input_data)
-            except ValueError as err:
-                msg = f"Could not detect diagram format of '{path}': {err}"
-                raise DiagramIngestionError(msg) from err
-
     try:
-        if input_format == 'svg':
-            return SVGParser().parse(input_data)
-        if input_format == 'obsidian':
-            if not isinstance(input_data, str):
-                msg = f"Obsidian Excalidraw requires text content: '{path}'"
-                raise DiagramIngestionError(msg)
-            return ExcalidrawParser().parse(extract_excalidraw_json(input_data))
-        if input_format == 'mermaid':
-            return MermaidParser().parse(input_data)
-        if input_format == 'plantuml':
-            return PlantUMLParser().parse(input_data)
-        if input_format == 'tldraw':
-            return TLDrawParser().parse(input_data)
-        return ExcalidrawParser().parse(input_data)
+        return parse_file(path).diagram
+    except json.JSONDecodeError as err:
+        msg = f"Failed to parse diagram '{path}': invalid JSON ({err})"
+        raise DiagramIngestionError(msg) from err
     except ValueError as err:
-        msg = f"Failed to parse diagram '{path}': {err}"
+        message = str(err)
+        undetected = message.startswith('Could not detect')
+        prefix = 'Could not detect diagram format of' if undetected else 'Failed to parse diagram'
+        msg = f"{prefix} '{path}': {message}"
         raise DiagramIngestionError(msg) from err
 
 

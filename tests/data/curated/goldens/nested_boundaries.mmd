@@ -1,10 +1,10 @@
 C4Context
     title Architecture Diagram
     Boundary(group_outer, "Platform") {
-    Boundary(group_inner, "Services") {
-        Container(api, "API")
-        Container(worker, "Worker")
-    }
+        Boundary(group_inner, "Services") {
+            Container(api, "API")
+            Container(worker, "Worker")
+        }
         ContainerDb(cache, "Cache")
     }
     Rel(api, worker, "uses")

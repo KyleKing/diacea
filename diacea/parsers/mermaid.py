@@ -1,21 +1,21 @@
-"""Mermaid parser - converts Mermaid flowchart/graph and sequence text to IR.
+"""Mermaid parser - converts Mermaid flowchart/graph, sequence, and C4 text to IR.
 
-Supports a deliberate subset of Mermaid: flowchart/graph and sequence
-diagrams. Other Mermaid diagram types (C4Context, classDiagram, ...) are
-rejected with a ValueError. Styling directives (classDef, style, click,
-linkStyle) and unrecognized lines are skipped with a warning instead of
-failing. Sequence control blocks (loop, alt, par, ...) and notes are
-skipped with warnings while the messages inside them are still parsed.
+Supports a deliberate subset of Mermaid: flowchart/graph, sequence, and C4
+(C4Context, C4Container, ...) diagrams. Other Mermaid diagram types
+(classDiagram, erDiagram, ...) are rejected with a ValueError. Styling
+directives (classDef, style, click, linkStyle) and unrecognized lines are
+skipped with a warning instead of failing. Sequence control blocks (loop,
+alt, par, ...) and notes are skipped with warnings while the messages inside
+them are still parsed.
 
-Since Mermaid text has no coordinates, a simple layered layout is
-synthesized (topological layers along the declared direction) and flagged
-via ``diagram.metadata["synthesized_layout"]``.
+Since Mermaid text has no coordinates, a layered layout is synthesized along
+the declared direction (see `diacea.layout`) and flagged via
+``diagram.metadata["synthesized_layout"]``.
 """
 
 from __future__ import annotations
 
 import re
-from collections import defaultdict, deque
 from typing import Any
 
 from ..ir import (
@@ -30,6 +30,8 @@ from ..ir import (
     Style,
 )
 from ..ir.semantic import SemanticType, infer_semantic_type
+from ..layout import estimate_label_size, layout_diagram
+from .plantuml import PlantUMLParser
 
 _HEADER_RE = re.compile(r'^(?:flowchart|graph)\b\s*(LR|RL|TD|TB|BT)?\s*;?\s*$', re.IGNORECASE)
 
@@ -37,12 +39,9 @@ _SEQUENCE_HEADER_RE = re.compile(r'^sequenceDiagram\s*;?\s*$')
 
 _FRONTMATTER_TITLE_RE = re.compile(r'^title:\s*(.+?)\s*$')
 
+_C4_HEADER_RE = re.compile(r'^C4(?:Component|Container|Context|Deployment|Dynamic)\s*;?\s*$')
+
 _OTHER_DIAGRAM_KEYWORDS = (
-    'C4Component',
-    'C4Container',
-    'C4Context',
-    'C4Deployment',
-    'C4Dynamic',
     'block-beta',
     'classDiagram',
     'erDiagram',
@@ -141,11 +140,8 @@ _BRACKET_SHAPES = (
     ('{', '}', 'diamond'),
 )
 
-_NODE_WIDTH_MIN = 120.0
 _NODE_HEIGHT_BASE = 60.0
 _LAYER_PITCH = 240.0
-_CROSS_PITCH = 140.0
-_GROUP_PADDING = 20.0
 
 
 def is_mermaid(content: str) -> bool:
@@ -153,7 +149,7 @@ def is_mermaid(content: str) -> bool:
     first = _first_meaningful_line(content)
     if first is None:
         return False
-    if _HEADER_RE.match(first) or _SEQUENCE_HEADER_RE.match(first):
+    if _HEADER_RE.match(first) or _SEQUENCE_HEADER_RE.match(first) or _C4_HEADER_RE.match(first):
         return True
     keyword = first.split()[0].rstrip(':;')
     return keyword in _OTHER_DIAGRAM_KEYWORDS
@@ -169,6 +165,12 @@ def is_mermaid_sequence(content: str) -> bool:
     """Whether the content is a Mermaid sequence diagram."""
     first = _first_meaningful_line(content)
     return first is not None and _SEQUENCE_HEADER_RE.match(first) is not None
+
+
+def is_mermaid_c4(content: str) -> bool:
+    """Whether the content is a Mermaid C4 diagram."""
+    first = _first_meaningful_line(content)
+    return first is not None and _C4_HEADER_RE.match(first) is not None
 
 
 def _split_frontmatter(content: str) -> tuple[str, str | None]:
@@ -262,13 +264,13 @@ def _split_on_ampersand(segment: str) -> list[str]:
 
 
 class MermaidParser(Parser):
-    """Parse Mermaid flowchart/graph text into the IR."""
+    """Parse Mermaid flowchart/graph, sequence, and C4 text into the IR."""
 
     def __init__(self) -> None:
         self.warnings: list[str] = []
 
     def parse(self, data: Any) -> Diagram:
-        """Parse Mermaid flowchart or sequence text to an IR Diagram."""
+        """Parse Mermaid flowchart, sequence, or C4 text to an IR Diagram."""
         if not isinstance(data, str):
             raise ValueError('Mermaid parser expects a string input')
 
@@ -276,6 +278,8 @@ class MermaidParser(Parser):
         data, title = _split_frontmatter(data)
         if is_mermaid_sequence(data):
             return self._parse_sequence(data, title)
+        if is_mermaid_c4(data):
+            return self._parse_c4(data, title)
         self._shapes: dict[str, Shape] = {}
         self._shape_order: list[Shape] = []
         self._connections: list[Connection] = []
@@ -300,14 +304,13 @@ class MermaidParser(Parser):
                 metadata=shape.metadata,
             )
 
-        self._synthesize_layout()
-
         diagram = Diagram(
             id='mermaid-flowchart',
             name=title,
             metadata={
                 'mermaid': {'diagram_type': 'flowchart', 'direction': self._direction},
-                'synthesized_layout': True,
+                'direction': self._direction,
+                'explicit_shapes': True,
             },
         )
         for shape in self._shape_order:
@@ -316,6 +319,34 @@ class MermaidParser(Parser):
             diagram.add_element(connection)
         for group in self._groups:
             diagram.add_element(group)
+        layout_diagram(diagram, diagram.direction or 'TB')
+        return diagram
+
+    def _parse_c4(self, data: str, title: str | None) -> Diagram:
+        """Parse a Mermaid C4 diagram, which shares the C4-PlantUML macro dialect."""
+        lines = data.splitlines()
+        header_index = next(
+            index for index, line in enumerate(lines) if line.strip() and not line.strip().startswith(('%%', '```'))
+        )
+        c4_level = lines[header_index].strip().rstrip(';').strip()
+        lines[header_index] = '@startuml'
+        body: list[str] = []
+        for line in lines:
+            stripped = line.strip()
+            if stripped.startswith(('%%', '```')):
+                body.append('')
+            elif stripped.lower().startswith('title ') and title is None:
+                title = stripped[len('title ') :].strip()
+                body.append('')
+            else:
+                body.append(line)
+
+        macro_parser = PlantUMLParser()
+        diagram = macro_parser.parse('\n'.join(body))
+        self.warnings.extend(macro_parser.warnings)
+        diagram.id = 'mermaid-c4'
+        diagram.name = title
+        diagram.metadata['mermaid'] = {'diagram_type': 'c4', 'c4_level': c4_level}
         return diagram
 
     def _collect_statements(self, data: str) -> list[tuple[int, str]]:
@@ -347,7 +378,7 @@ class MermaidParser(Parser):
         if keyword in _OTHER_DIAGRAM_KEYWORDS:
             msg = (
                 f"Unsupported Mermaid diagram type '{keyword}': "
-                'only flowchart/graph and sequence diagrams are supported'
+                'only flowchart/graph, sequence, and C4 diagrams are supported'
             )
             raise ValueError(msg)
         msg = f"line {line_number}: not a Mermaid flowchart (expected 'flowchart' or 'graph' header)"
@@ -608,13 +639,10 @@ class MermaidParser(Parser):
         shape_type: str,
         metadata: dict[str, Any] | None = None,
     ) -> None:
-        label_lines = label.splitlines() or ['']
-        width = max(_NODE_WIDTH_MIN, 12.0 * max(len(line) for line in label_lines) + 40.0)
-        height = _NODE_HEIGHT_BASE + 30.0 * (len(label_lines) - 1)
         shape = Shape(
             id=node_id,
             position=Point(0.0, 0.0),
-            size=Dimensions(width, height),
+            size=estimate_label_size(label),
             label=label,
             shape_type=shape_type,
             metadata=metadata or {},
@@ -630,85 +658,3 @@ class MermaidParser(Parser):
         if any(node_id in group.children for group in self._groups):
             return
         self._group_stack[-1].children.append(node_id)
-
-    def _synthesize_layout(self) -> None:
-        layers = self._assign_layers()
-        max_layer = max(layers.values(), default=0)
-        cross_counters: dict[int, int] = defaultdict(int)
-
-        for shape in self._shape_order:
-            layer = layers[shape.id]
-            cross = cross_counters[layer]
-            cross_counters[layer] += 1
-            match self._direction:
-                case 'LR':
-                    shape.position = Point(layer * _LAYER_PITCH, cross * _CROSS_PITCH)
-                case 'RL':
-                    shape.position = Point((max_layer - layer) * _LAYER_PITCH, cross * _CROSS_PITCH)
-                case 'BT':
-                    shape.position = Point(cross * _LAYER_PITCH, (max_layer - layer) * _CROSS_PITCH)
-                case _:
-                    shape.position = Point(cross * _LAYER_PITCH, layer * _CROSS_PITCH)
-
-        for connection in self._connections:
-            source = self._shapes.get(connection.from_id)
-            target = self._shapes.get(connection.to_id)
-            if not source or not target:
-                continue
-            start = Point(
-                source.position.x + source.size.width / 2,
-                source.position.y + source.size.height / 2,
-            )
-            end = Point(
-                target.position.x + target.size.width / 2,
-                target.position.y + target.size.height / 2,
-            )
-            connection.start_point = start
-            connection.end_point = end
-            connection.position = Point(min(start.x, end.x), min(start.y, end.y))
-            connection.size = Dimensions(max(abs(end.x - start.x), 1.0), max(abs(end.y - start.y), 1.0))
-
-        for group in reversed(self._groups):
-            self._fit_group_box(group)
-
-    def _assign_layers(self) -> dict[str, int]:
-        successors: dict[str, list[str]] = defaultdict(list)
-        in_degree: dict[str, int] = {shape.id: 0 for shape in self._shape_order}
-        for connection in self._connections:
-            if connection.from_id in in_degree and connection.to_id in in_degree:
-                successors[connection.from_id].append(connection.to_id)
-                in_degree[connection.to_id] += 1
-
-        layers = dict.fromkeys(in_degree, 0)
-        queue = deque(node_id for node_id, degree in in_degree.items() if degree == 0)
-        remaining = dict(in_degree)
-        while queue:
-            node_id = queue.popleft()
-            for successor in successors[node_id]:
-                layers[successor] = max(layers[successor], layers[node_id] + 1)
-                remaining[successor] -= 1
-                if remaining[successor] == 0:
-                    queue.append(successor)
-        return layers
-
-    def _fit_group_box(self, group: Group) -> None:
-        boxes: list[tuple[float, float, float, float]] = []
-        for child_id in group.children:
-            child = self._shapes.get(child_id) or next((g for g in self._groups if g.id == child_id), None)
-            if child:
-                boxes.append(
-                    (
-                        child.position.x,
-                        child.position.y,
-                        child.position.x + child.size.width,
-                        child.position.y + child.size.height,
-                    )
-                )
-        if not boxes:
-            return
-        min_x = min(box[0] for box in boxes) - _GROUP_PADDING
-        min_y = min(box[1] for box in boxes) - _GROUP_PADDING
-        max_x = max(box[2] for box in boxes) + _GROUP_PADDING
-        max_y = max(box[3] for box in boxes) + _GROUP_PADDING
-        group.position = Point(min_x, min_y)
-        group.size = Dimensions(max_x - min_x, max_y - min_y)

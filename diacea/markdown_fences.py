@@ -20,15 +20,8 @@ import re
 from collections.abc import Sequence
 from pathlib import Path
 
-from .generators import (
-    C4PlantUMLGenerator,
-    D2Generator,
-    GraphVizGenerator,
-    MermaidGenerator,
-    PlantUMLGenerator,
-)
+from .formats import render_diagram
 from .ingestion import DiagramIngestionError, parse_diagram_file
-from .ir.elements import Diagram
 
 _FENCE_RE = re.compile(
     r'^(?P<indent>[ \t]*)```[ \t]*diacea[ \t]*\n(?P<body>.*?)\n(?P=indent)```[ \t]*$',
@@ -61,7 +54,7 @@ def replace_diacea_fences(markdown: str, base_dirs: Sequence[str | Path]) -> str
             diagram = parse_diagram_file(source)
         except DiagramIngestionError as err:
             raise DiaceaFenceError(str(err)) from err
-        output = _generate(diagram, options['format'], options.get('mermaid-type'))
+        output = render_diagram(diagram, options['format'], mermaid_type=options.get('mermaid-type')).output
         language = _FENCE_LANGUAGES[options['format']]
         lines = [f'{indent}```{language}']
         lines.extend(f'{indent}{line}'.rstrip() for line in output.splitlines())
@@ -104,20 +97,4 @@ def _resolve_source(source: str, base_dirs: Sequence[str | Path]) -> Path:
             return candidate
     searched = ', '.join(str(c) for c in candidates)
     msg = f'diacea fence source {source!r} not found (searched: {searched})'
-    raise DiaceaFenceError(msg)
-
-
-def _generate(diagram: Diagram, output_format: str, mermaid_type: str | None) -> str:
-    match output_format:
-        case 'c4':
-            return C4PlantUMLGenerator().generate(diagram)
-        case 'd2':
-            return D2Generator().generate(diagram)
-        case 'graphviz':
-            return GraphVizGenerator().generate(diagram)
-        case 'mermaid':
-            return MermaidGenerator(diagram_type=mermaid_type).generate(diagram)
-        case 'plantuml':
-            return PlantUMLGenerator().generate(diagram)
-    msg = f'unknown diacea fence format {output_format!r}'
     raise DiaceaFenceError(msg)

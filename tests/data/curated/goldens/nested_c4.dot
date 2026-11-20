@@ -1,6 +1,6 @@
 digraph "diagram" {
     rankdir="TB";
-    node [fontname="Helvetica"];
+    node [shape="box", fontname="Helvetica"];
     edge [fontname="Helvetica"];
 
     subgraph cluster_platform {

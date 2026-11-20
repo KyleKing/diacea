@@ -1,6 +1,6 @@
 digraph "Page 1" {
     rankdir="LR";
-    node [fontname="Helvetica"];
+    node [shape="box", fontname="Helvetica"];
     edge [fontname="Helvetica"];
 
     subgraph cluster_shape_host_frame {
