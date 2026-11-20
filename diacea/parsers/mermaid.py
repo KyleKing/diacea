@@ -61,7 +61,9 @@ _OTHER_DIAGRAM_KEYWORDS = (
     'zenuml',
 )
 
-_SKIPPED_DIRECTIVES = ('class', 'classDef', 'click', 'direction', 'linkStyle', 'style')
+_SKIPPED_DIRECTIVES = ('class', 'classDef', 'click', 'direction', 'linkStyle')
+
+_STYLE_RE = re.compile(r'^style\s+([\w.:,-]+)\s+(.+)$')
 
 _SEQUENCE_BLOCK_KEYWORDS = (
     'alt',
@@ -130,9 +132,15 @@ _FA_ICON_SEMANTICS: dict[str, SemanticType] = {
 _SUBGRAPH_TITLED_RE = re.compile(r'^([A-Za-z0-9_.-]+)\s*\[(.*)\]$')
 
 _BRACKET_SHAPES = (
+    ('(((', ')))', 'circle'),
     ('([', '])', 'stadium'),
+    ('[[', ']]', 'subroutine'),
     ('[(', ')]', 'cylinder'),
     ('((', '))', 'circle'),
+    ('[/', '\\]', 'trapezoid'),
+    ('[\\', '/]', 'trapezoid'),
+    ('[\\', '\\]', 'parallelogram'),
+    ('>', ']', 'rectangle'),
     ('{{', '}}', 'hexagon'),
     ('[/', '/]', 'parallelogram'),
     ('[', ']', 'rectangle'),
@@ -286,10 +294,12 @@ class MermaidParser(Parser):
         self._groups: list[Group] = []
         self._group_stack: list[Group] = []
         self._direction = 'TD'
+        self._styles: list[tuple[int, list[str], dict[str, str]]] = []
 
         statements = self._collect_statements(data)
         for line_number, statement in statements:
             self._parse_statement(statement, line_number)
+        self._apply_styles()
 
         if self._group_stack:
             self.warnings.append(f"unclosed subgraph '{self._group_stack[-1].id}': missing 'end'")
@@ -525,10 +535,32 @@ class MermaidParser(Parser):
         if keyword in _SKIPPED_DIRECTIVES:
             self.warnings.append(f"line {line_number}: skipped '{keyword}' directive")
             return
+        if match := _STYLE_RE.match(statement):
+            pairs = (part.split(':', 1) for part in match.group(2).rstrip(';').split(',') if ':' in part)
+            properties = {name.strip(): value.strip() for name, value in pairs}
+            self._styles.append((line_number, match.group(1).split(','), properties))
+            return
 
         if self._parse_node_or_edges(statement, line_number):
             return
         self.warnings.append(f'line {line_number}: unrecognized line skipped: {statement!r}')
+
+    def _apply_styles(self) -> None:
+        """Apply `style <id> fill:...,stroke:...` directives to the nodes and subgraphs they name."""
+        groups_by_raw_id = {re.sub(r'\W', '_', group.id): group for group in self._groups}
+        for line_number, target_ids, properties in self._styles:
+            for target_id in target_ids:
+                target = self._shapes.get(target_id) or groups_by_raw_id.get(target_id)
+                if target is None:
+                    self.warnings.append(f"line {line_number}: style for unknown node '{target_id}' skipped")
+                    continue
+                style = target.style
+                style.fill_color = properties.get('fill', style.fill_color)
+                style.stroke_color = properties.get('stroke', style.stroke_color)
+                if (width := re.match(r'[\d.]+', properties.get('stroke-width', ''))) is not None:
+                    style.stroke_width = float(width.group(0))
+                if 'stroke-dasharray' in properties:
+                    style.stroke_style = 'dashed'
 
     def _parse_subgraph(self, statement: str, line_number: int) -> None:
         rest = statement[len('subgraph') :].strip()

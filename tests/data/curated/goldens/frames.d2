@@ -1,8 +1,8 @@
 direction: right
 
-shape_host_frame: Host {
-  shape_runtime_frame: Runtime {
-    shape_editor: Editor {
+group-host: Host {
+  group-runtime: Runtime {
+    editor: Editor {
       style: {
         stroke: "#1d1d1d"
         stroke-width: 4
@@ -10,7 +10,7 @@ shape_host_frame: Host {
     }
   }
 
-  shape_sidecar: Sidecar {
+  sidecar: Sidecar {
     style: {
       stroke: "#1d1d1d"
       stroke-width: 4
@@ -19,7 +19,7 @@ shape_host_frame: Host {
 }
 
 
-shape_host_frame.shape_runtime_frame.shape_editor -> shape_host_frame.shape_sidecar: sync {
+group-host.group-runtime.editor -> group-host.sidecar: sync {
   style: {
     stroke: "#1d1d1d"
     stroke-width: 2

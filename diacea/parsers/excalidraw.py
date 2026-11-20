@@ -38,6 +38,40 @@ _MAX_CELLS_PER_QUERY = 4096
 """A region query spanning more cells than this falls back to a full scan."""
 
 
+_ADJACENT_LABEL_GAP_RATIO = 0.75
+"""A loose text labels a shape when it sits within this fraction of its own height from the shape's border."""
+
+
+def _adjacent_gap(shape: Shape, text: Text) -> float | None:
+    """Distance from a text to the shape border it sits beside, or None when they are not side by side."""
+    shape_right = shape.position.x + shape.size.width
+    shape_bottom = shape.position.y + shape.size.height
+    text_right = text.position.x + text.size.width
+    text_bottom = text.position.y + text.size.height
+    overlaps_x = text.position.x < shape_right and text_right > shape.position.x
+    overlaps_y = text.position.y < shape_bottom and text_bottom > shape.position.y
+    if overlaps_x and not overlaps_y:
+        return max(shape.position.y - text_bottom, text.position.y - shape_bottom)
+    if overlaps_y and not overlaps_x:
+        return max(shape.position.x - text_right, text.position.x - shape_right)
+    return None
+
+
+_DEFAULT_STROKE_COLORS = frozenset({'#000000', '#1e1e1e'})
+_DEFAULT_STROKE_WIDTH = 2
+"""Excalidraw's out-of-the-box pen. Left untouched it is not a styling choice, so it is not carried into the IR."""
+
+
+def _authored_stroke_color(elem: dict[str, Any]) -> str | None:
+    color = elem.get('strokeColor')
+    return None if color in _DEFAULT_STROKE_COLORS else color
+
+
+def _authored_stroke_width(elem: dict[str, Any]) -> float | None:
+    width = elem.get('strokeWidth')
+    return None if width is None or width == _DEFAULT_STROKE_WIDTH else float(width)
+
+
 def _stroke_style(elem: dict[str, Any]) -> str:
     stroke_style = elem.get('strokeStyle')
     return stroke_style if stroke_style in {'dashed', 'dotted'} else 'solid'
@@ -162,20 +196,31 @@ class ExcalidrawParser(Parser):
         # Second pass: Associate text labels with shapes. Text bound to an
         # arrow labels that arrow and must not be mistaken for the label of
         # whatever container the arrow happens to cross.
+        aliases = self._merge_person_icons(shapes)
         arrow_ids = {arrow_data.get('id') for arrow_data in connections}
         arrow_labels = {
             container_id: text.content
             for text in texts
             if (container_id := text.metadata['excalidraw'].get('containerId')) in arrow_ids
         }
-        self._associate_text_labels(
-            shapes,
-            [text for text in texts if text.metadata['excalidraw'].get('containerId') not in arrow_ids],
-        )
+        free_texts = [text for text in texts if text.metadata['excalidraw'].get('containerId') not in arrow_ids]
+        aliases.update(self._associate_text_labels(shapes, free_texts))
+
+        # Loose text that an arrow is bound to acts as a node in its own right
+        arrow_targets = {
+            binding.get('elementId')
+            for arrow_data in connections
+            for binding in (arrow_data.get('startBinding'), arrow_data.get('endBinding'))
+            if binding
+        }
+        promoted = [text for text in free_texts if text.id in arrow_targets and text.id not in aliases]
+        shapes.extend(self._text_as_node(text) for text in promoted)
+        promoted_ids = {text.id for text in promoted}
+        ir_elements = [*shapes, *(elem for elem in texts if elem.id not in promoted_ids)]
 
         # Third pass: Process arrows/connections
         for arrow_data in connections:
-            connection = self._parse_arrow(arrow_data, shapes)
+            connection = self._parse_arrow(arrow_data, shapes, aliases)
             if connection:
                 connection.label = arrow_labels.get(connection.id, '')
                 ir_elements.append(connection)
@@ -198,11 +243,10 @@ class ExcalidrawParser(Parser):
         size = Dimensions(width=float(elem.get('width', 0)), height=float(elem.get('height', 0)))
 
         # Style
-        stroke_width = elem.get('strokeWidth')
         style = Style(
             fill_color=elem.get('backgroundColor') if elem.get('backgroundColor') != 'transparent' else None,
-            stroke_color=elem.get('strokeColor'),
-            stroke_width=float(stroke_width) if stroke_width is not None else None,
+            stroke_color=_authored_stroke_color(elem),
+            stroke_width=_authored_stroke_width(elem),
             stroke_style=_stroke_style(elem),
             opacity=float(elem.get('opacity', 100)) / 100.0,
         )
@@ -265,7 +309,8 @@ class ExcalidrawParser(Parser):
 
         text = Text(
             id=elem['id'],
-            content=elem.get('text', ''),
+            # Text bound to a container is auto-wrapped by Excalidraw; originalText is what was typed
+            content=(elem.get('originalText') if elem.get('containerId') else None) or elem.get('text', ''),
             alignment=elem.get('textAlign', 'left'),
             position=position,
             size=size,
@@ -276,12 +321,13 @@ class ExcalidrawParser(Parser):
         text.metadata['excalidraw'] = {
             'originalText': elem.get('originalText'),
             'containerId': elem.get('containerId'),
+            'groupIds': elem.get('groupIds', []),
             'autoResize': elem.get('autoResize'),
         }
 
         return text
 
-    def _parse_arrow(self, elem: dict[str, Any], shapes: list[Shape]) -> Connection | None:
+    def _parse_arrow(self, elem: dict[str, Any], shapes: list[Shape], aliases: dict[str, str]) -> Connection | None:
         """Parse Excalidraw arrow to IR Connection."""
         arrow_id = elem.get('id', 'unknown')
 
@@ -299,7 +345,7 @@ class ExcalidrawParser(Parser):
         end_point = Point(x=arrow_x + float(points[-1][0]), y=arrow_y + float(points[-1][1]))
 
         # Find connected shapes using bindings or nearest rectangle
-        from_id, to_id = self._find_arrow_connections(elem, shapes, start_point, end_point)
+        from_id, to_id = self._find_arrow_connections(elem, shapes, start_point, end_point, aliases)
 
         if not from_id or not to_id:
             _logger.debug(
@@ -326,10 +372,9 @@ class ExcalidrawParser(Parser):
             connection_type = 'undirected'
 
         # Style
-        stroke_width = elem.get('strokeWidth')
         style = Style(
-            stroke_color=elem.get('strokeColor'),
-            stroke_width=float(stroke_width) if stroke_width is not None else None,
+            stroke_color=_authored_stroke_color(elem),
+            stroke_width=_authored_stroke_width(elem),
             stroke_style=_stroke_style(elem),
         )
 
@@ -368,29 +413,29 @@ class ExcalidrawParser(Parser):
         return connection
 
     def _find_arrow_connections(
-        self, arrow: dict[str, Any], shapes: list[Shape], start_point: Point, end_point: Point
+        self,
+        arrow: dict[str, Any],
+        shapes: list[Shape],
+        start_point: Point,
+        end_point: Point,
+        aliases: dict[str, str],
     ) -> tuple[str | None, str | None]:
         """Find which shapes an arrow connects to.
 
-        Uses bindings first, falls back to spatial proximity.
+        Uses bindings first (following `aliases` from a bound label or
+        decoration to the shape it belongs to), falling back to spatial
+        proximity when a binding is missing or points at nothing we parsed.
         """
-        # Try using Excalidraw bindings first
-        start_binding = arrow.get('startBinding')
-        end_binding = arrow.get('endBinding')
-
-        from_id = start_binding.get('elementId') if start_binding else None
-        to_id = end_binding.get('elementId') if end_binding else None
-
-        # If no bindings, use spatial proximity
-        if not from_id:
-            from_shape = self._find_nearest_shape(start_point, shapes)
-            from_id = from_shape.id if from_shape else None
-
-        if not to_id:
-            to_shape = self._find_nearest_shape(end_point, shapes)
-            to_id = to_shape.id if to_shape else None
-
-        return (from_id, to_id)
+        shape_ids = {shape.id for shape in shapes}
+        resolved: list[str | None] = []
+        for binding, point in ((arrow.get('startBinding'), start_point), (arrow.get('endBinding'), end_point)):
+            bound_id = binding.get('elementId') if binding else None
+            bound_id = aliases.get(bound_id, bound_id) if bound_id else None
+            if bound_id not in shape_ids:
+                nearest = self._find_nearest_shape(point, shapes)
+                bound_id = nearest.id if nearest else None
+            resolved.append(bound_id)
+        return (resolved[0], resolved[1])
 
     def _find_nearest_shape(self, point: Point, shapes: list[Shape]) -> Shape | None:
         """Find the nearest shape to a point."""
@@ -419,35 +464,134 @@ class ExcalidrawParser(Parser):
             and shape.position.y <= point.y <= shape.position.y + shape.size.height
         )
 
-    def _associate_text_labels(self, shapes: list[Shape], texts: list[Text]) -> None:
-        """Associate texts with shapes: containerId binding wins, else the smallest shape containing the text center."""
+    def _merge_person_icons(self, shapes: list[Shape]) -> dict[str, str]:
+        """Fold a stick-figure head into its body: a grouped small ellipse sitting above one other shape.
+
+        Removes each head from `shapes`, marks the body as a person, and
+        returns {head id: body id} so arrows bound to the head follow.
+        """
+        members: dict[str, list[Shape]] = defaultdict(list)
+        for shape in shapes:
+            group_ids = shape.metadata['excalidraw'].get('groupIds') or []
+            if group_ids:
+                members[group_ids[0]].append(shape)
+
+        merged: dict[str, str] = {}
+        for pair in members.values():
+            if len(pair) != 2:
+                continue
+            head, body = sorted(pair, key=lambda shape: shape.size.area)
+            head_center_y = head.position.y + head.size.height / 2
+            if head.shape_type == 'ellipse' and body.shape_type != 'ellipse' and head_center_y <= body.position.y:
+                merged[head.id] = body.id
+                body.metadata['semantic_type'] = 'person'
+        shapes[:] = [shape for shape in shapes if shape.id not in merged]
+        return merged
+
+    def _text_as_node(self, text: Text) -> Shape:
+        shape = Shape(
+            id=text.id,
+            label=text.content,
+            shape_type='rectangle',
+            position=text.position,
+            size=text.size,
+            style=Style(stroke_color=text.style.stroke_color),
+        )
+        shape.metadata['excalidraw'] = {'groupIds': text.metadata['excalidraw'].get('groupIds', []), 'text_node': True}
+        self._apply_label(shape, text.content)
+        return shape
+
+    def _associate_text_labels(self, shapes: list[Shape], texts: list[Text]) -> dict[str, str]:
+        """Label shapes from their texts and return {text id: owning shape id}.
+
+        A text belongs to the shape it is bound to (containerId), else the
+        smallest shape containing its center, else the only shape it is
+        natively grouped with. When a shape owns several texts, the bound
+        one (else the largest, then topmost) is its label and the rest
+        become its description, as in a C4 box with a title and a blurb.
+        """
         grid = _ShapeGrid(shapes)
         shapes_by_id = {shape.id: shape for shape in shapes}
-        bound_shape_ids = set()
+        grouped_shapes: dict[str, list[Shape]] = defaultdict(list)
+        for shape in shapes:
+            for group_id in shape.metadata['excalidraw'].get('groupIds') or []:
+                grouped_shapes[group_id].append(shape)
 
+        owned: dict[str, list[Text]] = defaultdict(list)
+        bound_shape_ids = set()
         for text in texts:
-            container_id = text.metadata.get('excalidraw', {}).get('containerId')
+            container_id = text.metadata['excalidraw'].get('containerId')
             if container_id in shapes_by_id:
-                self._apply_label(shapes_by_id[container_id], text.content)
+                owned[container_id].insert(0, text)
                 bound_shape_ids.add(container_id)
 
         for text in texts:
-            if text.metadata.get('excalidraw', {}).get('containerId') in shapes_by_id:
+            if text.metadata['excalidraw'].get('containerId') in shapes_by_id:
                 continue
             text_center = Point(
                 x=text.position.x + text.size.width / 2,
                 y=text.position.y + text.size.height / 2,
             )
-
             containing = [
                 shape
                 for shape in grid.at_point(text_center)
                 if shape.id not in bound_shape_ids and self._point_in_shape(text_center, shape)
             ]
-            if not containing:
+            if containing:
+                owned[min(containing, key=lambda s: s.size.area).id].append(text)
                 continue
+            for group_id in text.metadata['excalidraw'].get('groupIds') or []:
+                companions = grouped_shapes.get(group_id, [])
+                if len(companions) == 1 and companions[0].id not in bound_shape_ids:
+                    owned[companions[0].id].append(text)
+                    break
 
-            self._apply_label(min(containing, key=lambda s: s.size.area), text.content)
+        self._adopt_adjacent_labels(shapes, texts, owned, bound_shape_ids)
+
+        owners: dict[str, str] = {}
+        for shape_id, shape_texts in owned.items():
+            if shape_id not in bound_shape_ids:
+                shape_texts.sort(key=lambda text: (-(text.style.font_size or 0.0), text.position.y))
+            shape = shapes_by_id[shape_id]
+            title, *details = shape_texts
+            if details:
+                shape.metadata['description'] = '\n'.join(detail.content for detail in details)
+            self._apply_label(shape, title.content)
+            owners.update((text.id, shape_id) for text in shape_texts)
+        return owners
+
+    def _adopt_adjacent_labels(
+        self,
+        shapes: list[Shape],
+        texts: list[Text],
+        owned: dict[str, list[Text]],
+        bound_shape_ids: set[str],
+    ) -> None:
+        """Give each unlabeled shape the loose text sitting just outside its border.
+
+        People often write a label above or below a box instead of inside
+        it. Such a text is otherwise claimed by the surrounding container,
+        which keeps it only when it is the container's sole text.
+        """
+        owner_of = {text.id: shape_id for shape_id, shape_texts in owned.items() for text in shape_texts}
+        for shape in shapes:
+            if shape.id in owned:
+                continue
+            nearest: tuple[float, Text] | None = None
+            for text in texts:
+                current = owner_of.get(text.id)
+                if current in bound_shape_ids or (current is not None and len(owned[current]) < 2):
+                    continue
+                gap = _adjacent_gap(shape, text)
+                if gap is not None and gap <= text.size.height * _ADJACENT_LABEL_GAP_RATIO:
+                    nearest = min(nearest, (gap, text), key=lambda pair: pair[0]) if nearest else (gap, text)
+            if nearest is None:
+                continue
+            text = nearest[1]
+            if (previous := owner_of.get(text.id)) is not None:
+                owned[previous].remove(text)
+            owned[shape.id].append(text)
+            owner_of[text.id] = shape.id
 
     def _apply_label(self, shape: Shape, content: str) -> None:
         shape.label = content
@@ -588,8 +732,7 @@ class ExcalidrawParser(Parser):
         for parent_id, child_ids in children_by_parent.items():
             parent = shapes_by_id[parent_id]
             children = [
-                f'{GROUP_ID_PREFIX}{child_id}' if child_id in children_by_parent else child_id
-                for child_id in child_ids
+                f'{GROUP_ID_PREFIX}{child_id}' if child_id in children_by_parent else child_id for child_id in child_ids
             ]
             group = Group(
                 id=f'{GROUP_ID_PREFIX}{parent_id}',

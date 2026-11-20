@@ -25,7 +25,7 @@ rectangle "Cloudflare" as group_cloudflare {
     database "Workers KV config" as kv
     database "D1 tenants + billing" as d1
     database "R2 uploads" as r2
-    rectangle "[Queue: thumbnails]" as queues
+    rectangle "Queue: thumbnails" as queues
   }
 }
 rectangle "Legacy origin - Hetzner" as group_origin {

@@ -380,7 +380,6 @@ class TestWarnings:
         [
             'classDef important fill:#f96',
             'class A important',
-            'style A fill:#bbf',
             'click A "https://example.com"',
             'linkStyle 0 stroke:#ff3',
         ],
@@ -501,11 +500,7 @@ class TestRoundTrip:
     def test_excalidraw_mermaid_round_trip(self):
         """Round-trip diacea's own flowchart output through the parser.
 
-        Exact equality holds for the structural portion of the output. The
-        trailing 'style' block cannot round-trip because the parser skips
-        style directives by design (recorded as warnings), and one style line
-        targets the group's source container shape, which has no Shape
-        counterpart in text-based IR.
+        Exact equality holds for the whole output, styles included.
         """
         data = json.loads((TEST_DATA_DIR / 'excalidraw.json').read_text())
         generator = MermaidGenerator(diagram_type='flowchart')
@@ -515,10 +510,8 @@ class TestRoundTrip:
         diagram = parser.parse(first)
         second = MermaidGenerator(diagram_type='flowchart').generate(diagram)
 
-        structural = first.split('\n\n')[0]
-        assert second == structural
-        assert all("skipped 'style' directive" in w for w in parser.warnings)
-        assert len(parser.warnings) == 3
+        assert second == first
+        assert parser.warnings == []
 
     def test_round_trip_is_fixpoint(self):
         data = json.loads((TEST_DATA_DIR / 'excalidraw.json').read_text())
@@ -703,3 +696,30 @@ class TestSequenceDiagrams:
         first = MermaidGenerator().generate(MermaidParser().parse(content))
         second = MermaidGenerator().generate(MermaidParser().parse(first))
         assert second == first
+
+
+class TestStyleDirectives:
+    def test_style_applies_fill_stroke_and_dash(self):
+        parser = MermaidParser()
+        diagram = parser.parse(
+            'flowchart LR\n    A[Web] --> B[(DB)]\n    style A fill:#bbf,stroke:#333,stroke-width:4px\n'
+            '    style B stroke-dasharray:5 5\n'
+        )
+        shapes = {shape.id: shape for shape in diagram.get_shapes()}
+
+        assert parser.warnings == []
+        assert shapes['A'].style.fill_color == '#bbf'
+        assert shapes['A'].style.stroke_color == '#333'
+        assert shapes['A'].style.stroke_width == 4.0
+        assert shapes['B'].style.stroke_style == 'dashed'
+
+    def test_style_round_trips(self):
+        source = 'flowchart LR\n    A[Web]\n    B[(DB)]\n    A --> B\n\n    style A fill:#bbf,stroke:#333'
+
+        assert MermaidGenerator().generate(MermaidParser().parse(source)) == source
+
+    def test_style_for_unknown_node_warns(self):
+        parser = MermaidParser()
+        parser.parse('flowchart LR\n    A --> B\n    style Missing fill:#bbf\n')
+
+        assert any("unknown node 'Missing'" in warning for warning in parser.warnings)

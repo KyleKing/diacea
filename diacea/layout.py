@@ -15,6 +15,7 @@ connected nodes near each other.
 from __future__ import annotations
 
 import math
+import textwrap
 from collections import defaultdict
 from dataclasses import dataclass
 
@@ -22,8 +23,9 @@ from .ir.elements import Diagram, Dimensions, Element, Group, Point, Shape
 
 DIRECTIONS = ('TB', 'BT', 'LR', 'RL')
 
-_CHAR_WIDTH = 9.0
-_LINE_HEIGHT = 24.0
+_CHAR_WIDTH = 11.0
+_LINE_HEIGHT = 25.0
+_WRAP_COLUMNS = 26
 _MIN_WIDTH = 120.0
 _MIN_HEIGHT = 60.0
 _PADDING_X = 40.0
@@ -40,9 +42,17 @@ class LayoutOptions:
     group_header: float = 30.0
 
 
+def wrap_label(label: str, columns: int = _WRAP_COLUMNS) -> str:
+    """Break long label lines at word boundaries, keeping the author's own line breaks."""
+    wrapped: list[str] = []
+    for line in label.splitlines() or ['']:
+        wrapped.extend(textwrap.wrap(line, width=columns, break_long_words=False) or [''])
+    return '\n'.join(wrapped)
+
+
 def estimate_label_size(label: str) -> Dimensions:
-    """Estimate a box size that fits a (possibly multi-line) label."""
-    lines = label.splitlines() or ['']
+    """Estimate a box size that fits a label once long lines are wrapped."""
+    lines = wrap_label(label).splitlines() or ['']
     width = max(_MIN_WIDTH, _CHAR_WIDTH * max(len(line) for line in lines) + _PADDING_X)
     height = max(_MIN_HEIGHT, _LINE_HEIGHT * len(lines) + _PADDING_Y)
     return Dimensions(width, height)
@@ -322,4 +332,4 @@ def _barycenter(node_id: str, neighbors: dict[str, list[str]], slot: dict[str, i
     return sum(slot[other] for other in linked) / len(linked)
 
 
-__all__ = ['DIRECTIONS', 'LayoutOptions', 'estimate_label_size', 'layout_diagram', 'route_connections']
+__all__ = ['DIRECTIONS', 'LayoutOptions', 'estimate_label_size', 'layout_diagram', 'route_connections', 'wrap_label']

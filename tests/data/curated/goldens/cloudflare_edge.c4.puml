@@ -30,7 +30,7 @@ System_Boundary(group_cloudflare, "Cloudflare") {
     ComponentDb(kv, "Workers KV config")
     ComponentDb(d1, "D1 tenants + billing")
     ComponentDb(r2, "R2 uploads")
-    Container(queues, "[Queue: thumbnails]")
+    Container(queues, "Queue: thumbnails")
   }
 }
 System_Boundary(group_origin, "Legacy origin - Hetzner") {

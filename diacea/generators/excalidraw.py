@@ -22,7 +22,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from ..ir import Connection, Diagram, Element, Generator, Group, Shape, Style
-from ..layout import layout_diagram
+from ..layout import layout_diagram, wrap_label
 from ._text import DECLARED_CONFIDENCE, canonical_shape
 
 _SOURCE_URL = 'https://github.com/KyleKing/diacea'
@@ -158,13 +158,14 @@ class ExcalidrawGenerator(Generator):
         center: tuple[float, float],
         font_size: int = _FONT_SIZE,
     ) -> dict[str, Any]:
-        lines = content.split('\n')
+        wrapped = wrap_label(content) if container is not None and container['type'] != 'arrow' else content
+        lines = wrapped.split('\n')
         width = max(len(line) for line in lines) * font_size * _CHAR_WIDTH_RATIO
         height = len(lines) * font_size * _LINE_HEIGHT
         text = self._element(text_id, 'text', (center[0] - width / 2, center[1] - height / 2, width, height))
         text.update(
             {
-                'text': content,
+                'text': wrapped,
                 'originalText': content,
                 'fontSize': font_size,
                 'fontFamily': _FONT_FAMILY,

@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+import re
+
 from ..ir import Connection, Diagram, Group, SemanticType, Shape
+from ..ir.ids import looks_generated
 
 # Confidence at or above which a semantic type was declared by the source rather than guessed
 DECLARED_CONFIDENCE = 0.9
@@ -15,6 +18,19 @@ _SHAPE_ALIASES = {
     'square': 'rectangle',
     'rounded': 'rounded_rectangle',
 }
+
+_PLACEHOLDER_ID_RE = re.compile(r'(?:group_)?(?:node|group)_\d+')
+
+
+def readable_id(element_id: str) -> str:
+    """Label to show for an unlabeled element: its id when a person wrote it, else a blank.
+
+    Drawing tools assign random ids (``vapRpvna4Qio1_zgMc5D3``) that mean
+    nothing to a reader, so an unlabeled box stays visibly unlabeled.
+    """
+    if looks_generated(element_id) or _PLACEHOLDER_ID_RE.fullmatch(element_id.replace('-', '_')):
+        return ' '
+    return element_id
 
 
 def sanitize_alnum_id(id_str: str) -> str:

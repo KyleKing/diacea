@@ -1,11 +1,11 @@
 C4Context
     title Architecture Diagram
-    Boundary(group_3jeOnfab9kbPTD_4SxZvU, "Payments Platform") {
-        Boundary(group_riVvo6v6oSjLgnYy2g9xt, "Workers") {
-            ContainerQueue(tJZC03icZzKatyfULqnua, "Queue")
-            Component(qgyiBi2HdtSFOuecXganz, "Processor")
+    Boundary(group_payments_platform, "Payments Platform") {
+        Boundary(group_workers, "Workers") {
+            ContainerQueue(queue, "Queue")
+            Component(processor, "Processor")
         }
-        Container(swFO3KgzmFt0I5NdqrvVf, "Gateway")
+        Container(gateway, "Gateway")
     }
-    Rel(swFO3KgzmFt0I5NdqrvVf, tJZC03icZzKatyfULqnua, "uses")
-    Rel(tJZC03icZzKatyfULqnua, qgyiBi2HdtSFOuecXganz, "uses")
+    Rel(gateway, queue, "uses")
+    Rel(queue, processor, "uses")
