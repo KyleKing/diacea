@@ -16,9 +16,9 @@ System_Boundary(group_cloud, "Cloud") {
   Container(gateway, "Gateway")
 }
 
-Rel(client, gateway, "uses")
-Rel(gateway, api, "uses")
-Rel(api, worker, "uses")
-Rel(worker, db, "uses")
-Rel(api, db, "uses")
+Rel(client, gateway, "")
+Rel(gateway, api, "")
+Rel(api, worker, "")
+Rel(worker, db, "")
+Rel(api, db, "")
 @enduml

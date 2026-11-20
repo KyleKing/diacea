@@ -43,13 +43,15 @@ def _parse(path):
 
 
 def _params():
+    params = []
     for path in sorted(REAL_DATA_DIR.iterdir()):
         if path.name == 'README.md':
             continue
         marks = []
         if (reason := _XFAIL_REASONS.get(path.name)) is not None:
             marks = [pytest.mark.xfail(reason=reason, strict=True)]
-        yield pytest.param(path, id=path.name, marks=marks)
+        params.append(pytest.param(path, id=path.name, marks=marks))
+    return params
 
 
 @pytest.mark.parametrize('fixture_path', _params())

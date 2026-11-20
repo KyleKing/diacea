@@ -6,9 +6,11 @@ Run property-based tests:
     pytest tests/test_property_based.py -v
 """
 
+import pytest
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 
+from diacea.formats import OUTPUT_FORMATS, parse_diagram, render_diagram, verify_conversion
 from diacea.generators import (
     C4PlantUMLGenerator,
     D2Generator,
@@ -16,9 +18,13 @@ from diacea.generators import (
     MermaidGenerator,
     PlantUMLGenerator,
 )
-from diacea.ir import Diagram
+from diacea.ir import Connection, Diagram, Group
 from diacea.ir.elements import Dimensions, Point, Shape, Style
 from diacea.parsers import ExcalidrawParser
+
+# beartype checks a randomly sampled list item with the `random` module, which Hypothesis flags when it
+# happens while a strategy builds IR objects; the sampling does not affect what the tests generate
+pytestmark = pytest.mark.filterwarnings('ignore:Do not use the `random` module inside strategies')
 
 
 def excalidraw_shape_strategy():
@@ -256,3 +262,71 @@ class TestIdempotency:
         output2 = gen.generate(diagram)
 
         assert output1 == output2
+
+
+_PUNCTUATED_LABEL = (
+    st.text(alphabet='abcXYZ 019-_.,:;()[]{}<>|&"\'#/\\?!=+*%@$`~^', min_size=1, max_size=18)
+    .map(str.strip)
+    .filter(bool)
+)
+
+
+@st.composite
+def labelled_graph_strategy(draw):
+    """Node labels, labelled edges between them, and how many nodes sit in one group."""
+    count = draw(st.integers(1, 6))
+    labels = draw(st.lists(_PUNCTUATED_LABEL, min_size=count, max_size=count))
+    endpoint = st.integers(0, count - 1)
+    edges = draw(st.lists(st.tuples(endpoint, endpoint, st.one_of(st.just(''), _PUNCTUATED_LABEL)), max_size=6))
+    return labels, edges, draw(st.integers(0, count)), draw(_PUNCTUATED_LABEL)
+
+
+def _build_labelled_graph(labels, edges, grouped, group_label):
+    diagram = Diagram(id='graph', metadata={'explicit_shapes': True})
+    for index, label in enumerate(labels):
+        diagram.add_element(
+            Shape(id=f'n{index}', position=Point(index * 200.0, 0.0), size=Dimensions(120.0, 60.0), label=label)
+        )
+    for index, (source, target, label) in enumerate(edges):
+        if source != target:
+            diagram.add_element(
+                Connection(
+                    id=f'e{index}',
+                    position=Point(0.0, 0.0),
+                    size=Dimensions(1.0, 1.0),
+                    from_id=f'n{source}',
+                    to_id=f'n{target}',
+                    label=label,
+                )
+            )
+    if grouped:
+        diagram.add_element(
+            Group(
+                id='group-g',
+                position=Point(0.0, 0.0),
+                size=Dimensions(1.0, 1.0),
+                label=group_label,
+                children=[f'n{index}' for index in range(grouped)],
+            )
+        )
+    return diagram
+
+
+class TestLabelsSurviveEveryFormat:
+    """Whatever punctuation a label holds, each format must write it so that it reads back intact."""
+
+    @given(labelled_graph_strategy())
+    @settings(max_examples=60, deadline=None, suppress_health_check=[HealthCheck.too_slow])
+    def test_structure_and_labels_read_back(self, graph):
+        diagram = _build_labelled_graph(*graph)
+        edge_labels = sorted(conn.label for conn in diagram.get_connections())
+
+        for name, output_format in OUTPUT_FORMATS.items():
+            if output_format.reads_back_as is None:
+                continue
+            options = {'mermaid_type': 'flowchart'} if name == 'mermaid' else {}
+            result = render_diagram(diagram, name, **options)
+
+            assert verify_conversion(result) == [], name
+            reparsed = parse_diagram(result.output, output_format.reads_back_as).diagram
+            assert sorted(conn.label for conn in reparsed.get_connections()) == edge_labels, name

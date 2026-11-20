@@ -7,13 +7,13 @@ Person(user, "User")
 
 System_Boundary(platform, "Platform") {
   System_Boundary(api_app, "API Application") {
-    Component(auth, "Auth Controller")
-    Component(jobs, "Job Scheduler")
+    Component(auth, "Auth Controller", "FastAPI", "Validates sessions")
+    Component(jobs, "Job Scheduler", "APScheduler", "Queues background work")
   }
-  ComponentDb(db, "Database")
+  ComponentDb(db, "Database", "PostgreSQL", "Stores jobs and users")
 }
 
-Rel(user, auth, "Signs in")
+Rel(user, auth, "Signs in", "HTTPS")
 Rel(auth, jobs, "Enqueues")
-Rel(jobs, db, "Reads/writes")
+Rel(jobs, db, "Reads/writes", "SQL")
 @enduml

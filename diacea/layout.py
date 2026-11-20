@@ -80,10 +80,27 @@ def ensure_layout(diagram: Diagram) -> None:
     connections without endpoints.
     """
     shapes = diagram.get_shapes()
-    if len(shapes) > 1 and len({(shape.position.x, shape.position.y) for shape in shapes}) == 1:
+    stacked = len(shapes) > 1 and len({(shape.position.x, shape.position.y) for shape in shapes}) == 1
+    if stacked or _has_unplaced_group(diagram):
         layout_diagram(diagram, diagram.direction or 'TB')
     elif any(conn.start_point is None or conn.end_point is None for conn in diagram.get_connections()):
         route_connections(diagram)
+
+
+def _has_unplaced_group(diagram: Diagram) -> bool:
+    """Whether some group's box fails to cover the center of one of its member shapes."""
+    shapes = {shape.id: shape for shape in diagram.get_shapes()}
+    for group in diagram.get_groups():
+        for child_id in group.children:
+            child = shapes.get(child_id)
+            if child is None:
+                continue
+            center = _center(child)
+            inside_x = group.position.x <= center.x <= group.position.x + group.size.width
+            inside_y = group.position.y <= center.y <= group.position.y + group.size.height
+            if not (inside_x and inside_y):
+                return True
+    return False
 
 
 def route_connections(diagram: Diagram) -> None:

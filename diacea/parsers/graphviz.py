@@ -52,6 +52,9 @@ _TOKEN_RE = re.compile(
 
 _CLUSTER_PREFIX = 'cluster'
 
+# Prefix marking an attribute value that was written as an HTML string (<...>) rather than a quoted one
+_HTML_MARK = '\0html\0'
+
 _DOT_SHAPE_TYPES = {
     'box': 'rectangle',
     'box3d': 'rectangle',
@@ -169,13 +172,23 @@ def _html_end(text: str, start: int) -> int | None:
 
 
 def _unquote(raw: str) -> str:
-    body = raw[1:-1].replace('\\\n', '')
-    return body.replace('\\"', '"')
+    r"""Body of a quoted DOT string: only `\"` and line continuations are resolved here."""
+    return raw[1:-1].replace('\\\n', '').replace('\\"', '"')
+
+
+_LABEL_ESCAPE_RE = re.compile(r'\\(.)', re.DOTALL)
 
 
 def _unescape_label(label: str) -> str:
-    text = re.sub(r'\\[nlr]', '\n', label)
-    return text.replace('\\\\', '\\').rstrip('\n')
+    r"""Resolve DOT label escapes: `\n`, `\l`, `\r` are line breaks and `\\` is a backslash."""
+
+    def resolve(match: re.Match[str]) -> str:
+        char = match.group(1)
+        if char in 'nlr':
+            return '\n'
+        return char if char == '\\' else match.group(0)
+
+    return _LABEL_ESCAPE_RE.sub(resolve, label).rstrip('\n')
 
 
 def _strip_html(label: str) -> str:
@@ -461,10 +474,10 @@ class GraphVizParser(Parser):
         if dot_shape in {'record', 'mrecord'}:
             self.warnings.append(f"node '{node_id}': record label flattened to plain text")
             return _flatten_record(label)
-        if '<' in label and re.search(r'</?\w+[^>]*>', label):
+        if label.startswith(_HTML_MARK):
             self.warnings.append(f"node '{node_id}': HTML label flattened to plain text")
-            return _strip_html(label)
-        return _unescape_label(label).replace('\\N', node_id)
+            return _strip_html(label.removeprefix(_HTML_MARK))
+        return _unescape_label(label.replace('\\N', node_id))
 
     def _add_connection(self, from_id: str, to_id: str, operator: str, attrs: dict[str, str]) -> None:
         # An edge clipped at a cluster border (lhead/ltail) links the cluster, not the node it is anchored to
@@ -483,7 +496,9 @@ class GraphVizParser(Parser):
                 size=Dimensions(1.0, 1.0),
                 from_id=from_id,
                 to_id=to_id,
-                label=_strip_html(label) if re.search(r'</?\w+[^>]*>', label) else _unescape_label(label),
+                label=_strip_html(label.removeprefix(_HTML_MARK))
+                if label.startswith(_HTML_MARK)
+                else _unescape_label(label),
                 connection_type=connection_type,
                 style=Style(
                     stroke_color=attrs.get('color'),
@@ -501,7 +516,8 @@ class GraphVizParser(Parser):
                     continue
                 key = self._parse_id().value.lower()
                 if self._accept('='):
-                    attrs[key] = self._parse_id().value
+                    value = self._parse_id()
+                    attrs[key] = _HTML_MARK + value.value if value.html else value.value
                 else:
                     attrs[key] = 'true'
         return attrs

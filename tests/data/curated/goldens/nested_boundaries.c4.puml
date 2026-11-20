@@ -12,6 +12,6 @@ System_Boundary(group_outer, "Platform") {
   ComponentDb(cache, "Cache")
 }
 
-Rel(api, worker, "uses")
-Rel(cache, api, "uses")
+Rel(api, worker, "")
+Rel(cache, api, "")
 @enduml

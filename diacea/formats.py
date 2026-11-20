@@ -382,7 +382,10 @@ def detect_input_format(data: str | dict[str, Any], filename: str | Path | None 
     if is_d2(data):
         return 'd2'
     known = ', '.join(sorted(INPUT_FORMATS))
-    msg = f'Could not detect input format (supported: {known}); pass the format explicitly if the file is valid'
+    msg = (
+        f'Could not detect input format (supported: {known}); '
+        'if the file is valid, name its format with --input-format (or input_format= in Python)'
+    )
     raise ValueError(msg)
 
 
@@ -502,11 +505,10 @@ def apply_hints(diagram: Diagram, hints: Mapping[str, str]) -> list[str]:
     maps an element id or label (case-insensitive) to a semantic type.
     """
     for element in diagram.elements:
-        label = getattr(element, 'label', '')
-        if '<<' in label or '«' in label:
-            cleaned, semantic = split_stereotype(label)
+        if isinstance(element, (Shape, Group)) and ('<<' in element.label or '«' in element.label):
+            cleaned, semantic = split_stereotype(element.label)
             if semantic is not None:
-                element.label = cleaned  # type: ignore[attr-defined]
+                element.label = cleaned
                 _declare_semantic(element, semantic)
 
     problems: list[str] = []
@@ -530,7 +532,7 @@ def apply_hints(diagram: Diagram, hints: Mapping[str, str]) -> list[str]:
     return problems
 
 
-def _declare_semantic(element: Any, semantic: SemanticType) -> None:
+def _declare_semantic(element: Shape | Group, semantic: SemanticType) -> None:
     element.semantic_type = semantic
     element.semantic_confidence = 1.0
     if isinstance(element, Shape):

@@ -108,6 +108,10 @@ _TEXT_ARROW_SUBS = (
     (re.compile(r'==\s*([^=|>][^|]*?)\s*==>'), r'==>|\1|'),
 )
 
+_QUOTED_RE = re.compile(r'"[^"]*"')
+
+_MASK_RE = re.compile(r'\0(\d+)\0')
+
 _NODE_TOKEN_RE = re.compile(r'^([A-Za-z0-9_.:-]+)\s*(.*)$', re.DOTALL)
 
 _CLASS_SUFFIX_RE = re.compile(r':::[\w-]+$')
@@ -615,14 +619,24 @@ class MermaidParser(Parser):
         self._group_stack.append(group)
 
     def _parse_node_or_edges(self, statement: str, line_number: int) -> bool:
-        normalized = statement
+        # Quoted text may contain anything, including arrows, so it is set aside while links are found
+        quoted: list[str] = []
+
+        def mask(match: re.Match[str]) -> str:
+            quoted.append(match.group(0))
+            return f'\0{len(quoted) - 1}\0'
+
+        def unmask(text: str) -> str:
+            return _MASK_RE.sub(lambda match: quoted[int(match.group(1))], text)
+
+        normalized = _QUOTED_RE.sub(mask, statement)
         for pattern, replacement in _TEXT_ARROW_SUBS:
             normalized = pattern.sub(replacement, normalized)
 
         parts = _LINK_RE.split(normalized)
-        segments = parts[0::3]
+        segments = [unmask(segment) for segment in parts[0::3]]
         arrows = parts[1::3]
-        labels = parts[2::3]
+        labels = [unmask(label) if label else label for label in parts[2::3]]
 
         if any(not segment.strip() for segment in segments):
             return False
