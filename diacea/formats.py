@@ -43,6 +43,7 @@ from .generators import (
 )
 from .ir.base import Generator, Parser
 from .ir.elements import Diagram, Shape
+from .ir.ids import assign_readable_ids
 from .ir.semantic import SemanticType, split_stereotype
 from .parsers import (
     D2Parser,
@@ -78,6 +79,7 @@ class InputFormat:
     sniff_text: Callable[[str], bool] | None = None
     sniff_json: Callable[[dict[str, Any]], bool] | None = None
     load: Callable[[str], Any] = str
+    generated_ids: bool = False  # the format's ids are tool-assigned and get replaced by readable ones
 
 
 @dataclass(frozen=True)
@@ -170,6 +172,7 @@ INPUT_FORMATS: dict[str, InputFormat] = {
             parser=ExcalidrawParser,
             sniff_text=is_obsidian_excalidraw,
             load=extract_excalidraw_json,
+            generated_ids=True,
         ),
         InputFormat(
             name='plantuml',
@@ -203,6 +206,7 @@ INPUT_FORMATS: dict[str, InputFormat] = {
             parser=TLDrawParser,
             sniff_json=lambda data: is_tldraw_v2(data) or _is_legacy_tldraw(data),
             load=json.loads,
+            generated_ids=True,
         ),
         InputFormat(
             name='excalidraw',
@@ -212,6 +216,7 @@ INPUT_FORMATS: dict[str, InputFormat] = {
             parser=ExcalidrawParser,
             sniff_json=_is_excalidraw,
             load=json.loads,
+            generated_ids=True,
         ),
         InputFormat(
             name='d2',
@@ -410,6 +415,8 @@ def parse_diagram(
 
     warnings = list(getattr(parser, 'warnings', []))
     warnings.extend(apply_hints(diagram, hints or {}))
+    if fmt.generated_ids:
+        assign_readable_ids(diagram)
     return ParseResult(diagram=diagram, input_format=input_format, warnings=warnings)
 
 

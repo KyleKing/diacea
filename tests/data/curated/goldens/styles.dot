@@ -3,10 +3,10 @@ digraph "diagram" {
     node [shape="box", fontname="Helvetica"];
     edge [fontname="Helvetica"];
 
-    solid_fill [label="Solid Fill", fillcolor="#a5d8ff", style="filled", color="#1e1e1e", penwidth="1.0"];
-    dashed_box [label="Dashed", color="#1e1e1e", penwidth="1.0"];
-    oval [label="Ellipse", shape="ellipse", fillcolor="#b2f2bb", style="filled", color="#1e1e1e", penwidth="1.0"];
+    solid_fill [label="Solid Fill", fillcolor="#a5d8ff", style="filled", penwidth="1.0"];
+    dashed_box [label="Dashed", penwidth="1.0"];
+    oval [label="Ellipse", shape="ellipse", fillcolor="#b2f2bb", style="filled", penwidth="1.0"];
     choice [label="Decision", shape="diamond", color="#e03131", penwidth="1.0"];
 
-    oval -> choice [style="dotted", color="#1e1e1e", penwidth="1.0"];
+    oval -> choice [style="dotted", penwidth="1.0"];
 }

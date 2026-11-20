@@ -1,9 +1,9 @@
 @startuml
-rectangle "Host" as shape_host_frame {
-  rectangle "Runtime" as shape_runtime_frame {
-    rectangle "Editor" as shape_editor
+rectangle "Host" as group_host {
+  rectangle "Runtime" as group_runtime {
+    rectangle "Editor" as editor
   }
-  rectangle "Sidecar" as shape_sidecar
+  rectangle "Sidecar" as sidecar
 }
-shape_editor --> shape_sidecar : "sync"
+editor --> sidecar : "sync"
 @enduml

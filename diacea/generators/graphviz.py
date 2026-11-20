@@ -14,7 +14,7 @@ import warnings
 from dataclasses import dataclass, field
 
 from ..ir import Connection, Diagram, Generator, Group, SemanticType, Shape
-from ._text import Containers, canonical_shape, top_level_groups, visual_semantic
+from ._text import Containers, canonical_shape, readable_id, top_level_groups, visual_semantic
 
 _DOT_SHAPES = {
     'circle': 'circle',
@@ -187,11 +187,9 @@ class GraphVizGenerator(Generator):
 
         indent = '    ' * depth
         cluster_id = self._sanitize_id(group.id)
-        label = self._escape_label(group.label or cluster_id)
+        label = self._escape_label(group.label or readable_id(cluster_id))
 
-        lines.extend(
-            (f'{indent}subgraph {self.config.cluster_prefix}{cluster_id} {{', f'{indent}    label="{label}";')
-        )
+        lines.extend((f'{indent}subgraph {self.config.cluster_prefix}{cluster_id} {{', f'{indent}    label="{label}";'))
 
         for child_id in group.children:
             child_group = groups_by_id.get(child_id)
@@ -207,7 +205,7 @@ class GraphVizGenerator(Generator):
     def _format_node(self, shape: Shape, indent: str = '    ') -> str:
         """Format a GraphViz node."""
         node_id = self._sanitize_id(shape.id)
-        label = self._escape_label(shape.label or node_id)
+        label = self._escape_label(shape.label or readable_id(node_id))
 
         # Determine node shape
         node_shape = self._get_node_shape(shape)

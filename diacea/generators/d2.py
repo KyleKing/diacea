@@ -15,7 +15,7 @@ import warnings
 from dataclasses import dataclass, field
 
 from ..ir import Connection, Diagram, Generator, Group, SemanticType, Shape
-from ._text import canonical_shape, top_level_groups, visual_semantic
+from ._text import canonical_shape, readable_id, top_level_groups, visual_semantic
 
 _D2_SHAPES = {
     'circle': 'circle',
@@ -226,7 +226,7 @@ class D2Generator(Generator):
     ) -> None:
         """Write a group as a D2 container, recursing into child groups."""
         group_id = self._sanitize_id(group.id)
-        label = self._escape_label(group.label or group_id)
+        label = self._escape_label(group.label or readable_id(group_id))
 
         lines.append(f'{group_id}: {label} {{')
 
@@ -251,7 +251,7 @@ class D2Generator(Generator):
         else:
             shape_id = self._element_paths.get(shape.id, self._sanitize_id(shape.id))
 
-        label = self._escape_label(shape.label or shape_id)
+        label = self._escape_label(shape.label or readable_id(shape_id))
 
         # Determine D2 shape
         d2_shape = self._get_d2_shape(shape)

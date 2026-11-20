@@ -3,16 +3,16 @@ digraph "diagram" {
     node [shape="box", fontname="Helvetica"];
     edge [fontname="Helvetica"];
 
-    subgraph cluster_group_3jeOnfab9kbPTD_4SxZvU {
+    subgraph cluster_group_payments_platform {
         label="Payments Platform";
-        subgraph cluster_group_riVvo6v6oSjLgnYy2g9xt {
+        subgraph cluster_group_workers {
             label="Workers";
-            tJZC03icZzKatyfULqnua [label="Queue", shape="folder", color="#1e1e1e", penwidth="2.0"];
-            qgyiBi2HdtSFOuecXganz [label="Processor", color="#1e1e1e", penwidth="2.0"];
+            queue [label="Queue", shape="folder"];
+            processor [label="Processor"];
         }
-        swFO3KgzmFt0I5NdqrvVf [label="Gateway", color="#1e1e1e", penwidth="2.0"];
+        gateway [label="Gateway"];
     }
 
-    swFO3KgzmFt0I5NdqrvVf -> tJZC03icZzKatyfULqnua [color="#1e1e1e", penwidth="2.0"];
-    tJZC03icZzKatyfULqnua -> qgyiBi2HdtSFOuecXganz [color="#1e1e1e", penwidth="2.0"];
+    gateway -> queue;
+    queue -> processor;
 }

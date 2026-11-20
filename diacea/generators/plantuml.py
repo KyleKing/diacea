@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from ..ir import Connection, Diagram, Generator, Group, SemanticType, Shape
-from ._text import Containers, canonical_shape, sanitize_alnum_id, top_level_groups, visual_semantic
+from ._text import Containers, canonical_shape, readable_id, sanitize_alnum_id, top_level_groups, visual_semantic
 
 _PLANTUML_SEMANTIC_KEYWORDS: dict[str, str] = {
     SemanticType.CLOUD: 'cloud',
@@ -77,7 +77,7 @@ class PlantUMLGenerator(Generator):
         """Generate PlantUML for a shape."""
         plantuml_type = self._map_shape_type(shape)
         safe_id = self._sanitize_id(shape.id)
-        label = self._escape_label(shape.label or safe_id)
+        label = self._escape_label(shape.label or readable_id(safe_id))
         return f'{plantuml_type} "{label}" as {safe_id}'
 
     def _generate_group(
@@ -90,7 +90,7 @@ class PlantUMLGenerator(Generator):
         """Generate PlantUML rectangle for a group, recursing into child groups."""
         indent = '  ' * depth
         safe_id = self._sanitize_id(group.id)
-        label = self._escape_label(group.label or safe_id)
+        label = self._escape_label(group.label or readable_id(safe_id))
         lines = [f'{indent}rectangle "{label}" as {safe_id} {{']
 
         for child_id in group.children:
@@ -225,19 +225,19 @@ class C4PlantUMLGenerator(Generator):
     def _generate_person(self, shape: Shape) -> str:
         """Generate C4 Person element."""
         safe_id = self._sanitize_id(shape.id)
-        label = self._escape_label(shape.label or safe_id)
+        label = self._escape_label(shape.label or readable_id(safe_id))
         return f'Person({safe_id}, "{label}")'
 
     def _generate_system(self, shape: Shape) -> str:
         """Generate C4 System element."""
         safe_id = self._sanitize_id(shape.id)
-        label = self._escape_label(shape.label or safe_id)
+        label = self._escape_label(shape.label or readable_id(safe_id))
         return f'System({safe_id}, "{label}")'
 
     def _generate_container(self, shape: Shape) -> str:
         """Generate C4 Container element."""
         safe_id = self._sanitize_id(shape.id)
-        label = self._escape_label(shape.label or safe_id)
+        label = self._escape_label(shape.label or readable_id(safe_id))
         tech = shape.metadata.get('technology', '')
         if tech:
             tech = self._escape_label(tech)
@@ -247,13 +247,13 @@ class C4PlantUMLGenerator(Generator):
     def _generate_component(self, shape: Shape) -> str:
         """Generate C4 Component element."""
         safe_id = self._sanitize_id(shape.id)
-        label = self._escape_label(shape.label or safe_id)
+        label = self._escape_label(shape.label or readable_id(safe_id))
         return f'Component({safe_id}, "{label}")'
 
     def _generate_database(self, shape: Shape) -> str:
         """Generate C4 Database element."""
         safe_id = self._sanitize_id(shape.id)
-        raw_label = shape.label or safe_id
+        raw_label = shape.label or readable_id(safe_id)
         label = self._escape_label(raw_label)
         label_lower = raw_label.lower()
         tech = ''
@@ -281,7 +281,7 @@ class C4PlantUMLGenerator(Generator):
         """Generate C4 System_Boundary for a group, recursing into child groups."""
         indent = '  ' * depth
         safe_id = self._sanitize_id(group.id)
-        label = self._escape_label(group.label or self._sanitize_id(group.source_shape_id))
+        label = self._escape_label(group.label or readable_id(self._sanitize_id(group.source_shape_id)))
         lines = [f'{indent}System_Boundary({safe_id}, "{label}") {{']
 
         for child_id in group.children:

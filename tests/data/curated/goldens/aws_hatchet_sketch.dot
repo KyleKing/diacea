@@ -4,49 +4,49 @@ digraph "diagram" {
     node [shape="box", fontname="Helvetica"];
     edge [fontname="Helvetica"];
 
-    subgraph cluster_group_7EMFW__e06wBO0pv2vzW0 {
+    subgraph cluster_group_aws_us_east_1 {
         label="AWS us-east-1";
-        subgraph cluster_group_Y6qyauU04YBWRvOvun0Td {
+        subgraph cluster_group_serverless {
             label="Serverless";
-            fA4ppqogHKNnUSGdkfW95 [label="Ingest\nLambda", color="#1e1e1e", penwidth="2.0"];
-            zGch7h2DYWR31qpFj4IH4 [label="Resize\nLambda", color="#1e1e1e", penwidth="2.0"];
+            ingest_lambda [label="Ingest Lambda"];
+            resize_lambda [label="Resize Lambda"];
         }
-        subgraph cluster_group_JhC8RMsArM_Hhr3Cj_SV6 {
+        subgraph cluster_group_vpc {
             label="VPC";
-            subgraph cluster_group_LeKEeXKMx_3PrgHpStIzR {
+            subgraph cluster_group_hatchet_on_ecs {
                 label="Hatchet on ECS";
-                M7Mqk9078rDKuucwSCf88 [label="Hatchet\nEngine", color="#1e1e1e", penwidth="2.0"];
-                _4KTwF9HtBFLrnToskO02 [label="Postgres", shape="cylinder", color="#1e1e1e", penwidth="2.0"];
-                zmAnl1J9JPPrEPmpjMoIg [label="Worker: email", color="#1e1e1e", penwidth="2.0"];
-                vRFaRcAl48H8NE_PFK03K [label="Worker: resize", color="#1e1e1e", penwidth="2.0"];
-                WXviVpJ1WpbghOZQbXkrk [label="Dashboard", color="#1e1e1e", penwidth="2.0"];
+                hatchet_engine [label="Hatchet Engine"];
+                postgres [label="Postgres", shape="cylinder"];
+                worker_email [label="Worker: email"];
+                worker_resize [label="Worker: resize"];
+                dashboard [label="Dashboard"];
             }
-            W5aG9pVJIu9J9mWuKj7a_ [label="ALB", color="#1e1e1e", penwidth="2.0"];
+            alb [label="ALB"];
         }
-        MqLbEPS8dRbsvPwSlBJsZ [label="API GW", color="#1e1e1e", penwidth="2.0"];
-        cGFAh1YpHffOfyiBU4f_H [label="Cognito", color="#1e1e1e", penwidth="2.0"];
-        aXzvozpPHMfFsp2gRiDN8 [label="EventBridge", color="#1e1e1e", penwidth="2.0"];
-        jfN2GligvRlvXI4ZTdxiR [label="S3\nuploads", shape="cylinder", color="#1e1e1e", penwidth="2.0"];
-        jNlnhDH1bKL1ycx_lcFHc [label="Notify\nLambda", color="#1e1e1e", penwidth="2.0"];
-        MNx_LzplutZTZFROnZjkv [label="SQS jobs", shape="folder", color="#1e1e1e", penwidth="2.0"];
-        n_4Jm7NtyVlPOLQbwzk0yK3 [label="DynamoDB", shape="cylinder", color="#1e1e1e", penwidth="2.0"];
-        n_5O6g0Skk4knK8D0JVZjIN [label="SES", color="#1e1e1e", penwidth="2.0"];
+        api_gw [label="API GW"];
+        cognito [label="Cognito"];
+        eventbridge [label="EventBridge"];
+        s3_uploads [label="S3 uploads", shape="cylinder"];
+        notify_lambda [label="Notify Lambda"];
+        sqs_jobs [label="SQS jobs", shape="folder"];
+        dynamodb [label="DynamoDB", shape="cylinder"];
+        ses [label="SES"];
     }
 
-    vapRpvna4Qio1_zgMc5D3 [label="Client", shape="ellipse", color="#1e1e1e", penwidth="2.0"];
+    client [label="Client", shape="ellipse"];
 
-    vapRpvna4Qio1_zgMc5D3 -> MqLbEPS8dRbsvPwSlBJsZ [color="#1e1e1e", penwidth="2.0"];
-    MqLbEPS8dRbsvPwSlBJsZ -> fA4ppqogHKNnUSGdkfW95 [color="#1e1e1e", penwidth="2.0"];
-    MqLbEPS8dRbsvPwSlBJsZ -> cGFAh1YpHffOfyiBU4f_H [color="#1e1e1e", penwidth="2.0"];
-    fA4ppqogHKNnUSGdkfW95 -> MNx_LzplutZTZFROnZjkv [color="#1e1e1e", penwidth="2.0"];
-    MNx_LzplutZTZFROnZjkv -> M7Mqk9078rDKuucwSCf88 [color="#1e1e1e", penwidth="2.0"];
-    M7Mqk9078rDKuucwSCf88 -> _4KTwF9HtBFLrnToskO02 [color="#1e1e1e", penwidth="2.0"];
-    M7Mqk9078rDKuucwSCf88 -> zmAnl1J9JPPrEPmpjMoIg [color="#1e1e1e", penwidth="2.0"];
-    M7Mqk9078rDKuucwSCf88 -> vRFaRcAl48H8NE_PFK03K [color="#1e1e1e", penwidth="2.0"];
-    zmAnl1J9JPPrEPmpjMoIg -> n_5O6g0Skk4knK8D0JVZjIN [color="#1e1e1e", penwidth="2.0"];
-    zGch7h2DYWR31qpFj4IH4 -> jfN2GligvRlvXI4ZTdxiR [color="#1e1e1e", penwidth="2.0"];
-    aXzvozpPHMfFsp2gRiDN8 -> jNlnhDH1bKL1ycx_lcFHc [color="#1e1e1e", penwidth="2.0"];
-    zGch7h2DYWR31qpFj4IH4 -> W5aG9pVJIu9J9mWuKj7a_ [color="#1e1e1e", penwidth="2.0"];
-    M7Mqk9078rDKuucwSCf88 -> jNlnhDH1bKL1ycx_lcFHc [color="#1e1e1e", penwidth="2.0", ltail="cluster_group_LeKEeXKMx_3PrgHpStIzR"];
-    W5aG9pVJIu9J9mWuKj7a_ -> M7Mqk9078rDKuucwSCf88 [color="#1e1e1e", penwidth="2.0"];
+    client -> api_gw;
+    api_gw -> ingest_lambda;
+    api_gw -> cognito;
+    ingest_lambda -> sqs_jobs;
+    sqs_jobs -> hatchet_engine;
+    hatchet_engine -> postgres;
+    hatchet_engine -> worker_email;
+    hatchet_engine -> worker_resize;
+    worker_email -> ses;
+    resize_lambda -> s3_uploads;
+    eventbridge -> notify_lambda;
+    resize_lambda -> alb;
+    hatchet_engine -> notify_lambda [ltail="cluster_group_hatchet_on_ecs"];
+    alb -> hatchet_engine;
 }

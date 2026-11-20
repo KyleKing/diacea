@@ -4,14 +4,14 @@
 LAYOUT_WITH_LEGEND()
 
 
-System_Boundary(group_3jeOnfab9kbPTD_4SxZvU, "Payments Platform") {
-  System_Boundary(group_riVvo6v6oSjLgnYy2g9xt, "Workers") {
-    Container(tJZC03icZzKatyfULqnua, "Queue")
-    Component(qgyiBi2HdtSFOuecXganz, "Processor")
+System_Boundary(group_payments_platform, "Payments Platform") {
+  System_Boundary(group_workers, "Workers") {
+    Container(queue, "Queue")
+    Component(processor, "Processor")
   }
-  Container(swFO3KgzmFt0I5NdqrvVf, "Gateway")
+  Container(gateway, "Gateway")
 }
 
-Rel(swFO3KgzmFt0I5NdqrvVf, tJZC03icZzKatyfULqnua, "uses")
-Rel(tJZC03icZzKatyfULqnua, qgyiBi2HdtSFOuecXganz, "uses")
+Rel(gateway, queue, "uses")
+Rel(queue, processor, "uses")
 @enduml

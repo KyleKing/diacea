@@ -13,7 +13,7 @@ from __future__ import annotations
 import warnings
 
 from ..ir import Connection, Diagram, Generator, Group, SemanticType, Shape
-from ._text import Containers, canonical_shape, sanitize_alnum_id, top_level_groups, visual_semantic
+from ._text import Containers, canonical_shape, readable_id, sanitize_alnum_id, top_level_groups, visual_semantic
 
 _C4_BOUNDARY_KEYWORDS: dict[str, str] = {
     SemanticType.COMPONENT: 'Component',
@@ -48,6 +48,8 @@ _FLOWCHART_BRACKETS: dict[str, tuple[str, str]] = {
     'rectangle': ('[', ']'),
     'rounded_rectangle': ('(', ')'),
     'stadium': ('([', '])'),
+    'subroutine': ('[[', ']]'),
+    'trapezoid': ('[/', '\\]'),
 }
 
 _FLOWCHART_SEMANTIC_BRACKETS: dict[str, tuple[str, str]] = {
@@ -158,7 +160,9 @@ class MermaidGenerator(Generator):
             lines.append(self._format_flowchart_connection(conn))
 
         # Add styling (basic colors)
-        style_lines = self._generate_flowchart_styles(shapes)
+        style_lines = self._generate_flowchart_styles(
+            [*shapes, *(g for g in groups if g.source_shape_id not in shapes_by_id)]
+        )
         if style_lines:
             lines.append('')
             lines.extend(style_lines)
@@ -168,13 +172,13 @@ class MermaidGenerator(Generator):
     def _format_flowchart_node(self, shape: Shape) -> str:
         """Format a Mermaid flowchart node."""
         node_id = self._sanitize_id(shape.id)
-        label = self._format_bracket_label(shape.label or node_id)
+        label = self._format_bracket_label(shape.label or readable_id(node_id))
         brackets = self._get_node_brackets(shape)
         return f'    {node_id}{brackets[0]}{label}{brackets[1]}'
 
     def _format_bracket_label(self, label: str) -> str:
         escaped = self._escape_label(label)
-        if _LABEL_CHARS_REQUIRING_QUOTES & set(label):
+        if _LABEL_CHARS_REQUIRING_QUOTES & set(label) or not label.strip():
             return f'"{escaped}"'
         return escaped
 
@@ -232,7 +236,7 @@ class MermaidGenerator(Generator):
         lines = []
         indent = '    ' * depth
         subgraph_id = self._sanitize_id(group.id)
-        label = self._format_bracket_label(group.label or subgraph_id)
+        label = self._format_bracket_label(group.label or readable_id(subgraph_id))
         lines.append(f'{indent}subgraph {subgraph_id}[{label}]')
 
         for child_id in group.children:
@@ -248,7 +252,7 @@ class MermaidGenerator(Generator):
         lines.append(f'{indent}end')
         return lines
 
-    def _generate_flowchart_styles(self, shapes: list[Shape]) -> list[str]:
+    def _generate_flowchart_styles(self, shapes: list[Shape | Group]) -> list[str]:
         """Generate Mermaid style definitions for shapes."""
         lines = []
 
@@ -256,7 +260,9 @@ class MermaidGenerator(Generator):
             if not shape.style.fill_color and not shape.style.stroke_color:
                 continue  # No custom styling
 
-            node_id = self._sanitize_id(shape.id)
+            # A container shape is declared as a subgraph, under its group id
+            group = self._containers.group_for(shape.id)
+            node_id = self._sanitize_id(group.id if group else shape.id)
             style_parts = []
 
             if shape.style.fill_color:
@@ -264,6 +270,9 @@ class MermaidGenerator(Generator):
 
             if shape.style.stroke_color:
                 style_parts.append(f'stroke:{shape.style.stroke_color}')
+
+            if shape.style.stroke_style == 'dashed':
+                style_parts.append('stroke-dasharray:5 5')
 
             if style_parts:
                 style_str = ','.join(style_parts)
@@ -345,7 +354,7 @@ class MermaidGenerator(Generator):
             warnings.warn(f'group {group.id!r} has no resolvable children; skipping empty C4 boundary', stacklevel=2)
             return []
 
-        label = self._escape_quoted_label(group.label or group.source_shape_id)
+        label = self._escape_quoted_label(group.label or readable_id(group.source_shape_id))
         boundary_id = self._sanitize_id(group.id)
         nested = [f'    {line}' for line in body]
         return [f'    Boundary({boundary_id}, "{label}") {{', *nested, '    }']
@@ -381,7 +390,7 @@ class MermaidGenerator(Generator):
         default = 'Container' if in_boundary else 'System'
         keyword = keywords.get(shape.semantic_type or '', default)
         node_id = self._sanitize_id(shape.id)
-        label = self._escape_quoted_label(shape.label or node_id)
+        label = self._escape_quoted_label(shape.label or readable_id(node_id))
         return f'    {keyword}({node_id}, "{label}")'
 
     def _generate_sequence(self, diagram: Diagram) -> str:
@@ -393,7 +402,7 @@ class MermaidGenerator(Generator):
 
         for shape in shapes:
             participant_id = self._sanitize_id(shape.id)
-            label = self._escape_label(shape.label or participant_id)
+            label = self._escape_label(shape.label or readable_id(participant_id))
             lines.append(f'    participant {participant_id} as {label}')
 
         for conn in connections:

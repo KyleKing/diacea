@@ -4,7 +4,7 @@
   "source": "https://github.com/KyleKing/diacea",
   "elements": [
     {
-      "id": "shape:host_frame",
+      "id": "group-host",
       "type": "rectangle",
       "x": 0.0,
       "y": 0.0,
@@ -19,15 +19,15 @@
       "roughness": 1,
       "opacity": 100,
       "groupIds": [
-        "shape:host_frame-frame"
+        "group-host-frame"
       ],
       "frameId": null,
       "roundness": {
         "type": 3
       },
-      "seed": 3013658313,
+      "seed": 1701837602,
       "version": 1,
-      "versionNonce": 3976173974,
+      "versionNonce": 976266365,
       "isDeleted": false,
       "boundElements": [],
       "updated": 1,
@@ -35,7 +35,7 @@
       "locked": false
     },
     {
-      "id": "shape:host_frame-label",
+      "id": "group-host-label",
       "type": "text",
       "x": 10.0,
       "y": 10.0,
@@ -50,13 +50,13 @@
       "roughness": 1,
       "opacity": 100,
       "groupIds": [
-        "shape:host_frame-frame"
+        "group-host-frame"
       ],
       "frameId": null,
       "roundness": null,
-      "seed": 414456821,
+      "seed": 2594978641,
       "version": 1,
-      "versionNonce": 1206600874,
+      "versionNonce": 3321062414,
       "isDeleted": false,
       "boundElements": [],
       "updated": 1,
@@ -73,7 +73,7 @@
       "lineHeight": 1.25
     },
     {
-      "id": "shape:runtime_frame",
+      "id": "group-runtime",
       "type": "rectangle",
       "x": 40.0,
       "y": 60.0,
@@ -88,15 +88,15 @@
       "roughness": 1,
       "opacity": 100,
       "groupIds": [
-        "shape:runtime_frame-frame"
+        "group-runtime-frame"
       ],
       "frameId": null,
       "roundness": {
         "type": 3
       },
-      "seed": 2778002797,
+      "seed": 3184774810,
       "version": 1,
-      "versionNonce": 4207651378,
+      "versionNonce": 3800863173,
       "isDeleted": false,
       "boundElements": [],
       "updated": 1,
@@ -104,7 +104,7 @@
       "locked": false
     },
     {
-      "id": "shape:runtime_frame-label",
+      "id": "group-runtime-label",
       "type": "text",
       "x": 50.0,
       "y": 70.0,
@@ -119,13 +119,13 @@
       "roughness": 1,
       "opacity": 100,
       "groupIds": [
-        "shape:runtime_frame-frame"
+        "group-runtime-frame"
       ],
       "frameId": null,
       "roundness": null,
-      "seed": 458898031,
+      "seed": 3519678485,
       "version": 1,
-      "versionNonce": 1141204272,
+      "versionNonce": 2392151882,
       "isDeleted": false,
       "boundElements": [],
       "updated": 1,
@@ -142,7 +142,7 @@
       "lineHeight": 1.25
     },
     {
-      "id": "shape:editor",
+      "id": "editor",
       "type": "rectangle",
       "x": 30.0,
       "y": 40.0,
@@ -159,13 +159,13 @@
       "groupIds": [],
       "frameId": null,
       "roundness": null,
-      "seed": 3854256727,
+      "seed": 3438408122,
       "version": 1,
-      "versionNonce": 3135509768,
+      "versionNonce": 2477698789,
       "isDeleted": false,
       "boundElements": [
         {
-          "id": "shape:editor-label",
+          "id": "editor-label",
           "type": "text"
         },
         {
@@ -178,7 +178,7 @@
       "locked": false
     },
     {
-      "id": "shape:editor-label",
+      "id": "editor-label",
       "type": "text",
       "x": 67.0,
       "y": 57.5,
@@ -195,9 +195,9 @@
       "groupIds": [],
       "frameId": null,
       "roundness": null,
-      "seed": 2766648265,
+      "seed": 2854176678,
       "version": 1,
-      "versionNonce": 4223200406,
+      "versionNonce": 4114618617,
       "isDeleted": false,
       "boundElements": [],
       "updated": 1,
@@ -209,12 +209,12 @@
       "fontFamily": 5,
       "textAlign": "center",
       "verticalAlign": "middle",
-      "containerId": "shape:editor",
+      "containerId": "editor",
       "autoResize": true,
       "lineHeight": 1.25
     },
     {
-      "id": "shape:sidecar",
+      "id": "sidecar",
       "type": "rectangle",
       "x": 400.0,
       "y": 120.0,
@@ -231,13 +231,13 @@
       "groupIds": [],
       "frameId": null,
       "roundness": null,
-      "seed": 1504933399,
+      "seed": 2267128425,
       "version": 1,
-      "versionNonce": 116140360,
+      "versionNonce": 3632201014,
       "isDeleted": false,
       "boundElements": [
         {
-          "id": "shape:sidecar-label",
+          "id": "sidecar-label",
           "type": "text"
         },
         {
@@ -250,7 +250,7 @@
       "locked": false
     },
     {
-      "id": "shape:sidecar-label",
+      "id": "sidecar-label",
       "type": "text",
       "x": 431.5,
       "y": 137.5,
@@ -267,9 +267,9 @@
       "groupIds": [],
       "frameId": null,
       "roundness": null,
-      "seed": 3332293561,
+      "seed": 463292292,
       "version": 1,
-      "versionNonce": 2579602662,
+      "versionNonce": 1153571035,
       "isDeleted": false,
       "boundElements": [],
       "updated": 1,
@@ -281,7 +281,7 @@
       "fontFamily": 5,
       "textAlign": "center",
       "verticalAlign": "middle",
-      "containerId": "shape:sidecar",
+      "containerId": "sidecar",
       "autoResize": true,
       "lineHeight": 1.25
     },
@@ -330,12 +330,12 @@
       ],
       "lastCommittedPoint": null,
       "startBinding": {
-        "elementId": "shape:editor",
+        "elementId": "editor",
         "focus": 0,
         "gap": 4.0
       },
       "endBinding": {
-        "elementId": "shape:sidecar",
+        "elementId": "sidecar",
         "focus": 0,
         "gap": 4.0
       },

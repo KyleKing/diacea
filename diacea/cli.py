@@ -135,6 +135,8 @@ def _element_summaries(diagram: Diagram) -> list[dict[str, Any]]:
         }
         if isinstance(element, Shape):
             summary['shape'] = element.shape_type
+        if 'source_id' in element.metadata:
+            summary['source_id'] = element.metadata['source_id']
         summaries.append(summary)
     return summaries
 

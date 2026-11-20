@@ -4,12 +4,12 @@
 LAYOUT_WITH_LEGEND()
 
 
-System_Boundary(shape_host_frame, "Host") {
-  System_Boundary(shape_runtime_frame, "Runtime") {
-    Component(shape_editor, "Editor")
+System_Boundary(group_host, "Host") {
+  System_Boundary(group_runtime, "Runtime") {
+    Component(editor, "Editor")
   }
-  Component(shape_sidecar, "Sidecar")
+  Component(sidecar, "Sidecar")
 }
 
-Rel(shape_editor, shape_sidecar, "sync")
+Rel(editor, sidecar, "sync")
 @enduml
