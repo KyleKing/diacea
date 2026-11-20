@@ -102,7 +102,8 @@ class TestJsonEnvelope:
         element_ids = {e['id'] for e in envelope['elements']}
         assert {'a', 'b', 'arr'} <= element_ids
         for element in envelope['elements']:
-            assert set(element) == {'id', 'label', 'semantic_type', 'confidence'}
+            assert {'id', 'type', 'label', 'semantic_type', 'confidence'} <= set(element)
+            assert ('shape' in element) == (element['type'] == 'shape')
             assert 0.0 <= element['confidence'] <= 1.0
 
     def test_envelope_reports_forced_mermaid_type(self, excalidraw_file, capsys):
@@ -217,13 +218,14 @@ class TestFormatsSubcommand:
         result = main(['formats', '--json'])
         assert result == EXIT_OK
         listing = json.loads(capsys.readouterr().out)
-        assert set(listing) == {'input_formats', 'output_formats'}
+        assert set(listing) == {'input_formats', 'output_formats', 'semantic_types'}
+        assert 'database' in listing['semantic_types']
         input_names = {f['name'] for f in listing['input_formats']}
-        assert input_names == {'excalidraw', 'mermaid', 'obsidian', 'plantuml', 'svg', 'tldraw'}
+        assert input_names == {'d2', 'excalidraw', 'graphviz', 'mermaid', 'obsidian', 'plantuml', 'svg', 'tldraw'}
         for input_format in listing['input_formats']:
             assert input_format['detection']
         output_names = {f['name'] for f in listing['output_formats']}
-        assert output_names == {'c4', 'd2', 'graphviz', 'mermaid', 'plantuml'}
+        assert output_names == {'c4', 'd2', 'excalidraw', 'graphviz', 'mermaid', 'plantuml'}
         for output_format in listing['output_formats']:
             assert isinstance(output_format['options'], list)
 
@@ -245,7 +247,7 @@ class TestInspectSubcommand:
         assert report['input_format'] == 'excalidraw'
         assert report['element_count'] == len(report['elements']) >= 3
         for element in report['elements']:
-            assert set(element) == {'id', 'label', 'semantic_type', 'confidence'}
+            assert {'id', 'type', 'label', 'semantic_type', 'confidence'} <= set(element)
 
     def test_inspect_svg_detects_format_and_warnings(self, curved_svg_file, capsys):
         result = main(['inspect', str(curved_svg_file), '--json'])

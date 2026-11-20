@@ -23,6 +23,20 @@ IR_VERSION = '1.0.0'
 # Prefix used for group IDs derived from container shapes
 GROUP_ID_PREFIX = 'group-'
 
+_DIRECTION_ALIASES = {
+    'LR': 'LR',
+    'RL': 'RL',
+    'TB': 'TB',
+    'TD': 'TB',
+    'BT': 'BT',
+    'LEFT_TO_RIGHT': 'LR',
+    'TOP_TO_BOTTOM': 'TB',
+    'RIGHT': 'LR',
+    'LEFT': 'RL',
+    'DOWN': 'TB',
+    'UP': 'BT',
+}
+
 
 @dataclass
 class Point:
@@ -180,6 +194,30 @@ class Diagram:
     # Format-specific metadata (preserves for roundtrip)
     # Example: {"excalidraw": {"appState": {...}}}  # noqa: ERA001
     metadata: dict[str, Any] = field(default_factory=dict)
+
+    @property
+    def direction(self) -> str | None:
+        """Flow direction declared by the source (LR, RL, TB, or BT), if any.
+
+        Parsers of text formats record the declared direction in
+        ``metadata['direction']``; any of the source spellings (TD,
+        left_to_right, down, ...) is accepted.
+        """
+        raw = self.metadata.get('direction')
+        if not isinstance(raw, str):
+            return None
+        return _DIRECTION_ALIASES.get(raw.upper())
+
+    @property
+    def has_explicit_shapes(self) -> bool:
+        """Whether the source format let its author pick each node's shape.
+
+        True for text formats (Mermaid, DOT, D2), where ``shape_type`` is an
+        authored choice that generators must not override with a shape
+        guessed from the label. False for drawings, where a labelled box is
+        all the author could express.
+        """
+        return bool(self.metadata.get('explicit_shapes'))
 
     def get_element(self, element_id: str) -> Element | None:
         """Get element by ID."""

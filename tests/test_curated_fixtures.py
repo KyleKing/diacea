@@ -5,15 +5,13 @@ shell out to mmdc/plantuml/dot/d2 and only run when DIACEA_RENDER=1. Goldens
 live in tests/data/curated/goldens and regenerate with DIACEA_REGEN_GOLDENS=1.
 """
 
-import json
 import os
 import shutil
 import subprocess
 
 import pytest
 
-from diacea.generators import C4PlantUMLGenerator, D2Generator, GraphVizGenerator, MermaidGenerator, PlantUMLGenerator
-from diacea.parsers import ExcalidrawParser, MermaidParser, PlantUMLParser, TLDrawParser
+from diacea.formats import parse_file, render_diagram
 
 from .configuration import TEST_DATA_DIR
 
@@ -23,6 +21,7 @@ GOLDENS_DIR = CURATED_DIR / 'goldens'
 OUTPUT_FORMATS = {
     'c4': '.c4.puml',
     'd2': '.d2',
+    'excalidraw': '.excalidraw',
     'graphviz': '.dot',
     'mermaid': '.mmd',
     'plantuml': '.puml',
@@ -44,27 +43,8 @@ def _fixtures():
 
 
 def _convert(fixture_path, output_format):
-    content = fixture_path.read_text(encoding='utf-8')
-    match fixture_path.suffix:
-        case '.excalidraw':
-            diagram = ExcalidrawParser().parse(json.loads(content))
-        case '.tldr':
-            diagram = TLDrawParser().parse(json.loads(content))
-        case '.mmd':
-            diagram = MermaidParser().parse(content)
-        case '.puml':
-            diagram = PlantUMLParser().parse(content)
-        case _:
-            msg = f'Unhandled fixture suffix: {fixture_path.suffix}'
-            raise ValueError(msg)
-    generators = {
-        'c4': C4PlantUMLGenerator,
-        'd2': D2Generator,
-        'graphviz': GraphVizGenerator,
-        'mermaid': MermaidGenerator,
-        'plantuml': PlantUMLGenerator,
-    }
-    return generators[output_format]().generate(diagram)
+    parsed = parse_file(fixture_path)
+    return render_diagram(parsed.diagram, output_format).output
 
 
 def _matrix_params(*, with_render_marks: bool = False):
@@ -104,7 +84,9 @@ def _render_command(renderer, source, out_dir):
 @pytest.mark.skipif(os.environ.get('DIACEA_RENDER') != '1', reason='set DIACEA_RENDER=1 to run render checks')
 @pytest.mark.parametrize(('fixture_path', 'output_format'), _matrix_params(with_render_marks=True))
 def test_curated_render(fixture_path, output_format, tmp_path):
-    renderer = RENDERER_BINARIES[output_format]
+    renderer = RENDERER_BINARIES.get(output_format)
+    if renderer is None:
+        pytest.skip(f'no command-line renderer for {output_format}')
     if shutil.which(renderer) is None:
         pytest.skip(f'{renderer} not installed')
 

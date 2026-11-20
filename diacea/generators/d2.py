@@ -10,11 +10,44 @@ Design decisions (from Phase 4 open questions):
 
 from __future__ import annotations
 
+import re
 import warnings
 from dataclasses import dataclass, field
 
 from ..ir import Connection, Diagram, Generator, Group, SemanticType, Shape
-from ._text import top_level_groups
+from ._text import canonical_shape, top_level_groups, visual_semantic
+
+_D2_SHAPES = {
+    'circle': 'circle',
+    'cloud': 'cloud',
+    'cylinder': 'cylinder',
+    'diamond': 'diamond',
+    'document': 'document',
+    'ellipse': 'oval',
+    'hexagon': 'hexagon',
+    'parallelogram': 'parallelogram',
+    'person': 'person',
+    'queue': 'queue',
+    'stadium': 'oval',
+}
+
+_D2_DIRECTIONS = {'BT': 'up', 'LR': 'right', 'RL': 'left', 'TB': 'down'}
+
+# Unquoted D2 strings end at these, or would be read as syntax when leading
+_D2_NEEDS_QUOTES_RE = re.compile(r'[{}\[\]:;|#"$<>]|^[\s\'*&!@.-]|--|->|\s$')
+
+_D2_COLOR_RE = re.compile(r'#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})|[a-zA-Z]+')
+
+_D2_MAX_STROKE_WIDTH = 15
+
+
+def _is_d2_color(color: str | None) -> bool:
+    """D2 accepts hex codes and named colors only (no rgb(), url(), or 'none')."""
+    return bool(color) and color not in {'none', 'transparent'} and _D2_COLOR_RE.fullmatch(color or '') is not None
+
+
+def _d2_stroke_width(width: float) -> int:
+    return max(1, min(_D2_MAX_STROKE_WIDTH, round(width)))
 
 
 @dataclass
@@ -61,14 +94,22 @@ class D2Generator(Generator):
             D2 diagram string
         """
         lines: list[str] = []
+        self._diagram = diagram
 
         # Direction
-        direction = self.config.direction or self._detect_direction(diagram)
+        direction = (
+            self.config.direction
+            or _D2_DIRECTIONS.get(diagram.direction or '')
+            or (None if diagram.metadata.get('synthesized_layout') else self._detect_direction(diagram))
+        )
         if direction:
             lines.extend((f'direction: {direction}', ''))
 
         # Build element paths for hierarchy
         self._build_element_paths(diagram)
+        self._container_ids = {group.id for group in diagram.get_groups()} | {
+            group.source_shape_id for group in diagram.get_groups()
+        }
 
         # Generate all elements
         self._write_elements(diagram, lines)
@@ -88,6 +129,9 @@ class D2Generator(Generator):
         """
         from_path = self._element_paths.get(conn.from_id, self._sanitize_id(conn.from_id))
         to_path = self._element_paths.get(conn.to_id, self._sanitize_id(conn.to_id))
+        if from_path == to_path and conn.from_id in self._container_ids:
+            warnings.warn(f'Dropping self-loop on container: {from_path}', stacklevel=2)
+            return True
         if to_path.startswith(f'{from_path}.') or from_path.startswith(f'{to_path}.'):
             warnings.warn(
                 f'Dropping connection between container and its descendant: {from_path} -> {to_path}',
@@ -233,23 +277,20 @@ class D2Generator(Generator):
 
     def _get_d2_shape(self, shape: Shape) -> str | None:
         """Get D2 shape name based on semantic or geometric type."""
-        # Check semantic type first
-        if shape.semantic_type and shape.semantic_type in self.config.shape_map:
-            return self.config.shape_map[shape.semantic_type]
-
-        # Map geometric shapes
-        shape_map = {
-            'ellipse': 'oval',
-            'diamond': 'diamond',
-            'circle': 'circle',
-        }
-
-        return shape_map.get(shape.shape_type)
+        semantic = visual_semantic(shape, self._diagram)
+        if semantic in self.config.shape_map:
+            return self.config.shape_map[semantic]
+        return _D2_SHAPES.get(canonical_shape(shape.shape_type))
 
     def _has_custom_style(self, shape: Shape) -> bool:
         """Check if shape has custom styling."""
         style = shape.style
-        return bool(style.fill_color or style.stroke_color or style.stroke_width or style.stroke_style == 'dashed')
+        return bool(
+            _is_d2_color(style.fill_color)
+            or _is_d2_color(style.stroke_color)
+            or style.stroke_width
+            or style.stroke_style == 'dashed'
+        )
 
     def _format_style(self, shape: Shape) -> list[str]:
         """Format D2 style block for a shape."""
@@ -257,14 +298,14 @@ class D2Generator(Generator):
         style = shape.style
 
         style_props = []
-        if style.fill_color:
+        if _is_d2_color(style.fill_color):
             style_props.append(f'fill: "{style.fill_color}"')
 
-        if style.stroke_color:
+        if _is_d2_color(style.stroke_color):
             style_props.append(f'stroke: "{style.stroke_color}"')
 
         if style.stroke_width:
-            style_props.append(f'stroke-width: {int(style.stroke_width)}')
+            style_props.append(f'stroke-width: {_d2_stroke_width(style.stroke_width)}')
 
         if style.stroke_style == 'dashed':
             style_props.append('stroke-dash: 3')
@@ -305,12 +346,14 @@ class D2Generator(Generator):
         """Get D2 arrow type."""
         if conn.connection_type == 'bidirectional':
             return '<->'
+        if conn.connection_type == 'undirected':
+            return '--'
         return '->'
 
     def _connection_has_style(self, conn: Connection) -> bool:
         """Check if connection has custom styling."""
         style = conn.style
-        return bool(style.stroke_color or style.stroke_width or style.stroke_style == 'dashed')
+        return bool(_is_d2_color(style.stroke_color) or style.stroke_width or style.stroke_style == 'dashed')
 
     def _format_connection_style(self, conn: Connection) -> list[str]:
         """Format D2 style for connection."""
@@ -318,11 +361,11 @@ class D2Generator(Generator):
         style = conn.style
 
         style_props = []
-        if style.stroke_color:
+        if _is_d2_color(style.stroke_color):
             style_props.append(f'stroke: "{style.stroke_color}"')
 
         if style.stroke_width:
-            style_props.append(f'stroke-width: {int(style.stroke_width)}')
+            style_props.append(f'stroke-width: {_d2_stroke_width(style.stroke_width)}')
 
         if style.stroke_style == 'dashed':
             style_props.append('stroke-dash: 3')
@@ -348,11 +391,7 @@ class D2Generator(Generator):
 
     def _escape_label(self, label: str) -> str:
         """Escape label for D2 format."""
-        # D2 handles most characters well, escape special ones
         escaped = label.replace('\\', '\\\\').replace('\n', '\\n')
-
-        # Quote if contains special characters
-        if any(c in escaped for c in ['{', '}', ':', ';']):
-            escaped = f'"{escaped}"'
-
+        if _D2_NEEDS_QUOTES_RE.search(label):
+            escaped = '"' + escaped.replace('"', '\\"') + '"'
         return escaped

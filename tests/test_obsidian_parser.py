@@ -55,7 +55,7 @@ class TestDetection:
     def test_detect_input_format(self):
         assert detect_input_format(PLAIN_FIXTURE.read_text()) == 'obsidian'
 
-        with pytest.raises(ValueError, match='Unknown string format'):
+        with pytest.raises(ValueError, match='Could not detect input format'):
             detect_input_format('plain text that is not a diagram')
 
 

@@ -1,6 +1,6 @@
 @startuml
-rectangle "Customer engineer" as customer
-rectangle "On-call operator" as oncall
+actor "Customer engineer" as customer
+actor "On-call operator" as oncall
 rectangle "Recipient mail servers" as recipients
 rectangle "DNS provider" as dnsprov
 rectangle "Email service" as emailsvc {

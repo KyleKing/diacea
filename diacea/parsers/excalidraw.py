@@ -38,6 +38,11 @@ _MAX_CELLS_PER_QUERY = 4096
 """A region query spanning more cells than this falls back to a full scan."""
 
 
+def _stroke_style(elem: dict[str, Any]) -> str:
+    stroke_style = elem.get('strokeStyle')
+    return stroke_style if stroke_style in {'dashed', 'dotted'} else 'solid'
+
+
 class _ShapeGrid:
     """Uniform bucket grid over shape bounding boxes.
 
@@ -154,13 +159,25 @@ class ExcalidrawParser(Parser):
             elif elem_type == 'frame':
                 frames.append(elem)
 
-        # Second pass: Associate text labels with shapes
-        self._associate_text_labels(shapes, texts)
+        # Second pass: Associate text labels with shapes. Text bound to an
+        # arrow labels that arrow and must not be mistaken for the label of
+        # whatever container the arrow happens to cross.
+        arrow_ids = {arrow_data.get('id') for arrow_data in connections}
+        arrow_labels = {
+            container_id: text.content
+            for text in texts
+            if (container_id := text.metadata['excalidraw'].get('containerId')) in arrow_ids
+        }
+        self._associate_text_labels(
+            shapes,
+            [text for text in texts if text.metadata['excalidraw'].get('containerId') not in arrow_ids],
+        )
 
         # Third pass: Process arrows/connections
         for arrow_data in connections:
             connection = self._parse_arrow(arrow_data, shapes)
             if connection:
+                connection.label = arrow_labels.get(connection.id, '')
                 ir_elements.append(connection)
 
         # Fourth pass: Detect groups from native structure, then containment
@@ -186,7 +203,7 @@ class ExcalidrawParser(Parser):
             fill_color=elem.get('backgroundColor') if elem.get('backgroundColor') != 'transparent' else None,
             stroke_color=elem.get('strokeColor'),
             stroke_width=float(stroke_width) if stroke_width is not None else None,
-            stroke_style='dashed' if elem.get('strokeStyle') == 'dashed' else 'solid',
+            stroke_style=_stroke_style(elem),
             opacity=float(elem.get('opacity', 100)) / 100.0,
         )
 
@@ -215,6 +232,13 @@ class ExcalidrawParser(Parser):
             'boundElements': elem.get('boundElements', []),
         }
         shape.metadata['excalidraw'] = excalidraw_metadata
+
+        # Hints written by diacea's Excalidraw generator (or by hand) survive a round trip
+        hints = (elem.get('customData') or {}).get('diacea') or {}
+        if isinstance(hints.get('semantic_type'), str):
+            shape.metadata['semantic_type'] = hints['semantic_type']
+        if isinstance(hints.get('shape_type'), str):
+            shape.shape_type = shape_type = hints['shape_type']
 
         # Infer semantic type
         shape.semantic_type, shape.semantic_confidence = infer_semantic_type(
@@ -291,14 +315,22 @@ class ExcalidrawParser(Parser):
         start_arrowhead = elem.get('startArrowhead')
         end_arrowhead = elem.get('endArrowhead')
 
-        connection_type = 'bidirectional' if start_arrowhead == 'arrow' and end_arrowhead == 'arrow' else 'directed'
+        if start_arrowhead and end_arrowhead:
+            connection_type = 'bidirectional'
+        elif start_arrowhead:
+            connection_type = 'directed'
+            from_id, to_id = to_id, from_id
+        elif end_arrowhead or 'endArrowhead' not in elem:
+            connection_type = 'directed'
+        else:
+            connection_type = 'undirected'
 
         # Style
         stroke_width = elem.get('strokeWidth')
         style = Style(
             stroke_color=elem.get('strokeColor'),
             stroke_width=float(stroke_width) if stroke_width is not None else None,
-            stroke_style='dashed' if elem.get('strokeStyle') == 'dashed' else 'solid',
+            stroke_style=_stroke_style(elem),
         )
 
         # Create connection
@@ -312,7 +344,7 @@ class ExcalidrawParser(Parser):
             id=elem['id'],
             from_id=from_id,
             to_id=to_id,
-            label='',  # Arrows typically don't have labels in Excalidraw
+            label='',  # Filled in from the arrow's bound text, if any
             connection_type=connection_type,
             position=Point(x=center_x, y=center_y),
             size=Dimensions(width=width, height=height),

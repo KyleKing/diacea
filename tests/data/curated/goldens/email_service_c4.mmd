@@ -8,18 +8,18 @@ C4Context
         Container(apigw, "Public API")
         Container(console, "Admin console")
         ContainerDb(maindb, "Control DB")
-    Boundary(pipeline, "Delivery pipeline") {
-        Container(validator, "Validator")
-        ContainerQueue(sendq, "Send queue")
-        Container(scheduler, "Scheduler")
-        Container(smtpout, "SMTP out pool")
-        ContainerDb(eventdb, "Event store")
-    }
-    Boundary(feedback, "Feedback loop") {
-        Container(bouncer, "Bounce classifier")
-        Container(fbl, "FBL processor")
-        ContainerQueue(eventq, "Event queue")
-    }
+        Boundary(pipeline, "Delivery pipeline") {
+            Container(validator, "Validator")
+            ContainerQueue(sendq, "Send queue")
+            Container(scheduler, "Scheduler")
+            Container(smtpout, "SMTP out pool")
+            ContainerDb(eventdb, "Event store")
+        }
+        Boundary(feedback, "Feedback loop") {
+            Container(bouncer, "Bounce classifier")
+            Container(fbl, "FBL processor")
+            ContainerQueue(eventq, "Event queue")
+        }
         Container(webhookd, "Webhook dispatcher")
         Container(reputation, "Reputation monitor")
     }

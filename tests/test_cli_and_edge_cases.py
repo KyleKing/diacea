@@ -342,11 +342,11 @@ class TestFormatDetection:
         assert detect_input_format(data) == 'svg'
 
     def test_detect_unknown_dict(self):
-        with pytest.raises(ValueError, match='Unknown input format'):
+        with pytest.raises(ValueError, match='Unrecognized input format'):
             detect_input_format({'random': 'data'})
 
     def test_detect_unknown_string(self):
-        with pytest.raises(ValueError, match='Unknown string format'):
+        with pytest.raises(ValueError, match='Could not detect input format'):
             detect_input_format('random string')
 
 

@@ -7,17 +7,13 @@ group-cloud: Cloud {
       worker: Worker
     }
 
-    db: Database {
-      shape: cylinder
-    }
+    db: Database
   }
 
   gateway: Gateway
 }
 
-client: Client {
-  shape: person
-}
+client: Client
 
 client -> group-cloud.gateway
 group-cloud.gateway -> group-cloud.group-vpc.group-cluster.api

@@ -3,7 +3,24 @@
 from __future__ import annotations
 
 from ..ir import Connection, Diagram, Generator, Group, SemanticType, Shape
-from ._text import sanitize_alnum_id, top_level_groups
+from ._text import Containers, canonical_shape, sanitize_alnum_id, top_level_groups, visual_semantic
+
+_PLANTUML_SEMANTIC_KEYWORDS: dict[str, str] = {
+    SemanticType.CLOUD: 'cloud',
+    SemanticType.DATABASE: 'database',
+    SemanticType.QUEUE: 'queue',
+    SemanticType.STORAGE: 'storage',
+}
+
+_PLANTUML_SHAPE_KEYWORDS = {
+    'cloud': 'cloud',
+    'cylinder': 'database',
+    'diamond': 'hexagon',
+    'ellipse': 'actor',  # PlantUML uses 'actor' for people
+    'hexagon': 'hexagon',
+    'person': 'actor',
+    'queue': 'queue',
+}
 
 
 def _escape_plantuml_label(label: str) -> str:
@@ -28,6 +45,9 @@ class PlantUMLGenerator(Generator):
             PlantUML string
         """
         lines = ['@startuml']
+        self._diagram = diagram
+        if diagram.direction == 'LR':
+            lines.append('left to right direction')
 
         # Get elements
         shapes = diagram.get_shapes()
@@ -47,6 +67,7 @@ class PlantUMLGenerator(Generator):
             lines.extend(self._generate_group(group, shapes_by_id, groups_by_id, depth=0))
 
         # Generate connections
+        self._containers = Containers(diagram)
         lines.extend(self._generate_connection(conn) for conn in connections)
 
         lines.append('@enduml')
@@ -86,11 +107,19 @@ class PlantUMLGenerator(Generator):
 
     def _generate_connection(self, conn: Connection) -> str:
         """Generate PlantUML arrow."""
-        from_id = self._sanitize_id(conn.from_id)
-        to_id = self._sanitize_id(conn.to_id)
+        from_group = self._containers.group_for(conn.from_id)
+        to_group = self._containers.group_for(conn.to_id)
+        from_id = self._sanitize_id(from_group.id if from_group else conn.from_id)
+        to_id = self._sanitize_id(to_group.id if to_group else conn.to_id)
 
         # Determine arrow type
-        arrow = '<-->' if conn.connection_type == 'bidirectional' else '-->'
+        line = '..' if conn.style.stroke_style in {'dashed', 'dotted'} else '--'
+        if conn.connection_type == 'bidirectional':
+            arrow = f'<{line}>'
+        elif conn.connection_type == 'undirected':
+            arrow = line
+        else:
+            arrow = f'{line}>'
 
         if conn.label:
             label = self._escape_label(conn.label)
@@ -99,25 +128,10 @@ class PlantUMLGenerator(Generator):
 
     def _map_shape_type(self, shape: Shape) -> str:
         """Map IR shape type to PlantUML type."""
-        # Use semantic type if available
-        if shape.semantic_type:
-            semantic = shape.semantic_type
-            if semantic == SemanticType.DATABASE:
-                return 'database'
-            if semantic == SemanticType.QUEUE:
-                return 'queue'
-            if semantic == SemanticType.STORAGE:
-                return 'storage'
-            if semantic == SemanticType.CLOUD:
-                return 'cloud'
-
-        # Fallback to geometric shape
-        shape_map = {
-            'rectangle': 'rectangle',
-            'ellipse': 'actor',  # PlantUML uses 'actor' for people
-            'diamond': 'hexagon',
-        }
-        return shape_map.get(shape.shape_type, 'rectangle')
+        semantic = visual_semantic(shape, self._diagram)
+        if semantic in _PLANTUML_SEMANTIC_KEYWORDS:
+            return _PLANTUML_SEMANTIC_KEYWORDS[semantic]
+        return _PLANTUML_SHAPE_KEYWORDS.get(canonical_shape(shape.shape_type), 'rectangle')
 
     _sanitize_id = staticmethod(sanitize_alnum_id)
     _escape_label = staticmethod(_escape_plantuml_label)

@@ -1,5 +1,5 @@
 @startuml
-rectangle "User" as user
+actor "User" as user
 rectangle "Platform" as platform {
   rectangle "API Application" as api_app {
     rectangle "Auth Controller" as auth

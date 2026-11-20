@@ -1,15 +1,15 @@
 digraph "Edge-first SaaS on Cloudflare" {
-    rankdir="LR";
-    node [fontname="Helvetica"];
+    rankdir="TB";
+    node [shape="box", fontname="Helvetica"];
     edge [fontname="Helvetica"];
 
     subgraph cluster_group_cloudflare {
         label="Cloudflare";
-        dns [label="DNS + CDN", shape="cylinder"];
+        dns [label="DNS + CDN"];
         waf [label="WAF rules"];
         subgraph cluster_group_pages {
             label="Pages";
-            app [label="app.example.com", shape="box3d"];
+            app [label="app.example.com"];
             marketing [label="www static site"];
         }
         subgraph cluster_group_workers {
@@ -29,7 +29,7 @@ digraph "Edge-first SaaS on Cloudflare" {
             kv [label="Workers KV config", shape="cylinder"];
             d1 [label="D1 tenants + billing", shape="cylinder"];
             r2 [label="R2 uploads", shape="cylinder"];
-            queues [label="[Queue: thumbnails]", shape="folder"];
+            queues [label="[Queue: thumbnails]"];
         }
     }
     subgraph cluster_group_origin {
@@ -39,9 +39,9 @@ digraph "Edge-first SaaS on Cloudflare" {
     }
 
     browser [label="Browser SPA"];
-    mobile [label="Mobile app", shape="box3d"];
-    stripe [label="Stripe", shape="octagon"];
-    github [label="GitHub OAuth", shape="octagon"];
+    mobile [label="Mobile app"];
+    stripe [label="Stripe"];
+    github [label="GitHub OAuth"];
     sentry [label="Sentry"];
 
     browser -> dns;

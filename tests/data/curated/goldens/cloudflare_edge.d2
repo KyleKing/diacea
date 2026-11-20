@@ -1,9 +1,7 @@
-direction: right
+direction: down
 
 group-cloudflare: Cloudflare {
-  dns: DNS + CDN {
-    shape: cylinder
-  }
+  dns: DNS + CDN
   waf: WAF rules
   group-pages: Pages {
     app: app.example.com
@@ -17,9 +15,7 @@ group-cloudflare: Cloudflare {
     cron: cron trigger worker
     group-durable: Durable Objects {
       session: SessionDO
-      doc: DocumentDO per tenant {
-        shape: document
-      }
+      doc: DocumentDO per tenant
     }
 
   }
@@ -34,9 +30,7 @@ group-cloudflare: Cloudflare {
     r2: R2 uploads {
       shape: cylinder
     }
-    queues: "[Queue: thumbnails]" {
-      shape: queue
-    }
+    queues: "[Queue: thumbnails]"
   }
 
 }
