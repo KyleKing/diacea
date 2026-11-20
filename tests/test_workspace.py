@@ -538,7 +538,7 @@ class TestWorkspaceIngestion:
         assert summary.elements_added == 4
         assert workspace.elements['api-server'].element_type == 'service'
         assert workspace.elements['database'].element_type == 'database'
-        assert workspace.elements['client'].element_type == 'person'
+        assert workspace.elements['server'].element_type == 'service'
         assert workspace.views['containers'].element_refs == ['api-server', 'database']
         assert workspace.views['flow'].element_refs == ['client', 'server']
         assert workspace.get_element_usage('database') == ['containers']

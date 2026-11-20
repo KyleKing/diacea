@@ -36,9 +36,7 @@ group-aws_us_east_1: AWS us-east-1 {
   ses: SES
 }
 
-client: Client {
-  shape: person
-}
+client: Client
 
 client -> group-aws_us_east_1.api_gw
 group-aws_us_east_1.api_gw -> group-aws_us_east_1.group-serverless.ingest_lambda

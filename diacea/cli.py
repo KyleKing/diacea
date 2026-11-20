@@ -19,6 +19,7 @@ from .formats import (
     output_format_for_path,
     parse_diagram,
     render_diagram,
+    verify_conversion,
 )
 from .generators._text import DECLARED_CONFIDENCE
 from .ir.elements import Diagram, Shape
@@ -194,11 +195,13 @@ def _run_convert(argv: list[str]) -> int:
         return _emit_error(str(err), EXIT_ERROR, args.json)
 
     warnings = [*parsed.warnings, *result.warnings]
+    problems = verify_conversion(result) if args.verify else None
+    exit_code = EXIT_ERROR if problems else EXIT_OK
     if args.output != '-':
         _write_output_file(result.output, args.output)
 
     if args.json:
-        envelope = {
+        envelope: dict[str, Any] = {
             'output': result.output,
             'input_format': parsed.input_format,
             'output_format': output_format,
@@ -206,8 +209,10 @@ def _run_convert(argv: list[str]) -> int:
             'elements': _element_summaries(parsed.diagram),
             'warnings': warnings,
         }
+        if args.verify:
+            envelope['verification'] = {'checked': problems is not None, 'problems': problems or []}
         print(json.dumps(envelope, indent=2))
-        return EXIT_OK
+        return exit_code
 
     for warning in warnings:
         print(f'Warning: {warning}', file=sys.stderr)
@@ -217,7 +222,26 @@ def _run_convert(argv: list[str]) -> int:
     else:
         print(f'Generated {output_format} diagram: {args.output}', file=sys.stderr)
 
-    return EXIT_OK
+    if args.verify:
+        _report_verification(problems, parsed.diagram, output_format)
+    return exit_code
+
+
+def _report_verification(problems: list[str] | None, diagram: Diagram, output_format: str) -> None:
+    if problems is None:
+        print(f'Not verified: {output_format} output cannot be read back', file=sys.stderr)
+    elif problems:
+        for problem in problems:
+            print(f'Verification failed: {problem}', file=sys.stderr)
+    else:
+        groups = diagram.get_groups()
+        source_ids = {group.source_shape_id for group in groups}
+        nodes = sum(1 for shape in diagram.get_shapes() if shape.id not in source_ids)
+        print(
+            f'Verified: the {output_format} output reads back with the same {nodes} node(s), '
+            f'{len(groups)} group(s), and connections',
+            file=sys.stderr,
+        )
 
 
 def _run_inspect(argv: list[str]) -> int:
@@ -438,6 +462,11 @@ def create_parser() -> argparse.ArgumentParser:
         '--json',
         action='store_true',
         help='Emit a JSON envelope (output, formats, elements, warnings) to stdout; errors go to stderr as JSON',
+    )
+    parser.add_argument(
+        '--verify',
+        action='store_true',
+        help='Parse the output back and confirm it has the same nodes, groups, and connections (exit 1 if not)',
     )
 
     _add_format_options(parser)

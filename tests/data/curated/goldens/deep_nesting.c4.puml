@@ -3,7 +3,7 @@
 
 LAYOUT_WITH_LEGEND()
 
-Person(client, "Client")
+Component(client, "Client")
 
 System_Boundary(group_cloud, "Cloud") {
   System_Boundary(group_vpc, "VPC") {

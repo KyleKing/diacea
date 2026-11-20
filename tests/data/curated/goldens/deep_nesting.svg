@@ -9,7 +9,7 @@
 <g id="worker" data-semantic="service"><rect x="90.0" y="633.0" width="120.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="150.0" y="668.2" text-anchor="middle">Worker</text></g>
 <g id="db" data-semantic="database"><rect x="86.0" y="814.0" width="128.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="150.0" y="849.2" text-anchor="middle">Database</text></g>
 <g id="gateway" data-semantic="service"><rect x="90.0" y="211.0" width="120.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="150.0" y="246.2" text-anchor="middle">Gateway</text></g>
-<g id="client" data-semantic="person"><rect x="90.0" y="0.0" width="120.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="150.0" y="35.2" text-anchor="middle">Client</text></g>
+<g id="client" data-semantic="component"><rect x="90.0" y="0.0" width="120.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="150.0" y="35.2" text-anchor="middle">Client</text></g>
 <polyline points="150.0,61.0 150.0,211.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
 <polyline points="150.0,272.0 150.0,482.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
 <polyline points="150.0,543.0 150.0,633.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>

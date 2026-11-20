@@ -1078,6 +1078,41 @@ class TestSemanticInference:
     def test_snake_case_split_enables_word_match(self):
         from diacea.ir.semantic import SemanticType, infer_semantic_type
 
-        semantic, confidence = infer_semantic_type(shape_type='rectangle', label='user_store')
+        semantic, confidence = infer_semantic_type(shape_type='rectangle', label='mobile_user')
         assert semantic == SemanticType.PERSON
         assert confidence >= 0.8
+
+
+class TestHeadNounInference:
+    """A label names what an element is with its last word; earlier words only qualify it."""
+
+    @pytest.mark.parametrize(
+        ('label', 'expected'),
+        [
+            ('Mobile user', 'person'),
+            ('Customer', 'person'),
+            ('Customer\nA person with an account', 'person'),
+            ('Customer Database', 'database'),
+            ('User Store DB', 'database'),
+            ('Admin console', 'interface'),
+            ('Message Queue', 'queue'),
+            ('Check stock?', 'decision'),
+        ],
+    )
+    def test_last_keyword_names_the_type(self, label, expected):
+        from diacea.ir.semantic import _infer_from_text
+
+        semantic, _ = _infer_from_text(label)
+
+        assert semantic is not None
+        assert semantic.value == expected
+
+    @pytest.mark.parametrize(
+        'label', ['User Input', 'Filter results', 'Replica Manager', 'HTTP client', 'ChangeResponder']
+    )
+    def test_qualifiers_and_verbs_are_not_types(self, label):
+        from diacea.ir.semantic import SemanticType, _infer_from_text
+
+        semantic, _ = _infer_from_text(label)
+
+        assert semantic not in {SemanticType.PERSON, SemanticType.DECISION}

@@ -628,3 +628,43 @@ class TestPlantUMLBinary:
             check=False,
         )
         assert result.returncode == 0, result.stderr
+
+
+class TestIconLibraryMacros:
+    SOURCE = """@startuml
+!define AzurePuml https://example.invalid/dist
+!includeurl AzurePuml/Databases/AzureCosmosDb.puml
+AzureEventHub(hub, "Telemetry hub", "Standard")
+AzureCosmosDb(store, "Aggregates", "SQL API")
+AzureResourceGroup(rg, "Analytics") {
+    AzureStreamAnalyticsJob(job, "Rollup job", "6 SU")
+}
+UpdateElementStyle(hub, $bgColor="red")
+hub --> job
+job --> store
+@enduml
+"""
+
+    def test_library_elements_become_shapes_and_groups(self):
+        parser = PlantUMLParser()
+        diagram = parser.parse(self.SOURCE)
+        shapes = {shape.id: shape for shape in diagram.get_shapes()}
+
+        assert {shape.label for shape in shapes.values()} == {'Telemetry hub', 'Aggregates', 'Rollup job'}
+        assert shapes['hub'].metadata['plantuml']['macro'] == 'AzureEventHub'
+        assert shapes['hub'].metadata['technology'] == 'Standard'
+        assert diagram.get_groups()[0].children == ['job']
+        assert len(diagram.get_connections()) == 2
+
+    def test_macro_name_informs_the_semantic_type(self):
+        diagram = PlantUMLParser().parse('@startuml\nAWSQueue(q, "Jobs")\nAzureDatabase(d, "Aggregates")\n@enduml')
+        types = {shape.id: shape.semantic_type for shape in diagram.get_shapes()}
+
+        assert types == {'q': SemanticType.QUEUE, 'd': SemanticType.DATABASE}
+
+    def test_styling_macros_are_still_skipped(self):
+        parser = PlantUMLParser()
+        diagram = parser.parse(self.SOURCE)
+
+        assert 'UpdateElementStyle' not in {shape.id for shape in diagram.get_shapes()}
+        assert any('UpdateElementStyle' in warning for warning in parser.warnings)

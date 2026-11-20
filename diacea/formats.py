@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import json
 import warnings as _warnings
+from collections import Counter
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -42,10 +43,11 @@ from .generators import (
     PlantUMLGenerator,
     SVGGenerator,
 )
+from .generators._text import readable_id
 from .ir.base import Generator, Parser
-from .ir.elements import Diagram, Shape
+from .ir.elements import Diagram, Group, Shape, Text
 from .ir.ids import assign_readable_ids
-from .ir.semantic import SemanticType, split_stereotype
+from .ir.semantic import SemanticType, infer_semantic_type, split_stereotype
 from .parsers import (
     D2Parser,
     ExcalidrawParser,
@@ -114,6 +116,7 @@ class OutputFormat:
     build: Callable[[Mapping[str, Any]], Generator]
     options: tuple[FormatOption, ...] = ()
     extra_suffixes: tuple[str, ...] = ()
+    reads_back_as: str | None = None  # input format that parses this output, when there is one
 
 
 @dataclass
@@ -236,12 +239,14 @@ OUTPUT_FORMATS: dict[str, OutputFormat] = {
             name='c4',
             description='C4-PlantUML',
             suffix='.puml',
+            reads_back_as='plantuml',
             build=lambda _options: C4PlantUMLGenerator(),
         ),
         OutputFormat(
             name='d2',
             description='D2',
             suffix='.d2',
+            reads_back_as='d2',
             build=lambda options: D2Generator(
                 config=D2Config(direction=options.get('d2_direction'), sketch=bool(options.get('d2_sketch')))
             ),
@@ -258,6 +263,7 @@ OUTPUT_FORMATS: dict[str, OutputFormat] = {
             name='excalidraw',
             description='Excalidraw scene (editable; open at excalidraw.com or in the Obsidian/VS Code plugins)',
             suffix='.excalidraw',
+            reads_back_as='excalidraw',
             build=lambda options: ExcalidrawGenerator(
                 config=ExcalidrawConfig(roughness=int(options.get('excalidraw_roughness') or 1))
             ),
@@ -273,6 +279,7 @@ OUTPUT_FORMATS: dict[str, OutputFormat] = {
             name='graphviz',
             description='GraphViz DOT',
             suffix='.dot',
+            reads_back_as='graphviz',
             build=lambda options: GraphVizGenerator(
                 config=GraphVizConfig(
                     direction=options.get('graphviz_direction'),
@@ -298,6 +305,7 @@ OUTPUT_FORMATS: dict[str, OutputFormat] = {
             name='mermaid',
             description='Mermaid (flowchart, c4, or sequence; auto-detected by default)',
             suffix='.mmd',
+            reads_back_as='mermaid',
             build=lambda options: MermaidGenerator(diagram_type=options.get('mermaid_type')),
             options=(
                 FormatOption(
@@ -312,6 +320,7 @@ OUTPUT_FORMATS: dict[str, OutputFormat] = {
             name='plantuml',
             description='PlantUML',
             suffix='.puml',
+            reads_back_as='plantuml',
             build=lambda _options: PlantUMLGenerator(),
             extra_suffixes=('.plantuml', '.pu'),
         ),
@@ -421,10 +430,50 @@ def parse_diagram(
         raise FormatError(msg) from err
 
     warnings = list(getattr(parser, 'warnings', []))
+    _promote_to_nodes(diagram)
     warnings.extend(apply_hints(diagram, hints or {}))
     if fmt.generated_ids:
         assign_readable_ids(diagram)
     return ParseResult(diagram=diagram, input_format=input_format, warnings=warnings)
+
+
+def _promote_to_nodes(diagram: Diagram) -> None:
+    """Turn elements that are used as nodes into shapes, whatever they were drawn as.
+
+    A frame or container with nothing inside it is a labelled box, and a
+    free-standing text that connections attach to is a node without an
+    outline. Left as a group or a text, neither can be an endpoint in the
+    text formats.
+    """
+    endpoints = {endpoint for conn in diagram.get_connections() for endpoint in (conn.from_id, conn.to_id)}
+    shape_ids = {shape.id for shape in diagram.get_shapes()}
+    renamed: dict[str, str] = {}
+    for index, element in enumerate(diagram.elements):
+        if isinstance(element, Group) and not element.children and element.source_shape_id not in shape_ids:
+            label, shape_id = element.label, element.source_shape_id
+        elif isinstance(element, Text) and element.id in endpoints:
+            label, shape_id = element.content, element.id
+        else:
+            continue
+        shape = Shape(
+            id=shape_id,
+            position=element.position,
+            size=element.size,
+            style=element.style,
+            label=label,
+            metadata=element.metadata,
+        )
+        shape.semantic_type, shape.semantic_confidence = infer_semantic_type('rectangle', label, element.size)
+        diagram.elements[index] = shape
+        renamed[element.id] = shape_id
+
+    if not renamed:
+        return
+    for conn in diagram.get_connections():
+        conn.from_id = renamed.get(conn.from_id, conn.from_id)
+        conn.to_id = renamed.get(conn.to_id, conn.to_id)
+    for group in diagram.get_groups():
+        group.children = [renamed.get(child_id, child_id) for child_id in group.children]
 
 
 def parse_file(
@@ -549,6 +598,67 @@ def convert(
     return result
 
 
+def diagram_structure(diagram: Diagram) -> tuple[Counter[str], Counter[str], Counter[tuple[str, str]]]:
+    """What a reader sees in a diagram: node labels, group labels, and (from, to) label pairs.
+
+    An unlabeled element counts under the text it is displayed with: its id
+    when a person wrote that id, otherwise nothing.
+    """
+    groups = diagram.get_groups()
+    source_ids = {group.source_shape_id for group in groups}
+    leaves = [shape for shape in diagram.get_shapes() if shape.id not in source_ids]
+
+    def shown(label: str, element_id: str) -> str:
+        return ' '.join(label.split()) or readable_id(element_id).strip()
+
+    labels = {shape.id: shown(shape.label, shape.id) for shape in leaves}
+    for group in groups:
+        labels[group.id] = labels[group.source_shape_id] = shown(group.label, group.source_shape_id)
+    edges = Counter(
+        (labels.get(conn.from_id, conn.from_id), labels.get(conn.to_id, conn.to_id))
+        for conn in diagram.get_connections()
+    )
+    return Counter(labels[shape.id] for shape in leaves), Counter(labels[group.id] for group in groups), edges
+
+
+def verify_conversion(result: ConversionResult) -> list[str] | None:
+    """Check a conversion by parsing its output back and comparing what a reader would see.
+
+    Returns the problems found (an empty list means the output carries the
+    same nodes, groups, and connections as the source), or None when the
+    output format cannot be parsed back. A difference the generator already
+    reported as a warning (a dropped or re-pointed connection) is not
+    counted again.
+    """
+    reads_back_as = OUTPUT_FORMATS[result.output_format].reads_back_as
+    if reads_back_as is None:
+        return None
+    try:
+        reparsed = parse_diagram(result.output, reads_back_as).diagram
+    except FormatError as err:
+        return [f'the {result.output_format} output does not parse back: {err}']
+
+    nodes, groups, edges = diagram_structure(result.diagram)
+    nodes_back, groups_back, edges_back = diagram_structure(reparsed)
+    reported = sum(1 for warning in result.warnings if 'ropping' in warning or 'Re-pointing' in warning)
+
+    problems = []
+    for kind, before, after in (('node', nodes, nodes_back), ('group', groups, groups_back)):
+        if missing := sorted((before - after).elements()):
+            problems.append(f'{kind}(s) missing from the output: {", ".join(repr(label) for label in missing)}')
+        if extra := sorted((after - before).elements()):
+            problems.append(f'unexpected {kind}(s) in the output: {", ".join(repr(label) for label in extra)}')
+    lost = sorted((edges - edges_back).elements())
+    if len(lost) > reported:
+        pairs = ', '.join(f'{source!r} -> {target!r}' for source, target in lost)
+        problems.append(f'{len(lost) - reported} connection(s) lost without a warning, among: {pairs}')
+    invented = sorted((edges_back - edges).elements())
+    if len(invented) > reported:
+        pairs = ', '.join(f'{source!r} -> {target!r}' for source, target in invented)
+        problems.append(f'unexpected connection(s) in the output: {pairs}')
+    return problems
+
+
 __all__ = [
     'INPUT_FORMATS',
     'OUTPUT_FORMATS',
@@ -561,9 +671,11 @@ __all__ = [
     'apply_hints',
     'convert',
     'detect_input_format',
+    'diagram_structure',
     'input_format_for_path',
     'output_format_for_path',
     'parse_diagram',
     'parse_file',
     'render_diagram',
+    'verify_conversion',
 ]

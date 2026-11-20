@@ -5,8 +5,8 @@ LAYOUT_WITH_LEGEND()
 
 System(mobile, "Mobile app")
 Container(stripe, "Stripe")
-Container(github, "GitHub OAuth")
 Component(browser, "Browser SPA")
+Component(github, "GitHub OAuth")
 Component(sentry, "Sentry")
 
 System_Boundary(group_cloudflare, "Cloudflare") {

@@ -722,3 +722,75 @@ class TestStyleDirectives:
         parser.parse('flowchart LR\n    A --> B\n    style Missing fill:#bbf\n')
 
         assert any("unknown node 'Missing'" in warning for warning in parser.warnings)
+
+
+class TestC4Diagrams:
+    SOURCE = """
+    C4Container
+        title Internet Banking
+        Person(customer, "Customer", "A bank customer")
+        System_Ext(mail, "E-mail System")
+        System_Boundary(bank, "Internet Banking") {
+            Container(spa, "Single-Page App", "JavaScript")
+            ContainerDb(db, "Database", "Oracle")
+        }
+        Rel(customer, spa, "Uses", "HTTPS")
+        BiRel(spa, db, "Reads &amp; writes<br/>accounts")
+        UpdateRelStyle(customer, spa, $offsetY="-10")
+    """
+
+    def test_elements_boundaries_and_relations(self):
+        _, diagram = _parse(self.SOURCE)
+        shapes = {shape.id: shape for shape in diagram.get_shapes()}
+
+        assert diagram.name == 'Internet Banking'
+        assert diagram.metadata['mermaid'] == {'diagram_type': 'c4', 'c4_level': 'C4Container'}
+        assert shapes['customer'].semantic_type == SemanticType.PERSON
+        assert shapes['db'].semantic_type == SemanticType.DATABASE
+        assert shapes['mail'].metadata['external'] is True
+        assert shapes['spa'].metadata['technology'] == 'JavaScript'
+        assert diagram.get_groups()[0].children == ['spa', 'db']
+
+    def test_relation_labels_are_unescaped(self):
+        _, diagram = _parse(self.SOURCE)
+        relations = {(c.from_id, c.to_id): c for c in diagram.get_connections()}
+
+        assert relations['customer', 'spa'].label == 'Uses'
+        assert relations['spa', 'db'].label == 'Reads & writes\naccounts'
+        assert relations['spa', 'db'].connection_type == 'bidirectional'
+
+    def test_c4_source_regenerates_as_c4(self):
+        _, diagram = _parse(self.SOURCE)
+        output = MermaidGenerator().generate(diagram)
+
+        assert output.startswith('C4Context\n    title Internet Banking')
+        assert 'Person(customer, "Customer")' in output
+        assert 'Rel(customer, spa, "Uses")' in output
+
+    def test_own_c4_output_is_a_fixpoint(self):
+        _, diagram = _parse(self.SOURCE)
+        first = MermaidGenerator().generate(diagram)
+
+        assert MermaidGenerator().generate(MermaidParser().parse(first)) == first
+
+
+class TestExtraNodeShapes:
+    @pytest.mark.parametrize(
+        ('node', 'shape_type'),
+        [
+            ('a[[Sub]]', 'subroutine'),
+            ('a(((Stop)))', 'circle'),
+            ('a[/Out\\\\]', 'trapezoid'),
+            ('a>Flag]', 'rectangle'),
+        ],
+    )
+    def test_shape_parsed(self, node, shape_type):
+        _, diagram = _parse(f'flowchart LR\n    {node}\n')
+
+        assert _shape(diagram, 'a').shape_type == shape_type
+
+    def test_authored_shapes_round_trip(self):
+        nodes = '    a[[Sub]]\n    b{{Prep}}\n    c[/In/]\n    d(Round)\n    e((Circle))\n'
+        source = f'flowchart TD\n{nodes}    a --- b\n    b ==> c'
+
+        assert MermaidGenerator().generate(MermaidParser().parse(source)) == source

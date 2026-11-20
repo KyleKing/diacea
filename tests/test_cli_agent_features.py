@@ -337,3 +337,98 @@ class TestTextFormatInputs:
         result = main(['-i', str(f), '--input-format', 'mermaid', '-f', 'graphviz'])
         assert result == EXIT_OK
         assert 'digraph' in capsys.readouterr().out
+
+
+class TestConvenientInvocation:
+    def test_positional_input(self, excalidraw_file, capsys):
+        assert main([str(excalidraw_file), '-f', 'mermaid']) == EXIT_OK
+        assert capsys.readouterr().out.startswith(('flowchart', 'C4Context'))
+
+    def test_output_format_inferred_from_extension(self, excalidraw_file, tmp_path, capsys):
+        target = tmp_path / 'out.d2'
+
+        assert main([str(excalidraw_file), '-o', str(target)]) == EXIT_OK
+        assert 'Generated d2 diagram' in capsys.readouterr().err
+        assert target.read_text().strip()
+
+    def test_text_to_excalidraw_and_back(self, tmp_path, capsys):
+        source = tmp_path / 'flow.mmd'
+        source.write_text('flowchart LR\n    a[Web]\n    b[(DB)]\n    a -->|calls| b\n')
+        drawing = tmp_path / 'flow.excalidraw'
+
+        assert main([str(source), '-o', str(drawing)]) == EXIT_OK
+        assert json.loads(drawing.read_text())['type'] == 'excalidraw'
+        capsys.readouterr()
+        assert main([str(drawing), '-f', 'mermaid', '--mermaid-type', 'flowchart']) == EXIT_OK
+        assert capsys.readouterr().out.strip() == source.read_text().strip()
+
+    @pytest.mark.parametrize(('suffix', 'content'), [('.dot', 'digraph { a -> b }'), ('.d2', 'a -> b\n')])
+    def test_new_text_inputs_convert(self, tmp_path, capsys, suffix, content):
+        source = tmp_path / f'graph{suffix}'
+        source.write_text(content)
+
+        assert main([str(source), '-f', 'mermaid']) == EXIT_OK
+        assert 'a --> b' in capsys.readouterr().out
+
+    def test_missing_input_is_explained(self, capsys):
+        assert main(['-f', 'mermaid']) == EXIT_ERROR
+        assert 'No input given' in capsys.readouterr().err
+
+    def test_missing_format_is_explained(self, excalidraw_file, capsys):
+        assert main([str(excalidraw_file)]) == EXIT_ERROR
+        assert 'No output format given' in capsys.readouterr().err
+
+    def test_conflicting_inputs_are_rejected(self, excalidraw_file, capsys):
+        assert main(['other.json', '-i', str(excalidraw_file), '-f', 'mermaid']) == EXIT_ERROR
+        assert 'Two inputs given' in capsys.readouterr().err
+
+    def test_generator_warnings_are_plain_warning_lines(self, tmp_path, capsys):
+        source = tmp_path / 'loop.mmd'
+        source.write_text('flowchart LR\n    subgraph box\n        inner\n    end\n    box --> inner\n')
+
+        assert main([str(source), '-f', 'd2']) == EXIT_OK
+        err = capsys.readouterr().err
+        assert 'Warning: Dropping connection' in err
+        assert 'UserWarning' not in err
+
+
+class TestHintFlag:
+    def test_hint_overrides_inferred_type(self, excalidraw_file, capsys):
+        assert main([str(excalidraw_file), '-f', 'c4', '--hint', 'a=database', '--json']) == EXIT_OK
+        envelope = json.loads(capsys.readouterr().out)
+        element = next(e for e in envelope['elements'] if e['id'] == 'a')
+
+        assert element['semantic_type'] == 'database'
+        assert element['confidence'] == 1.0
+
+    def test_hint_that_matches_nothing_warns(self, excalidraw_file, capsys):
+        assert main([str(excalidraw_file), '-f', 'mermaid', '--hint', 'nope=database']) == EXIT_OK
+        assert 'no element has that id or label' in capsys.readouterr().err
+
+    def test_malformed_hint_is_an_error(self, excalidraw_file, capsys):
+        assert main([str(excalidraw_file), '-f', 'mermaid', '--hint', 'database']) == EXIT_ERROR
+        assert 'ID_OR_LABEL=TYPE' in capsys.readouterr().err
+
+    def test_inspect_explains_how_to_correct_a_guess(self, excalidraw_file, capsys):
+        assert main(['inspect', str(excalidraw_file)]) == EXIT_OK
+        assert '<<database>>' in capsys.readouterr().err
+
+    def test_formats_lists_semantic_types(self, capsys):
+        assert main(['formats']) == EXIT_OK
+        assert 'Semantic types' in capsys.readouterr().out
+
+
+class TestVerifyFlag:
+    def test_verified_conversion_reports_counts(self, excalidraw_file, capsys):
+        assert main([str(excalidraw_file), '-f', 'd2', '--verify']) == EXIT_OK
+        assert 'Verified: the d2 output reads back with the same' in capsys.readouterr().err
+
+    def test_verification_in_json_envelope(self, excalidraw_file, capsys):
+        assert main([str(excalidraw_file), '-f', 'graphviz', '--verify', '--json']) == EXIT_OK
+        envelope = json.loads(capsys.readouterr().out)
+
+        assert envelope['verification'] == {'checked': True, 'problems': []}
+
+    def test_format_that_cannot_be_read_back_is_not_verified(self, excalidraw_file, capsys):
+        assert main([str(excalidraw_file), '-f', 'svg', '--verify', '-o', '-']) == EXIT_OK
+        assert 'Not verified' in capsys.readouterr().err

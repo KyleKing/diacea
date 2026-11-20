@@ -239,6 +239,14 @@ def _parse_transform(transform_str: str | None) -> Transform:
     return result
 
 
+_HINT_CONFIDENCE = 0.9
+
+# Definitions and metadata that are referenced by, but not part of, the drawing
+_NON_RENDERED_TAGS = frozenset(
+    {'clipPath', 'defs', 'marker', 'mask', 'metadata', 'pattern', 'style', 'symbol', 'title'}
+)
+
+
 class SVGParser(Parser):
     """Parse basic SVG to IR.
 
@@ -300,6 +308,8 @@ class SVGParser(Parser):
             parent_id: Parent element ID for grouping
         """
         tag = elem.tag.replace(self.SVG_NS, '')
+        if tag in _NON_RENDERED_TAGS:
+            return
 
         elem_transform = _parse_transform(elem.get('transform'))
         current_transform = transform.combine(elem_transform) if transform else elem_transform
@@ -755,10 +765,8 @@ class SVGParser(Parser):
 
     def _find_shape_at_point(self, point: Point, shapes: list[Shape], tolerance: float = 10.0) -> Shape | None:
         """Find a shape that contains or is near a point."""
-        for shape in shapes:
-            if self._point_near_shape(point, shape, tolerance):
-                return shape
-        return None
+        near = [shape for shape in shapes if self._point_near_shape(point, shape, tolerance)]
+        return min(near, key=lambda shape: shape.size.area) if near else None
 
     def _point_near_shape(self, point: Point, shape: Shape, tolerance: float) -> bool:
         """Check if point is inside or near shape bounds."""
@@ -803,46 +811,132 @@ class SVGParser(Parser):
         elem: ET.Element,
         elements: list[Element],
         transform: Transform,
-    ) -> Group | None:
-        """Parse SVG group to IR Group."""
+    ) -> Element | None:
+        """Parse an SVG `<g>` as either one labelled node or a container of nodes.
+
+        A group holding a single shape and its text is how drawing tools
+        export a labelled box, so it becomes that one shape, named after the
+        group. A group holding several nodes is a container; a shape that
+        encloses all the others is its border rather than a node of its own.
+        """
         group_id = elem.get('id') or self._generate_id()
 
-        child_elements: list[Element] = []
+        direct: list[Element] = []
+        nested: list[Element] = []
+        nodes: list[Element] = []
         for child in elem:
-            self._process_element(child, child_elements, transform, parent_id=group_id)
+            if child.tag.replace(self.SVG_NS, '') == 'g':
+                child_transform = transform.combine(_parse_transform(child.get('transform')))
+                node = self._parse_group(child, nested, child_transform)
+                if node is not None:
+                    nodes.append(node)
+            else:
+                self._process_element(child, direct, transform, parent_id=group_id)
 
-        child_ids = [e.id for e in child_elements]
-
-        if not child_elements:
+        shapes = [e for e in direct if isinstance(e, Shape)]
+        texts = [e for e in direct if isinstance(e, Text)]
+        if not shapes and not nodes:
+            elements.extend(direct)
+            elements.extend(nested)
             return None
 
-        shapes = [e for e in child_elements if isinstance(e, Shape)]
-        if not shapes:
-            elements.extend(child_elements)
-            return None
+        if len(shapes) == 1 and not nodes:
+            shape = shapes[0]
+            self._adopt_group_identity(shape, elem, group_id)
+            self._label_from_texts(shape, texts)
+            elements.extend(direct)
+            return shape
 
-        min_x = min(s.position.x for s in shapes)
-        min_y = min(s.position.y for s in shapes)
-        max_x = max(s.position.x + s.size.width for s in shapes)
-        max_y = max(s.position.y + s.size.height for s in shapes)
-
-        position = Point(x=min_x, y=min_y)
-        size = Dimensions(width=max_x - min_x, height=max_y - min_y)
-
-        label = elem.get('data-label', '')
+        border = self._enclosing_shape(shapes, nodes)
+        members = [shape for shape in shapes if shape is not border]
+        outline: list[Element] = [border] if border is not None else [*members, *nodes]
+        min_x = min(e.position.x for e in outline)
+        min_y = min(e.position.y for e in outline)
+        max_x = max(e.position.x + e.size.width for e in outline)
+        max_y = max(e.position.y + e.size.height for e in outline)
 
         group = Group(
             id=group_id,
-            label=label,
-            position=position,
-            size=size,
-            children=child_ids,
+            label=elem.get('data-label', ''),
+            position=Point(x=min_x, y=min_y),
+            size=Dimensions(width=max_x - min_x, height=max_y - min_y),
+            style=border.style if border is not None else Style(),
+            children=[member.id for member in [*members, *nodes]],
         )
+        if semantic_hint := elem.get('data-semantic'):
+            group.semantic_type = self._parse_semantic_hint(semantic_hint)
+            group.semantic_confidence = 0.9
+
+        self._label_members(members, texts)
+        titles = [text for text in texts if 'label_of' not in text.metadata]
+        if titles and not group.label:
+            self._label_from_texts(group, titles)
 
         elements.append(group)
-        elements.extend(child_elements)
-
+        elements.extend(e for e in direct if e is not border)
+        elements.extend(nested)
         return group
+
+    def _adopt_group_identity(self, shape: Shape, elem: ET.Element, group_id: str) -> None:
+        """Give a group's only shape the group's id, label, and semantic hint."""
+        if elem.get('id'):
+            shape.id = group_id
+        shape.label = shape.label or elem.get('data-label', '')
+        semantic_hint = elem.get('data-semantic') or elem.get('class', '')
+        if semantic_hint and (semantic := self._parse_semantic_hint(semantic_hint)) is not None:
+            shape.semantic_type = semantic
+            shape.semantic_confidence = 0.9
+
+    def _enclosing_shape(self, shapes: list[Shape], nodes: list[Element]) -> Shape | None:
+        """The direct shape whose box encloses every other member, if there is one."""
+        if not shapes:
+            return None
+        candidate = max(shapes, key=lambda shape: shape.size.area)
+        others = [member for member in [*shapes, *nodes] if member is not candidate]
+        if others and all(self._box_contains(candidate, other) for other in others):
+            return candidate
+        return None
+
+    def _box_contains(self, outer: Element, inner: Element) -> bool:
+        return (
+            outer.position.x <= inner.position.x
+            and outer.position.y <= inner.position.y
+            and inner.position.x + inner.size.width <= outer.position.x + outer.size.width
+            and inner.position.y + inner.size.height <= outer.position.y + outer.size.height
+        )
+
+    def _label_members(self, shapes: list[Shape], texts: list[Text]) -> None:
+        """Label each shape from the unclaimed texts anchored inside it (smallest shape wins)."""
+        claimed: dict[str, list[Text]] = {}
+        by_id = {shape.id: shape for shape in shapes}
+        for text in texts:
+            if 'label_of' in text.metadata:
+                continue
+            holders = [shape for shape in shapes if not shape.label and self._point_in_shape(text.position, shape)]
+            if holders:
+                claimed.setdefault(min(holders, key=lambda shape: shape.size.area).id, []).append(text)
+        for shape_id, shape_texts in claimed.items():
+            self._label_from_texts(by_id[shape_id], shape_texts)
+
+    def _label_from_texts(self, element: Shape | Group, texts: list[Text]) -> None:
+        """Use the most prominent text (largest, then topmost) as the label and the rest as description."""
+        if not texts:
+            return
+        ordered = sorted(texts, key=lambda text: (-(text.style.font_size or 0.0), text.position.y))
+        for text in ordered:
+            text.metadata['label_of'] = element.id
+        if not element.label:
+            element.label = ordered[0].content
+            ordered = ordered[1:]
+        if ordered:
+            element.metadata['description'] = '\n'.join(text.content for text in ordered)
+        if isinstance(element, Shape) and element.semantic_confidence < _HINT_CONFIDENCE:
+            element.semantic_type, element.semantic_confidence = infer_semantic_type(
+                shape_type=element.shape_type,
+                label=element.label,
+                size=element.size,
+                style=element.style,
+            )
 
     def _parse_style_attrs(self, elem: ET.Element) -> Style:
         """Parse SVG style attributes to IR Style.
@@ -943,20 +1037,9 @@ class SVGParser(Parser):
         return hint_map.get(hint_lower)
 
     def _associate_text_labels(self, elements: list[Element]) -> None:
-        """Associate text elements with nearby shapes as labels.
-
-        Args:
-            elements: List of all elements
-        """
-        shapes = [e for e in elements if isinstance(e, Shape) and not e.label]
-        texts = [e for e in elements if isinstance(e, Text)]
-
-        for text in texts:
-            # Find shapes that contain this text
-            for shape in shapes:
-                if self._point_in_shape(text.position, shape):
-                    shape.label = text.content
-                    break
+        """Label the shapes that no group has labelled yet from the texts anchored inside them."""
+        group_border_free = [e for e in elements if isinstance(e, Shape)]
+        self._label_members(group_border_free, [e for e in elements if isinstance(e, Text)])
 
     def _point_in_shape(self, point: Point, shape: Shape) -> bool:
         """Check if point is inside shape bounds.
