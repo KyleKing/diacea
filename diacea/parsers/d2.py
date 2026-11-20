@@ -287,7 +287,7 @@ _DOT_RE = re.compile(r'\.')
 def _unquote(text: str) -> str:
     text = text.strip()
     if len(text) >= 2 and text[0] == text[-1] and text[0] in '"\'':
-        text = text[1:-1].replace('\\"', '"').replace("\\'", "'")
+        text = text[1:-1].replace('\\"', '"').replace("\\'", "'").replace('\\$', '$')
     return text.replace('\\\\', '\\')
 
 

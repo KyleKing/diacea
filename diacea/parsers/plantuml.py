@@ -178,6 +178,10 @@ def is_c4_plantuml(content: str) -> bool:
     return bool(_C4_INCLUDE_RE.search(content) or _C4_MACRO_HINT_RE.search(content))
 
 
+# How diacea's C4 output writes a double quote, which C4 macro arguments cannot escape
+_QUOTE_CODE_POINT = '<U+0022>'
+
+
 def _unescape_label(text: str) -> str:
     result: list[str] = []
     i = 0
@@ -193,7 +197,12 @@ def _unescape_label(text: str) -> str:
                 result.append(nxt)
                 i += 2
                 continue
-        if char == '~' and i + 1 < len(text) and text[i + 1] in '<>':
+        if text.startswith(_QUOTE_CODE_POINT, i):
+            result.append('"')
+            i += len(_QUOTE_CODE_POINT)
+            continue
+        escapes_bracket = char == '~' and i + 1 < len(text) and text[i + 1] in '<>'
+        if escapes_bracket and not text.startswith(_QUOTE_CODE_POINT, i + 1):
             result.append(text[i + 1])
             i += 2
             continue

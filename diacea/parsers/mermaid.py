@@ -108,6 +108,8 @@ _TEXT_ARROW_SUBS = (
     (re.compile(r'==\s*([^=|>][^|]*?)\s*==>'), r'==>|\1|'),
 )
 
+_NUMERIC_ENTITY_RE = re.compile(r'#(\d{2,6});')
+
 _QUOTED_RE = re.compile(r'"[^"]*"')
 
 _MASK_RE = re.compile(r'\0(\d+)\0')
@@ -217,10 +219,11 @@ def _unescape_label(label: str) -> str:
     if len(text) >= 2 and text[0] == '"' and text[-1] == '"':
         text = text[1:-1]
     text = text.replace('<br/>', '\n').replace('<br>', '\n')
+    text = text.replace('&#124;', '|')
     text = text.replace('#quot;', '"')
+    text = _NUMERIC_ENTITY_RE.sub(lambda match: chr(int(match.group(1))), text)
     text = text.replace('&lt;', '<')
     text = text.replace('&gt;', '>')
-    text = text.replace('&#124;', '|')
     return text.replace('&amp;', '&')
 
 

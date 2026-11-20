@@ -32,6 +32,11 @@ def _escape_plantuml_label(label: str) -> str:
     return escaped.replace('&', '&amp;')
 
 
+def _escape_c4_label(label: str) -> str:
+    """Escape a C4 macro argument; the preprocessor has no escaped quote, so one is written as a code point."""
+    return _escape_plantuml_label(label.replace('"', '\0')).replace('\0', '<U+0022>')
+
+
 class PlantUMLGenerator(Generator):
     """Generate basic PlantUML from IR."""
 
@@ -256,4 +261,4 @@ class C4PlantUMLGenerator(Generator):
         return f'{macro}({", ".join(arguments)})'
 
     _sanitize_id = staticmethod(sanitize_alnum_id)
-    _escape_label = staticmethod(_escape_plantuml_label)
+    _escape_label = staticmethod(_escape_c4_label)
