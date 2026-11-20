@@ -3,11 +3,11 @@
 
 LAYOUT_WITH_LEGEND()
 
-Person(oval, "Ellipse")
-Container(choice, "Decision")
 Component(solid_fill, "Solid Fill")
 Component(dashed_box, "Dashed")
+Person(oval, "Ellipse")
+Container(choice, "Decision")
 
 
-Rel(oval, choice, "uses")
+Rel(oval, choice, "")
 @enduml

@@ -10,6 +10,7 @@ Design decisions (from Phase 2 open questions):
 
 from __future__ import annotations
 
+import re
 import warnings
 
 from ..ir import Connection, Diagram, Generator, Group, SemanticType, Shape
@@ -35,7 +36,7 @@ _C4_TOP_LEVEL_KEYWORDS: dict[str, str] = {
     SemanticType.SYSTEM: 'System',
 }
 
-_LABEL_CHARS_REQUIRING_QUOTES = frozenset('"()[]{}|')
+_LABEL_CHARS_REQUIRING_QUOTES = frozenset('"()[]{}|/\\<>;&#@`~^=%$')
 
 _FLOWCHART_BRACKETS: dict[str, tuple[str, str]] = {
     'circle': ('((', '))'),
@@ -60,6 +61,9 @@ _FLOWCHART_SEMANTIC_BRACKETS: dict[str, tuple[str, str]] = {
 }
 
 _THICK_STROKE_WIDTH = 3.0
+
+# Text that the flowchart grammar would read as the start of a link
+_ARROW_LIKE_RE = re.compile(r'--|==|-\.|\.-|^\s|\s$')
 
 _FLOWCHART_DIRECTIONS = {'BT': 'BT', 'LR': 'LR', 'RL': 'RL', 'TB': 'TD'}
 
@@ -178,7 +182,7 @@ class MermaidGenerator(Generator):
 
     def _format_bracket_label(self, label: str) -> str:
         escaped = self._escape_label(label)
-        if _LABEL_CHARS_REQUIRING_QUOTES & set(label) or not label.strip():
+        if _LABEL_CHARS_REQUIRING_QUOTES & set(label) or _ARROW_LIKE_RE.search(label) or not label.strip():
             return f'"{escaped}"'
         return escaped
 
@@ -388,8 +392,9 @@ class MermaidGenerator(Generator):
                 )
             endpoints.append(self._sanitize_id(resolved))
 
-        label = self._escape_quoted_label(conn.label or 'uses')
-        return f'    Rel({endpoints[0]}, {endpoints[1]}, "{label}")'
+        macro = 'BiRel' if conn.connection_type == 'bidirectional' else 'Rel'
+        label = self._escape_quoted_label(conn.label or ' ')
+        return f'    {macro}({endpoints[0]}, {endpoints[1]}, "{label}")'
 
     def _format_c4_element(self, shape: Shape, in_boundary: bool) -> str:
         keywords = _C4_BOUNDARY_KEYWORDS if in_boundary else _C4_TOP_LEVEL_KEYWORDS
@@ -450,6 +455,10 @@ class MermaidGenerator(Generator):
         """Escape label for Mermaid pipe-delimited connection labels."""
         escaped = label.replace('&', '&amp;')
         escaped = escaped.replace('|', '&#124;')
+        escaped = escaped.replace('"', '#quot;')
         escaped = escaped.replace('<', '&lt;')
         escaped = escaped.replace('>', '&gt;')
-        return escaped.replace('\n', '<br/>')
+        escaped = escaped.replace('\n', '<br/>')
+        if _LABEL_CHARS_REQUIRING_QUOTES & set(label) or _ARROW_LIKE_RE.search(label):
+            return f'"{escaped}"'
+        return escaped

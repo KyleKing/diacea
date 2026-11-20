@@ -137,6 +137,24 @@ class PlantUMLGenerator(Generator):
     _escape_label = staticmethod(_escape_plantuml_label)
 
 
+# Semantic type -> (C4 macro, whether its third argument is a technology rather than a description)
+_C4_MACROS: dict[str, tuple[str, bool]] = {
+    SemanticType.COMPONENT: ('Component', True),
+    SemanticType.CONTAINER: ('Container', True),
+    SemanticType.DATABASE: ('ComponentDb', True),
+    SemanticType.PERSON: ('Person', False),
+    SemanticType.QUEUE: ('ComponentQueue', True),
+    SemanticType.SYSTEM: ('System', False),
+}
+
+_C4_DATABASE_TECHNOLOGIES = {
+    'mongo': 'MongoDB',
+    'mysql': 'MySQL',
+    'postgres': 'PostgreSQL',
+    'redis': 'Redis',
+}
+
+
 class C4PlantUMLGenerator(Generator):
     """Generate C4-PlantUML from IR."""
 
@@ -157,118 +175,48 @@ class C4PlantUMLGenerator(Generator):
             '',
         ]
 
-        # Get elements
         shapes = diagram.get_shapes()
-        connections = diagram.get_connections()
         groups = diagram.get_groups()
-
-        systems = []
-        containers = []
-        components = []
-        databases = []
-        people = []
-
         group_source_ids = {g.source_shape_id for g in groups}
         child_ids = {child_id for g in groups for child_id in g.children}
-        for shape in shapes:
-            if shape.id in child_ids or shape.id in group_source_ids:
-                continue
-            semantic = shape.semantic_type
-            if semantic == SemanticType.SYSTEM:
-                systems.append(shape)
-            elif semantic == SemanticType.CONTAINER:
-                containers.append(shape)
-            elif semantic == SemanticType.COMPONENT:
-                components.append(shape)
-            elif semantic == SemanticType.DATABASE:
-                databases.append(shape)
-            elif semantic == SemanticType.PERSON:
-                people.append(shape)
-            else:
-                # Default to container for unknown types
-                containers.append(shape)
+        top_level = [s for s in shapes if s.id not in child_ids and s.id not in group_source_ids]
 
-        # Generate people
-        lines.extend(self._generate_person(person) for person in people)
-
-        # Generate systems
-        lines.extend(self._generate_system(system) for system in systems)
-
-        # Generate containers
-        lines.extend(self._generate_container(container) for container in containers)
-
-        # Generate components
-        lines.extend(self._generate_component(component) for component in components)
-
-        # Generate databases
-        lines.extend(self._generate_database(database) for database in databases)
-
+        lines.extend(self._generate_element(shape) for shape in top_level)
         lines.append('')
 
-        # Generate groups as system boundaries
         shapes_by_id = {s.id: s for s in shapes}
         groups_by_id = {g.id: g for g in groups}
-        declared_ids = {s.id for s in shapes if s.id not in child_ids and s.id not in group_source_ids}
+        declared_ids = {s.id for s in top_level}
         for group in top_level_groups(groups):
             lines.extend(self._generate_boundary(group, shapes_by_id, groups_by_id, declared_ids, depth=0))
-
         lines.append('')
 
-        # Generate relationships; endpoints naming a suppressed container shape
-        # remap to that group's declared boundary alias
+        # Endpoints naming a suppressed container shape remap to that group's declared boundary alias
         boundary_alias_by_source = {g.source_shape_id: g.id for g in groups}
-        lines.extend(self._generate_relationship(conn, boundary_alias_by_source) for conn in connections)
+        lines.extend(self._generate_relationship(conn, boundary_alias_by_source) for conn in diagram.get_connections())
 
         lines.append('@enduml')
         return '\n'.join(lines)
 
-    def _generate_person(self, shape: Shape) -> str:
-        """Generate C4 Person element."""
+    def _generate_element(self, shape: Shape) -> str:
+        """Generate the C4 macro for a shape: Person, System, Container, Component, or a Db/Queue variant."""
+        macro, takes_technology = _C4_MACROS.get(shape.semantic_type or '', ('Container', True))
+        if shape.metadata.get('external'):
+            macro += '_Ext'
         safe_id = self._sanitize_id(shape.id)
-        label = self._escape_label(shape.label or readable_id(safe_id))
-        return f'Person({safe_id}, "{label}")'
+        label = shape.label or readable_id(safe_id)
 
-    def _generate_system(self, shape: Shape) -> str:
-        """Generate C4 System element."""
-        safe_id = self._sanitize_id(shape.id)
-        label = self._escape_label(shape.label or readable_id(safe_id))
-        return f'System({safe_id}, "{label}")'
+        technology = shape.metadata.get('technology', '')
+        if not technology and macro.startswith('ComponentDb'):
+            technology = next((name for key, name in _C4_DATABASE_TECHNOLOGIES.items() if key in label.lower()), '')
+        description = shape.metadata.get('description', '')
 
-    def _generate_container(self, shape: Shape) -> str:
-        """Generate C4 Container element."""
-        safe_id = self._sanitize_id(shape.id)
-        label = self._escape_label(shape.label or readable_id(safe_id))
-        tech = shape.metadata.get('technology', '')
-        if tech:
-            tech = self._escape_label(tech)
-            return f'Container({safe_id}, "{label}", "{tech}")'
-        return f'Container({safe_id}, "{label}")'
-
-    def _generate_component(self, shape: Shape) -> str:
-        """Generate C4 Component element."""
-        safe_id = self._sanitize_id(shape.id)
-        label = self._escape_label(shape.label or readable_id(safe_id))
-        return f'Component({safe_id}, "{label}")'
-
-    def _generate_database(self, shape: Shape) -> str:
-        """Generate C4 Database element."""
-        safe_id = self._sanitize_id(shape.id)
-        raw_label = shape.label or readable_id(safe_id)
-        label = self._escape_label(raw_label)
-        label_lower = raw_label.lower()
-        tech = ''
-        if 'postgres' in label_lower:
-            tech = 'PostgreSQL'
-        elif 'mysql' in label_lower:
-            tech = 'MySQL'
-        elif 'mongodb' in label_lower or 'mongo' in label_lower:
-            tech = 'MongoDB'
-        elif 'redis' in label_lower:
-            tech = 'Redis'
-
-        if tech:
-            return f'ComponentDb({safe_id}, "{label}", "{tech}")'
-        return f'ComponentDb({safe_id}, "{label}")'
+        arguments = [safe_id, f'"{self._escape_label(label)}"']
+        if takes_technology and (technology or description):
+            arguments.append(f'"{self._escape_label(technology)}"')
+        if description:
+            arguments.append(f'"{self._escape_label(description)}"')
+        return f'{macro}({", ".join(arguments)})'
 
     def _generate_boundary(
         self,
@@ -292,29 +240,20 @@ class C4PlantUMLGenerator(Generator):
             child_shape = shapes_by_id.get(child_id)
             if child_shape and child_shape.id not in declared_ids:
                 declared_ids.add(child_shape.id)
-                lines.append(f'{indent}  {self._generate_boundary_element(child_shape)}')
+                lines.append(f'{indent}  {self._generate_element(child_shape)}')
 
         lines.append(f'{indent}}}')
         return lines
-
-    def _generate_boundary_element(self, shape: Shape) -> str:
-        semantic = shape.semantic_type
-        if semantic == SemanticType.COMPONENT:
-            return self._generate_component(shape)
-        if semantic == SemanticType.DATABASE:
-            return self._generate_database(shape)
-        if semantic == SemanticType.PERSON:
-            return self._generate_person(shape)
-        if semantic == SemanticType.SYSTEM:
-            return self._generate_system(shape)
-        return self._generate_container(shape)
 
     def _generate_relationship(self, conn: Connection, boundary_alias_by_source: dict[str, str]) -> str:
         """Generate C4 Rel (relationship)."""
         from_id = self._sanitize_id(boundary_alias_by_source.get(conn.from_id, conn.from_id))
         to_id = self._sanitize_id(boundary_alias_by_source.get(conn.to_id, conn.to_id))
-        label = self._escape_label(conn.label or 'uses')
-        return f'Rel({from_id}, {to_id}, "{label}")'
+        macro = 'BiRel' if conn.connection_type == 'bidirectional' else 'Rel'
+        arguments = [from_id, to_id, f'"{self._escape_label(conn.label)}"']
+        if technology := conn.metadata.get('technology'):
+            arguments.append(f'"{self._escape_label(technology)}"')
+        return f'{macro}({", ".join(arguments)})'
 
     _sanitize_id = staticmethod(sanitize_alnum_id)
     _escape_label = staticmethod(_escape_plantuml_label)

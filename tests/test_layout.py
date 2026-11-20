@@ -86,6 +86,8 @@ def test_connections_end_on_shape_borders():
     first, second = diagram.get_shapes()
     connection = diagram.get_connections()[0]
 
+    assert connection.start_point is not None
+    assert connection.end_point is not None
     assert connection.start_point.x == pytest.approx(first.position.x + first.size.width)
     assert connection.end_point.x == pytest.approx(second.position.x)
 

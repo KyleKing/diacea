@@ -24,6 +24,10 @@ Also shipped beyond the original phase plans:
 - Agent-friendly CLI: `--json` envelopes, `diacea inspect`, `diacea formats`, structured exit codes, and conversion-loss warnings
 - Text-format input parsers enabling text-to-text conversion: Mermaid flowcharts and sequence diagrams (`MermaidParser`) and PlantUML including the C4 macro dialect (`PlantUMLParser`), both with synthesized layouts and exact round-trips of diacea's own output
 - Sync tooling: `diacea sync` (with `--check`), `diacea-sync`/`diacea-check` pre-commit hooks, and an MkDocs plugin replacing \`\`\`diacea fences with generated diagram blocks (`diacea[mkdocs]` extra)
+- Any-to-any conversion: GraphViz DOT, D2, and Mermaid C4 input parsers, so every text format diacea writes it also reads
+- Drawing outputs: editable Excalidraw scenes and standalone SVG, backed by a compound layered layout for sources without coordinates (`diacea/layout.py`)
+- A format registry and public API (`diacea.convert`, `parse_diagram`, `render_diagram`) shared by the CLI, sync, ingestion, and the MkDocs plugin
+- Self-serve correction and checking: `<<type>>` label stereotypes, `--hint`, `--verify`, readable ids for drawings, and `scripts/render_fixtures.py` for visual review
 
 ### Next
 
@@ -32,6 +36,9 @@ Also shipped beyond the original phase plans:
 ### Ideas (unscheduled)
 
 - Draw.io (mxGraph XML) parser
+- PlantUML activity and sequence diagram input
+- Orthogonal edge routing and crossing reduction in the synthesized layout
+- Arbitrary machine-exported SVG (deeply nested anonymous groups, text as paths)
 - Structurizr DSL generator
 - Web interface with live preview
 
@@ -43,9 +50,10 @@ Also shipped beyond the original phase plans:
 
 ## Known Limitations
 
-Conversions are one-way (visual to text). Documented losses, tracked in `tests/test_roundtrip_limitations.py`:
+Structure (nodes, groups, connections, labels) converts in every direction and is checked for every fixture and format pair in `tests/test_any_to_any.py`. Appearance does not fully round-trip. Documented losses, tracked in `tests/test_roundtrip_limitations.py`:
 
-- Exact positions are dropped; text formats delegate layout to their renderers
+- Exact positions are dropped by text formats, which delegate layout to their renderers; a drawing generated from text gets a synthesized layout
+- A connection between a container and its own content is dropped (with a warning) in Mermaid, D2, and DOT output, and Mermaid C4 re-points relations that target a boundary
 - SVG curves are sampled for accurate bounding boxes, but curved outlines still become polygons/boxes
 - Hand-drawn styling (Excalidraw roughness, seeds) is not preserved
 
@@ -61,4 +69,4 @@ Example diagrams live in `test_diagrams/` (Mermaid, D2, GraphViz, SVG at simple/
 
 ---
 
-**Last Updated**: 2026-07-06
+**Last Updated**: 2026-11-20

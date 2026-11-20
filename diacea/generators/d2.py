@@ -34,7 +34,7 @@ _D2_SHAPES = {
 _D2_DIRECTIONS = {'BT': 'up', 'LR': 'right', 'RL': 'left', 'TB': 'down'}
 
 # Unquoted D2 strings end at these, or would be read as syntax when leading
-_D2_NEEDS_QUOTES_RE = re.compile(r'[{}\[\]:;|#"$<>]|^[\s\'*&!@.-]|--|->|\s$')
+_D2_NEEDS_QUOTES_RE = re.compile(r'[{}\[\]():;|#"\'`$<>\\*&@~^]|^[\s!.-]|--|->|\s$')
 
 _D2_COLOR_RE = re.compile(r'#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})|[a-zA-Z]+')
 

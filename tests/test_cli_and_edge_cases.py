@@ -861,7 +861,8 @@ class TestNestedC4Boundaries:
     def test_mermaid_c4_nested_boundaries(self):
         diagram = _nested_c4_diagram()
 
-        output = MermaidGenerator(diagram_type='c4').generate(diagram)
+        with pytest.warns(UserWarning, match='Re-pointing C4 Rel'):
+            output = MermaidGenerator(diagram_type='c4').generate(diagram)
 
         outer_start = output.index('Boundary(group_sys, "Payment System") {')
         inner_start = output.index('Boundary(group_inner, "Data Layer") {')
@@ -870,6 +871,7 @@ class TestNestedC4Boundaries:
         assert output.count('Container(api, "API Service")') == 1
         assert output.count('ContainerDb(db, "Postgres")') == 1
 
+    @pytest.mark.filterwarnings('ignore:Re-pointing C4 Rel')
     def test_mermaid_c4_skips_empty_boundary(self):
         diagram = _nested_c4_diagram(include_empty_group=True)
 
@@ -881,7 +883,8 @@ class TestNestedC4Boundaries:
     def test_mermaid_c4_remaps_rel_from_suppressed_source_shape(self):
         diagram = _nested_c4_diagram()
 
-        output = MermaidGenerator(diagram_type='c4').generate(diagram)
+        with pytest.warns(UserWarning, match='Re-pointing C4 Rel'):
+            output = MermaidGenerator(diagram_type='c4').generate(diagram)
 
         assert 'Rel(user, api, "uses")' in output
         assert 'Rel(user, sys' not in output
