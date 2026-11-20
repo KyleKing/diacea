@@ -3,7 +3,7 @@
 
 LAYOUT_WITH_LEGEND()
 
-Person(client, "Client")
+Component(client, "Client")
 
 System_Boundary(group_aws_us_east_1, "AWS us-east-1") {
   System_Boundary(group_serverless, "Serverless") {

@@ -458,12 +458,12 @@ class GraphVizParser(Parser):
             )
 
     def _plain_label(self, label: str, dot_shape: str, node_id: str) -> str:
-        if '<' in label and re.search(r'</?\w+[^>]*>', label):
-            self.warnings.append(f"node '{node_id}': HTML label flattened to plain text")
-            return _strip_html(label)
         if dot_shape in {'record', 'mrecord'}:
             self.warnings.append(f"node '{node_id}': record label flattened to plain text")
             return _flatten_record(label)
+        if '<' in label and re.search(r'</?\w+[^>]*>', label):
+            self.warnings.append(f"node '{node_id}': HTML label flattened to plain text")
+            return _strip_html(label)
         return _unescape_label(label).replace('\\N', node_id)
 
     def _add_connection(self, from_id: str, to_id: str, operator: str, attrs: dict[str, str]) -> None:

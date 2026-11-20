@@ -1,6 +1,6 @@
 C4Context
     title Architecture Diagram
-    Person(client, "Client")
+    Component(client, "Client")
     Boundary(group_aws_us_east_1, "AWS us-east-1") {
         Boundary(group_serverless, "Serverless") {
             Container(ingest_lambda, "Ingest Lambda")

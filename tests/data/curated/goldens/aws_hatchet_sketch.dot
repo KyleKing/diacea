@@ -33,7 +33,7 @@ digraph "diagram" {
         ses [label="SES"];
     }
 
-    client [label="Client", shape="ellipse"];
+    client [label="Client"];
 
     client -> api_gw;
     api_gw -> ingest_lambda;

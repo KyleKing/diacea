@@ -99,13 +99,9 @@ SEMANTIC_KEYWORDS = {
         'customer',
         'admin',
         'administrator',
-        'operator',
         'developer',
         'engineer',
-        'manager',
-        'client',
         'visitor',
-        'member',
         'staff',
     ],
     SemanticType.QUEUE: [
@@ -333,7 +329,9 @@ SEMANTIC_KEYWORDS = {
     ],
 }
 
-_CAMEL_BOUNDARY_RE = re.compile(r'(?<=[a-z0-9])(?=[A-Z])')
+_CAMEL_BOUNDARY_RE = re.compile(r'(?<=[a-z0-9])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])')
+
+_UNAMBIGUOUS_DECISION_WORDS = frozenset({'condition', 'decision'})
 
 _KEYWORD_PATTERNS = {
     semantic_type: re.compile(r'\b(?:' + '|'.join(re.escape(keyword) for keyword in keywords) + r')\b')
@@ -645,10 +643,28 @@ def _infer_from_text(label: str) -> tuple[SemanticType | None, float]:
     if not label:
         return (None, 0.0)
 
-    normalized = _normalize_label_words(label)
-    for semantic_type, pattern in _KEYWORD_PATTERNS.items():
-        if pattern.search(normalized):
-            return (semantic_type, 0.8)
+    lines = [line.strip() for line in _normalize_label_words(label).splitlines() if line.strip()]
+    is_question = label.rstrip().endswith('?')
+    best: tuple[int, int, SemanticType] | None = None
+    for line_number, line in enumerate(lines):
+        for semantic_type, pattern in _KEYWORD_PATTERNS.items():
+            for match in pattern.finditer(line):
+                # A person is named by the head noun: "Mobile user" is one, "User input" is not
+                if semantic_type == SemanticType.PERSON and match.end() != len(line):
+                    continue
+                # Verbs like "check" or "filter" only mark a decision when the label asks a question
+                if (
+                    semantic_type == SemanticType.DECISION
+                    and not is_question
+                    and match.group(0) not in _UNAMBIGUOUS_DECISION_WORDS
+                ):
+                    continue
+                # The first line is the title; within a line the last keyword is the head noun
+                rank = (-line_number, match.end())
+                if best is None or rank > (best[0], best[1]):
+                    best = (rank[0], rank[1], semantic_type)
+    if best is not None:
+        return (best[2], 0.8)
 
     return (None, 0.0)
 

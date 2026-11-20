@@ -6,7 +6,7 @@ import pytest
 from defusedxml import EntitiesForbidden
 
 from diacea.cli import detect_input_format
-from diacea.ir import Group, Shape, Text
+from diacea.ir import Connection, Group, Shape, Text
 from diacea.ir.semantic import SemanticType
 from diacea.parsers import SVGParser
 
@@ -227,14 +227,45 @@ class TestSVGParser:
         diagram = parser.parse(svg)
 
         groups = [e for e in diagram.elements if isinstance(e, Group)]
-        # Both outer and inner groups should be parsed
-        assert len(groups) == 2
+        shapes = {e.id: e for e in diagram.elements if isinstance(e, Shape)}
 
-        outer = next((g for g in groups if g.id == 'outer'), None)
-        inner = next((g for g in groups if g.id == 'inner'), None)
+        # A group wrapping a single shape is that shape; only the outer group is a container
+        assert [group.id for group in groups] == ['outer']
+        assert groups[0].label == 'Outer'
+        assert groups[0].children == ['r1', 'inner']
+        assert shapes['inner'].label == 'Inner'
 
-        assert outer is not None
-        assert inner is not None
+    def test_labelled_node_groups_and_container_border(self):
+        """A <g> per labelled box, inside a <g> with a border rect and a title."""
+        svg = """
+        <svg xmlns="http://www.w3.org/2000/svg">
+            <defs><marker id="arrowhead"><polygon points="0 0, 10 3, 0 6"/></marker></defs>
+            <g id="services" data-semantic="system">
+                <rect x="0" y="0" width="400" height="200" fill="none" stroke="#666"/>
+                <text x="10" y="20" font-size="14">Services</text>
+                <g id="auth" data-semantic="service">
+                    <rect x="20" y="40" width="100" height="50"/>
+                    <text x="70" y="70" font-size="11">Auth Service</text>
+                </g>
+                <g id="orders_db" data-semantic="database">
+                    <ellipse cx="300" cy="65" rx="40" ry="20"/>
+                    <text x="300" y="70" font-size="11">Orders DB</text>
+                </g>
+            </g>
+            <line x1="120" y1="65" x2="260" y2="65"/>
+        </svg>
+        """
+
+        diagram = SVGParser().parse(svg)
+        shapes = {e.id: e for e in diagram.elements if isinstance(e, Shape)}
+        group = next(e for e in diagram.elements if isinstance(e, Group))
+
+        assert set(shapes) == {'auth', 'orders_db'}
+        assert shapes['auth'].label == 'Auth Service'
+        assert shapes['auth'].semantic_type == SemanticType.SERVICE
+        assert shapes['orders_db'].semantic_type == SemanticType.DATABASE
+        assert (group.id, group.label, group.children) == ('services', 'Services', ['auth', 'orders_db'])
+        assert [(c.from_id, c.to_id) for c in diagram.elements if isinstance(c, Connection)] == [('auth', 'orders_db')]
 
 
 class TestSVGTransforms:

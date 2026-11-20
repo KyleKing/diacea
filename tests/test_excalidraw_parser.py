@@ -4,7 +4,7 @@ import json
 
 import pytest
 
-from diacea.ir import Connection, Shape, Text
+from diacea.ir import Connection, SemanticType, Shape, Text
 from diacea.parsers import ExcalidrawParser
 
 from .configuration import TEST_DATA_DIR
@@ -258,3 +258,195 @@ class TestExcalidrawGroupDetection:
             for other_id, other_children in child_sets.items():
                 if group_id != other_id:
                     assert not (children > other_children)
+
+
+def _sketch_box(element_id, x, y, width=160, height=80, **extra):
+    return {'id': element_id, 'type': 'rectangle', 'x': x, 'y': y, 'width': width, 'height': height, **extra}
+
+
+def _sketch_text(element_id, text, x, y, font_size=20, **extra):
+    width = len(text) * font_size * 0.5
+    return {
+        'id': element_id,
+        'type': 'text',
+        'x': x,
+        'y': y,
+        'width': width,
+        'height': font_size * 1.25,
+        'text': text,
+        'fontSize': font_size,
+        **extra,
+    }
+
+
+def _sketch_arrow(element_id, start, end, **extra):
+    return {
+        'id': element_id,
+        'type': 'arrow',
+        'x': start[0],
+        'y': start[1],
+        'points': [[0, 0], [end[0] - start[0], end[1] - start[1]]],
+        'endArrowhead': 'arrow',
+        **extra,
+    }
+
+
+def _parse_elements(*elements):
+    parser = ExcalidrawParser()
+    return parser.parse({'elements': list(elements)})
+
+
+class TestLabelsFromRealSketches:
+    def test_box_with_title_and_description_uses_the_title(self):
+        diagram = _parse_elements(
+            _sketch_box('box', 0, 0, 300, 160),
+            _sketch_text('body', 'Stores every order placed', 10, 80, font_size=14),
+            _sketch_text('title', 'Orders API', 10, 10, font_size=24),
+        )
+        box = diagram.get_shapes()[0]
+
+        assert box.label == 'Orders API'
+        assert box.metadata['description'] == 'Stores every order placed'
+
+    def test_label_written_above_a_box_labels_that_box(self):
+        diagram = _parse_elements(
+            _sketch_box('zone', 0, 0, 400, 300),
+            _sketch_text('zone_label', 'Zone', 16, 8),
+            _sketch_box('store', 60, 120, 120, 60),
+            _sketch_text('store_label', 'Store', 62, 92),
+        )
+        labels = {shape.id: shape.label for shape in diagram.get_shapes()}
+
+        assert labels == {'zone': 'Zone', 'store': 'Store'}
+
+    def test_text_grouped_with_one_shape_labels_it_from_outside(self):
+        diagram = _parse_elements(
+            _sketch_box('box', 0, 0, groupIds=['g1']),
+            _sketch_text('caption', 'Billing', 0, 140, groupIds=['g1']),
+        )
+
+        assert diagram.get_shapes()[0].label == 'Billing'
+
+    def test_bound_text_ignores_auto_wrap_line_breaks(self):
+        diagram = _parse_elements(
+            _sketch_box('box', 0, 0),
+            _sketch_text('label', 'spellchec\nk', 10, 10, containerId='box', originalText='spellcheck'),
+        )
+
+        assert diagram.get_shapes()[0].label == 'spellcheck'
+
+    def test_default_pen_is_not_recorded_as_styling(self):
+        diagram = _parse_elements(_sketch_box('box', 0, 0, strokeColor='#1e1e1e', strokeWidth=2))
+        style = diagram.get_shapes()[0].style
+
+        assert style.stroke_color is None
+        assert style.stroke_width is None
+
+    def test_chosen_pen_is_recorded(self):
+        diagram = _parse_elements(_sketch_box('box', 0, 0, strokeColor='#e03131', strokeWidth=4))
+        style = diagram.get_shapes()[0].style
+
+        assert style.stroke_color == '#e03131'
+        assert style.stroke_width == 4.0
+
+
+class TestArrowsFromRealSketches:
+    def test_arrow_label_is_read_and_not_given_to_the_container(self):
+        diagram = _parse_elements(
+            _sketch_box('outer', -50, -50, 700, 300),
+            _sketch_text('outer_label', 'Platform', -40, -40),
+            _sketch_box('a', 0, 60),
+            _sketch_box('b', 400, 60),
+            _sketch_arrow(
+                'link', (160, 100), (400, 100), startBinding={'elementId': 'a'}, endBinding={'elementId': 'b'}
+            ),
+            _sketch_text('link_label', 'publishes', 240, 90, containerId='link'),
+        )
+        labels = {shape.id: shape.label for shape in diagram.get_shapes()}
+
+        assert diagram.get_connections()[0].label == 'publishes'
+        assert labels['outer'] == 'Platform'
+
+    def test_arrow_bound_to_a_label_follows_it_to_the_shape(self):
+        diagram = _parse_elements(
+            _sketch_box('a', 0, 0, groupIds=['ga']),
+            _sketch_text('a_title', 'Sender', 20, 20, groupIds=['ga']),
+            _sketch_box('b', 400, 0),
+            _sketch_arrow(
+                'link', (160, 40), (400, 40), startBinding={'elementId': 'a_title'}, endBinding={'elementId': 'b'}
+            ),
+        )
+        connection = diagram.get_connections()[0]
+
+        assert (connection.from_id, connection.to_id) == ('a', 'b')
+
+    def test_loose_text_that_arrows_point_at_becomes_a_node(self):
+        diagram = _parse_elements(
+            _sketch_box('a', 0, 0),
+            _sketch_text('note', 'External API', 400, 20),
+            _sketch_arrow(
+                'link', (160, 40), (400, 30), startBinding={'elementId': 'a'}, endBinding={'elementId': 'note'}
+            ),
+        )
+        shapes = {shape.id: shape.label for shape in diagram.get_shapes()}
+
+        assert shapes['note'] == 'External API'
+        assert diagram.get_connections()[0].to_id == 'note'
+        assert [element.id for element in diagram.elements].count('note') == 1
+
+    def test_binding_to_a_missing_element_falls_back_to_the_nearest_shape(self):
+        diagram = _parse_elements(
+            _sketch_box('a', 0, 0),
+            _sketch_box('b', 400, 0),
+            _sketch_arrow(
+                'link', (160, 40), (400, 40), startBinding={'elementId': 'gone'}, endBinding={'elementId': 'b'}
+            ),
+        )
+
+        assert diagram.get_connections()[0].from_id == 'a'
+
+    def test_arrowhead_at_the_start_reverses_the_connection(self):
+        diagram = _parse_elements(
+            _sketch_box('a', 0, 0),
+            _sketch_box('b', 400, 0),
+            _sketch_arrow(
+                'link',
+                (160, 40),
+                (400, 40),
+                startArrowhead='arrow',
+                endArrowhead=None,
+                startBinding={'elementId': 'a'},
+                endBinding={'elementId': 'b'},
+            ),
+        )
+        connection = diagram.get_connections()[0]
+
+        assert (connection.from_id, connection.to_id, connection.connection_type) == ('b', 'a', 'directed')
+
+    def test_line_without_arrowheads_is_undirected(self):
+        diagram = _parse_elements(
+            _sketch_box('a', 0, 0),
+            _sketch_box('b', 400, 0),
+            _sketch_arrow('link', (160, 40), (400, 40), endArrowhead=None),
+        )
+
+        assert diagram.get_connections()[0].connection_type == 'undirected'
+
+    def test_stick_figure_head_and_body_are_one_person(self):
+        head = {'id': 'head', 'type': 'ellipse', 'x': 40, 'y': -70, 'width': 60, 'height': 60, 'groupIds': ['p']}
+        diagram = _parse_elements(
+            head,
+            _sketch_box('body', 0, 0, 140, 100, groupIds=['p']),
+            _sketch_text('name', 'Shopper', 30, 40, groupIds=['p']),
+            _sketch_box('shop', 400, 0),
+            _sketch_arrow(
+                'link', (100, -40), (400, 40), startBinding={'elementId': 'head'}, endBinding={'elementId': 'shop'}
+            ),
+        )
+        shapes = {shape.id: shape for shape in diagram.get_shapes()}
+
+        assert set(shapes) == {'body', 'shop'}
+        assert shapes['body'].label == 'Shopper'
+        assert shapes['body'].semantic_type == SemanticType.PERSON
+        assert diagram.get_connections()[0].from_id == 'body'
+        assert diagram.get_groups() == []

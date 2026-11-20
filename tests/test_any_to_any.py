@@ -9,12 +9,9 @@ has no equivalent in most text formats, or a Mermaid C4 relation re-pointed
 from a boundary to an element inside it.
 """
 
-from collections import Counter
-
 import pytest
 
-from diacea.formats import parse_diagram, parse_file, render_diagram
-from diacea.ir import Diagram
+from diacea.formats import OUTPUT_FORMATS, parse_diagram, parse_file, render_diagram, verify_conversion
 
 from .configuration import TEST_DATA_DIR
 
@@ -32,37 +29,11 @@ FIXTURES = sorted(
         *(REPO_ROOT / 'test_diagrams').glob('*.dot'),
         *(REPO_ROOT / 'test_diagrams').glob('*.d2'),
         *(REPO_ROOT / 'test_diagrams').glob('*.mmd'),
+        *(REPO_ROOT / 'test_diagrams').glob('*.svg'),
     ]
 )
 
-# Output format -> the input format that reads it back
-READ_BACK = {
-    'c4': 'plantuml',
-    'd2': 'd2',
-    'excalidraw': 'excalidraw',
-    'graphviz': 'graphviz',
-    'mermaid': 'mermaid',
-    'plantuml': 'plantuml',
-}
-
-
-def _normalize(label: str) -> str:
-    return ' '.join(label.split())
-
-
-def _structure(diagram: Diagram) -> tuple[Counter, Counter, Counter]:
-    """Node labels, group labels, and (from label, to label) pairs of a diagram."""
-    groups = diagram.get_groups()
-    source_ids = {group.source_shape_id for group in groups}
-    labels = {shape.id: _normalize(shape.label) for shape in diagram.get_shapes() if shape.id not in source_ids}
-    for group in groups:
-        labels[group.id] = labels[group.source_shape_id] = _normalize(group.label)
-    nodes = Counter(_normalize(shape.label) for shape in diagram.get_shapes() if shape.id not in source_ids)
-    edges = Counter(
-        (labels.get(conn.from_id, conn.from_id), labels.get(conn.to_id, conn.to_id))
-        for conn in diagram.get_connections()
-    )
-    return nodes, Counter(_normalize(group.label) for group in groups), edges
+READ_BACK = [name for name, fmt in OUTPUT_FORMATS.items() if fmt.reads_back_as]
 
 
 def _params():
@@ -75,16 +46,23 @@ def _params():
 
 @pytest.mark.parametrize(('fixture', 'output_format'), _params())
 def test_output_reads_back_with_same_structure(fixture, output_format):
-    original = parse_file(fixture).diagram
-    nodes, groups, edges = _structure(original)
+    parsed = parse_file(fixture)
+    result = render_diagram(parsed.diagram, output_format)
 
-    result = render_diagram(original, output_format)
-    reparsed = parse_diagram(result.output, READ_BACK[output_format]).diagram
-    nodes_back, groups_back, edges_back = _structure(reparsed)
+    assert verify_conversion(result) == []
 
-    dropped = sum(1 for warning in result.warnings if 'ropping' in warning)
-    repointed = sum(1 for warning in result.warnings if 'Re-pointing' in warning)
-    assert nodes_back == nodes
-    assert groups_back == groups
-    assert sum((edges_back - edges).values()) <= repointed, 'conversion invented a connection'
-    assert sum((edges - edges_back).values()) <= dropped + repointed, 'conversion lost a connection silently'
+
+def test_verification_reports_a_lost_node():
+    result = render_diagram(parse_diagram('flowchart LR\n    a[Web] --> b[DB]\n').diagram, 'mermaid')
+    result.output = result.output.replace('b[DB]', 'b[Cache]')
+
+    problems = verify_conversion(result)
+
+    assert problems is not None
+    assert problems[:2] == ["node(s) missing from the output: 'DB'", "unexpected node(s) in the output: 'Cache'"]
+
+
+def test_verification_is_unavailable_for_formats_without_a_parser_mapping():
+    result = render_diagram(parse_diagram('flowchart LR\n    a --> b\n').diagram, 'svg')
+
+    assert verify_conversion(result) is None

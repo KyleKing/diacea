@@ -315,7 +315,7 @@ class MermaidGenerator(Generator):
             lines.append(self._format_c4_element(shape, in_boundary=False))
             declared_ids.add(shape.id)
 
-        source_to_group = {g.source_shape_id: g.id for g in groups}
+        source_to_group = {g.source_shape_id: g.id for g in groups} | {g.id: g.id for g in groups}
         for conn in connections:
             rel_line = self._format_c4_rel(conn, declared_ids, source_to_group, group_representatives)
             if rel_line:
