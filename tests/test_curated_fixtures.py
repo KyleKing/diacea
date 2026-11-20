@@ -25,6 +25,7 @@ OUTPUT_FORMATS = {
     'graphviz': '.dot',
     'mermaid': '.mmd',
     'plantuml': '.puml',
+    'svg': '.svg',
 }
 
 RENDERER_BINARIES = {

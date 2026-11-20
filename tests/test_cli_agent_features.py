@@ -225,7 +225,7 @@ class TestFormatsSubcommand:
         for input_format in listing['input_formats']:
             assert input_format['detection']
         output_names = {f['name'] for f in listing['output_formats']}
-        assert output_names == {'c4', 'd2', 'excalidraw', 'graphviz', 'mermaid', 'plantuml'}
+        assert output_names == {'c4', 'd2', 'excalidraw', 'graphviz', 'mermaid', 'plantuml', 'svg'}
         for output_format in listing['output_formats']:
             assert isinstance(output_format['options'], list)
 

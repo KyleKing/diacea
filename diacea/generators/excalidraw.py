@@ -22,7 +22,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from ..ir import Connection, Diagram, Element, Generator, Group, Shape, Style
-from ..layout import layout_diagram, wrap_label
+from ..layout import ensure_layout, wrap_label
 from ._text import DECLARED_CONFIDENCE, canonical_shape
 
 _SOURCE_URL = 'https://github.com/KyleKing/diacea'
@@ -76,8 +76,7 @@ class ExcalidrawGenerator(Generator):
         Returns:
             Excalidraw scene as a JSON string
         """
-        if _needs_layout(diagram):
-            layout_diagram(diagram, diagram.direction or 'TB')
+        ensure_layout(diagram)
 
         self._elements: list[dict[str, Any]] = []
         self._by_id: dict[str, dict[str, Any]] = {}
@@ -265,14 +264,6 @@ def _binding(endpoint: dict[str, Any] | None) -> dict[str, Any] | None:
     if endpoint is None:
         return None
     return {'elementId': endpoint['id'], 'focus': 0, 'gap': _ARROW_GAP}
-
-
-def _needs_layout(diagram: Diagram) -> bool:
-    """Whether the shapes lack usable positions (e.g. a hand-built IR with everything at the origin)."""
-    shapes = diagram.get_shapes()
-    if len(shapes) < 2:
-        return False
-    return len({(shape.position.x, shape.position.y) for shape in shapes}) == 1
 
 
 __all__ = ['ExcalidrawConfig', 'ExcalidrawGenerator']

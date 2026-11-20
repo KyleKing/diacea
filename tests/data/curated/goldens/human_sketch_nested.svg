@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="876" height="622" viewBox="236.0 132.0 876.0 622.0">
+<style>text{font-family:Helvetica,Arial,sans-serif;font-size:14px;fill:#1e1e1e}.group-label{font-size:12px;fill:#868e96}.edge-label{font-size:12px;paint-order:stroke;stroke:#ffffff;stroke-width:4px}</style>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1e1e1e"/></marker></defs>
+<rect x="236.0" y="132.0" width="876.0" height="622.0" fill="#ffffff"/>
+<g id="group-payments_platform" data-semantic="group"><rect x="260.0" y="156.0" width="828.0" height="574.0" rx="8" fill="none" fill-opacity="0.25" stroke="#868e96" stroke-dasharray="6 4"/><text class="group-label" x="270.0" y="174.0">Payments Platform</text></g>
+<g id="group-workers" data-semantic="group"><rect x="626.0" y="308.0" width="415.0" height="369.0" rx="8" fill="none" fill-opacity="0.25" stroke="#868e96" stroke-dasharray="6 4"/><text class="group-label" x="636.0" y="326.0">Workers</text></g>
+<g id="queue" data-semantic="queue"><rect x="677.0" y="361.0" width="155.0" height="87.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="754.5" y="409.2" text-anchor="middle">Queue</text></g>
+<g id="processor" data-semantic="component"><rect x="562.0" y="496.0" width="168.0" height="87.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="646.0" y="544.2" text-anchor="middle">Processor</text></g>
+<g id="gateway" data-semantic="service"><rect x="330.0" y="314.0" width="160.0" height="84.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="410.0" y="360.7" text-anchor="middle">Gateway</text></g>
+<polyline points="496.0,353.0 671.0,402.8" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="745.4,454.0 660.1,490.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+</svg>

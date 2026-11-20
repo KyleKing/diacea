@@ -79,8 +79,7 @@ class TestEndToEnd:
 
         assert result == 0
         output = capsys.readouterr().out
-        assert 'rectClient' in output
-        assert 'rectClient --> rectServer' in output
+        assert 'client --> server' in output
 
     def test_cli_compressed_auto_detect(self, capsys):
         pytest.importorskip('lzstring')
@@ -88,7 +87,7 @@ class TestEndToEnd:
         result = main(['-i', str(COMPRESSED_FIXTURE), '-f', 'mermaid', '--mermaid-type', 'flowchart'])
 
         assert result == 0
-        assert 'rectClient --> rectServer' in capsys.readouterr().out
+        assert 'client --> server' in capsys.readouterr().out
 
     def test_cli_explicit_input_format(self, capsys):
         result = main(['-i', str(PLAIN_FIXTURE), '--input-format', 'obsidian', '-f', 'plantuml'])

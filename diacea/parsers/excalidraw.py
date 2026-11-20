@@ -550,6 +550,8 @@ class ExcalidrawParser(Parser):
 
         owners: dict[str, str] = {}
         for shape_id, shape_texts in owned.items():
+            if not shape_texts:
+                continue
             if shape_id not in bound_shape_ids:
                 shape_texts.sort(key=lambda text: (-(text.style.font_size or 0.0), text.position.y))
             shape = shapes_by_id[shape_id]
@@ -575,23 +577,23 @@ class ExcalidrawParser(Parser):
         """
         owner_of = {text.id: shape_id for shape_id, shape_texts in owned.items() for text in shape_texts}
         for shape in shapes:
-            if shape.id in owned:
+            if owned.get(shape.id):
                 continue
-            nearest: tuple[float, Text] | None = None
+            nearest: Text | None = None
+            nearest_gap = float('inf')
             for text in texts:
                 current = owner_of.get(text.id)
                 if current in bound_shape_ids or (current is not None and len(owned[current]) < 2):
                     continue
                 gap = _adjacent_gap(shape, text)
-                if gap is not None and gap <= text.size.height * _ADJACENT_LABEL_GAP_RATIO:
-                    nearest = min(nearest, (gap, text), key=lambda pair: pair[0]) if nearest else (gap, text)
+                if gap is not None and gap <= text.size.height * _ADJACENT_LABEL_GAP_RATIO and gap < nearest_gap:
+                    nearest, nearest_gap = text, gap
             if nearest is None:
                 continue
-            text = nearest[1]
-            if (previous := owner_of.get(text.id)) is not None:
-                owned[previous].remove(text)
-            owned[shape.id].append(text)
-            owner_of[text.id] = shape.id
+            if (previous := owner_of.get(nearest.id)) is not None:
+                owned[previous].remove(nearest)
+            owned[shape.id].append(nearest)
+            owner_of[nearest.id] = shape.id
 
     def _apply_label(self, shape: Shape, content: str) -> None:
         shape.label = content

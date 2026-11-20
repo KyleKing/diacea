@@ -40,6 +40,7 @@ from .generators import (
     GraphVizGenerator,
     MermaidGenerator,
     PlantUMLGenerator,
+    SVGGenerator,
 )
 from .ir.base import Generator, Parser
 from .ir.elements import Diagram, Shape
@@ -314,6 +315,12 @@ OUTPUT_FORMATS: dict[str, OutputFormat] = {
             build=lambda _options: PlantUMLGenerator(),
             extra_suffixes=('.plantuml', '.pu'),
         ),
+        OutputFormat(
+            name='svg',
+            description='SVG drawing of the diagram as diacea read it (no external renderer needed)',
+            suffix='.svg',
+            build=lambda _options: SVGGenerator(),
+        ),
     )
 }
 
@@ -506,7 +513,7 @@ def render_diagram(diagram: Diagram, output_format: str, **options: Any) -> Conv
         output_format=output_format,
         diagram=diagram,
         diagram_type=getattr(generator, 'detected_type', None),
-        warnings=list(dict.fromkeys(str(warning.message) for warning in caught)),
+        warnings=[str(warning.message) for warning in caught],
     )
 
 

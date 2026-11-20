@@ -5,6 +5,7 @@ from .excalidraw import ExcalidrawConfig, ExcalidrawGenerator
 from .graphviz import GraphVizConfig, GraphVizGenerator
 from .mermaid import MermaidGenerator
 from .plantuml import C4PlantUMLGenerator, PlantUMLGenerator
+from .svg import SVGGenerator
 
 __all__ = [
     'C4PlantUMLGenerator',
@@ -16,4 +17,5 @@ __all__ = [
     'GraphVizGenerator',
     'MermaidGenerator',
     'PlantUMLGenerator',
+    'SVGGenerator',
 ]

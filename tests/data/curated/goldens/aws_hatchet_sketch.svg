@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1267" height="725" viewBox="213.0 111.0 1267.0 725.0">
+<style>text{font-family:Helvetica,Arial,sans-serif;font-size:14px;fill:#1e1e1e}.group-label{font-size:12px;fill:#868e96}.edge-label{font-size:12px;paint-order:stroke;stroke:#ffffff;stroke-width:4px}</style>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1e1e1e"/></marker></defs>
+<rect x="213.0" y="111.0" width="1267.0" height="725.0" fill="#ffffff"/>
+<g id="group-aws_us_east_1" data-semantic="group"><rect x="374.0" y="135.0" width="1082.0" height="677.0" rx="8" fill="none" fill-opacity="0.25" stroke="#868e96" stroke-dasharray="6 4"/><text class="group-label" x="384.0" y="153.0">AWS us-east-1</text></g>
+<g id="group-vpc" data-semantic="group"><rect x="956.0" y="185.0" width="489.0" height="616.0" rx="8" fill="none" fill-opacity="0.25" stroke="#868e96" stroke-dasharray="6 4"/><text class="group-label" x="966.0" y="203.0">VPC</text></g>
+<g id="group-hatchet_on_ecs" data-semantic="group"><rect x="986.0" y="354.0" width="439.0" height="424.0" rx="8" fill="none" fill-opacity="0.25" stroke="#868e96" stroke-dasharray="6 4"/><text class="group-label" x="996.0" y="372.0">Hatchet on ECS</text></g>
+<g id="group-serverless" data-semantic="group"><rect x="584.0" y="199.0" width="331.0" height="342.0" rx="8" fill="none" fill-opacity="0.25" stroke="#868e96" stroke-dasharray="6 4"/><text class="group-label" x="594.0" y="217.0">Serverless</text></g>
+<g id="client" data-semantic="person"><rect x="237.0" y="292.0" width="108.0" height="74.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="291.0" y="333.7" text-anchor="middle">Client</text></g>
+<g id="api_gw" data-semantic="service"><rect x="406.0" y="230.0" width="126.0" height="72.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="469.0" y="270.7" text-anchor="middle">API GW</text></g>
+<g id="cognito" data-semantic="component"><rect x="405.0" y="345.0" width="126.0" height="71.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="468.0" y="385.2" text-anchor="middle">Cognito</text></g>
+<g id="eventbridge" data-semantic="component"><rect x="404.0" y="459.0" width="137.0" height="73.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="472.5" y="500.2" text-anchor="middle">EventBridge</text></g>
+<g id="s3_uploads" data-semantic="storage"><rect x="406.0" y="584.0" width="115.0" height="71.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="463.5" y="624.2" text-anchor="middle">S3 uploads</text></g>
+<g id="ingest_lambda" data-semantic="service"><rect x="615.0" y="249.0" width="135.0" height="65.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="682.5" y="286.2" text-anchor="middle">Ingest Lambda</text></g>
+<g id="resize_lambda" data-semantic="service"><rect x="615.0" y="345.0" width="135.0" height="64.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="682.5" y="381.7" text-anchor="middle">Resize Lambda</text></g>
+<g id="notify_lambda" data-semantic="service"><rect x="713.0" y="515.0" width="135.0" height="65.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="780.5" y="552.2" text-anchor="middle">Notify Lambda</text></g>
+<g id="sqs_jobs" data-semantic="queue"><rect x="624.0" y="584.0" width="135.0" height="71.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="691.5" y="624.2" text-anchor="middle">SQS jobs</text></g>
+<g id="dynamodb" data-semantic="database"><rect x="791.0" y="584.0" width="126.0" height="71.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="854.0" y="624.2" text-anchor="middle">DynamoDB</text></g>
+<g id="alb" data-semantic="component"><rect x="988.0" y="241.0" width="115.0" height="72.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="1045.5" y="281.7" text-anchor="middle">ALB</text></g>
+<g id="hatchet_engine" data-semantic="component"><rect x="1019.0" y="416.0" width="136.0" height="74.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="1087.0" y="457.7" text-anchor="middle">Hatchet Engine</text></g>
+<g id="postgres" data-semantic="database"><rect x="1226.0" y="417.0" width="157.0" height="72.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="1304.5" y="457.7" text-anchor="middle">Postgres</text></g>
+<g id="worker_email" data-semantic="service"><rect x="1020.0" y="532.0" width="136.0" height="71.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="1088.0" y="572.2" text-anchor="middle">Worker: email</text></g>
+<g id="worker_resize" data-semantic="service"><rect x="1227.0" y="531.0" width="155.0" height="73.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="1304.5" y="572.2" text-anchor="middle">Worker: resize</text></g>
+<g id="dashboard" data-semantic="interface"><rect x="1118.0" y="721.0" width="135.0" height="72.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="1185.5" y="761.7" text-anchor="middle">Dashboard</text></g>
+<g id="ses" data-semantic="component"><rect x="791.0" y="688.0" width="115.0" height="71.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="848.5" y="728.2" text-anchor="middle">SES</text></g>
+<polyline points="351.0,319.0 400.0,271.8" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="538.0,265.7 609.0,280.3" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="469.0,308.0 468.2,339.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="684.1,320.0 691.3,578.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="765.0,610.6 1013.0,456.7" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="1161.0,453.0 1220.0,453.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="1086.0,496.0 1087.7,526.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="1160.4,478.2 1229.0,542.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="1021.0,587.0 912.0,716.4" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="609.0,393.1 525.4,591.4" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="547.0,497.2 707.0,545.7" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="609.0,393.1 1009.9,319.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="1135.9,394.0 714.0,549.4" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="1047.1,319.0 1084.6,410.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="1088.0,643.0 1088.0,609.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+</svg>

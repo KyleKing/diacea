@@ -30,6 +30,8 @@ _MIN_WIDTH = 120.0
 _MIN_HEIGHT = 60.0
 _PADDING_X = 40.0
 _PADDING_Y = 36.0
+_BEND_BREADTH = 24.0
+_MAX_BEND_POINTS = 5000
 
 
 @dataclass(frozen=True)
@@ -70,6 +72,20 @@ def layout_diagram(diagram: Diagram, direction: str = 'TB', options: LayoutOptio
     diagram.metadata['synthesized_layout'] = True
 
 
+def ensure_layout(diagram: Diagram) -> None:
+    """Make a diagram drawable: lay it out if it has no positions, and route any unrouted connections.
+
+    A diagram built by hand (rather than parsed) typically has every shape
+    at the origin; one from a drawing has positions but may have
+    connections without endpoints.
+    """
+    shapes = diagram.get_shapes()
+    if len(shapes) > 1 and len({(shape.position.x, shape.position.y) for shape in shapes}) == 1:
+        layout_diagram(diagram, diagram.direction or 'TB')
+    elif any(conn.start_point is None or conn.end_point is None for conn in diagram.get_connections()):
+        route_connections(diagram)
+
+
 def route_connections(diagram: Diagram) -> None:
     """Set connection endpoints on the borders of the boxes they join."""
     boxes: dict[str, Element] = {}
@@ -84,8 +100,9 @@ def route_connections(diagram: Diagram) -> None:
         target = boxes.get(connection.to_id)
         if source is None or target is None:
             continue
-        start = _border_point(source, _center(target))
-        end = _border_point(target, _center(source))
+        bends = connection.waypoints
+        start = _border_point(source, bends[0] if bends else _center(target))
+        end = _border_point(target, bends[-1] if bends else _center(source))
         connection.start_point = start
         connection.end_point = end
         connection.position = Point(min(start.x, end.x), min(start.y, end.y))
@@ -136,8 +153,12 @@ class _Layout:
         self._children: dict[str | None, list[str]] = defaultdict(list)
         for node_id in self._nodes:
             self._children[self._parent.get(node_id)].append(node_id)
+        self._connection_edges: dict[str, tuple[str | None, str, str]] = {}
         self._edges = self._edges_by_container()
         self._relative: dict[str, tuple[float, float]] = {}
+        # Bend points that carry an edge spanning several layers around the nodes in between
+        self._bends: dict[tuple[str | None, str, str], list[str]] = {}
+        self._bend_positions: dict[str, Point] = {}
 
     def run(self) -> None:
         self._layout_container(None)
@@ -146,6 +167,10 @@ class _Layout:
             if (source := self._source_shapes.get(group.source_shape_id)) is not None:
                 source.position = Point(group.position.x, group.position.y)
                 source.size = Dimensions(group.size.width, group.size.height)
+        for connection in self._diagram.get_connections():
+            edge = self._connection_edges.get(connection.id)
+            bend_ids = self._bends.get(edge, []) if edge else []
+            connection.waypoints = [self._bend_positions[bend_id] for bend_id in bend_ids]
         route_connections(self._diagram)
 
     def _break_parent_cycles(self) -> None:
@@ -184,7 +209,9 @@ class _Layout:
                 to_chain.pop()
             if from_chain[-1] == to_chain[-1]:
                 continue
-            edges[self._parent.get(from_chain[-1])].append((from_chain[-1], to_chain[-1]))
+            container_id = self._parent.get(from_chain[-1])
+            edges[container_id].append((from_chain[-1], to_chain[-1]))
+            self._connection_edges[connection.id] = (container_id, from_chain[-1], to_chain[-1])
         return edges
 
     def _layout_container(self, container_id: str | None) -> tuple[float, float]:
@@ -197,13 +224,17 @@ class _Layout:
             return (0.0, 0.0)
 
         edges = self._edges.get(container_id, [])
-        layers = self._ordered_layers(child_ids, edges) if edges else self._grid_layers(child_ids)
+        layers = self._ordered_layers(container_id, child_ids, edges) if edges else self._grid_layers(child_ids)
 
         def along(node_id: str) -> float:
+            if node_id not in self._nodes:
+                return 0.0
             size = self._nodes[node_id].size
             return size.width if self._horizontal else size.height
 
         def across(node_id: str) -> float:
+            if node_id not in self._nodes:
+                return _BEND_BREADTH
             size = self._nodes[node_id].size
             return size.height if self._horizontal else size.width
 
@@ -244,12 +275,31 @@ class _Layout:
         rows = math.ceil(len(child_ids) / per_layer)
         return [child_ids[i : i + rows] for i in range(0, len(child_ids), rows)]
 
-    def _ordered_layers(self, child_ids: list[str], edges: list[tuple[str, str]]) -> list[list[str]]:
-        forward = self._acyclic_edges(child_ids, edges)
-        rank = self._longest_path_ranks(child_ids, forward)
+    def _ordered_layers(
+        self,
+        container_id: str | None,
+        child_ids: list[str],
+        edges: list[tuple[str, str]],
+    ) -> list[list[str]]:
+        acyclic = self._acyclic_edges(child_ids, edges)
+        rank = self._longest_path_ranks(child_ids, acyclic)
         layers: list[list[str]] = [[] for _ in range(max(rank.values()) + 1)]
         for node_id in child_ids:
             layers[rank[node_id]].append(node_id)
+
+        # An edge spanning several layers gets a bend point in each layer it
+        # crosses, which reserves it a lane between the nodes there.
+        forward: list[tuple[str, str]] = []
+        for from_id, to_id in acyclic:
+            span = rank[to_id] - rank[from_id]
+            if span <= 1 or len(self._bend_positions) + len(self._relative) > _MAX_BEND_POINTS:
+                forward.append((from_id, to_id))
+                continue
+            bend_ids = [f'\0bend:{len(self._bends)}:{step}' for step in range(1, span)]
+            self._bends[container_id, from_id, to_id] = bend_ids
+            for step, bend_id in enumerate(bend_ids, start=1):
+                layers[rank[from_id] + step].append(bend_id)
+            forward.extend(zip([from_id, *bend_ids], [*bend_ids, to_id], strict=True))
 
         predecessors: dict[str, list[str]] = defaultdict(list)
         successors: dict[str, list[str]] = defaultdict(list)
@@ -314,6 +364,15 @@ class _Layout:
         pending = [(container_id, origin_x, origin_y)]
         while pending:
             current, base_x, base_y = pending.pop()
+            for (bend_container, _from_id, _to_id), bend_ids in self._bends.items():
+                if bend_container != current:
+                    continue
+                offset_x, offset_y = (0.0, _BEND_BREADTH / 2) if self._horizontal else (_BEND_BREADTH / 2, 0.0)
+                for bend_id in bend_ids:
+                    relative_x, relative_y = self._relative[bend_id]
+                    self._bend_positions[bend_id] = Point(
+                        base_x + relative_x + offset_x, base_y + relative_y + offset_y
+                    )
             for child_id in self._children.get(current, []):
                 relative_x, relative_y = self._relative.get(child_id, (0.0, 0.0))
                 node = self._nodes[child_id]
@@ -332,4 +391,12 @@ def _barycenter(node_id: str, neighbors: dict[str, list[str]], slot: dict[str, i
     return sum(slot[other] for other in linked) / len(linked)
 
 
-__all__ = ['DIRECTIONS', 'LayoutOptions', 'estimate_label_size', 'layout_diagram', 'route_connections', 'wrap_label']
+__all__ = [
+    'DIRECTIONS',
+    'LayoutOptions',
+    'ensure_layout',
+    'estimate_label_size',
+    'layout_diagram',
+    'route_connections',
+    'wrap_label',
+]

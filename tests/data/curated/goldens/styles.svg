@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="428" height="308" viewBox="-24.0 -24.0 428.0 308.0">
+<style>text{font-family:Helvetica,Arial,sans-serif;font-size:14px;fill:#1e1e1e}.group-label{font-size:12px;fill:#868e96}.edge-label{font-size:12px;paint-order:stroke;stroke:#ffffff;stroke-width:4px}</style>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1e1e1e"/></marker></defs>
+<rect x="-24.0" y="-24.0" width="428.0" height="308.0" fill="#ffffff"/>
+<g id="solid_fill" data-semantic="component"><rect x="0.0" y="0.0" width="160.0" height="80.0" rx="2.0" fill="#a5d8ff" stroke="#1e1e1e" stroke-width="1.0"/><text x="80.0" y="44.7" text-anchor="middle">Solid Fill</text></g>
+<g id="dashed_box" data-semantic="component"><rect x="220.0" y="0.0" width="160.0" height="80.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.0" stroke-dasharray="6 4"/><text x="300.0" y="44.7" text-anchor="middle">Dashed</text></g>
+<g id="oval" data-semantic="person"><ellipse cx="80.0" cy="210.0" rx="80.0" ry="50.0" fill="#b2f2bb" stroke="#1e1e1e" stroke-width="1.0"/><text x="80.0" y="214.7" text-anchor="middle">Ellipse</text></g>
+<g id="choice" data-semantic="decision"><polygon points="300.0,160.0 380.0,210.0 300.0,260.0 220.0,210.0" fill="#ffffff" stroke="#e03131" stroke-width="1.0"/><text x="300.0" y="214.7" text-anchor="middle">Decision</text></g>
+<polyline points="166.0,210.0 214.0,210.0" fill="none" stroke="#1e1e1e" stroke-width="1.0" stroke-dasharray="6 4" marker-end="url(#arrow)"/>
+</svg>

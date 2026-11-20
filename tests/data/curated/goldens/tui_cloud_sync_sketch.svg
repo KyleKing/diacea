@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1305" height="743" viewBox="216.0 92.0 1305.0 743.0">
+<style>text{font-family:Helvetica,Arial,sans-serif;font-size:14px;fill:#1e1e1e}.group-label{font-size:12px;fill:#868e96}.edge-label{font-size:12px;paint-order:stroke;stroke:#ffffff;stroke-width:4px}</style>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1e1e1e"/></marker></defs>
+<rect x="216.0" y="92.0" width="1305.0" height="743.0" fill="#ffffff"/>
+<g id="group-user_laptop_offline_first" data-semantic="group"><rect x="240.0" y="116.0" width="749.0" height="695.0" rx="8" fill="none" fill-opacity="0.25" stroke="#868e96" stroke-dasharray="6 4"/><text class="group-label" x="250.0" y="134.0">user laptop (offline first)</text></g>
+<g id="group-cloud_fly_io_vendors" data-semantic="group"><rect x="1008.0" y="116.0" width="489.0" height="695.0" rx="8" fill="none" fill-opacity="0.25" stroke="#868e96" stroke-dasharray="6 4"/><text class="group-label" x="1018.0" y="134.0">cloud (fly.io + vendors)</text></g>
+<g id="group-notes_tui_rust" data-semantic="group"><rect x="262.0" y="158.0" width="404.0" height="426.0" rx="8" fill="none" fill-opacity="0.25" stroke="#868e96" stroke-dasharray="6 4"/><text class="group-label" x="272.0" y="176.0">notes TUI (Rust)</text></g>
+<g id="group-integrations" data-semantic="group"><rect x="1028.0" y="469.0" width="457.0" height="332.0" rx="8" fill="none" fill-opacity="0.25" stroke="#868e96" stroke-dasharray="6 4"/><text class="group-label" x="1038.0" y="487.0">integrations</text></g>
+<g id="group-sync_service" data-semantic="group"><rect x="1029.0" y="158.0" width="457.0" height="280.0" rx="8" fill="none" fill-opacity="0.25" stroke="#868e96" stroke-dasharray="6 4"/><text class="group-label" x="1039.0" y="176.0">sync service</text></g>
+<g id="group-sync_daemon" data-semantic="group"><rect x="261.0" y="614.0" width="467.0" height="187.0" rx="8" fill="none" fill-opacity="0.25" stroke="#868e96" stroke-dasharray="6 4"/><text class="group-label" x="271.0" y="632.0">sync daemon</text></g>
+<g id="group-fs_watcher" data-semantic="group"><rect x="280.0" y="644.0" width="94.0" height="60.0" rx="8" fill="none" fill-opacity="0.25" stroke="#868e96" stroke-dasharray="6 4"/><text class="group-label" x="290.0" y="662.0">fs watcher</text></g>
+<g id="editor_pane" data-semantic="component"><rect x="280.0" y="182.0" width="104.0" height="60.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="332.0" y="216.7" text-anchor="middle">editor pane</text></g>
+<g id="vault_tree" data-semantic="component"><rect x="280.0" y="244.0" width="104.0" height="60.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="332.0" y="278.7" text-anchor="middle">vault tree</text></g>
+<g id="search" data-semantic="component"><rect x="273.0" y="660.0" width="104.0" height="50.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="325.0" y="689.7" text-anchor="middle">search</text></g>
+<g id="cmd_palette" data-semantic="component"><rect x="280.0" y="369.0" width="104.0" height="60.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="332.0" y="403.7" text-anchor="middle">cmd palette</text></g>
+<g id="git_panel" data-semantic="interface"><rect x="280.0" y="431.0" width="104.0" height="50.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="332.0" y="460.7" text-anchor="middle">git panel</text></g>
+<g id="spellcheck" data-semantic="component"><rect x="280.0" y="493.0" width="104.0" height="60.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="332.0" y="527.7" text-anchor="middle">spellcheck</text></g>
+<g id="preview_pane" data-semantic="component"><rect x="415.0" y="182.0" width="104.0" height="60.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="467.0" y="216.7" text-anchor="middle">preview pane</text></g>
+<g id="keybind_map" data-semantic="component"><rect x="415.0" y="244.0" width="104.0" height="60.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="467.0" y="278.7" text-anchor="middle">keybind map</text></g>
+<g id="theme_engine" data-semantic="component"><rect x="415.0" y="306.0" width="104.0" height="60.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="467.0" y="340.7" text-anchor="middle">theme engine</text></g>
+<g id="plugin_host" data-semantic="component"><rect x="415.0" y="369.0" width="104.0" height="60.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="467.0" y="403.7" text-anchor="middle">plugin host</text></g>
+<g id="wasm_plugins" data-semantic="component"><rect x="415.0" y="431.0" width="104.0" height="60.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="467.0" y="465.7" text-anchor="middle">wasm plugins</text></g>
+<g id="indexer" data-semantic="component"><rect x="395.0" y="644.0" width="93.0" height="50.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="441.5" y="673.7" text-anchor="middle">indexer</text></g>
+<g id="crdt_engine" data-semantic="component"><rect x="509.0" y="644.0" width="93.0" height="60.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="555.5" y="678.7" text-anchor="middle">crdt engine</text></g>
+<g id="sqlite_index" data-semantic="database"><rect x="280.0" y="717.0" width="94.0" height="60.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="327.0" y="751.7" text-anchor="middle">sqlite index</text></g>
+<g id="conflict_resolver" data-semantic="component"><rect x="395.0" y="717.0" width="114.0" height="60.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="452.0" y="751.7" text-anchor="middle">conflict resolver</text></g>
+<g id="outbox_queue" data-semantic="queue"><rect x="530.0" y="717.0" width="93.0" height="60.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="576.5" y="751.7" text-anchor="middle">outbox queue</text></g>
+<g id="markdown_files" data-semantic="component"><rect x="706.0" y="187.0" width="104.0" height="60.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="758.0" y="221.7" text-anchor="middle">markdown files</text></g>
+<g id="git_repo" data-semantic="component"><rect x="706.0" y="260.0" width="104.0" height="49.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="758.0" y="289.2" text-anchor="middle">git repo</text></g>
+<g id="config_toml" data-semantic="document"><rect x="706.0" y="332.0" width="104.0" height="60.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="758.0" y="366.7" text-anchor="middle">config.toml</text></g>
+<g id="ssh_agent" data-semantic="component"><rect x="706.0" y="405.0" width="104.0" height="60.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="758.0" y="439.7" text-anchor="middle">ssh agent</text></g>
+<g id="kitty_terminal" data-semantic="interface"><rect x="841.0" y="187.0" width="125.0" height="60.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="903.5" y="221.7" text-anchor="middle">kitty terminal</text></g>
+<g id="sync_api" data-semantic="service"><rect x="1049.0" y="187.0" width="104.0" height="50.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="1101.0" y="216.7" text-anchor="middle">sync api</text></g>
+<g id="auth" data-semantic="component"><rect x="1173.0" y="187.0" width="104.0" height="50.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="1225.0" y="216.7" text-anchor="middle">auth</text></g>
+<g id="crdt_merge" data-semantic="component"><rect x="1298.0" y="187.0" width="114.0" height="50.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="1355.0" y="216.7" text-anchor="middle">crdt merge</text></g>
+<g id="postgres" data-semantic="database"><rect x="1049.0" y="260.0" width="104.0" height="49.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="1101.0" y="289.2" text-anchor="middle">postgres</text></g>
+<g id="object_store" data-semantic="storage"><rect x="1173.0" y="260.0" width="115.0" height="60.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="1230.5" y="294.7" text-anchor="middle">object store</text></g>
+<g id="presence" data-semantic="component"><rect x="1308.0" y="260.0" width="104.0" height="49.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="1360.0" y="289.2" text-anchor="middle">presence</text></g>
+<g id="github_api" data-semantic="service"><rect x="1049.0" y="499.0" width="104.0" height="60.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="1101.0" y="533.7" text-anchor="middle">GitHub API</text></g>
+<g id="openai_api" data-semantic="service"><rect x="1173.0" y="499.0" width="104.0" height="60.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="1225.0" y="533.7" text-anchor="middle">OpenAI API</text></g>
+<g id="caldav" data-semantic="component"><rect x="1298.0" y="499.0" width="114.0" height="49.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="1355.0" y="528.2" text-anchor="middle">CalDAV</text></g>
+<g id="b2_backup" data-semantic="component"><rect x="1049.0" y="582.0" width="104.0" height="60.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="1101.0" y="616.7" text-anchor="middle">B2 backup</text></g>
+<g id="smtp_digest" data-semantic="component"><rect x="1173.0" y="582.0" width="115.0" height="60.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="1230.5" y="616.7" text-anchor="middle">smtp digest</text></g>
+<g id="webhooks_out" data-semantic="component"><rect x="1308.0" y="582.0" width="104.0" height="60.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="1360.0" y="616.7" text-anchor="middle">webhooks out</text></g>
+<polyline points="390.0,207.6 409.0,211.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="390.0,222.9 700.0,217.1" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="390.0,269.4 700.0,218.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="330.7,638.0 701.2,240.2" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="380.0,675.8 441.5,694.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="558.0,698.0 574.0,715.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="629.0,737.1 1043.0,219.5" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="1155.0,212.0 1101.0,239.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="1321.2,243.0 1159.0,283.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="1149.2,241.4 1187.0,254.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="390.0,453.8 700.0,287.7" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="816.0,288.9 1043.1,511.2" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="525.0,400.7 1167.0,527.8" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="1231.0,312.0 1105.8,576.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="1106.8,243.0 1349.2,493.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="1360.0,315.0 1360.0,576.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+</svg>

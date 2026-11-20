@@ -295,11 +295,13 @@ class MermaidParser(Parser):
         self._group_stack: list[Group] = []
         self._direction = 'TD'
         self._styles: list[tuple[int, list[str], dict[str, str]]] = []
+        self._bare_ids: set[str] = set()  # nodes only ever referenced by id, never given a shape or label
 
         statements = self._collect_statements(data)
         for line_number, statement in statements:
             self._parse_statement(statement, line_number)
         self._apply_styles()
+        self._retarget_subgraph_endpoints()
 
         if self._group_stack:
             self.warnings.append(f"unclosed subgraph '{self._group_stack[-1].id}': missing 'end'")
@@ -354,6 +356,9 @@ class MermaidParser(Parser):
         macro_parser = PlantUMLParser()
         diagram = macro_parser.parse('\n'.join(body))
         self.warnings.extend(macro_parser.warnings)
+        for element in diagram.elements:
+            if isinstance(element, (Shape, Group, Connection)):
+                element.label = _unescape_label(element.label.replace('\\"', '"').replace('\\\\', '\\'))
         diagram.id = 'mermaid-c4'
         diagram.name = title
         diagram.metadata['mermaid'] = {'diagram_type': 'c4', 'c4_level': c4_level}
@@ -545,6 +550,31 @@ class MermaidParser(Parser):
             return
         self.warnings.append(f'line {line_number}: unrecognized line skipped: {statement!r}')
 
+    def _retarget_subgraph_endpoints(self) -> None:
+        """Point edges written against a subgraph id at the group, not at a node of the same name.
+
+        `subgraph api ... end` followed by `api --> db` links the subgraph
+        itself. The edge parser only sees a bare id and declares a node for
+        it, so that placeholder is removed again here.
+        """
+        groups_by_raw_id = {re.sub(r'\W', '_', group.id): group for group in self._groups}
+        groups_by_raw_id.update({group.source_shape_id: group for group in self._groups})
+        placeholders = {
+            shape.id for shape in self._shape_order if shape.id in groups_by_raw_id and shape.id in self._bare_ids
+        }
+        if not placeholders:
+            return
+        for connection in self._connections:
+            if connection.from_id in placeholders:
+                connection.from_id = groups_by_raw_id[connection.from_id].id
+            if connection.to_id in placeholders:
+                connection.to_id = groups_by_raw_id[connection.to_id].id
+        self._shape_order = [shape for shape in self._shape_order if shape.id not in placeholders]
+        for shape_id in placeholders:
+            del self._shapes[shape_id]
+        for group in self._groups:
+            group.children = [child_id for child_id in group.children if child_id not in placeholders]
+
     def _apply_styles(self) -> None:
         """Apply `style <id> fill:...,stroke:...` directives to the nodes and subgraphs they name."""
         groups_by_raw_id = {re.sub(r'\W', '_', group.id): group for group in self._groups}
@@ -637,6 +667,7 @@ class MermaidParser(Parser):
         if not body:
             if node_id not in self._shapes:
                 self._create_shape(node_id, label=node_id, shape_type='rectangle')
+                self._bare_ids.add(node_id)
             else:
                 self._adopt_into_group(node_id)
             return node_id
@@ -645,6 +676,7 @@ class MermaidParser(Parser):
             if body.startswith(opening) and body.endswith(closing):
                 label = _unescape_label(body[len(opening) : -len(closing)])
                 label, icons = _extract_fa_icons(label)
+                self._bare_ids.discard(node_id)
                 if node_id in self._shapes:
                     shape = self._shapes[node_id]
                     shape.label = label

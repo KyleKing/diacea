@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="648" height="448" viewBox="-24.0 -24.0 648.0 448.0">
+<style>text{font-family:Helvetica,Arial,sans-serif;font-size:14px;fill:#1e1e1e}.group-label{font-size:12px;fill:#868e96}.edge-label{font-size:12px;paint-order:stroke;stroke:#ffffff;stroke-width:4px}</style>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1e1e1e"/></marker></defs>
+<rect x="-24.0" y="-24.0" width="648.0" height="448.0" fill="#ffffff"/>
+<g id="group-host" data-semantic="group"><rect x="0.0" y="0.0" width="600.0" height="400.0" rx="8" fill="none" fill-opacity="0.25" stroke="#1d1d1d" stroke-dasharray="6 4"/><text class="group-label" x="10.0" y="18.0">Host</text></g>
+<g id="group-runtime" data-semantic="group"><rect x="40.0" y="60.0" width="300.0" height="260.0" rx="8" fill="none" fill-opacity="0.25" stroke="#1d1d1d" stroke-dasharray="6 4"/><text class="group-label" x="50.0" y="78.0">Runtime</text></g>
+<g id="editor" data-semantic="component"><rect x="30.0" y="40.0" width="140.0" height="60.0" rx="2.0" fill="#ffffff" stroke="#1d1d1d" stroke-width="3.5"/><text x="100.0" y="74.7" text-anchor="middle">Editor</text></g>
+<g id="sidecar" data-semantic="component"><rect x="400.0" y="120.0" width="140.0" height="60.0" rx="2.0" fill="#ffffff" stroke="#1d1d1d" stroke-width="3.5"/><text x="470.0" y="154.7" text-anchor="middle">Sidecar</text></g>
+<polyline points="210.0,130.0 210.0,130.0" fill="none" stroke="#1d1d1d" stroke-width="2.0" marker-end="url(#arrow)"/><text class="edge-label" x="210.0" y="130.0" text-anchor="middle">sync</text>
+</svg>
