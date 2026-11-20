@@ -62,6 +62,9 @@ _FLOWCHART_SEMANTIC_BRACKETS: dict[str, tuple[str, str]] = {
 
 _THICK_STROKE_WIDTH = 3.0
 
+# Words the flowchart grammar reads as keywords when they stand alone as an unquoted label
+_RESERVED_WORDS = frozenset({'class', 'default', 'end', 'graph', 'style', 'subgraph'})
+
 # Text that the flowchart grammar would read as the start of a link
 _ARROW_LIKE_RE = re.compile(r'--|==|-\.|\.-|^\s|\s$')
 
@@ -182,9 +185,13 @@ class MermaidGenerator(Generator):
 
     def _format_bracket_label(self, label: str) -> str:
         escaped = self._escape_label(label)
-        if _LABEL_CHARS_REQUIRING_QUOTES & set(label) or _ARROW_LIKE_RE.search(label) or not label.strip():
-            return f'"{escaped}"'
-        return escaped
+        needs_quotes = (
+            _LABEL_CHARS_REQUIRING_QUOTES & set(label)
+            or _ARROW_LIKE_RE.search(label)
+            or label.strip().lower() in _RESERVED_WORDS
+            or not label.strip()
+        )
+        return f'"{escaped}"' if needs_quotes else escaped
 
     def _get_node_brackets(self, shape: Shape) -> tuple[str, str]:
         """Get Mermaid node brackets based on shape type.
@@ -435,30 +442,21 @@ class MermaidGenerator(Generator):
     _sanitize_id = staticmethod(sanitize_alnum_id)
 
     def _escape_label(self, label: str) -> str:
-        """Escape label for Mermaid flowchart node syntax."""
-        escaped = label.replace('&', '&amp;')
+        """Escape label text with Mermaid entity codes, which are valid in every label position."""
+        escaped = label.replace('#', '#35;')
+        escaped = escaped.replace('&', '&amp;')
         escaped = escaped.replace('"', '#quot;')
+        escaped = escaped.replace('`', '#96;')
         escaped = escaped.replace('<', '&lt;')
         escaped = escaped.replace('>', '&gt;')
         return escaped.replace('\n', '<br/>')
 
-    def _escape_quoted_label(self, label: str) -> str:
-        """Escape label for Mermaid quoted string contexts (C4, sequence)."""
-        escaped = label.replace('\\', '\\\\')
-        escaped = escaped.replace('"', '\\"')
-        escaped = escaped.replace('&', '&amp;')
-        escaped = escaped.replace('<', '&lt;')
-        escaped = escaped.replace('>', '&gt;')
-        return escaped.replace('\n', '<br/>')
+    # Mermaid has no backslash escapes inside quoted strings, so quoted contexts (C4, sequence) use the same entities
+    _escape_quoted_label = _escape_label
 
     def _escape_pipe_label(self, label: str) -> str:
         """Escape label for Mermaid pipe-delimited connection labels."""
-        escaped = label.replace('&', '&amp;')
-        escaped = escaped.replace('|', '&#124;')
-        escaped = escaped.replace('"', '#quot;')
-        escaped = escaped.replace('<', '&lt;')
-        escaped = escaped.replace('>', '&gt;')
-        escaped = escaped.replace('\n', '<br/>')
+        escaped = self._escape_label(label).replace('|', '&#124;')
         if _LABEL_CHARS_REQUIRING_QUOTES & set(label) or _ARROW_LIKE_RE.search(label):
             return f'"{escaped}"'
         return escaped

@@ -409,7 +409,8 @@ class TestLabelEscaping:
         diagram = self._make_diagram_with_label('Test "quoted"')
         gen = C4PlantUMLGenerator()
         output = gen.generate(diagram)
-        assert '\\"quoted\\"' in output
+        # C4 macros have no escaped quote, so a quote is written as a code point
+        assert '<U+0022>quoted<U+0022>' in output
 
     def test_mermaid_escapes_quotes_in_flowchart(self):
         diagram = self._make_diagram_with_label('Test "quoted"')
@@ -440,7 +441,7 @@ class TestLabelEscaping:
         diagram = self._make_diagram_with_label('Test "quoted"')
         gen = GraphVizGenerator()
         output = gen.generate(diagram)
-        assert '\\"' in output
+        assert '\\"quoted\\"' in output
 
     def test_d2_escapes_newlines(self):
         diagram = self._make_diagram_with_label('Line1\nLine2')
@@ -485,7 +486,7 @@ class TestLabelEscaping:
         diagram.elements[0].semantic_type = 'person'
         gen = MermaidGenerator(diagram_type='c4')
         output = gen.generate(diagram)
-        assert '\\"' in output
+        assert '#quot;quoted#quot;' in output
         assert '&amp;' in output
         assert '&lt;' in output
         assert '&gt;' in output

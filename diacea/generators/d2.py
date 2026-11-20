@@ -393,5 +393,5 @@ class D2Generator(Generator):
         """Escape label for D2 format."""
         escaped = label.replace('\\', '\\\\').replace('\n', '\\n')
         if _D2_NEEDS_QUOTES_RE.search(label):
-            escaped = '"' + escaped.replace('"', '\\"') + '"'
+            escaped = '"' + escaped.replace('"', '\\"').replace('$', '\\$') + '"'
         return escaped

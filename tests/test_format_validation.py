@@ -21,6 +21,7 @@ import subprocess
 
 import pytest
 
+from diacea.formats import OUTPUT_FORMATS, render_diagram
 from diacea.generators import (
     C4PlantUMLGenerator,
     D2Generator,
@@ -28,7 +29,7 @@ from diacea.generators import (
     MermaidGenerator,
     PlantUMLGenerator,
 )
-from diacea.ir import Diagram
+from diacea.ir import Diagram, Group
 from diacea.ir.elements import Connection, Dimensions, Point, Shape, Style
 
 HAS_PLANTUML = shutil.which('plantuml') is not None
@@ -266,3 +267,82 @@ class TestToolAvailability:
                 print('  d2: brew install d2')
             if 'graphviz (dot)' in missing:
                 print('  dot: brew install graphviz')
+
+
+_AWKWARD_LABELS = [
+    'a/b',
+    '--',
+    '1--Y',
+    "User's (laptop)",
+    'x: y; z',
+    '[Queue]',
+    '{decide?}',
+    '<tag> & "quote"',
+    'pipe | bar',
+    '#hash @at $dollar',
+    'back\\slash',
+    '50% ~ ^caret',
+    '`tick` = eq',
+    '==> arrow',
+    'end',
+    'multi\nline',
+]
+
+
+def _make_awkward_label_diagram() -> Diagram:
+    """A chain of nodes whose node, edge, and group labels hold the punctuation each format treats as syntax."""
+    diagram = Diagram(id='awkward', metadata={'explicit_shapes': True})
+    for index, label in enumerate(_AWKWARD_LABELS):
+        diagram.add_element(
+            Shape(id=f'n{index}', label=label, position=Point(x=index * 200.0, y=0.0), size=Dimensions(120.0, 60.0))
+        )
+    for index, label in enumerate(_AWKWARD_LABELS[:-1]):
+        diagram.add_element(
+            Connection(
+                id=f'e{index}',
+                from_id=f'n{index}',
+                to_id=f'n{index + 1}',
+                label=label,
+                position=Point(x=0.0, y=0.0),
+                size=Dimensions(1.0, 1.0),
+            )
+        )
+    diagram.add_element(
+        Group(
+            id='group-g',
+            label='Group: "a" & <b> / [c]',
+            position=Point(x=0.0, y=0.0),
+            size=Dimensions(1.0, 1.0),
+            children=['n0', 'n1', 'n2'],
+        )
+    )
+    return diagram
+
+
+_AWKWARD_LABEL_CASES = [
+    pytest.param('mermaid', {'mermaid_type': 'flowchart'}, 'mmdc', id='mermaid-flowchart'),
+    pytest.param('mermaid', {'mermaid_type': 'c4'}, 'mmdc', id='mermaid-c4'),
+    pytest.param('d2', {}, 'd2', id='d2'),
+    pytest.param('graphviz', {}, 'dot', id='graphviz'),
+    pytest.param('plantuml', {}, 'plantuml', id='plantuml'),
+    pytest.param('c4', {}, 'plantuml', id='c4-plantuml'),
+]
+
+
+@pytest.mark.parametrize(('output_format', 'options', 'tool'), _AWKWARD_LABEL_CASES)
+def test_awkward_labels_are_accepted_by_the_native_tool(output_format, options, tool, tmp_path):
+    """Labels full of each format's own syntax characters must still render in that format's tool."""
+    if shutil.which(tool) is None:
+        pytest.skip(f'{tool} not installed')
+    source = tmp_path / f'awkward{OUTPUT_FORMATS[output_format].suffix}'
+    source.write_text(render_diagram(_make_awkward_label_diagram(), output_format, **options).output + '\n')
+    commands = {
+        'mmdc': ['mmdc', '-i', str(source), '-o', str(tmp_path / 'out.svg')],
+        'd2': ['d2', str(source), str(tmp_path / 'out.svg')],
+        'dot': ['dot', '-Tsvg', str(source), '-o', str(tmp_path / 'out.svg')],
+        'plantuml': ['plantuml', '-tsvg', str(source)],
+    }
+
+    result = subprocess.run(commands[tool], capture_output=True, text=True, timeout=180)
+
+    assert result.returncode == 0, f'{tool} rejected the output:\n{result.stdout}\n{result.stderr}'

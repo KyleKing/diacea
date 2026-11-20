@@ -80,8 +80,8 @@ uv publish
 | `diacea/generators/d2.py`             | 209        | 1       | 0        | 97.9%    |
 | `diacea/generators/excalidraw.py`     | 121        | 5       | 0        | 93.5%    |
 | `diacea/generators/graphviz.py`       | 160        | 4       | 0        | 96.1%    |
-| `diacea/generators/mermaid.py`        | 256        | 11      | 0        | 93.5%    |
-| `diacea/generators/plantuml.py`       | 141        | 1       | 0        | 97.8%    |
+| `diacea/generators/mermaid.py`        | 247        | 11      | 0        | 93.3%    |
+| `diacea/generators/plantuml.py`       | 143        | 1       | 0        | 97.8%    |
 | `diacea/generators/svg.py`            | 90         | 6       | 0        | 92.3%    |
 | `diacea/ingestion.py`                 | 91         | 4       | 0        | 92.9%    |
 | `diacea/ir/__init__.py`               | 5          | 0       | 0        | 100.0%   |
@@ -95,16 +95,16 @@ uv publish
 | `diacea/mkdocs_plugin.py`             | 9          | 0       | 0        | 100.0%   |
 | `diacea/parsers/__init__.py`          | 9          | 0       | 0        | 100.0%   |
 | `diacea/parsers/d2.py`                | 328        | 17      | 0        | 93.2%    |
-| `diacea/parsers/excalidraw.py`        | 379        | 25      | 0        | 92.0%    |
+| `diacea/parsers/excalidraw.py`        | 379        | 25      | 0        | 91.8%    |
 | `diacea/parsers/graphviz.py`          | 331        | 15      | 0        | 94.1%    |
-| `diacea/parsers/mermaid.py`           | 430        | 16      | 0        | 95.2%    |
+| `diacea/parsers/mermaid.py`           | 432        | 16      | 0        | 95.2%    |
 | `diacea/parsers/obsidian.py`          | 29         | 3       | 0        | 89.2%    |
-| `diacea/parsers/plantuml.py`          | 340        | 12      | 0        | 95.5%    |
+| `diacea/parsers/plantuml.py`          | 346        | 12      | 0        | 95.6%    |
 | `diacea/parsers/svg.py`               | 584        | 46      | 0        | 89.8%    |
 | `diacea/parsers/tldraw.py`            | 353        | 48      | 0        | 83.0%    |
 | `diacea/workspace_cli.py`             | 167        | 10      | 2        | 91.5%    |
 | `diacea/workspace_format.py`          | 50         | 3       | 0        | 92.2%    |
-| **Totals**                            | 5506       | 297     | 39       | 93.0%    |
+| **Totals**                            | 5507       | 297     | 39       | 93.0%    |
 
 Generated on: 2026-11-20
 <!-- {cte} -->
