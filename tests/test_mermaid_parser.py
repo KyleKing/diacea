@@ -883,6 +883,19 @@ class TestExtraNodeShapes:
             [],
             id='sequence-terminator-stripped-but-not-from-a-closing-entity',
         ),
+        pytest.param(
+            'C4Container\n  Container(api, "Fish &amp;amp; Chips")\n  Container(db, "A &lt; B")\n'
+            '  Rel(api, db, "r &amp;amp; w")\n',
+            {
+                'nodes': [
+                    ('api', 'Fish &amp; Chips', 'rectangle', 'container'),
+                    ('db', 'A < B', 'rectangle', 'container'),
+                ],
+                'edges': [('api', 'db', 'r &amp; w')],
+            },
+            [],
+            id='c4-entities-decoded-once',
+        ),
     ],
 )
 def test_source_parses_to(source, expected, warnings):

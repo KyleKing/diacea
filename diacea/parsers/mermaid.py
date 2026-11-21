@@ -370,12 +370,18 @@ class MermaidParser(Parser):
             else:
                 body.append(line)
 
+        # PlantUML decodes '&amp;' itself, so '&' is hidden from it and Mermaid's entities are decoded once, below
         macro_parser = PlantUMLParser()
-        diagram = macro_parser.parse('\n'.join(body))
-        self.warnings.extend(macro_parser.warnings)
+        diagram = macro_parser.parse('\n'.join(body).replace('&', '\0'))
+        self.warnings.extend(warning.replace('\0', '&') for warning in macro_parser.warnings)
         for element in diagram.elements:
             if isinstance(element, (Shape, Group, Connection)):
-                element.label = _unescape_label(element.label.replace('\\"', '"').replace('\\\\', '\\'))
+                element.label = _unescape_label(
+                    element.label.replace('\0', '&').replace('\\"', '"').replace('\\\\', '\\')
+                )
+            for key in ('technology', 'description'):
+                if isinstance(value := element.metadata.get(key), str):
+                    element.metadata[key] = _unescape_label(value.replace('\0', '&'))
         diagram.id = 'mermaid-c4'
         diagram.name = title
         diagram.metadata['mermaid'] = {'diagram_type': 'c4', 'c4_level': c4_level}

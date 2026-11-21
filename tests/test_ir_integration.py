@@ -151,6 +151,17 @@ def test_graphviz_direction_follows_the_drawing_aspect_ratio(elements, rankdir):
             id='mermaid-sequence-semicolons-written-as-entities',
         ),
         pytest.param(
+            'C4Container\n  Container(api, "Fish &amp;amp; Chips", "Go &lt;1.22", "R&amp;D")\n'
+            '  Container(db, "A &lt; B")\n  Rel(api, db, "r &amp;amp; w")\n',
+            'mermaid',
+            'c4',
+            '@startuml\n!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml\n'
+            '\nLAYOUT_WITH_LEGEND()\n\nContainer(api, "Fish &amp;amp; Chips", "Go ~<1.22", "R&amp;D")\n'
+            'Container(db, "A ~< B")\n\n\nRel(api, db, "r &amp;amp; w")\n@enduml',
+            None,
+            id='mermaid-c4-entities-decoded-once',
+        ),
+        pytest.param(
             'flowchart LR\n  a -->|"x -- y"| b\n  a -->|say "hi"| c\n  a -->|plain| d\n',
             'mermaid',
             'mermaid',
