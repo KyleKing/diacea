@@ -142,6 +142,15 @@ def test_graphviz_direction_follows_the_drawing_aspect_ratio(elements, rankdir):
             id='mermaid-sequence-participants',
         ),
         pytest.param(
+            'sequenceDiagram\n  a->>b: say #quot;hi#quot;\n  b->>a: read#59; then write\n',
+            'mermaid',
+            'mermaid',
+            'sequenceDiagram\n    participant a as a\n    participant b as b\n'
+            '    a->>b: say #quot;hi#quot;\n    b->>a: read#59; then write',
+            'sequence',
+            id='mermaid-sequence-semicolons-written-as-entities',
+        ),
+        pytest.param(
             'flowchart LR\n  a -->|"x -- y"| b\n  a -->|say "hi"| c\n  a -->|plain| d\n',
             'mermaid',
             'mermaid',

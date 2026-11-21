@@ -869,6 +869,20 @@ class TestExtraNodeShapes:
             [],
             id='style-value-with-colon',
         ),
+        pytest.param(
+            'sequenceDiagram\n  participant c as Carol;;\n'
+            '  a->>b: say #quot;hi#quot;\n  b->>a: hello;\n  a->>c: x#59;\n',
+            {
+                'nodes': [
+                    ('c', 'Carol', 'rectangle', 'component'),
+                    ('a', 'a', 'rectangle', 'component'),
+                    ('b', 'b', 'rectangle', 'component'),
+                ],
+                'edges': [('a', 'b', 'say "hi"'), ('b', 'a', 'hello'), ('a', 'c', 'x;')],
+            },
+            [],
+            id='sequence-terminator-stripped-but-not-from-a-closing-entity',
+        ),
     ],
 )
 def test_source_parses_to(source, expected, warnings):
