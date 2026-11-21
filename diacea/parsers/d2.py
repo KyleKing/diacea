@@ -284,11 +284,22 @@ def _split_outside_quotes(text: str, pattern: re.Pattern[str]) -> list[str]:
 _DOT_RE = re.compile(r'\.')
 
 
-def _unquote(text: str) -> str:
+_QUOTED_ESCAPE_RE = re.compile(r'\\([\\"\'$n])')
+_UNQUOTED_ESCAPE_RE = re.compile(r'\\([\\n])')
+
+
+def _unquote(text: str, *, newlines: bool = False) -> str:
     text = text.strip()
-    if len(text) >= 2 and text[0] == text[-1] and text[0] in '"\'':
-        text = text[1:-1].replace('\\"', '"').replace("\\'", "'").replace('\\$', '$')
-    return text.replace('\\\\', '\\')
+    quoted = len(text) >= 2 and text[0] == text[-1] and text[0] in '"\''
+    pattern = _QUOTED_ESCAPE_RE if quoted else _UNQUOTED_ESCAPE_RE
+
+    def resolve(match: re.Match[str]) -> str:
+        char = match.group(1)
+        if char == 'n':
+            return '\n' if newlines else match.group(0)
+        return char
+
+    return pattern.sub(resolve, text[1:-1] if quoted else text)
 
 
 def _parse_label(value: str) -> str:
@@ -300,7 +311,7 @@ def _parse_label(value: str) -> str:
             inner = value[len(opener.group(0)) : len(value) - len(fence.group(0))]
             lines = [line.strip().lstrip('#').strip() for line in inner.strip().splitlines()]
             return '\n'.join(line for line in lines if line)
-    return _unquote(value).replace('\\n', '\n')
+    return _unquote(value, newlines=True)
 
 
 def _parse_key(text: str) -> _Path:

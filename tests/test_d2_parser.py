@@ -246,6 +246,18 @@ def test_own_output_is_a_fixpoint():
             [],
             id='quoted-key-segment-keeps-its-dot',
         ),
+        pytest.param(
+            'x: "C:\\\\new"\ny: "a\\\\\\nb"\nz: "two\\nlines"\n',
+            {
+                'nodes': [
+                    ('x', 'C:\\new', 'rectangle', 'component'),
+                    ('y', 'a\\\nb', 'rectangle', 'component'),
+                    ('z', 'two\nlines', 'rectangle', 'component'),
+                ],
+            },
+            [],
+            id='escaped-backslash-before-n-is-not-a-newline',
+        ),
     ],
 )
 def test_source_parses_to(source, expected, warnings):
