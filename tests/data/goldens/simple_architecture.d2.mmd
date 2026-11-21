@@ -1,0 +1,30 @@
+flowchart LR
+    user([User])
+    api_gateway{{API Gateway}}
+    queue[Message Queue]
+    subgraph services[Services]
+        auth[Auth Service]
+        orders[Order Service]
+        products[Product Service]
+        inventory[Inventory Service]
+    end
+    subgraph databases[Databases]
+        auth_db[(Auth DB)]
+        order_db[(Order DB)]
+        product_db[(Product DB)]
+        inventory_db[(Inventory DB)]
+    end
+    user -->|HTTP Requests| api_gateway
+    api_gateway -->|Authenticate| auth
+    api_gateway -->|Place Order| orders
+    api_gateway -->|Get Products| products
+    auth -->|Query| auth_db
+    orders -->|Query| order_db
+    products -->|Query| product_db
+    inventory -->|Query| inventory_db
+    orders -->|Order Placed Event| queue
+    queue -->|Process Order| inventory
+
+    style user fill:lightblue
+    style api_gateway fill:lightgreen
+    style queue fill:gold

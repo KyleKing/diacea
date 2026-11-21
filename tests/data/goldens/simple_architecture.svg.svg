@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="758" height="348" viewBox="16.0 26.0 758.0 348.0">
+<style>text{font-family:Helvetica,Arial,sans-serif;font-size:14px;fill:#1e1e1e}.group-label{font-size:12px;fill:#868e96}.edge-label{font-size:12px;paint-order:stroke;stroke:#ffffff;stroke-width:4px}</style>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1e1e1e"/></marker></defs>
+<rect x="16.0" y="26.0" width="758.0" height="348.0" fill="#ffffff"/>
+<g id="services" data-semantic="group"><rect x="350.0" y="50.0" width="400.0" height="300.0" rx="8" fill="none" fill-opacity="0.25" stroke="#666" stroke-dasharray="6 4"/><text class="group-label" x="360.0" y="68.0">Services</text></g>
+<g id="user" data-semantic="person"><ellipse cx="80.0" cy="200.0" rx="40.0" ry="40.0" fill="#87CEEB" stroke="black" stroke-width="2.0"/><text x="80.0" y="204.7" text-anchor="middle">User</text></g>
+<g id="api_gateway" data-semantic="component"><rect x="180.0" y="170.0" width="120.0" height="60.0" rx="2.0" fill="#90EE90" stroke="black" stroke-width="2.0"/><text x="240.0" y="204.7" text-anchor="middle">API Gateway</text></g>
+<g id="auth_service" data-semantic="service"><rect x="370.0" y="90.0" width="100.0" height="50.0" rx="2.0" fill="#E0E0E0" stroke="black" stroke-width="1.0"/><text x="420.0" y="119.7" text-anchor="middle">Auth Service</text></g>
+<g id="order_service" data-semantic="service"><rect x="370.0" y="160.0" width="100.0" height="50.0" rx="2.0" fill="#E0E0E0" stroke="black" stroke-width="1.0"/><text x="420.0" y="189.7" text-anchor="middle">Order Service</text></g>
+<g id="product_service" data-semantic="service"><rect x="370.0" y="230.0" width="100.0" height="50.0" rx="2.0" fill="#E0E0E0" stroke="black" stroke-width="1.0"/><text x="420.0" y="259.7" text-anchor="middle">Product Service</text></g>
+<g id="auth_db" data-semantic="database"><ellipse cx="600.0" cy="115.0" rx="60.0" ry="30.0" fill="#FFE4B5" stroke="black" stroke-width="1.0"/><text x="600.0" y="119.7" text-anchor="middle">Auth DB</text></g>
+<g id="order_db" data-semantic="database"><ellipse cx="600.0" cy="185.0" rx="60.0" ry="30.0" fill="#FFE4B5" stroke="black" stroke-width="1.0"/><text x="600.0" y="189.7" text-anchor="middle">Order DB</text></g>
+<g id="product_db" data-semantic="database"><ellipse cx="600.0" cy="255.0" rx="60.0" ry="30.0" fill="#FFE4B5" stroke="black" stroke-width="1.0"/><text x="600.0" y="259.7" text-anchor="middle">Product DB</text></g>
+<g id="message_queue" data-semantic="queue"><rect x="370.0" y="300.0" width="100.0" height="40.0" rx="2.0" fill="#FFD700" stroke="black" stroke-width="2.0"/><text x="420.0" y="324.7" text-anchor="middle">Message Queue</text></g>
+<polyline points="120.0,200.0 180.0,200.0" fill="none" stroke="black" stroke-width="2.0" marker-end="url(#arrow)"/>
+<polyline points="300.0,190.0 370.0,115.0" fill="none" stroke="black" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="300.0,200.0 370.0,185.0" fill="none" stroke="black" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="300.0,210.0 370.0,255.0" fill="none" stroke="black" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="470.0,115.0 540.0,115.0" fill="none" stroke="blue" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="470.0,185.0 540.0,185.0" fill="none" stroke="blue" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="470.0,255.0 540.0,255.0" fill="none" stroke="blue" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="420.0,210.0 420.0,300.0" fill="none" stroke="green" stroke-width="1.5" stroke-dasharray="6 4" marker-end="url(#arrow)"/>
+</svg>

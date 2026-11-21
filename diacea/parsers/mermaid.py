@@ -112,6 +112,16 @@ _NUMERIC_ENTITY_RE = re.compile(r'#(\d{2,6});')
 
 _QUOTED_RE = re.compile(r'"[^"]*"')
 
+# A trailing ';' ends a statement unless it closes an entity code such as `#quot;` or `&lt;`
+_TRAILING_ENTITY_RE = re.compile(r'[#&]\w+;$')
+
+
+def _strip_terminator(line: str) -> str:
+    while line.endswith(';') and not _TRAILING_ENTITY_RE.search(line):
+        line = line[:-1].rstrip()
+    return line.strip()
+
+
 _MASK_RE = re.compile(r'\0(\d+)\0')
 
 _NODE_TOKEN_RE = re.compile(r'^([A-Za-z0-9_.:-]+)\s*(.*)$', re.DOTALL)
@@ -360,12 +370,18 @@ class MermaidParser(Parser):
             else:
                 body.append(line)
 
+        # PlantUML decodes '&amp;' itself, so '&' is hidden from it and Mermaid's entities are decoded once, below
         macro_parser = PlantUMLParser()
-        diagram = macro_parser.parse('\n'.join(body))
-        self.warnings.extend(macro_parser.warnings)
+        diagram = macro_parser.parse('\n'.join(body).replace('&', '\0'))
+        self.warnings.extend(warning.replace('\0', '&') for warning in macro_parser.warnings)
         for element in diagram.elements:
             if isinstance(element, (Shape, Group, Connection)):
-                element.label = _unescape_label(element.label.replace('\\"', '"').replace('\\\\', '\\'))
+                element.label = _unescape_label(
+                    element.label.replace('\0', '&').replace('\\"', '"').replace('\\\\', '\\')
+                )
+            for key in ('technology', 'description'):
+                if isinstance(value := element.metadata.get(key), str):
+                    element.metadata[key] = _unescape_label(value.replace('\0', '&'))
         diagram.id = 'mermaid-c4'
         diagram.name = title
         diagram.metadata['mermaid'] = {'diagram_type': 'c4', 'c4_level': c4_level}
@@ -425,7 +441,7 @@ class MermaidParser(Parser):
             if not header_seen:
                 header_seen = True
                 continue
-            self._parse_sequence_statement(line.rstrip(';').strip(), line_number)
+            self._parse_sequence_statement(_strip_terminator(line), line_number)
 
         for shape in self._shape_order:
             shape.semantic_type, shape.semantic_confidence = infer_semantic_type(

@@ -1,0 +1,25 @@
+flowchart LR
+    API_Results[API:Results]
+    State_LayoutConfig[State:LayoutConfig]
+    GeneralSummaryResult[GeneralSummaryResult]
+    TwoRowsBallResult[TwoRowsBallResult]
+    OneRowBallResult[OneRowBallResult]
+    OneRowAddUpBallResult[OneRowAddUpBallResult]
+    TwoRowsWithHeaderBallResult[TwoRowsWithHeaderBallResult]
+    subgraph group_ResultsComponent[ResultsComponent]
+        GameDropDown[GameDropDown]
+        DateFilterBar[DateFilterBar]
+        Loop_ResultContainer[Loop:ResultContainer]
+        subgraph group_ResultContainer[ResultContainer]
+            ResultBallLoader[ResultBallLoader]
+            ResultSummaryLoader[ResultSummaryLoader]
+        end
+    end
+    group_ResultsComponent -->|"Get #96;resultSummary#96;, #96;displayResultNumbers#96;"| API_Results
+    group_ResultsComponent -->|"Get #96;componetId#96; of #96;miniResultLayout#96; by counter"| State_LayoutConfig
+    Loop_ResultContainer -->|Single Result Data| group_ResultContainer
+    ResultSummaryLoader -->|Dynamic loading by componentId| GeneralSummaryResult
+    ResultBallLoader -->|Dynamic loading by componentId| TwoRowsBallResult
+    ResultBallLoader -->|Dynamic loading by componentId| OneRowBallResult
+    ResultBallLoader -->|Dynamic loading by componentId| OneRowAddUpBallResult
+    ResultBallLoader -->|Dynamic loading by componentId| TwoRowsWithHeaderBallResult

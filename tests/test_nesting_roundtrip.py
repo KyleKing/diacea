@@ -136,44 +136,20 @@ def _containment(diagram):
 
 
 @pytest.mark.parametrize('depth', [2, 3])
-def test_mermaid_roundtrip_preserves_nesting(depth):
-    diagram = MermaidParser().parse(MERMAID_SOURCES[depth])
+@pytest.mark.parametrize(
+    ('sources', 'parser', 'generator'),
+    [
+        pytest.param(MERMAID_SOURCES, MermaidParser, MermaidGenerator, id='mermaid'),
+        pytest.param(PLANTUML_SOURCES, PlantUMLParser, PlantUMLGenerator, id='plantuml'),
+        pytest.param(C4_SOURCES, PlantUMLParser, C4PlantUMLGenerator, id='c4'),
+        pytest.param(MERMAID_SOURCES, MermaidParser, PlantUMLGenerator, id='mermaid-to-plantuml'),
+    ],
+)
+def test_roundtrip_preserves_nesting(sources, parser, generator, depth):
+    diagram = parser().parse(sources[depth])
     assert _containment(diagram) == EXPECTED_CONTAINMENT[depth]
 
-    regenerated = MermaidGenerator().generate(diagram)
-    reparsed = MermaidParser().parse(regenerated)
+    regenerated = generator().generate(diagram)
+    reparse = PlantUMLParser if generator in {PlantUMLGenerator, C4PlantUMLGenerator} else MermaidParser
 
-    assert _containment(reparsed) == EXPECTED_CONTAINMENT[depth]
-
-
-@pytest.mark.parametrize('depth', [2, 3])
-def test_plantuml_roundtrip_preserves_nesting(depth):
-    diagram = PlantUMLParser().parse(PLANTUML_SOURCES[depth])
-    assert _containment(diagram) == EXPECTED_CONTAINMENT[depth]
-
-    regenerated = PlantUMLGenerator().generate(diagram)
-    reparsed = PlantUMLParser().parse(regenerated)
-
-    assert _containment(reparsed) == EXPECTED_CONTAINMENT[depth]
-
-
-@pytest.mark.parametrize('depth', [2, 3])
-def test_c4_roundtrip_preserves_nesting(depth):
-    diagram = PlantUMLParser().parse(C4_SOURCES[depth])
-    assert _containment(diagram) == EXPECTED_CONTAINMENT[depth]
-
-    regenerated = C4PlantUMLGenerator().generate(diagram)
-    reparsed = PlantUMLParser().parse(regenerated)
-
-    assert _containment(reparsed) == EXPECTED_CONTAINMENT[depth]
-
-
-@pytest.mark.parametrize('depth', [2, 3])
-def test_mermaid_to_plantuml_preserves_nesting(depth):
-    diagram = MermaidParser().parse(MERMAID_SOURCES[depth])
-    assert _containment(diagram) == EXPECTED_CONTAINMENT[depth]
-
-    generated = PlantUMLGenerator().generate(diagram)
-    reparsed = PlantUMLParser().parse(generated)
-
-    assert _containment(reparsed) == EXPECTED_CONTAINMENT[depth]
+    assert _containment(reparse().parse(regenerated)) == EXPECTED_CONTAINMENT[depth]

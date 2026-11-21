@@ -1,0 +1,21 @@
+C4Context
+    title SVG Diagram
+    Person(user, "User")
+    Component(api_gateway, "API Gateway")
+    SystemQueue(message_queue, "Message Queue")
+    Boundary(services, "Services") {
+        Container(auth_service, "Auth Service")
+        Container(order_service, "Order Service")
+        Container(product_service, "Product Service")
+        ContainerDb(auth_db, "Auth DB")
+        ContainerDb(order_db, "Order DB")
+        ContainerDb(product_db, "Product DB")
+    }
+    Rel(user, api_gateway, " ")
+    Rel(api_gateway, auth_service, " ")
+    Rel(api_gateway, order_service, " ")
+    Rel(api_gateway, product_service, " ")
+    Rel(auth_service, auth_db, " ")
+    Rel(order_service, order_db, " ")
+    Rel(product_service, product_db, " ")
+    Rel(order_service, message_queue, " ")

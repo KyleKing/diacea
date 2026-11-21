@@ -1,0 +1,78 @@
+direction: right
+
+group-services: Microservices {
+  auth_service: Auth\nService
+  order_service: Order\nService
+  product_service: Product\nService
+  inventory_service: Inventory\nService
+}
+
+group-databases: Databases {
+  auth_db: Auth DB {
+    shape: cylinder
+  }
+  order_db: Order DB {
+    shape: cylinder
+  }
+  product_db: Product DB {
+    shape: cylinder
+  }
+  inventory_db: Inventory DB {
+    shape: cylinder
+  }
+}
+
+user: User {
+  shape: oval
+  style: {
+    fill: "lightblue"
+  }
+}
+admin: Administrator {
+  shape: oval
+  style: {
+    fill: "lightblue"
+  }
+}
+api_gateway: API Gateway {
+  shape: hexagon
+  style: {
+    fill: "lightgreen"
+  }
+}
+message_queue: Message\nQueue {
+  shape: queue
+  style: {
+    fill: "gold"
+  }
+}
+payment_gateway: Payment\nGateway {
+  style: {
+    fill: "lightyellow"
+  }
+}
+
+user -> api_gateway: HTTP
+admin -> api_gateway: HTTPS
+api_gateway -> group-services.auth_service: auth
+api_gateway -> group-services.order_service: orders
+api_gateway -> group-services.product_service: products
+group-services.auth_service -> group-databases.auth_db: SQL
+group-services.order_service -> group-databases.order_db: SQL
+group-services.product_service -> group-databases.product_db: SQL
+group-services.inventory_service -> group-databases.inventory_db: SQL
+group-services.order_service -> message_queue: publish {
+  style: {
+    stroke-dash: 3
+  }
+}
+message_queue -> group-services.inventory_service: subscribe {
+  style: {
+    stroke-dash: 3
+  }
+}
+group-services.order_service -> payment_gateway: charge {
+  style: {
+    stroke: "red"
+  }
+}

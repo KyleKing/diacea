@@ -1,0 +1,13 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+
+ComponentDb(database, "Database")
+
+System_Boundary(group_backend, "Backend") {
+  Container(api_server, "API Server")
+}
+
+Rel(api_server, database, "queries")
+@enduml

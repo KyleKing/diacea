@@ -1,0 +1,18 @@
+@startuml
+left to right direction
+actor "Client" as client
+rectangle "Fineract" as fineractSystem {
+  rectangle "Fineract REST API" as api
+  rectangle "Command Processing" as commandSystem {
+    rectangle "Command Dispatcher" as dispatcher
+    rectangle "Command Hook Manager" as hookManager
+    rectangle "Command Handler Manager" as handlerManager
+  }
+}
+client --> api : "Sends requests"
+api --> dispatcher : "Converts request into command"
+dispatcher --> hookManager : "Call before handler"
+dispatcher --> hookManager : "Call after handler"
+dispatcher --> hookManager : "Call on handler error"
+dispatcher --> handlerManager : "Handle command"
+@enduml

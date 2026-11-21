@@ -1,0 +1,22 @@
+direction: right
+
+fineractSystem: Fineract {
+  api: Fineract REST API
+  commandSystem: Command Processing {
+    dispatcher: Command Dispatcher
+    hookManager: Command Hook Manager
+    handlerManager: Command Handler Manager
+  }
+
+}
+
+client: Client {
+  shape: person
+}
+
+client -> fineractSystem.api: Sends requests
+fineractSystem.api -> fineractSystem.commandSystem.dispatcher: Converts request into command
+fineractSystem.commandSystem.dispatcher -> fineractSystem.commandSystem.hookManager: Call before handler
+fineractSystem.commandSystem.dispatcher -> fineractSystem.commandSystem.hookManager: Call after handler
+fineractSystem.commandSystem.dispatcher -> fineractSystem.commandSystem.hookManager: Call on handler error
+fineractSystem.commandSystem.dispatcher -> fineractSystem.commandSystem.handlerManager: Handle command

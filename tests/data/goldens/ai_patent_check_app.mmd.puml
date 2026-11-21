@@ -1,0 +1,25 @@
+@startuml
+rectangle "Client Layer" as group_Client {
+  rectangle "User's Browser" as Browser
+  rectangle "React Frontend (Dockerized)" as Frontend
+}
+rectangle "Server Layer (Dockerized)" as group_Backend {
+  rectangle "Node.js Backend" as NodeBackend
+  rectangle "OpenAI Prompt Template" as Template
+  rectangle "Data Processing" as group_Processing {
+    rectangle "Patent ID &amp; Company Input Handler" as InputHandler
+  }
+}
+rectangle "External Services" as group_External {
+  rectangle "OpenAI API" as OpenAI
+}
+Browser --> Frontend
+Frontend --> NodeBackend
+NodeBackend --> InputHandler
+InputHandler --> Template
+Template --> InputHandler
+InputHandler --> NodeBackend
+NodeBackend --> OpenAI : "Prompt with Patent &amp; Company Info"
+OpenAI --> NodeBackend : "Response Standard JSON"
+NodeBackend --> Frontend
+@enduml

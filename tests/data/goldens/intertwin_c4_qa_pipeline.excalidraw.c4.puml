@@ -1,0 +1,33 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+
+Container(workflow_composition, "Workflow composition", "", "[Software System]\nDefine, deploy and run\ntrigger-based workflows")
+Person(dt_developer, "DT developer", "Defines use case-specific DT\n[Person]")
+Container(data_and_computation_abstraction, "Data and computation\nabstraction", "", "[Container]\nProvides abstractions to\naccess data on the \ninfrastructure and computational\nresources")
+Container(ai_ml_subsystem, "AI/ML subsystem", "", "[Container]\nProvides the user with AI/ML\ntools to perform distributed ML\ntraining and HPO")
+Component(repository, "Repository", "", "[Software System: \ngithub.com/interTwin-eu]\nStores DT applications")
+
+System_Boundary(group_node_1, " ") {
+  Container(tooling_reporting, "Tooling &amp; Reporting", "", "[Component]\nCatalogs the supported QA\n tools and provides plugins to\nparse and validate their\noutputs ")
+  Component(jepl_library, "JePL library", "", "[Component]\nYAML-based definition of\nJenkins CI/CD pipelines")
+  System(ci_system, "CI system", "[Component: Jenkins]\nManages the execution of\nCI/CD pipelines")
+  Container(sqaaas_api, "SQAaaS API", "", "[Component]\nImplements core functionalities\nof QA assessment of digital\nassets and creation of\ncustomized C/CD pipelines")
+  Container(sqaaas_web, "SQAaaS web", "", "[Component]\nProvides the graphical\ninterface to SQAaaS\nplatform")
+}
+
+Rel(dt_developer, repository, "Push changes to workflow code")
+Rel(data_and_computation_abstraction, sqaaas_api, "FAIR and data quality assessment (event and/or polling-based)")
+Rel(sqaaas_api, ci_system, "Runs/fetches results\nof the QA assessment")
+Rel(ci_system, ai_ml_subsystem, "Triggers deployment\nof pre-trained ML model")
+Rel(repository, sqaaas_api, "Event-based\nworfklow validation\n(DevOps)")
+Rel(sqaaas_api, repository, "Registers/loads\nQA assessment")
+Rel(jepl_library, repository, "Modifies\nQA assessment")
+Rel(tooling_reporting, sqaaas_api, "Get tools")
+Rel(sqaaas_web, sqaaas_api, "Leverages")
+Rel(workflow_composition, sqaaas_api, "Triggers pre-defined\nQA assessment\nas step in the workflow")
+Rel(sqaaas_api, workflow_composition, "Gets deployed as\na step in the workflow")
+Rel(dt_developer, sqaaas_web, "Defines custom\nQA assessment")
+Rel(dt_developer, workflow_composition, "")
+@enduml

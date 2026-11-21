@@ -1,0 +1,15 @@
+C4Context
+    title Architecture Diagram
+    Person(customer, "Customer")
+    System(payments, "Payment Provider")
+    Boundary(shop, "Web Shop") {
+        Container(web, "Web App")
+        Container(api, "API")
+        ContainerDb(db, "Orders DB")
+        ContainerQueue(bus, "Event Bus")
+    }
+    Rel(customer, web, "Uses")
+    Rel(web, api, "Calls")
+    Rel(api, db, "Reads/Writes")
+    Rel(api, bus, "Publishes")
+    Rel(api, payments, "Charges")

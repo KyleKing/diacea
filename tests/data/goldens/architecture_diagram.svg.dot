@@ -1,0 +1,18 @@
+digraph "SVG Diagram" {
+    rankdir="LR";
+    node [shape="box", fontname="Helvetica"];
+    edge [fontname="Helvetica"];
+
+    user1 [label="User", shape="ellipse", fillcolor="#FFE0B2", style="filled", color="#E65100", penwidth="2.0"];
+    webapp [label="Web App", shape="box3d", fillcolor="#E3F2FD", style="filled", color="#1565C0", penwidth="3.0"];
+    api [label="API Gateway", fillcolor="#F3E5F5", style="filled", color="#6A1B9A", penwidth="2.0"];
+    database1 [label="PostgreSQL", shape="cylinder", fillcolor="#E8F5E9", style="filled", color="#2E7D32", penwidth="2.0"];
+    queue1 [label="RabbitMQ", shape="folder", fillcolor="#FFF9C4", style="filled", color="#F57F17", penwidth="2.0"];
+    storage1 [label="S3 Storage", shape="cylinder", fillcolor="#E0F7FA", style="filled", color="#00838F", penwidth="2.0"];
+    external1 [label="Payment API", shape="octagon", fillcolor="#EFEBE9", style="filled", color="#4E342E", penwidth="2.0"];
+
+    user1 -> webapp [color="#666", penwidth="2.0"];
+    webapp -> api [color="#666", penwidth="2.0"];
+    webapp -> database1 [color="#666", penwidth="2.0"];
+    api -> queue1 [color="#666", penwidth="2.0"];
+}

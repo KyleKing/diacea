@@ -1,0 +1,44 @@
+direction: right
+
+User: User {
+  style: {
+    fill: "#87CEEB"
+  }
+}
+API: API Gateway {
+  style: {
+    fill: "#90EE90"
+  }
+}
+Auth: Auth Service
+Orders: Order Service
+Products: Product Service
+AuthDB: Auth Database {
+  shape: cylinder
+}
+OrderDB: Order Database {
+  shape: cylinder
+}
+ProductDB: Product Database {
+  shape: cylinder
+}
+Queue: Message Queue {
+  style: {
+    fill: "#FFD700"
+  }
+}
+Inventory: Inventory Service
+InvDB: Inventory Database {
+  shape: cylinder
+}
+
+User -> API
+API -> Auth
+API -> Orders
+API -> Products
+Auth -> AuthDB
+Orders -> OrderDB
+Products -> ProductDB
+Orders -> Queue
+Queue -> Inventory
+Inventory -> InvDB

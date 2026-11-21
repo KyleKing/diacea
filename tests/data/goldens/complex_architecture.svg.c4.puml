@@ -1,0 +1,54 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+
+
+System_Boundary(external_users, "external_users") {
+  Person(mobile_user, "Mobile")
+  Person(web_user, "Web")
+  Person(admin, "Admin")
+}
+System_Boundary(aws_cloud, "AWS Cloud") {
+  Container(cdn, "CDN")
+  Component(load_balancer, "Load Balancer")
+  System_Boundary(app_layer, "Application Tier (EKS)") {
+    Container(api_service_1, "API-1")
+    Container(api_service_2, "API-2")
+    Container(api_service_3, "API-3")
+    Container(worker_service, "Worker")
+    Container(scheduler, "Scheduler")
+  }
+  System_Boundary(data_layer, "Data Tier") {
+    ComponentDb(primary_db, "Primary DB", "", "(PostgreSQL)")
+    ComponentDb(read_replica, "Read Replica")
+    Container(cache, "Redis Cache")
+    Container(s3_storage, "S3 Storage")
+    ComponentQueue(message_queue, "SQS Queue")
+  }
+}
+System_Boundary(gcp_cloud, "GCP Cloud") {
+  Container(ml_service, "ML Prediction", "", "(Vertex AI)")
+  ComponentDb(analytics_db, "Analytics DB", "", "(BigQuery)")
+}
+System_Boundary(external_services, " ") {
+  Container(payment_gateway, "Payment", "", "(Stripe)")
+  Container(email_service, "Email", "", "(SendGrid)")
+  Container(monitoring, "Monitoring", "", "(Datadog)")
+}
+
+Rel(mobile_user, cdn, "")
+Rel(admin, load_balancer, "")
+Rel(cdn, load_balancer, "")
+Rel(load_balancer, api_service_1, "")
+Rel(load_balancer, api_service_2, "")
+Rel(load_balancer, api_service_3, "")
+Rel(worker_service, primary_db, "")
+Rel(scheduler, primary_db, "")
+Rel(api_service_3, primary_db, "")
+Rel(primary_db, read_replica, "")
+Rel(worker_service, cache, "")
+Rel(worker_service, message_queue, "")
+Rel(api_service_3, ml_service, "")
+Rel(read_replica, analytics_db, "")
+@enduml

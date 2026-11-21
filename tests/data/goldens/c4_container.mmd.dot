@@ -1,0 +1,26 @@
+digraph "E-Commerce System - Container Diagram" {
+    rankdir="TB";
+    node [shape="box", fontname="Helvetica"];
+    edge [fontname="Helvetica"];
+
+    subgraph cluster_ecommerce {
+        label="E-Commerce System";
+        web [label="Web Application", shape="component"];
+        api [label="API Application", shape="component"];
+        db [label="Database", shape="cylinder"];
+        cache [label="Cache", shape="component"];
+        queue [label="Message Queue", shape="folder"];
+    }
+
+    customer [label="Customer", shape="ellipse"];
+    payment [label="Payment Gateway", shape="box3d"];
+    email [label="Email Service", shape="box3d"];
+
+    customer -> web [label="Uses"];
+    web -> api [label="Makes API calls to"];
+    api -> db [label="Reads/Writes"];
+    api -> cache [label="Reads/Writes"];
+    api -> queue [label="Publishes messages to"];
+    api -> payment [label="Processes payments via"];
+    api -> email [label="Sends emails via"];
+}

@@ -1,0 +1,13 @@
+C4Context
+    title SVG Diagram
+    Person(user, "Customer")
+    Boundary(system_boundary, "Microservices System") {
+        Container(service1, "User Service")
+        Container(service2, "Order Service")
+        Container(service3, "Payment Service")
+        Boundary(data_layer, "Data Layer") {
+            ContainerDb(db1, "Users DB")
+            ContainerDb(db2, "Orders DB")
+            ContainerDb(db3, "Payments DB")
+        }
+    }

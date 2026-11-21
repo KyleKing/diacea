@@ -1,0 +1,18 @@
+flowchart LR
+    dev[Developer]
+    gh[GitHub]
+    ci{CI Checks}
+    build[Build Image]
+    notify[Notify Author]
+    registry[(Container Registry)]
+    deploy([Deploy to Staging])
+    smoke{{Smoke Tests}}
+    prod[Production]
+    dev -->|git push| gh
+    gh --> ci
+    ci -->|pass| build
+    ci -->|fail| notify
+    build --> registry
+    registry --> deploy
+    deploy -.-> smoke
+    smoke ==> prod

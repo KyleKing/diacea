@@ -1,0 +1,28 @@
+@startuml
+left to right direction
+actor "User" as user
+hexagon "API Gateway" as api_gateway
+queue "Message Queue" as queue
+rectangle "Services" as services {
+  rectangle "Auth Service" as auth
+  rectangle "Order Service" as orders
+  rectangle "Product Service" as products
+  rectangle "Inventory Service" as inventory
+}
+rectangle "Databases" as databases {
+  database "Auth DB" as auth_db
+  database "Order DB" as order_db
+  database "Product DB" as product_db
+  database "Inventory DB" as inventory_db
+}
+user --> api_gateway : "HTTP Requests"
+api_gateway --> auth : "Authenticate"
+api_gateway --> orders : "Place Order"
+api_gateway --> products : "Get Products"
+auth --> auth_db : "Query"
+orders --> order_db : "Query"
+products --> product_db : "Query"
+inventory --> inventory_db : "Query"
+orders --> queue : "Order Placed Event"
+queue --> inventory : "Process Order"
+@enduml

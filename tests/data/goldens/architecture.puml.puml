@@ -1,0 +1,28 @@
+@startuml
+left to right direction
+actor "Customer" as customer
+actor "Support Agent" as agent_support
+cloud "CDN" as cdn
+storage "Object Storage" as blobs
+database "Analytics Warehouse" as warehouse
+rectangle "Web Platform" as platform {
+  rectangle "Frontend SPA" as frontend
+  rectangle "API Gateway" as gateway
+  rectangle "Order Service" as orders
+  rectangle "Billing Service" as billing
+  queue "Event Bus" as events
+  database "Orders DB" as orders_db
+}
+customer --> cdn : "browses"
+cdn --> frontend
+customer --> frontend
+agent_support --> gateway : "admin API"
+frontend --> gateway : "HTTPS/JSON"
+gateway --> orders
+gateway --> billing
+orders --> orders_db : "SQL"
+orders ..> events : "publishes"
+billing ..> events : "publishes"
+events --> warehouse : "streams"
+orders --> blobs : "invoices"
+@enduml

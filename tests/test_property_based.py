@@ -6,6 +6,8 @@ Run property-based tests:
     pytest tests/test_property_based.py -v
 """
 
+from collections.abc import Callable
+
 import pytest
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
@@ -19,6 +21,7 @@ from diacea.generators import (
     PlantUMLGenerator,
 )
 from diacea.ir import Connection, Diagram, Group
+from diacea.ir.base import Generator
 from diacea.ir.elements import Dimensions, Point, Shape, Style
 from diacea.parsers import ExcalidrawParser
 
@@ -113,155 +116,54 @@ class TestParserPropertyBased:
     @given(data=excalidraw_diagram_strategy())
     @settings(max_examples=50, suppress_health_check=[HealthCheck.too_slow])
     def test_excalidraw_parser_handles_any_valid_input(self, data):
-        """Parser should never crash on valid input structure."""
-        parser = ExcalidrawParser()
-        diagram = parser.parse(data)
-
-        assert isinstance(diagram, Diagram)
-        assert diagram.id is not None
-        assert isinstance(diagram.elements, list)
-
-    @given(data=excalidraw_diagram_strategy())
-    @settings(max_examples=20, suppress_health_check=[HealthCheck.too_slow])
-    def test_shape_count_matches_input(self, data):
-        """Number of parsed shapes should relate to input elements."""
-        parser = ExcalidrawParser()
-        diagram = parser.parse(data)
+        diagram = ExcalidrawParser().parse(data)
 
         non_arrow_elements = [e for e in data['elements'] if e.get('type') != 'arrow']
-        assert len(diagram.elements) <= len(non_arrow_elements) + len(non_arrow_elements)
+        assert isinstance(diagram.elements, list)
+        assert len(diagram.elements) <= 2 * len(non_arrow_elements)
+
+
+_GENERATOR_MARKERS: list[tuple[Callable[[], Generator], str, str]] = [
+    (PlantUMLGenerator, '@startuml', '@enduml'),
+    (C4PlantUMLGenerator, '@startuml', '@enduml'),
+    (lambda: MermaidGenerator(diagram_type='flowchart'), 'flowchart', ''),
+    (GraphVizGenerator, 'digraph', '}'),
+    (D2Generator, '', ''),
+]
 
 
 class TestGeneratorPropertyBased:
-    """Property-based tests for generators."""
-
     @given(diagram=ir_diagram_strategy())
     @settings(max_examples=50, suppress_health_check=[HealthCheck.too_slow])
-    def test_plantuml_never_crashes(self, diagram):
-        """PlantUML generator should never crash on valid IR."""
-        gen = PlantUMLGenerator()
-        output = gen.generate(diagram)
+    def test_every_generator_writes_a_complete_deterministic_document(self, diagram):
+        for make_generator, head, tail in _GENERATOR_MARKERS:
+            output = make_generator().generate(diagram)
 
-        assert isinstance(output, str)
-        assert '@startuml' in output
-        assert '@enduml' in output
-
-    @given(diagram=ir_diagram_strategy())
-    @settings(max_examples=50, suppress_health_check=[HealthCheck.too_slow])
-    def test_mermaid_never_crashes(self, diagram):
-        """Mermaid generator should never crash on valid IR."""
-        gen = MermaidGenerator(diagram_type='flowchart')
-        output = gen.generate(diagram)
-
-        assert isinstance(output, str)
-        assert 'flowchart' in output.lower()
-
-    @given(diagram=ir_diagram_strategy())
-    @settings(max_examples=50, suppress_health_check=[HealthCheck.too_slow])
-    def test_graphviz_never_crashes(self, diagram):
-        """GraphViz generator should never crash on valid IR."""
-        gen = GraphVizGenerator()
-        output = gen.generate(diagram)
-
-        assert isinstance(output, str)
-        assert 'digraph' in output or 'graph' in output
-
-    @given(diagram=ir_diagram_strategy())
-    @settings(max_examples=50, suppress_health_check=[HealthCheck.too_slow])
-    def test_d2_never_crashes(self, diagram):
-        """D2 generator should never crash on valid IR."""
-        gen = D2Generator()
-        output = gen.generate(diagram)
-
-        assert isinstance(output, str)
-
-    @given(diagram=ir_diagram_strategy())
-    @settings(max_examples=30, suppress_health_check=[HealthCheck.too_slow])
-    def test_all_generators_produce_output(self, diagram):
-        """All generators should produce non-empty output for non-empty diagrams."""
-        generators = [
-            PlantUMLGenerator(),
-            C4PlantUMLGenerator(),
-            MermaidGenerator(diagram_type='flowchart'),
-            GraphVizGenerator(),
-            D2Generator(),
-        ]
-
-        for gen in generators:
-            output = gen.generate(diagram)
-            assert isinstance(output, str)
+            assert output.startswith(head)
+            assert output.endswith(tail)
+            assert make_generator().generate(diagram) == output
             if diagram.elements:
                 assert output.strip()
 
-
-class TestEscapingPropertyBased:
-    """Property-based tests for label escaping."""
-
-    @given(
-        label=st.text(
-            alphabet=st.characters(blacklist_categories=['Cs']),
-            min_size=0,
-            max_size=200,
-        )
+    @pytest.mark.parametrize(
+        ('make_generator', 'head', 'tail'),
+        [
+            (PlantUMLGenerator, '@startuml', '@enduml'),
+            (lambda: MermaidGenerator(diagram_type='flowchart'), 'flowchart', ''),
+        ],
     )
+    @given(label=st.text(alphabet=st.characters(blacklist_categories=['Cs']), min_size=0, max_size=200))
     @settings(max_examples=100, suppress_health_check=[HealthCheck.too_slow])
-    def test_labels_never_break_plantuml(self, label):
-        """Any label should be escapable for PlantUML."""
+    def test_any_label_keeps_the_document_intact(self, make_generator, head, tail, label):
         shape = Shape(
-            id='test',
-            label=label,
-            shape_type='rectangle',
-            position=Point(x=0.0, y=0.0),
-            size=Dimensions(width=100.0, height=50.0),
-            style=Style(),
+            id='test', label=label, shape_type='rectangle', position=Point(0.0, 0.0), size=Dimensions(100.0, 50.0)
         )
-        diagram = Diagram(id='test', elements=[shape])
 
-        gen = PlantUMLGenerator()
-        output = gen.generate(diagram)
+        output = make_generator().generate(Diagram(id='test', elements=[shape]))
 
-        assert '@startuml' in output
-        assert '@enduml' in output
-
-    @given(
-        label=st.text(
-            alphabet=st.characters(blacklist_categories=['Cs']),
-            min_size=0,
-            max_size=200,
-        )
-    )
-    @settings(max_examples=100, suppress_health_check=[HealthCheck.too_slow])
-    def test_labels_never_break_mermaid(self, label):
-        """Any label should be escapable for Mermaid."""
-        shape = Shape(
-            id='test',
-            label=label,
-            shape_type='rectangle',
-            position=Point(x=0.0, y=0.0),
-            size=Dimensions(width=100.0, height=50.0),
-            style=Style(),
-        )
-        diagram = Diagram(id='test', elements=[shape])
-
-        gen = MermaidGenerator(diagram_type='flowchart')
-        output = gen.generate(diagram)
-
-        assert 'flowchart' in output.lower()
-
-
-class TestIdempotency:
-    """Test that operations are idempotent."""
-
-    @given(diagram=ir_diagram_strategy())
-    @settings(max_examples=20, suppress_health_check=[HealthCheck.too_slow])
-    def test_generation_is_idempotent(self, diagram):
-        """Generating from the same diagram should produce the same output."""
-        gen = PlantUMLGenerator()
-
-        output1 = gen.generate(diagram)
-        output2 = gen.generate(diagram)
-
-        assert output1 == output2
+        assert output.startswith(head)
+        assert output.endswith(tail)
+        assert len(output.split('\n')) == (3 if head == '@startuml' else 2)
 
 
 _PUNCTUATED_LABEL = (

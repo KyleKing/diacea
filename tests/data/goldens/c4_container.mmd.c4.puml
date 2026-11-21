@@ -1,0 +1,25 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+
+Person(customer, "Customer")
+System_Ext(payment, "Payment Gateway")
+System_Ext(email, "Email Service")
+
+System_Boundary(ecommerce, "E-Commerce System") {
+  Container(web, "Web Application", "React, JavaScript", "Provides e-commerce functionality via web browser")
+  Container(api, "API Application", "Node.js, Express", "Provides e-commerce functionality via REST API")
+  ComponentDb(db, "Database", "PostgreSQL", "Stores product catalog, orders, customer data")
+  Container(cache, "Cache", "Redis", "Stores session data and frequently accessed data")
+  ComponentQueue(queue, "Message Queue", "RabbitMQ", "Handles async order processing")
+}
+
+Rel(customer, web, "Uses", "HTTPS")
+Rel(web, api, "Makes API calls to", "JSON/HTTPS")
+Rel(api, db, "Reads/Writes", "TCP/SQL")
+Rel(api, cache, "Reads/Writes", "Redis Protocol")
+Rel(api, queue, "Publishes messages to", "AMQP")
+Rel(api, payment, "Processes payments via", "HTTPS/JSON")
+Rel(api, email, "Sends emails via", "HTTPS/JSON")
+@enduml

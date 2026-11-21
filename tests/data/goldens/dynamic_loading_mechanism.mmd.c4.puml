@@ -1,0 +1,32 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+
+Container(API_Results, "API:Results")
+Container(State_LayoutConfig, "State:LayoutConfig")
+Component(GeneralSummaryResult, "GeneralSummaryResult")
+Component(TwoRowsBallResult, "TwoRowsBallResult")
+Component(OneRowBallResult, "OneRowBallResult")
+Component(OneRowAddUpBallResult, "OneRowAddUpBallResult")
+Component(TwoRowsWithHeaderBallResult, "TwoRowsWithHeaderBallResult")
+
+System_Boundary(group_ResultsComponent, "ResultsComponent") {
+  Component(GameDropDown, "GameDropDown")
+  Component(DateFilterBar, "DateFilterBar")
+  Container(Loop_ResultContainer, "Loop:ResultContainer")
+  System_Boundary(group_ResultContainer, "ResultContainer") {
+    Component(ResultBallLoader, "ResultBallLoader")
+    Component(ResultSummaryLoader, "ResultSummaryLoader")
+  }
+}
+
+Rel(group_ResultsComponent, API_Results, "Get `resultSummary`, `displayResultNumbers`")
+Rel(group_ResultsComponent, State_LayoutConfig, "Get `componetId` of `miniResultLayout` by counter")
+Rel(Loop_ResultContainer, group_ResultContainer, "Single Result Data")
+Rel(ResultSummaryLoader, GeneralSummaryResult, "Dynamic loading by componentId")
+Rel(ResultBallLoader, TwoRowsBallResult, "Dynamic loading by componentId")
+Rel(ResultBallLoader, OneRowBallResult, "Dynamic loading by componentId")
+Rel(ResultBallLoader, OneRowAddUpBallResult, "Dynamic loading by componentId")
+Rel(ResultBallLoader, TwoRowsWithHeaderBallResult, "Dynamic loading by componentId")
+@enduml

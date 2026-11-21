@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="648" height="493" viewBox="26.0 -19.0 648.0 493.0">
+<style>text{font-family:Helvetica,Arial,sans-serif;font-size:14px;fill:#1e1e1e}.group-label{font-size:12px;fill:#868e96}.edge-label{font-size:12px;paint-order:stroke;stroke:#ffffff;stroke-width:4px}</style>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1e1e1e"/></marker></defs>
+<rect x="26.0" y="-19.0" width="648.0" height="493.0" fill="#ffffff"/>
+<g id="system_boundary" data-semantic="group"><rect x="50.0" y="50.0" width="600.0" height="400.0" rx="8" fill="none" fill-opacity="0.25" stroke="#1976D2" stroke-dasharray="6 4"/><text class="group-label" x="60.0" y="68.0">Microservices System</text></g>
+<g id="data_layer" data-semantic="group"><rect x="85.0" y="280.0" width="540.0" height="80.0" rx="8" fill="none" fill-opacity="0.25" stroke="#868e96" stroke-dasharray="6 4"/><text class="group-label" x="95.0" y="298.0">Data Layer</text></g>
+<g id="service1" data-semantic="service"><rect x="80.0" y="100.0" width="150.0" height="100.0" rx="2.0" fill="#E3F2FD" stroke="#1565C0" stroke-width="2.0"/><text x="155.0" y="154.7" text-anchor="middle">User Service</text></g>
+<g id="service2" data-semantic="service"><rect x="280.0" y="100.0" width="150.0" height="100.0" rx="2.0" fill="#F3E5F5" stroke="#6A1B9A" stroke-width="2.0"/><text x="355.0" y="154.7" text-anchor="middle">Order Service</text></g>
+<g id="service3" data-semantic="service"><rect x="480.0" y="100.0" width="150.0" height="100.0" rx="2.0" fill="#E8F5E9" stroke="#2E7D32" stroke-width="2.0"/><text x="555.0" y="154.7" text-anchor="middle">Payment Service</text></g>
+<g id="db1" data-semantic="database"><ellipse cx="155.0" cy="320.0" rx="70.0" ry="40.0" fill="#C8E6C9" stroke="#1B5E20" stroke-width="2.0"/><text x="155.0" y="324.7" text-anchor="middle">Users DB</text></g>
+<g id="db2" data-semantic="database"><ellipse cx="355.0" cy="320.0" rx="70.0" ry="40.0" fill="#C8E6C9" stroke="#1B5E20" stroke-width="2.0"/><text x="355.0" y="324.7" text-anchor="middle">Orders DB</text></g>
+<g id="db3" data-semantic="database"><ellipse cx="555.0" cy="320.0" rx="70.0" ry="40.0" fill="#C8E6C9" stroke="#1B5E20" stroke-width="2.0"/><text x="555.0" y="324.7" text-anchor="middle">Payments DB</text></g>
+<g id="user" data-semantic="person"><ellipse cx="350.0" cy="30.0" rx="25.0" ry="25.0" fill="#FFCCBC" stroke="#BF360C" stroke-width="2.0"/><text x="350.0" y="34.7" text-anchor="middle">Customer</text></g>
+</svg>

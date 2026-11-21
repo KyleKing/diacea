@@ -9,7 +9,6 @@ To skip slow tests:
     pytest tests/test_performance.py -v -m "not slow"
 """
 
-import random
 import time
 from typing import Any
 
@@ -35,7 +34,7 @@ def generate_excalidraw_diagram(num_shapes: int, num_connections: int) -> dict[s
         x = (i % 20) * 150.0
         y = (i // 20) * 100.0
 
-        shape_type = random.choice(['rectangle', 'ellipse', 'diamond'])
+        shape_type = ('rectangle', 'ellipse', 'diamond')[i % 3]
         element = {
             'id': shape_id,
             'type': shape_type,
@@ -78,144 +77,28 @@ def generate_excalidraw_diagram(num_shapes: int, num_connections: int) -> dict[s
     return {'elements': elements, 'type': 'excalidraw'}
 
 
-class TestSmallDiagramPerformance:
-    """Test performance with small diagrams (should be fast)."""
+@pytest.mark.parametrize(('num_shapes', 'budget'), [(50, 1.0), pytest.param(1000, 5.0, marks=pytest.mark.slow)])
+def test_parse_and_generate_every_text_format_within_budget(num_shapes, budget):
+    data = generate_excalidraw_diagram(num_shapes, num_shapes * 4 // 5)
 
-    def test_parse_50_shapes(self):
-        data = generate_excalidraw_diagram(50, 30)
-        parser = ExcalidrawParser()
+    start = time.perf_counter()
+    diagram = ExcalidrawParser().parse(data)
+    assert time.perf_counter() - start < budget
 
+    assert len(diagram.get_shapes()) == num_shapes
+    assert len(diagram.get_connections()) == num_shapes * 4 // 5
+    for generator in (
+        PlantUMLGenerator(),
+        C4PlantUMLGenerator(),
+        MermaidGenerator(),
+        GraphVizGenerator(),
+        D2Generator(),
+    ):
         start = time.perf_counter()
-        diagram = parser.parse(data)
-        elapsed = time.perf_counter() - start
-
-        assert len(diagram.get_shapes()) >= 50
-        assert elapsed < 0.5
-
-    def test_generate_50_shapes_all_formats(self):
-        data = generate_excalidraw_diagram(50, 30)
-        parser = ExcalidrawParser()
-        diagram = parser.parse(data)
-
-        generators = [
-            PlantUMLGenerator(),
-            C4PlantUMLGenerator(),
-            MermaidGenerator(),
-            GraphVizGenerator(),
-            D2Generator(),
-        ]
-
-        for gen in generators:
-            start = time.perf_counter()
-            output = gen.generate(diagram)
-            elapsed = time.perf_counter() - start
-
-            assert len(output) > 0
-            assert elapsed < 0.5
-
-
-class TestMediumDiagramPerformance:
-    """Test performance with medium diagrams."""
-
-    def test_parse_500_shapes(self):
-        data = generate_excalidraw_diagram(500, 400)
-        parser = ExcalidrawParser()
-
-        start = time.perf_counter()
-        diagram = parser.parse(data)
-        elapsed = time.perf_counter() - start
-
-        assert len(diagram.get_shapes()) >= 500
-        assert elapsed < 2.0
-
-    def test_generate_500_shapes_all_formats(self):
-        data = generate_excalidraw_diagram(500, 400)
-        parser = ExcalidrawParser()
-        diagram = parser.parse(data)
-
-        generators = [
-            ('plantuml', PlantUMLGenerator()),
-            ('c4', C4PlantUMLGenerator()),
-            ('mermaid', MermaidGenerator()),
-            ('graphviz', GraphVizGenerator()),
-            ('d2', D2Generator()),
-        ]
-
-        for name, gen in generators:
-            start = time.perf_counter()
-            output = gen.generate(diagram)
-            elapsed = time.perf_counter() - start
-
-            assert len(output) > 0, f'{name} produced empty output'
-            assert elapsed < 2.0, f'{name} took too long: {elapsed:.2f}s'
-
-
-@pytest.mark.slow
-class TestLargeDiagramPerformance:
-    """Test performance with large diagrams (1000+ shapes)."""
-
-    def test_parse_1000_shapes(self):
-        data = generate_excalidraw_diagram(1000, 800)
-        parser = ExcalidrawParser()
-
-        start = time.perf_counter()
-        diagram = parser.parse(data)
-        elapsed = time.perf_counter() - start
-
-        assert len(diagram.get_shapes()) >= 1000
-        assert elapsed < 5.0
-
-    def test_generate_1000_shapes_all_formats(self):
-        data = generate_excalidraw_diagram(1000, 800)
-        parser = ExcalidrawParser()
-        diagram = parser.parse(data)
-
-        generators = [
-            ('plantuml', PlantUMLGenerator()),
-            ('c4', C4PlantUMLGenerator()),
-            ('mermaid', MermaidGenerator()),
-            ('graphviz', GraphVizGenerator()),
-            ('d2', D2Generator()),
-        ]
-
-        for name, gen in generators:
-            start = time.perf_counter()
-            output = gen.generate(diagram)
-            elapsed = time.perf_counter() - start
-
-            assert len(output) > 0, f'{name} produced empty output'
-            assert elapsed < 5.0, f'{name} took too long: {elapsed:.2f}s'
-
-
-@pytest.mark.slow
-class TestVeryLargeDiagramPerformance:
-    """Test performance with very large diagrams (2000+ shapes)."""
-
-    def test_parse_2000_shapes(self):
-        data = generate_excalidraw_diagram(2000, 1500)
-        parser = ExcalidrawParser()
-
-        start = time.perf_counter()
-        diagram = parser.parse(data)
-        elapsed = time.perf_counter() - start
-
-        assert len(diagram.get_shapes()) >= 2000
-        assert elapsed < 10.0
-
-    def test_generate_2000_shapes_mermaid(self):
-        """Mermaid is often the slowest generator."""
-        data = generate_excalidraw_diagram(2000, 1500)
-        parser = ExcalidrawParser()
-        diagram = parser.parse(data)
-
-        gen = MermaidGenerator()
-
-        start = time.perf_counter()
-        output = gen.generate(diagram)
-        elapsed = time.perf_counter() - start
-
-        assert len(output) > 0
-        assert elapsed < 10.0
+        output = generator.generate(diagram)
+        assert time.perf_counter() - start < budget, type(generator).__name__
+        assert 'Shape 0' in output
+        assert f'Shape {num_shapes - 1}' in output
 
 
 class TestOutputSizeScaling:

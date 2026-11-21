@@ -1,0 +1,13 @@
+@startuml
+actor "User" as user1
+rectangle "Web App" as webapp
+rectangle "API Gateway" as api
+database "PostgreSQL" as database1
+queue "RabbitMQ" as queue1
+storage "S3 Storage" as storage1
+rectangle "Payment API" as external1
+user1 --> webapp
+webapp --> api
+webapp --> database1
+api --> queue1
+@enduml

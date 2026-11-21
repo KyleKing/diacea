@@ -1,0 +1,32 @@
+@startuml
+left to right direction
+actor "User" as user
+actor "Administrator" as admin
+hexagon "API Gateway" as api_gateway
+queue "Message\nQueue" as message_queue
+rectangle "Payment\nGateway" as payment_gateway
+rectangle "Microservices" as group_services {
+  rectangle "Auth\nService" as auth_service
+  rectangle "Order\nService" as order_service
+  rectangle "Product\nService" as product_service
+  rectangle "Inventory\nService" as inventory_service
+}
+rectangle "Databases" as group_databases {
+  database "Auth DB" as auth_db
+  database "Order DB" as order_db
+  database "Product DB" as product_db
+  database "Inventory DB" as inventory_db
+}
+user --> api_gateway : "HTTP"
+admin --> api_gateway : "HTTPS"
+api_gateway --> auth_service : "auth"
+api_gateway --> order_service : "orders"
+api_gateway --> product_service : "products"
+auth_service --> auth_db : "SQL"
+order_service --> order_db : "SQL"
+product_service --> product_db : "SQL"
+inventory_service --> inventory_db : "SQL"
+order_service ..> message_queue : "publish"
+message_queue ..> inventory_service : "subscribe"
+order_service --> payment_gateway : "charge"
+@enduml

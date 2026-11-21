@@ -1,0 +1,13 @@
+direction: right
+
+devices: Device Simulator
+fareDataEventHub: Fare Data
+tripDataEventHub: Trip Data
+streamAnalytics: Stream Processing
+outputCosmosDb: Output Database
+
+devices -> fareDataEventHub
+devices -> tripDataEventHub
+fareDataEventHub -> streamAnalytics
+tripDataEventHub -> streamAnalytics
+streamAnalytics -> outputCosmosDb

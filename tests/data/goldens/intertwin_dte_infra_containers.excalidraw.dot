@@ -1,0 +1,40 @@
+digraph "diagram" {
+    compound=true;
+    rankdir="LR";
+    node [shape="box", fontname="Helvetica"];
+    edge [fontname="Helvetica"];
+
+    subgraph cluster_group_external_data_source {
+        label="External Data \nSource";
+        subgraph cluster_group_resource_info {
+            label="Resource Info";
+            container [label="[Container]", shape="diamond", fillcolor="#bbcca4", style="filled", color="#495057", penwidth="1.0"];
+        }
+        replica_manager_data_transfer_location_c [label="Replica Manager \nData Transfer \nLocation Catalog", shape="component", fillcolor="#228be6", style="filled", color="#343a40", penwidth="1.0"];
+        compute_resources_orchestrion_service_de [label="Compute Resources \n       Orchestrion - \nService deployment   ", fillcolor="#495057", style="filled", color="transparent", penwidth="1.0"];
+        container_paas_orchestrator [label="[Container:PaaS orchestrator]", shape="component", fillcolor="#228be6", style="filled", color="#343a40", penwidth="1.0"];
+        subgraph cluster_group_hpc {
+            label="HPC";
+            service_offloading [label="Service Offloading", fillcolor="#ced4da", style="filled"];
+            edge_service_api_2 [label="Edge Service API", fillcolor="#228be6", style="filled", color="#343a40", penwidth="1.0"];
+        }
+        subgraph cluster_group_storage {
+            label="Storage";
+            data_access [label="Data Access", fillcolor="#ced4da", style="filled"];
+            edge_service_api [label="Edge Service API", fillcolor="#228be6", style="filled", color="#343a40", penwidth="1.0"];
+        }
+        subgraph cluster_group_cloud {
+            label="CLOUD";
+            node_1 [label=" ", fillcolor="#ced4da", style="filled"];
+        }
+        aai_auth_authz [label="AAI / Auth & Authz\n\n", shape="component", fillcolor="#868e96", style="filled", color="#343a40", penwidth="1.0"];
+        software_distribution [label="Software Distribution", shape="component", fillcolor="#868e96", style="filled", color="#343a40", penwidth="1.0"];
+    }
+
+    container_paas_orchestrator -> container [style="dashed", color="#495057", penwidth="1.0", dir="both", lhead="cluster_group_resource_info"];
+    compute_resources_orchestrion_service_de -> replica_manager_data_transfer_location_c [style="dashed", color="#495057", penwidth="1.0", dir="both"];
+    replica_manager_data_transfer_location_c -> data_access [style="dashed", color="#495057", penwidth="1.0", dir="both", lhead="cluster_group_storage"];
+    container_paas_orchestrator -> node_1 [style="dashed", color="#030303", penwidth="1.0", dir="both"];
+    node_1 -> edge_service_api_2 [style="dashed", penwidth="1.0", dir="both"];
+    node_1 -> software_distribution [style="dashed", penwidth="1.0", dir="both", ltail="cluster_group_cloud"];
+}

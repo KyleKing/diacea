@@ -1,0 +1,17 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+
+Person(customer, "Customer")
+Person(admin, "Administrator")
+System(ecommerce, "E-Commerce System")
+System_Ext(payment, "Payment Gateway")
+System_Ext(shipping, "Shipping Service")
+
+
+Rel(customer, ecommerce, "Browses products, places orders")
+Rel(admin, ecommerce, "Manages products, views analytics")
+Rel(ecommerce, payment, "Processes payments via")
+Rel(ecommerce, shipping, "Tracks shipments via")
+@enduml

@@ -420,7 +420,7 @@ class MermaidGenerator(Generator):
 
         for shape in shapes:
             participant_id = self._sanitize_id(shape.id)
-            label = self._escape_label(shape.label or readable_id(participant_id))
+            label = self._escape_sequence_label(shape.label or readable_id(participant_id))
             lines.append(f'    participant {participant_id} as {label}')
 
         for conn in connections:
@@ -434,7 +434,7 @@ class MermaidGenerator(Generator):
             else:
                 arrow = '->>'
 
-            label = self._escape_label(conn.label or '')
+            label = self._escape_sequence_label(conn.label or '')
             lines.append(f'    {from_id}{arrow}{to_id}: {label}')
 
         return '\n'.join(lines)
@@ -450,6 +450,10 @@ class MermaidGenerator(Generator):
         escaped = escaped.replace('<', '&lt;')
         escaped = escaped.replace('>', '&gt;')
         return escaped.replace('\n', '<br/>')
+
+    def _escape_sequence_label(self, label: str) -> str:
+        """Escape sequence text, where a bare ';' ends the statement like a line break."""
+        return self._escape_label(label.replace(';', '\0')).replace('\0', '#59;')
 
     # Mermaid has no backslash escapes inside quoted strings, so quoted contexts (C4, sequence) use the same entities
     _escape_quoted_label = _escape_label

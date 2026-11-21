@@ -1,0 +1,81 @@
+direction: right
+
+user1: User {
+  shape: person
+  style: {
+    fill: "#FFE0B2"
+    stroke: "#E65100"
+    stroke-width: 2
+  }
+}
+webapp: Web App {
+  style: {
+    fill: "#E3F2FD"
+    stroke: "#1565C0"
+    stroke-width: 3
+  }
+}
+api: API Gateway {
+  style: {
+    fill: "#F3E5F5"
+    stroke: "#6A1B9A"
+    stroke-width: 2
+  }
+}
+database1: PostgreSQL {
+  shape: cylinder
+  style: {
+    fill: "#E8F5E9"
+    stroke: "#2E7D32"
+    stroke-width: 2
+  }
+}
+queue1: RabbitMQ {
+  shape: queue
+  style: {
+    fill: "#FFF9C4"
+    stroke: "#F57F17"
+    stroke-width: 2
+  }
+}
+storage1: S3 Storage {
+  shape: cylinder
+  style: {
+    fill: "#E0F7FA"
+    stroke: "#00838F"
+    stroke-width: 2
+  }
+}
+external1: Payment API {
+  style: {
+    fill: "#EFEBE9"
+    stroke: "#4E342E"
+    stroke-width: 2
+    stroke-dash: 3
+  }
+}
+
+user1 -> webapp {
+  style: {
+    stroke: "#666"
+    stroke-width: 2
+  }
+}
+webapp -> api {
+  style: {
+    stroke: "#666"
+    stroke-width: 2
+  }
+}
+webapp -> database1 {
+  style: {
+    stroke: "#666"
+    stroke-width: 2
+  }
+}
+api -> queue1 {
+  style: {
+    stroke: "#666"
+    stroke-width: 2
+  }
+}

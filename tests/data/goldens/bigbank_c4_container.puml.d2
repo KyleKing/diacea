@@ -1,0 +1,28 @@
+direction: down
+
+c1: Internet Banking {
+  web_app: Web Application
+  spa: Single-Page App
+  mobile_app: Mobile App
+  database: Database {
+    shape: cylinder
+  }
+  backend_api: API Application
+}
+
+customer: Customer {
+  shape: person
+}
+email_system: E-Mail System
+banking_system: Mainframe Banking System
+
+customer -> c1.web_app: Uses
+customer -> c1.spa: Uses
+customer -> c1.mobile_app: Uses
+c1.web_app -> c1.spa: Delivers
+c1.spa -> c1.backend_api: Uses
+c1.mobile_app -> c1.backend_api: Uses
+c1.database -> c1.backend_api: Reads from and writes to
+customer -> email_system: Sends e-mails to
+email_system -> c1.backend_api: Sends e-mails using
+c1.backend_api -> banking_system: Uses

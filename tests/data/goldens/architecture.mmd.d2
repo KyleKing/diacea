@@ -1,0 +1,27 @@
+direction: down
+
+group-backend: Backend Services {
+  api: API Service
+  db: PostgreSQL {
+    shape: cylinder
+  }
+  cache: Redis Cache {
+    shape: cylinder
+  }
+  worker: Worker
+  queue: Message Queue {
+    shape: cylinder
+  }
+}
+
+client: Web Client
+lb: Load Balancer {
+  shape: parallelogram
+}
+
+client -> lb
+lb -> group-backend.api
+lb -> group-backend.worker
+group-backend.api -> group-backend.db
+group-backend.api -> group-backend.cache
+group-backend.worker -> group-backend.queue

@@ -83,23 +83,21 @@ class TestSyncCLI:
 
 
 class TestMarkdownFences:
-    def test_replaces_fence_with_mermaid_block(self, excalidraw_source):
-        markdown = 'before\n\n```diacea\nsource: arch.excalidraw\n```\n\nafter\n'
+    @pytest.mark.parametrize(
+        ('options', 'language', 'golden'),
+        [
+            ('', 'mermaid', 'excalidraw.json.mmd'),
+            ('format: d2\n', 'd2', 'excalidraw.json.d2'),
+            ('mermaid-type: flowchart\n', 'mermaid', 'excalidraw.json.flowchart.mmd'),
+        ],
+    )
+    def test_replaces_fence_with_generated_block(self, excalidraw_source, options, language, golden):
+        markdown = f'before\n\n```diacea\nsource: arch.excalidraw\n{options}```\n\nafter\n'
 
         result = replace_diacea_fences(markdown, [excalidraw_source.parent])
 
-        assert '```mermaid' in result
-        assert 'C4Context' in result
-        assert 'diacea' not in result
-        assert result.startswith('before')
-        assert result.rstrip().endswith('after')
-
-    def test_format_option_controls_fence_language(self, excalidraw_source):
-        markdown = '```diacea\nsource: arch.excalidraw\nformat: d2\n```'
-
-        result = replace_diacea_fences(markdown, [excalidraw_source.parent])
-
-        assert result.startswith('```d2')
+        generated = (TEST_DATA_DIR / 'goldens' / golden).read_text().rstrip('\n')
+        assert result == f'before\n\n```{language}\n{generated}\n```\n\nafter\n'
 
     def test_indented_fence_stays_indented(self, excalidraw_source):
         markdown = '1. step\n\n    ```diacea\n    source: arch.excalidraw\n    ```\n'
@@ -126,17 +124,27 @@ class TestMarkdownFences:
         with pytest.raises(DiaceaFenceError, match='not found'):
             replace_diacea_fences('```diacea\nsource: nope.svg\n```', [tmp_path])
 
-    def test_missing_source_option_raises(self):
-        with pytest.raises(DiaceaFenceError, match="missing the required 'source'"):
-            replace_diacea_fences('```diacea\nformat: d2\n```', ['.'])
+    @pytest.mark.parametrize(
+        ('body', 'message'),
+        [
+            ('format: d2\n', "diacea fence is missing the required 'source' option"),
+            ('source: a.svg\ndirection: LR\n', "unknown diacea fence option 'direction'"),
+            (
+                'source: a.svg\nformat: ascii\n',
+                "unknown diacea fence format 'ascii'; expected one of ['c4', 'd2', 'graphviz', 'mermaid', 'plantuml']",
+            ),
+            (
+                'source: a.svg\nmermaid-type: pie\n',
+                "unknown mermaid-type 'pie'; expected one of ['c4', 'flowchart', 'sequence']",
+            ),
+            ('source\n', "diacea fence lines must be 'key: value', got 'source'"),
+        ],
+    )
+    def test_invalid_fence_raises(self, body, message):
+        with pytest.raises(DiaceaFenceError) as raised:
+            replace_diacea_fences(f'```diacea\n{body}```', ['.'])
 
-    def test_unknown_option_raises(self):
-        with pytest.raises(DiaceaFenceError, match='unknown diacea fence option'):
-            replace_diacea_fences('```diacea\nsource: a.svg\ndirection: LR\n```', ['.'])
-
-    def test_unknown_format_raises(self):
-        with pytest.raises(DiaceaFenceError, match='unknown diacea fence format'):
-            replace_diacea_fences('```diacea\nsource: a.svg\nformat: ascii\n```', ['.'])
+        assert str(raised.value) == message
 
 
 class TestMkDocsPlugin:

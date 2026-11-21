@@ -1,6 +1,7 @@
 """Tests for the format registry, the public conversion API, and semantic hints."""
 
 import json
+import re
 import warnings
 
 import pytest
@@ -40,20 +41,52 @@ class TestDetection:
             ('{"elements": []}', 'excalidraw'),
             ('{"tldrawFileFormatVersion": 1, "records": []}', 'tldraw'),
             ('a -> b: uses\n', 'd2'),
+            ('<?xml version="1.0"?><svg></svg>', 'svg'),
+            ('<svg></svg>', 'svg'),
+            ('  \n  <?xml version="1.0"?><svg></svg>', 'svg'),
+            ('[]', 'excalidraw'),
+            ({'elements': []}, 'excalidraw'),
+            ({'type': 'excalidraw/clipboard', 'elements': []}, 'excalidraw'),
+            ({'document': {'pages': {}}}, 'tldraw'),
         ],
     )
     def test_detects_from_content(self, content, expected):
         assert detect_input_format(content) == expected
 
-    def test_extension_decides_when_content_has_no_signature(self):
-        assert detect_input_format('web: Web App\n', filename='arch.d2') == 'd2'
+    @pytest.mark.parametrize(
+        ('content', 'filename', 'expected'),
+        [
+            ('web: Web App\n', 'arch.d2', 'd2'),
+            ('digraph { a -> b }', 'misnamed.mmd', 'graphviz'),
+        ],
+    )
+    def test_content_signature_first_then_extension(self, content, filename, expected):
+        assert detect_input_format(content, filename=filename) == expected
 
-    def test_content_signature_beats_extension(self):
-        assert detect_input_format('digraph { a -> b }', filename='misnamed.mmd') == 'graphviz'
-
-    def test_unknown_content_lists_supported_formats(self):
-        with pytest.raises(ValueError, match='supported: d2, excalidraw, graphviz'):
-            detect_input_format('just some prose')
+    @pytest.mark.parametrize(
+        ('content', 'message'),
+        [
+            (
+                'just some prose',
+                (
+                    'Could not detect input format (supported: d2, excalidraw, graphviz, mermaid, obsidian, '
+                    'plantuml, svg, tldraw); if the file is valid, name its format with --input-format '
+                    '(or input_format= in Python)'
+                ),
+            ),
+            (
+                {'random': 'data'},
+                'Unrecognized input format: JSON is neither an Excalidraw scene nor a TLDraw document',
+            ),
+            (
+                '{"random": "data"}',
+                'Unrecognized input format: JSON is neither an Excalidraw scene nor a TLDraw document',
+            ),
+        ],
+    )
+    def test_undetectable_content_raises(self, content, message):
+        with pytest.raises(ValueError, match=f'^{re.escape(message)}$'):
+            detect_input_format(content)
 
     @pytest.mark.parametrize(
         ('name', 'expected'),

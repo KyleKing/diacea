@@ -1,0 +1,26 @@
+C4Context
+    title Architecture Diagram
+    Person(dt_user, "DT User")
+    Person(dt_developer, "DT Developer")
+    System(dt_application, "DT application")
+    Boundary(group_thematic_capabilities, "Thematic<br/>capabilities") {
+        Component(thematic_module, "Thematic module")
+        Component(thematic_module_2, "Thematic module")
+        Component(thematic_module_3, "Thematic module")
+    }
+    Boundary(group_core_capabilities, "Core<br/>capabilities") {
+        Container(quality_verification, "Quality verification")
+        Container(workflow_composition, "Workflow Composition")
+        Container(real_time_data_acquisition_and_processin, "Real-time data<br/>acquisition and<br/>processing")
+    }
+    Boundary(group_infrastructure, "Infrastructure") {
+        Container(orchestration, "Orchestration")
+        Container(federated_data_management, "Federated data<br/>management")
+    }
+    Rel(dt_application, thematic_module, " ")
+    Rel(dt_application, thematic_module_2, " ")
+    Rel(dt_application, thematic_module_3, " ")
+    Rel(dt_developer, thematic_module, " ")
+    Rel(dt_developer, quality_verification, " ")
+    Rel(dt_developer, orchestration, " ")
+    Rel(dt_user, dt_application, " ")

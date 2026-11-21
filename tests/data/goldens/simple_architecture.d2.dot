@@ -1,0 +1,35 @@
+digraph "diagram" {
+    rankdir="LR";
+    node [shape="box", fontname="Helvetica"];
+    edge [fontname="Helvetica"];
+
+    subgraph cluster_services {
+        label="Services";
+        auth [label="Auth Service"];
+        orders [label="Order Service"];
+        products [label="Product Service"];
+        inventory [label="Inventory Service"];
+    }
+    subgraph cluster_databases {
+        label="Databases";
+        auth_db [label="Auth DB", shape="cylinder"];
+        order_db [label="Order DB", shape="cylinder"];
+        product_db [label="Product DB", shape="cylinder"];
+        inventory_db [label="Inventory DB", shape="cylinder"];
+    }
+
+    user [label="User", shape="ellipse", fillcolor="lightblue", style="filled"];
+    api_gateway [label="API Gateway", shape="hexagon", fillcolor="lightgreen", style="filled"];
+    queue [label="Message Queue", shape="folder", fillcolor="gold", style="filled"];
+
+    user -> api_gateway [label="HTTP Requests"];
+    api_gateway -> auth [label="Authenticate"];
+    api_gateway -> orders [label="Place Order"];
+    api_gateway -> products [label="Get Products"];
+    auth -> auth_db [label="Query"];
+    orders -> order_db [label="Query"];
+    products -> product_db [label="Query"];
+    inventory -> inventory_db [label="Query"];
+    orders -> queue [label="Order Placed Event"];
+    queue -> inventory [label="Process Order"];
+}

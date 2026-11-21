@@ -1,0 +1,36 @@
+digraph "diagram" {
+    compound=true;
+    rankdir="LR";
+    node [shape="box", fontname="Helvetica"];
+    edge [fontname="Helvetica"];
+
+    subgraph cluster_group_thematic_capabilities {
+        label="Thematic\ncapabilities";
+        thematic_module [label="Thematic module", fillcolor="#228be6", style="filled", color="#343a40", penwidth="1.0"];
+        thematic_module_2 [label="Thematic module", fillcolor="#228be6", style="filled", color="#343a40", penwidth="1.0"];
+        thematic_module_3 [label="Thematic module", fillcolor="#228be6", style="filled", color="#343a40", penwidth="1.0"];
+    }
+    subgraph cluster_group_core_capabilities {
+        label="Core\ncapabilities";
+        quality_verification [label="Quality verification", shape="component", fillcolor="#228be6", style="filled", color="#343a40", penwidth="1.0"];
+        workflow_composition [label="Workflow Composition", fillcolor="#228be6", style="filled", color="#343a40", penwidth="1.0"];
+        real_time_data_acquisition_and_processin [label="Real-time data\nacquisition and\nprocessing", shape="component", fillcolor="#228be6", style="filled", color="#343a40", penwidth="1.0"];
+    }
+    subgraph cluster_group_infrastructure {
+        label="Infrastructure";
+        orchestration [label="Orchestration", shape="component", fillcolor="#228be6", style="filled", color="#343a40", penwidth="1.0"];
+        federated_data_management [label="Federated data\nmanagement", shape="component", fillcolor="#228be6", style="filled", color="#343a40", penwidth="1.0"];
+    }
+
+    dt_user [label="DT User", shape="ellipse", fillcolor="#0c37a2", style="filled", color="#0c37a2", penwidth="1.0"];
+    dt_developer [label="DT Developer", shape="ellipse", fillcolor="#0c37a2", style="filled", color="#0c37a2", penwidth="1.0"];
+    dt_application [label="DT application", shape="box3d", fillcolor="#228be6", style="filled", color="#343a40", penwidth="1.0"];
+
+    dt_application -> thematic_module [style="dashed", penwidth="1.0"];
+    dt_application -> thematic_module_2 [style="dashed", penwidth="1.0"];
+    dt_application -> thematic_module_3 [style="dashed", penwidth="1.0"];
+    dt_developer -> thematic_module [style="dashed", penwidth="1.0"];
+    dt_developer -> quality_verification [style="dashed", penwidth="1.0"];
+    dt_developer -> orchestration [style="dashed", penwidth="1.0", lhead="cluster_group_infrastructure"];
+    dt_user -> dt_application [style="dashed", penwidth="1.0"];
+}

@@ -1,0 +1,25 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+
+Person(dev, "Developer")
+Component(gh, "GitHub")
+Container(ci, "CI Checks")
+Container(build, "Build Image")
+Component(notify, "Notify Author")
+ComponentDb(registry, "Container Registry")
+Container(deploy, "Deploy to Staging")
+Container(smoke, "Smoke Tests")
+Component(prod, "Production")
+
+
+Rel(dev, gh, "git push")
+Rel(gh, ci, "")
+Rel(ci, build, "pass")
+Rel(ci, notify, "fail")
+Rel(build, registry, "")
+Rel(registry, deploy, "")
+Rel(deploy, smoke, "")
+Rel(smoke, prod, "")
+@enduml

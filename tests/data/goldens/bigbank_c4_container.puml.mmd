@@ -1,0 +1,22 @@
+C4Context
+    title Architecture Diagram
+    Person(customer, "Customer")
+    System(email_system, "E-Mail System")
+    System(banking_system, "Mainframe Banking System")
+    Boundary(c1, "Internet Banking") {
+        Container(web_app, "Web Application")
+        Container(spa, "Single-Page App")
+        Container(mobile_app, "Mobile App")
+        ContainerDb(database, "Database")
+        Container(backend_api, "API Application")
+    }
+    Rel(customer, web_app, "Uses")
+    Rel(customer, spa, "Uses")
+    Rel(customer, mobile_app, "Uses")
+    Rel(web_app, spa, "Delivers")
+    Rel(spa, backend_api, "Uses")
+    Rel(mobile_app, backend_api, "Uses")
+    Rel(database, backend_api, "Reads from and writes to")
+    Rel(customer, email_system, "Sends e-mails to")
+    Rel(email_system, backend_api, "Sends e-mails using")
+    Rel(backend_api, banking_system, "Uses")

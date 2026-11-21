@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="691" height="954" viewBox="-24.0 -24.0 691.0 954.0">
+<style>text{font-family:Helvetica,Arial,sans-serif;font-size:14px;fill:#1e1e1e}.group-label{font-size:12px;fill:#868e96}.edge-label{font-size:12px;paint-order:stroke;stroke:#ffffff;stroke-width:4px}</style>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1e1e1e"/></marker></defs>
+<rect x="-24.0" y="-24.0" width="691.0" height="954.0" fill="#ffffff"/>
+<g id="c1" data-semantic="group"><rect x="0.0" y="302.0" width="643.0" height="453.0" rx="8" fill="none" fill-opacity="0.25" stroke="#868e96" stroke-dasharray="6 4"/><text class="group-label" x="10.0" y="320.0">Internet Banking</text></g>
+<g id="customer" data-semantic="person"><ellipse cx="321.5" cy="30.5" rx="64.0" ry="30.5" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="321.5" y="35.2" text-anchor="middle">Customer</text></g>
+<g id="web_app" data-semantic="container"><rect x="30.0" y="362.0" width="205.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="132.5" y="397.2" text-anchor="middle">Web Application</text></g>
+<g id="spa" data-semantic="container"><rect x="145.0" y="513.0" width="205.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="247.5" y="548.2" text-anchor="middle">Single-Page App</text></g>
+<g id="mobile_app" data-semantic="container"><rect x="285.0" y="362.0" width="150.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="360.0" y="397.2" text-anchor="middle">Mobile App</text></g>
+<g id="database" data-semantic="database"><path d="M485.0,372.0 a64.0,10.0 0 0 1 128.0,0 v41.0 a64.0,10.0 0 0 1 -128.0,0 z" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><path d="M485.0,372.0 a64.0,10.0 0 0 0 128.0,0" fill="none" stroke="#1e1e1e" stroke-width="1.5"/><text x="549.0" y="397.2" text-anchor="middle">Database</text></g>
+<g id="backend_api" data-semantic="container"><rect x="219.0" y="664.0" width="205.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="321.5" y="699.2" text-anchor="middle">API Application</text></g>
+<g id="email_system" data-semantic="system"><rect x="193.0" y="151.0" width="183.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="284.5" y="186.2" text-anchor="middle">E-Mail System</text></g>
+<g id="banking_system" data-semantic="system"><rect x="169.5" y="845.0" width="304.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="321.5" y="880.2" text-anchor="middle">Mainframe Banking System</text></g>
+<polyline points="345.0,61.0 438.0,181.5 176.7,362.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/><text class="edge-label" x="307.3" y="271.8" text-anchor="middle">Uses</text>
+<polyline points="345.0,61.0 438.0,181.5 263.6,513.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/><text class="edge-label" x="350.8" y="347.2" text-anchor="middle">Uses</text>
+<polyline points="345.0,61.0 438.0,181.5 371.3,362.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/><text class="edge-label" x="404.6" y="271.8" text-anchor="middle">Uses</text>
+<polyline points="155.7,423.0 224.3,513.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/><text class="edge-label" x="190.0" y="468.0" text-anchor="middle">Delivers</text>
+<polyline points="262.4,574.0 306.6,664.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/><text class="edge-label" x="284.5" y="619.0" text-anchor="middle">Uses</text>
+<polyline points="370.5,423.0 412.0,543.5 339.8,664.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/><text class="edge-label" x="375.9" y="603.8" text-anchor="middle">Uses</text>
+<polyline points="536.3,423.0 486.0,543.5 354.7,664.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/><text class="edge-label" x="420.4" y="603.8" text-anchor="middle">Reads from and writes to</text>
+<polyline points="314.0,61.0 292.0,151.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/><text class="edge-label" x="303.0" y="106.0" text-anchor="middle">Sends e-mails to</text>
+<polyline points="286.7,212.0 319.3,664.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/><text class="edge-label" x="303.0" y="438.0" text-anchor="middle">Sends e-mails using</text>
+<polyline points="321.5,725.0 321.5,845.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/><text class="edge-label" x="321.5" y="785.0" text-anchor="middle">Uses</text>
+</svg>

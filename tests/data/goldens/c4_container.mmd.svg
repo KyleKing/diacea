@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="639" height="803" viewBox="-24.0 -24.0 639.0 803.0">
+<style>text{font-family:Helvetica,Arial,sans-serif;font-size:14px;fill:#1e1e1e}.group-label{font-size:12px;fill:#868e96}.edge-label{font-size:12px;paint-order:stroke;stroke:#ffffff;stroke-width:4px}</style>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1e1e1e"/></marker></defs>
+<rect x="-24.0" y="-24.0" width="639.0" height="803.0" fill="#ffffff"/>
+<g id="ecommerce" data-semantic="group"><rect x="0.0" y="151.0" width="591.0" height="453.0" rx="8" fill="none" fill-opacity="0.25" stroke="#868e96" stroke-dasharray="6 4"/><text class="group-label" x="10.0" y="169.0">E-Commerce System</text></g>
+<g id="customer" data-semantic="person"><ellipse cx="295.5" cy="30.5" rx="64.0" ry="30.5" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="295.5" y="35.2" text-anchor="middle">Customer</text></g>
+<g id="web" data-semantic="container"><rect x="193.0" y="211.0" width="205.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="295.5" y="246.2" text-anchor="middle">Web Application</text></g>
+<g id="api" data-semantic="container"><rect x="193.0" y="362.0" width="205.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="295.5" y="397.2" text-anchor="middle">API Application</text></g>
+<g id="db" data-semantic="database"><path d="M30.0,523.0 a64.0,10.0 0 0 1 128.0,0 v41.0 a64.0,10.0 0 0 1 -128.0,0 z" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><path d="M30.0,523.0 a64.0,10.0 0 0 0 128.0,0" fill="none" stroke="#1e1e1e" stroke-width="1.5"/><text x="94.0" y="548.2" text-anchor="middle">Database</text></g>
+<g id="cache" data-semantic="container"><rect x="208.0" y="513.0" width="120.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="268.0" y="548.2" text-anchor="middle">Cache</text></g>
+<g id="queue" data-semantic="queue"><rect x="378.0" y="513.0" width="183.0" height="61.0" rx="10.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="469.5" y="548.2" text-anchor="middle">Message Queue</text></g>
+<g id="payment" data-semantic="system"><rect x="76.5" y="694.0" width="205.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="179.0" y="729.2" text-anchor="middle">Payment Gateway</text></g>
+<g id="email" data-semantic="system"><rect x="331.5" y="694.0" width="183.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="423.0" y="729.2" text-anchor="middle">Email Service</text></g>
+<polyline points="295.5,61.0 295.5,211.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/><text class="edge-label" x="295.5" y="136.0" text-anchor="middle">Uses</text>
+<polyline points="295.5,272.0 295.5,362.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/><text class="edge-label" x="295.5" y="317.0" text-anchor="middle">Makes API calls to</text>
+<polyline points="254.8,423.0 134.7,513.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/><text class="edge-label" x="194.8" y="468.0" text-anchor="middle">Reads/Writes</text>
+<polyline points="289.9,423.0 273.6,513.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/><text class="edge-label" x="281.8" y="468.0" text-anchor="middle">Reads/Writes</text>
+<polyline points="330.6,423.0 434.4,513.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/><text class="edge-label" x="382.5" y="468.0" text-anchor="middle">Publishes messages to</text>
+<polyline points="284.8,423.0 189.7,694.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/><text class="edge-label" x="237.2" y="558.5" text-anchor="middle">Processes payments via</text>
+<polyline points="307.2,423.0 411.3,694.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/><text class="edge-label" x="359.2" y="558.5" text-anchor="middle">Sends emails via</text>
+</svg>

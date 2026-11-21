@@ -1,0 +1,46 @@
+C4Context
+    title Architecture Diagram
+    Boundary(group_external_data_source, "External Data <br/>Source") {
+        Boundary(group_resource_info, "Resource Info") {
+            Container(container, "[Container]")
+        }
+        Container(replica_manager_data_transfer_location_c, "Replica Manager <br/>Data Transfer <br/>Location Catalog")
+        Container(compute_resources_orchestrion_service_de, "Compute Resources <br/>       Orchestrion - <br/>Service deployment   ")
+        Container(container_paas_orchestrator, "[Container:PaaS orchestrator]")
+        Boundary(group_hpc, "HPC") {
+            Container(service_offloading, "Service Offloading")
+            Container(edge_service_api_2, "Edge Service API")
+        }
+        Boundary(group_storage, "Storage") {
+            Component(data_access, "Data Access")
+            Container(edge_service_api, "Edge Service API")
+        }
+        Boundary(group_cloud, "CLOUD") {
+            Component(node_1, " ")
+        }
+        Container(aai_auth_authz, "AAI / Auth &amp; Authz<br/><br/>")
+        Container(software_distribution, "Software Distribution")
+    }
+    BiRel(container_paas_orchestrator, container, " ")
+    BiRel(replica_manager_data_transfer_location_c, container, " ")
+    BiRel(compute_resources_orchestrion_service_de, replica_manager_data_transfer_location_c, " ")
+    BiRel(replica_manager_data_transfer_location_c, data_access, " ")
+    BiRel(data_access, data_access, " ")
+    BiRel(container, container, "Push info")
+    BiRel(service_offloading, service_offloading, " ")
+    BiRel(container_paas_orchestrator, node_1, " ")
+    BiRel(edge_service_api, container, " ")
+    BiRel(edge_service_api_2, container, " ")
+    BiRel(node_1, container, " ")
+    BiRel(node_1, node_1, " ")
+    BiRel(node_1, edge_service_api_2, " ")
+    BiRel(replica_manager_data_transfer_location_c, container, " ")
+    BiRel(container, container, " ")
+    BiRel(container, service_offloading, " ")
+    BiRel(container, node_1, " ")
+    BiRel(data_access, data_access, " ")
+    BiRel(service_offloading, service_offloading, " ")
+    BiRel(node_1, node_1, " ")
+    BiRel(node_1, software_distribution, " ")
+    BiRel(data_access, data_access, " ")
+    BiRel(container, container, " ")

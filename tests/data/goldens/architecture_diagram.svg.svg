@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="698" height="458" viewBox="26.0 46.0 698.0 458.0">
+<style>text{font-family:Helvetica,Arial,sans-serif;font-size:14px;fill:#1e1e1e}.group-label{font-size:12px;fill:#868e96}.edge-label{font-size:12px;paint-order:stroke;stroke:#ffffff;stroke-width:4px}</style>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1e1e1e"/></marker></defs>
+<rect x="26.0" y="46.0" width="698.0" height="458.0" fill="#ffffff"/>
+<g id="user1" data-semantic="person"><ellipse cx="100.0" cy="120.0" rx="50.0" ry="50.0" fill="#FFE0B2" stroke="#E65100" stroke-width="2.0"/><text x="100.0" y="124.7" text-anchor="middle">User</text></g>
+<g id="webapp" data-semantic="system"><rect x="250.0" y="80.0" width="200.0" height="120.0" rx="2.0" fill="#E3F2FD" stroke="#1565C0" stroke-width="3.0"/><text x="350.0" y="144.7" text-anchor="middle">Web App</text></g>
+<g id="api" data-semantic="service"><rect x="250.0" y="250.0" width="200.0" height="80.0" rx="2.0" fill="#F3E5F5" stroke="#6A1B9A" stroke-width="2.0"/><text x="350.0" y="294.7" text-anchor="middle">API Gateway</text></g>
+<g id="database1" data-semantic="database"><ellipse cx="600.0" cy="150.0" rx="100.0" ry="60.0" fill="#E8F5E9" stroke="#2E7D32" stroke-width="2.0"/><text x="600.0" y="154.7" text-anchor="middle">PostgreSQL</text></g>
+<g id="queue1" data-semantic="queue"><rect x="500.0" y="270.0" width="180.0" height="70.0" rx="2.0" fill="#FFF9C4" stroke="#F57F17" stroke-width="2.0"/><text x="590.0" y="309.7" text-anchor="middle">RabbitMQ</text></g>
+<g id="storage1" data-semantic="storage"><ellipse cx="600.0" cy="430.0" rx="90.0" ry="50.0" fill="#E0F7FA" stroke="#00838F" stroke-width="2.0"/><text x="600.0" y="434.7" text-anchor="middle">S3 Storage</text></g>
+<g id="external1" data-semantic="external"><rect x="50.0" y="350.0" width="150.0" height="80.0" rx="2.0" fill="#EFEBE9" stroke="#4E342E" stroke-width="2.0" stroke-dasharray="6 4"/><text x="125.0" y="394.7" text-anchor="middle">Payment API</text></g>
+<polyline points="150.0,120.0 250.0,140.0" fill="none" stroke="#666" stroke-width="2.0" marker-end="url(#arrow)"/>
+<polyline points="350.0,200.0 350.0,250.0" fill="none" stroke="#666" stroke-width="2.0" marker-end="url(#arrow)"/>
+<polyline points="450.0,150.0 500.0,150.0" fill="none" stroke="#666" stroke-width="2.0" marker-end="url(#arrow)"/>
+<polyline points="450.0,290.0 500.0,290.0" fill="none" stroke="#666" stroke-width="2.0" marker-end="url(#arrow)"/>
+</svg>

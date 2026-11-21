@@ -432,3 +432,69 @@ class TestVerifyFlag:
     def test_format_that_cannot_be_read_back_is_not_verified(self, excalidraw_file, capsys):
         assert main([str(excalidraw_file), '-f', 'svg', '--verify', '-o', '-']) == EXIT_OK
         assert 'Not verified' in capsys.readouterr().err
+
+
+_CLI_FILES = {
+    'arch.d2': 'web: Web App\n',
+    'declared.puml': '@startuml\ndatabase "Orders" as o\nqueue "Jobs" as j\no --> j\n@enduml\n',
+    'flow.mmd': 'flowchart LR\n  a[A] --> b[B]\n',
+}
+
+
+@pytest.mark.parametrize(
+    ('argv', 'code', 'out', 'err'),
+    [
+        pytest.param(['--version'], 0, 'diacea 0.0.1\n', '', id='version'),
+        pytest.param(['arch.d2', '-f', 'mermaid'], 0, 'flowchart LR\n    web[Web App]\n', '', id='extension-decides'),
+        pytest.param(
+            ['inspect', 'declared.puml'],
+            0,
+            "Format: plantuml\nElements: 3\n  o: label='Orders' semantic=database confidence=0.90\n"
+            "  j: label='Jobs' semantic=queue confidence=0.90\n  conn-0: label='' semantic=- confidence=0.00\n",
+            '',
+            id='inspect-declared-types-need-no-tip',
+        ),
+        pytest.param(
+            ['flow.mmd', '-f', 'd2', '--verify'],
+            0,
+            'direction: right\n\na: A\nb: B\n\na -> b\n',
+            'Verified: the d2 output reads back with the same 2 node(s), 0 group(s), and connections\n',
+            id='verify-counts',
+        ),
+    ],
+)
+def test_cli_output(argv, code, out, err, tmp_path, monkeypatch, capsys):
+    for name, content in _CLI_FILES.items():
+        (tmp_path / name).write_text(content)
+    monkeypatch.chdir(tmp_path)
+
+    result: int | str | None
+    try:
+        result = main(argv)
+    except SystemExit as exit_:
+        result = exit_.code
+
+    assert (result, *capsys.readouterr()) == (code, out, err)
+
+
+def test_unverifiable_json_envelope_says_unchecked(tmp_path, capsys):
+    source = tmp_path / 'flow.mmd'
+    source.write_text(_CLI_FILES['flow.mmd'])
+
+    assert main([str(source), '-f', 'svg', '--verify', '--json']) == EXIT_OK
+    assert json.loads(capsys.readouterr().out)['verification'] == {'checked': False, 'problems': []}
+
+
+def test_formats_json_is_indented_by_two(capsys):
+    assert main(['formats', '--json']) == EXIT_OK
+    assert capsys.readouterr().out.startswith('{\n  "input_formats": [\n    {\n      "name": "d2",\n')
+
+
+def test_version_without_package_metadata_is_unknown(monkeypatch, capsys):
+    import diacea
+
+    monkeypatch.delattr(diacea, '__version__')
+
+    with pytest.raises(SystemExit):
+        main(['--version'])
+    assert capsys.readouterr().out == 'diacea unknown\n'

@@ -1,0 +1,26 @@
+@startuml
+rectangle "VS Code" as vs_code
+rectangle "Each file on disk can be shown in multiple WebView\ninstances when you split the editor pane" as each_file_on_disk_can_be_shown_in_multip
+rectangle "FileOpen" as fileopen
+rectangle "TldrawWebViewManager" as tldrawwebviewmanager
+rectangle "Extension" as group_extension {
+  rectangle "TldrawEditorProvider" as tldraweditorprovider
+  rectangle "TldrawDocument" as tldrawdocument
+  rectangle "WebViewMessageHandler" as webviewmessagehandler
+}
+rectangle "WebView" as group_webview {
+  rectangle "Editor" as group_editor {
+    rectangle "App" as app
+    database "ChangeResponder" as changeresponder
+  }
+}
+vs_code --> group_extension : "activate"
+vs_code --> tldraweditorprovider : "openCustomDocument"
+vs_code --> tldraweditorprovider : "save, undo, redo,..."
+vs_code --> tldraweditorprovider : "document"
+webviewmessagehandler --> group_webview : "webview.postMessage"
+each_file_on_disk_can_be_shown_in_multip --> group_webview
+tldraweditorprovider --> tldrawdocument : "create"
+tldrawwebviewmanager --> group_webview : "creates"
+vs_code --> tldrawwebviewmanager : "resolveCustomEditor"
+@enduml

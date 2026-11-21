@@ -1,0 +1,19 @@
+C4Context
+    title E-Commerce System - Container Diagram
+    Person(customer, "Customer")
+    System(payment, "Payment Gateway")
+    System(email, "Email Service")
+    Boundary(ecommerce, "E-Commerce System") {
+        Container(web, "Web Application")
+        Container(api, "API Application")
+        ContainerDb(db, "Database")
+        Container(cache, "Cache")
+        ContainerQueue(queue, "Message Queue")
+    }
+    Rel(customer, web, "Uses")
+    Rel(web, api, "Makes API calls to")
+    Rel(api, db, "Reads/Writes")
+    Rel(api, cache, "Reads/Writes")
+    Rel(api, queue, "Publishes messages to")
+    Rel(api, payment, "Processes payments via")
+    Rel(api, email, "Sends emails via")

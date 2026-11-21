@@ -1,0 +1,35 @@
+digraph "Dynamic Loadindg Mechanism" {
+    compound=true;
+    rankdir="LR";
+    node [shape="box", fontname="Helvetica"];
+    edge [fontname="Helvetica"];
+
+    subgraph cluster_group_ResultsComponent {
+        label="ResultsComponent";
+        GameDropDown [label="GameDropDown"];
+        DateFilterBar [label="DateFilterBar"];
+        Loop_ResultContainer [label="Loop:ResultContainer"];
+        subgraph cluster_group_ResultContainer {
+            label="ResultContainer";
+            ResultBallLoader [label="ResultBallLoader"];
+            ResultSummaryLoader [label="ResultSummaryLoader"];
+        }
+    }
+
+    API_Results [label="API:Results"];
+    State_LayoutConfig [label="State:LayoutConfig"];
+    GeneralSummaryResult [label="GeneralSummaryResult"];
+    TwoRowsBallResult [label="TwoRowsBallResult"];
+    OneRowBallResult [label="OneRowBallResult"];
+    OneRowAddUpBallResult [label="OneRowAddUpBallResult"];
+    TwoRowsWithHeaderBallResult [label="TwoRowsWithHeaderBallResult"];
+
+    GameDropDown -> API_Results [label="Get `resultSummary`, `displayResultNumbers`", ltail="cluster_group_ResultsComponent"];
+    GameDropDown -> State_LayoutConfig [label="Get `componetId` of `miniResultLayout` by counter", ltail="cluster_group_ResultsComponent"];
+    Loop_ResultContainer -> ResultBallLoader [label="Single Result Data", lhead="cluster_group_ResultContainer"];
+    ResultSummaryLoader -> GeneralSummaryResult [label="Dynamic loading by componentId"];
+    ResultBallLoader -> TwoRowsBallResult [label="Dynamic loading by componentId"];
+    ResultBallLoader -> OneRowBallResult [label="Dynamic loading by componentId"];
+    ResultBallLoader -> OneRowAddUpBallResult [label="Dynamic loading by componentId"];
+    ResultBallLoader -> TwoRowsWithHeaderBallResult [label="Dynamic loading by componentId"];
+}

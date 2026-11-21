@@ -1,0 +1,14 @@
+digraph "Architecture" {
+    rankdir="LR";
+    node [shape="box", fontname="Helvetica"];
+    edge [fontname="Helvetica"];
+
+    subgraph cluster_group_backend {
+        label="Backend";
+        api_server [label="API Server", fillcolor="#4465e9", style="filled", color="#4465e9", penwidth="3.5"];
+    }
+
+    database [label="Database", shape="cylinder", color="#099268", penwidth="5.0"];
+
+    api_server -> database [label="queries", color="#1d1d1d", penwidth="3.5"];
+}

@@ -1,0 +1,17 @@
+C4Context
+    title Architecture Diagram
+    Person(client, "Client")
+    Boundary(fineractSystem, "Fineract") {
+        Container(api, "Fineract REST API")
+        Boundary(commandSystem, "Command Processing") {
+            Container(dispatcher, "Command Dispatcher")
+            Container(hookManager, "Command Hook Manager")
+            Container(handlerManager, "Command Handler Manager")
+        }
+    }
+    Rel(client, api, "Sends requests")
+    Rel(api, dispatcher, "Converts request into command")
+    Rel(dispatcher, hookManager, "Call before handler")
+    Rel(dispatcher, hookManager, "Call after handler")
+    Rel(dispatcher, hookManager, "Call on handler error")
+    Rel(dispatcher, handlerManager, "Handle command")

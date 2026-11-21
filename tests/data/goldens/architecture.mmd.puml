@@ -1,0 +1,17 @@
+@startuml
+rectangle "Web Client" as client
+rectangle "Load Balancer" as lb
+rectangle "Backend Services" as group_backend {
+  rectangle "API Service" as api
+  database "PostgreSQL" as db
+  database "Redis Cache" as cache
+  rectangle "Worker" as worker
+  database "Message Queue" as queue
+}
+client --> lb
+lb --> api
+lb --> worker
+api --> db
+api --> cache
+worker --> queue
+@enduml

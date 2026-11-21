@@ -1,0 +1,13 @@
+@startuml
+left to right direction
+rectangle "Device Simulator" as devices
+rectangle "Fare Data" as fareDataEventHub
+rectangle "Trip Data" as tripDataEventHub
+rectangle "Stream Processing" as streamAnalytics
+rectangle "Output Database" as outputCosmosDb
+devices --> fareDataEventHub
+devices --> tripDataEventHub
+fareDataEventHub --> streamAnalytics
+tripDataEventHub --> streamAnalytics
+streamAnalytics --> outputCosmosDb
+@enduml

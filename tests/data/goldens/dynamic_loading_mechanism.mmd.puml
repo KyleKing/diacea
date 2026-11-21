@@ -1,0 +1,27 @@
+@startuml
+left to right direction
+rectangle "API:Results" as API_Results
+rectangle "State:LayoutConfig" as State_LayoutConfig
+rectangle "GeneralSummaryResult" as GeneralSummaryResult
+rectangle "TwoRowsBallResult" as TwoRowsBallResult
+rectangle "OneRowBallResult" as OneRowBallResult
+rectangle "OneRowAddUpBallResult" as OneRowAddUpBallResult
+rectangle "TwoRowsWithHeaderBallResult" as TwoRowsWithHeaderBallResult
+rectangle "ResultsComponent" as group_ResultsComponent {
+  rectangle "GameDropDown" as GameDropDown
+  rectangle "DateFilterBar" as DateFilterBar
+  rectangle "Loop:ResultContainer" as Loop_ResultContainer
+  rectangle "ResultContainer" as group_ResultContainer {
+    rectangle "ResultBallLoader" as ResultBallLoader
+    rectangle "ResultSummaryLoader" as ResultSummaryLoader
+  }
+}
+group_ResultsComponent --> API_Results : "Get `resultSummary`, `displayResultNumbers`"
+group_ResultsComponent --> State_LayoutConfig : "Get `componetId` of `miniResultLayout` by counter"
+Loop_ResultContainer --> group_ResultContainer : "Single Result Data"
+ResultSummaryLoader --> GeneralSummaryResult : "Dynamic loading by componentId"
+ResultBallLoader --> TwoRowsBallResult : "Dynamic loading by componentId"
+ResultBallLoader --> OneRowBallResult : "Dynamic loading by componentId"
+ResultBallLoader --> OneRowAddUpBallResult : "Dynamic loading by componentId"
+ResultBallLoader --> TwoRowsWithHeaderBallResult : "Dynamic loading by componentId"
+@enduml

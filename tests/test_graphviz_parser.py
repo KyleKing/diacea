@@ -1,10 +1,15 @@
 """Tests for the GraphViz DOT parser."""
 
+import re
+
 import pytest
 
+from diacea.formats import parse_diagram
 from diacea.generators import GraphVizGenerator
 from diacea.ir import SemanticType
 from diacea.parsers import GraphVizParser, is_dot
+
+from .ir_summary import summarize
 
 DOT = """
 // architecture
@@ -141,18 +146,17 @@ class TestErrors:
     @pytest.mark.parametrize(
         ('text', 'message'),
         [
-            ('digraph { a -> b', 'unclosed'),
-            ('flowchart LR', 'not a DOT document'),
-            ('digraph { a [label= }', 'expected an identifier'),
+            ('digraph { a -> b', "Line 1: unclosed '{' in DOT input"),
+            ('flowchart LR', "Line 1: not a DOT document (expected 'graph' or 'digraph')"),
+            ('digraph { a [label= }', "Line 1: expected an identifier but found '}'"),
+            ('digraph x', "Line 1: expected '{' but found 'end of input'"),
+            ('digraph {\n a [label=<x\ny>\n];\n subgraph s ;\n}', "Line 5: expected '{' but found ';'"),
+            ({'not': 'text'}, 'GraphViz parser expects a string input'),
         ],
     )
     def test_invalid_dot_raises(self, text, message):
-        with pytest.raises(ValueError, match=message):
+        with pytest.raises(ValueError, match=f'^{re.escape(message)}$'):
             GraphVizParser().parse(text)
-
-    def test_non_string_input_raises(self):
-        with pytest.raises(ValueError, match='expects a string'):
-            GraphVizParser().parse({'not': 'text'})
 
 
 def test_own_output_is_a_fixpoint():
@@ -160,3 +164,68 @@ def test_own_output_is_a_fixpoint():
     second = GraphVizGenerator().generate(GraphVizParser().parse(first))
 
     assert second == first
+
+
+@pytest.mark.parametrize(
+    ('source', 'expected', 'warnings'),
+    [
+        pytest.param(
+            'digraph { subgraph cluster { a } subgraph cluster { b } '
+            'subgraph cluster_x { c } subgraph cluster_x { d } }',
+            {
+                'nodes': [
+                    ('a', 'a', 'ellipse', 'person'),
+                    ('b', 'b', 'ellipse', 'person'),
+                    ('c', 'c', 'ellipse', 'person'),
+                    ('d', 'd', 'ellipse', 'person'),
+                ],
+                'groups': [
+                    ('group-cluster_1', 'cluster_1', ['a']),
+                    ('group-cluster_2', 'cluster_2', ['b']),
+                    ('group-x', 'x', ['c', 'd']),
+                ],
+            },
+            [],
+            id='anonymous-and-reopened-clusters',
+        ),
+        pytest.param(
+            'digraph { a [label="foo" + "bar"]; "x" + "y" -> b }',
+            {
+                'nodes': [
+                    ('a', 'foobar', 'ellipse', 'person'),
+                    ('xy', 'xy', 'ellipse', 'person'),
+                    ('b', 'b', 'ellipse', 'person'),
+                ],
+                'edges': [('xy', 'b', '')],
+            },
+            [],
+            id='quoted-string-concatenation',
+        ),
+        pytest.param(
+            'digraph { a [penwidth=3]; b [penwidth=abc] }',
+            {
+                'nodes': [('a', 'a', 'ellipse', 'person'), ('b', 'b', 'ellipse', 'person')],
+                'styles': {'a': (None, None, 3.0)},
+            },
+            [],
+            id='numeric-penwidth-only',
+        ),
+        pytest.param(
+            'digraph { api [label="\\N service"]; b [label="C:\\\\Nodes"]; c [label="\\\\N"] }',
+            {
+                'nodes': [
+                    ('api', 'api service', 'ellipse', 'service'),
+                    ('b', 'C:\\Nodes', 'ellipse', 'person'),
+                    ('c', '\\N', 'ellipse', 'person'),
+                ],
+            },
+            [],
+            id='node-name-escape-is-not-read-inside-an-escaped-backslash',
+        ),
+    ],
+)
+def test_source_parses_to(source, expected, warnings):
+    parsed = parse_diagram(source, 'graphviz')
+
+    assert summarize(parsed.diagram) == expected
+    assert parsed.warnings == warnings

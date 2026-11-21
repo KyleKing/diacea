@@ -1,0 +1,10 @@
+digraph "Page 1" {
+    rankdir="LR";
+    node [shape="box", fontname="Helvetica"];
+    edge [fontname="Helvetica"];
+
+    rectangles_with_labels [label="Rectangles with labels", shape="component", color="#ffffff", penwidth="2.0"];
+    ovals_with_labels [label="Ovals with labels", shape="ellipse", fillcolor="#ffffff", style="filled", color="#ffffff", penwidth="2.0"];
+
+    rectangles_with_labels -> ovals_with_labels [label="Arrows with labels", color="#ffffff", penwidth="2.0"];
+}

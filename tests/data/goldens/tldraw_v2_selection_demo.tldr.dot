@@ -1,0 +1,30 @@
+digraph "Page 1" {
+    rankdir="LR";
+    node [shape="box", fontname="Helvetica"];
+    edge [fontname="Helvetica"];
+
+    is_there_a_shape_under_the_pointer [label="Is there a shape \nunder the pointer?", shape="diamond", color="#1d1d1d", penwidth="3.5"];
+    is_the_user_holding_the_shift_key_and_no [label="Is the user \nholding the shift key? \n(and not the alt key)", shape="diamond", color="#1d1d1d", penwidth="3.5"];
+    is_the_outermost_selectable_shape_select [label="Is the outermost \nselectable shape selected?", shape="diamond", color="#1d1d1d", penwidth="3.5"];
+    cancel_any_double_click [label="Cancel any double click", color="#1d1d1d", penwidth="3.5"];
+    select_the_hit_shape [label="Select the hit shape", shape="cylinder", fillcolor="#1d1d1d", style="filled", color="#1d1d1d", penwidth="3.5"];
+    select_the_outermost_selectable_shape [label="Select the outermost selectable shape", shape="cylinder", fillcolor="#1d1d1d", style="filled", color="#1d1d1d", penwidth="3.5"];
+    add_the_outermost_selectable_shape_to_se [label="Add the outermost selectable shape to selection", shape="cylinder", fillcolor="#1d1d1d", style="filled", color="#1d1d1d", penwidth="3.5"];
+    de_select_the_outermost_selectable_shape [label="De-select the outermost selectable shape", shape="cylinder", fillcolor="#1d1d1d", style="filled", color="#1d1d1d", penwidth="3.5"];
+    is_oss_shape_the_same_as_the_hit_shape [label="Is OSS shape the same \nas the hit shape?", shape="diamond", color="#1d1d1d", penwidth="3.5"];
+    is_oss_shape_the_focus_layer_id [label="Is OSS shape\nthe focus layer id?", shape="diamond", color="#1d1d1d", penwidth="3.5"];
+    is_oss_shape_selected [label="Is OSS shape\nselected?", shape="diamond", color="#1d1d1d", penwidth="3.5"];
+
+    is_there_a_shape_under_the_pointer -> is_the_user_holding_the_shift_key_and_no [label="Yes", color="#1d1d1d", penwidth="3.5"];
+    cancel_any_double_click -> is_the_outermost_selectable_shape_select [color="#1d1d1d", penwidth="3.5"];
+    is_the_outermost_selectable_shape_select -> de_select_the_outermost_selectable_shape [label="No", color="#1d1d1d", penwidth="3.5"];
+    is_the_outermost_selectable_shape_select -> add_the_outermost_selectable_shape_to_se [label="Yes", color="#1d1d1d", penwidth="3.5"];
+    is_the_user_holding_the_shift_key_and_no -> cancel_any_double_click [label="Yes", color="#1d1d1d", penwidth="3.5"];
+    is_oss_shape_the_same_as_the_hit_shape -> select_the_hit_shape [label="Yes", color="#1d1d1d", penwidth="3.5"];
+    is_oss_shape_the_focus_layer_id -> select_the_hit_shape [label="Yes", color="#1d1d1d", penwidth="3.5"];
+    is_oss_shape_the_same_as_the_hit_shape -> is_oss_shape_the_focus_layer_id [label="No", color="#1d1d1d", penwidth="3.5"];
+    is_oss_shape_the_focus_layer_id -> is_oss_shape_selected [label="No", color="#1d1d1d", penwidth="3.5"];
+    is_the_user_holding_the_shift_key_and_no -> is_oss_shape_the_same_as_the_hit_shape [label="No", color="#1d1d1d", penwidth="3.5"];
+    is_oss_shape_selected -> select_the_hit_shape [label="Yes", color="#1d1d1d", penwidth="3.5"];
+    is_oss_shape_selected -> select_the_outermost_selectable_shape [label="No", color="#1d1d1d", penwidth="3.5"];
+}

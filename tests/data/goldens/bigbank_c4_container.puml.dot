@@ -1,0 +1,29 @@
+digraph "diagram" {
+    rankdir="TB";
+    node [shape="box", fontname="Helvetica"];
+    edge [fontname="Helvetica"];
+
+    subgraph cluster_c1 {
+        label="Internet Banking";
+        web_app [label="Web Application", shape="component"];
+        spa [label="Single-Page App", shape="component"];
+        mobile_app [label="Mobile App", shape="component"];
+        database [label="Database", shape="cylinder"];
+        backend_api [label="API Application", shape="component"];
+    }
+
+    customer [label="Customer", shape="ellipse"];
+    email_system [label="E-Mail System", shape="box3d"];
+    banking_system [label="Mainframe Banking System", shape="box3d"];
+
+    customer -> web_app [label="Uses"];
+    customer -> spa [label="Uses"];
+    customer -> mobile_app [label="Uses"];
+    web_app -> spa [label="Delivers"];
+    spa -> backend_api [label="Uses"];
+    mobile_app -> backend_api [label="Uses"];
+    database -> backend_api [label="Reads from and writes to"];
+    customer -> email_system [label="Sends e-mails to"];
+    email_system -> backend_api [label="Sends e-mails using"];
+    backend_api -> banking_system [label="Uses"];
+}

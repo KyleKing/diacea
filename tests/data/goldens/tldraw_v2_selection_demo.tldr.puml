@@ -1,0 +1,25 @@
+@startuml
+hexagon "Is there a shape \nunder the pointer?" as is_there_a_shape_under_the_pointer
+hexagon "Is the user \nholding the shift key? \n(and not the alt key)" as is_the_user_holding_the_shift_key_and_no
+hexagon "Is the outermost \nselectable shape selected?" as is_the_outermost_selectable_shape_select
+rectangle "Cancel any double click" as cancel_any_double_click
+database "Select the hit shape" as select_the_hit_shape
+database "Select the outermost selectable shape" as select_the_outermost_selectable_shape
+database "Add the outermost selectable shape to selection" as add_the_outermost_selectable_shape_to_se
+database "De-select the outermost selectable shape" as de_select_the_outermost_selectable_shape
+hexagon "Is OSS shape the same \nas the hit shape?" as is_oss_shape_the_same_as_the_hit_shape
+hexagon "Is OSS shape\nthe focus layer id?" as is_oss_shape_the_focus_layer_id
+hexagon "Is OSS shape\nselected?" as is_oss_shape_selected
+is_there_a_shape_under_the_pointer --> is_the_user_holding_the_shift_key_and_no : "Yes"
+cancel_any_double_click --> is_the_outermost_selectable_shape_select
+is_the_outermost_selectable_shape_select --> de_select_the_outermost_selectable_shape : "No"
+is_the_outermost_selectable_shape_select --> add_the_outermost_selectable_shape_to_se : "Yes"
+is_the_user_holding_the_shift_key_and_no --> cancel_any_double_click : "Yes"
+is_oss_shape_the_same_as_the_hit_shape --> select_the_hit_shape : "Yes"
+is_oss_shape_the_focus_layer_id --> select_the_hit_shape : "Yes"
+is_oss_shape_the_same_as_the_hit_shape --> is_oss_shape_the_focus_layer_id : "No"
+is_oss_shape_the_focus_layer_id --> is_oss_shape_selected : "No"
+is_the_user_holding_the_shift_key_and_no --> is_oss_shape_the_same_as_the_hit_shape : "No"
+is_oss_shape_selected --> select_the_hit_shape : "Yes"
+is_oss_shape_selected --> select_the_outermost_selectable_shape : "No"
+@enduml

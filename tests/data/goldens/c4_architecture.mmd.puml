@@ -1,0 +1,11 @@
+@startuml
+actor "Customer" as customer
+actor "Administrator" as admin
+rectangle "E-Commerce System" as ecommerce
+rectangle "Payment Gateway" as payment
+rectangle "Shipping Service" as shipping
+customer --> ecommerce : "Browses products, places orders"
+admin --> ecommerce : "Manages products, views analytics"
+ecommerce --> payment : "Processes payments via"
+ecommerce --> shipping : "Tracks shipments via"
+@enduml

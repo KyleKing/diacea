@@ -1,0 +1,27 @@
+direction: down
+
+ecommerce: E-Commerce System {
+  web: Web Application
+  api: API Application
+  db: Database {
+    shape: cylinder
+  }
+  cache: Cache
+  queue: Message Queue {
+    shape: queue
+  }
+}
+
+customer: Customer {
+  shape: person
+}
+payment: Payment Gateway
+email: Email Service
+
+customer -> ecommerce.web: Uses
+ecommerce.web -> ecommerce.api: Makes API calls to
+ecommerce.api -> ecommerce.db: Reads/Writes
+ecommerce.api -> ecommerce.cache: Reads/Writes
+ecommerce.api -> ecommerce.queue: Publishes messages to
+ecommerce.api -> payment: Processes payments via
+ecommerce.api -> email: Sends emails via

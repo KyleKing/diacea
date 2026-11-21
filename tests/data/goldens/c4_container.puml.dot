@@ -1,0 +1,22 @@
+digraph "diagram" {
+    rankdir="TB";
+    node [shape="box", fontname="Helvetica"];
+    edge [fontname="Helvetica"];
+
+    subgraph cluster_shop {
+        label="Web Shop";
+        web [label="Web App", shape="component"];
+        api [label="API", shape="component"];
+        db [label="Orders DB", shape="cylinder"];
+        bus [label="Event Bus", shape="folder"];
+    }
+
+    customer [label="Customer", shape="ellipse"];
+    payments [label="Payment Provider", shape="box3d"];
+
+    customer -> web [label="Uses"];
+    web -> api [label="Calls"];
+    api -> db [label="Reads/Writes"];
+    api -> bus [label="Publishes"];
+    api -> payments [label="Charges"];
+}

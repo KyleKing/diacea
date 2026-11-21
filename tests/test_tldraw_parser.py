@@ -7,8 +7,10 @@ from typing import Any
 import pytest
 
 from diacea.cli import detect_input_format
-from diacea.ir import Connection, Group, Shape, Text
+from diacea.ir import Connection, Dimensions, Group, Point, Shape, Text
 from diacea.parsers import TLDrawParser
+
+from .ir_summary import summarize
 
 V2_FIXTURE = Path(__file__).parent / 'data' / 'tldraw_v2.tldr'
 
@@ -115,9 +117,12 @@ class TestTLDrawParser:
         assert len(connections) == 1
 
         conn = connections[0]
-        assert conn.from_id == 'rect1'
-        assert conn.to_id == 'rect2'
-        assert conn.label == 'connects'
+        assert (conn.from_id, conn.to_id, conn.label, conn.position) == (
+            'rect1',
+            'rect2',
+            'connects',
+            Point(100.0, 25.0),
+        )
 
     def test_parse_group(self):
         """Test parsing grouped shapes."""
@@ -288,34 +293,6 @@ class TestTLDrawParser:
         connections = [e for e in diagram.elements if isinstance(e, Connection)]
         assert len(connections) == 1
         assert connections[0].connection_type == 'bidirectional'
-
-
-class TestTLDrawCLI:
-    """Test TLDraw CLI integration."""
-
-    def test_auto_detect_tldraw(self):
-        """Test auto-detection of TLDraw format."""
-        tldraw_data: dict[str, Any] = {'document': {'pages': {}}}
-        format_type = detect_input_format(tldraw_data)
-        assert format_type == 'tldraw'
-
-    def test_auto_detect_excalidraw(self):
-        """Test auto-detection of Excalidraw format."""
-        excalidraw_data: dict[str, Any] = {'elements': []}
-        format_type = detect_input_format(excalidraw_data)
-        assert format_type == 'excalidraw'
-
-    def test_auto_detect_excalidraw_clipboard(self):
-        """Test auto-detection of Excalidraw clipboard format."""
-        excalidraw_data = {'type': 'excalidraw/clipboard', 'elements': []}
-        format_type = detect_input_format(excalidraw_data)
-        assert format_type == 'excalidraw'
-
-    def test_auto_detect_unknown(self):
-        """Test error on unknown format."""
-        unknown_data = {'something': 'else'}
-        with pytest.raises(ValueError, match='Unrecognized input format'):
-            detect_input_format(unknown_data)
 
 
 @pytest.fixture
@@ -707,3 +684,84 @@ class TestTLDrawV2Parser:
 
         by_id = TLDrawParser(page_id='page:p2').parse(data)
         assert [s.label for s in by_id.get_shapes()] == ['Two']
+
+
+def _v2_record(element_id, record_type, x, y, props, index='a1'):
+    return {
+        'id': f'shape:{element_id}',
+        'typeName': 'shape',
+        'type': record_type,
+        'x': x,
+        'y': y,
+        'parentId': 'page:p1',
+        'index': index,
+        'props': props,
+    }
+
+
+def _v2_geo(element_id, x, y, width, height, text, record_type='geo'):
+    return _v2_record(element_id, record_type, x, y, {'w': width, 'h': height, 'geo': 'rectangle', 'text': text})
+
+
+def _v2_arrow(element_id, x, y, start, end):
+    props = {
+        'start': {'x': start[0], 'y': start[1]},
+        'end': {'x': end[0], 'y': end[1]},
+        'arrowheadStart': 'none',
+        'arrowheadEnd': 'arrow',
+        'text': '',
+    }
+    return _v2_record(element_id, 'arrow', x, y, props, index='a2')
+
+
+def _v2_draw(element_id, points):
+    segments = [{'type': 'free', 'points': [{'x': x, 'y': y, 'z': 0.5} for x, y in points]}]
+    return _v2_record(element_id, 'draw', 0, 500, {'segments': segments}, index='a3')
+
+
+def test_v2_document_resolves_notes_edges_bindings_and_freehand():
+    records = [
+        {'id': 'page:p1', 'typeName': 'page', 'name': 'P', 'index': 'a1'},
+        _v2_geo('a', 0, 0, 100, 40, 'A'),
+        _v2_geo('d', 110, 0, 20, 40, 'D'),
+        _v2_geo('c', 270, 0, 20, 40, 'C'),
+        _v2_geo('b', 300, 0, 200, 40, 'B'),
+        _v2_geo('n', 0, 200, 100, 100, 'Note', record_type='note'),
+        _v2_arrow('ab', 100, 20, (0, 0), (200, 10)),
+        _v2_arrow('nb', 50, 250, (0, 0), (300, -100)),
+        {
+            'id': 'binding:x',
+            'typeName': 'binding',
+            'type': 'custom',
+            'fromId': 'shape:nb',
+            'toId': 'shape:c',
+            'props': {'terminal': 'end'},
+        },
+        _v2_draw('dot', [(0, 0), (4, 4)]),
+        _v2_draw('wide5', [(0, 0), (5, 0)]),
+        _v2_draw('tall5', [(0, 0), (0, 5)]),
+        _v2_draw('flat', [(0, 0), (10, 2)]),
+    ]
+
+    diagram = TLDrawParser(include_freehand=True).parse(
+        {'tldrawFileFormatVersion': 1, 'schema': {}, 'records': records}
+    )
+
+    assert summarize(diagram) | {'styles': {}} == {
+        'nodes': [
+            ('shape:a', 'A', 'rectangle', 'component'),
+            ('shape:d', 'D', 'rectangle', 'component'),
+            ('shape:c', 'C', 'rectangle', 'component'),
+            ('shape:b', 'B', 'rectangle', 'database'),
+            ('shape:n', 'Note', 'note', 'note'),
+            ('shape:wide5', '', 'freehand', None),
+            ('shape:tall5', '', 'freehand', None),
+            ('shape:flat', '', 'freehand', None),
+        ],
+        'edges': [('shape:a', 'shape:b', ''), ('shape:n', 'shape:b', '')],
+        'styles': {},
+    }
+    assert [(conn.position, conn.size) for conn in diagram.get_connections()] == [
+        (Point(200.0, 25.0), Dimensions(200.0, 10.0)),
+        (Point(200.0, 200.0), Dimensions(300.0, 100.0)),
+    ]

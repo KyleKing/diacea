@@ -1,0 +1,123 @@
+direction: right
+
+services: Services {
+  auth_service: Auth Service {
+    style: {
+      fill: "#E0E0E0"
+      stroke: "black"
+      stroke-width: 1
+    }
+  }
+  order_service: Order Service {
+    style: {
+      fill: "#E0E0E0"
+      stroke: "black"
+      stroke-width: 1
+    }
+  }
+  product_service: Product Service {
+    style: {
+      fill: "#E0E0E0"
+      stroke: "black"
+      stroke-width: 1
+    }
+  }
+  auth_db: Auth DB {
+    shape: cylinder
+    style: {
+      fill: "#FFE4B5"
+      stroke: "black"
+      stroke-width: 1
+    }
+  }
+  order_db: Order DB {
+    shape: cylinder
+    style: {
+      fill: "#FFE4B5"
+      stroke: "black"
+      stroke-width: 1
+    }
+  }
+  product_db: Product DB {
+    shape: cylinder
+    style: {
+      fill: "#FFE4B5"
+      stroke: "black"
+      stroke-width: 1
+    }
+  }
+}
+
+user: User {
+  shape: person
+  style: {
+    fill: "#87CEEB"
+    stroke: "black"
+    stroke-width: 2
+  }
+}
+api_gateway: API Gateway {
+  style: {
+    fill: "#90EE90"
+    stroke: "black"
+    stroke-width: 2
+  }
+}
+message_queue: Message Queue {
+  shape: queue
+  style: {
+    fill: "#FFD700"
+    stroke: "black"
+    stroke-width: 2
+  }
+}
+
+user -> api_gateway {
+  style: {
+    stroke: "black"
+    stroke-width: 2
+  }
+}
+api_gateway -> services.auth_service {
+  style: {
+    stroke: "black"
+    stroke-width: 2
+  }
+}
+api_gateway -> services.order_service {
+  style: {
+    stroke: "black"
+    stroke-width: 2
+  }
+}
+api_gateway -> services.product_service {
+  style: {
+    stroke: "black"
+    stroke-width: 2
+  }
+}
+services.auth_service -> services.auth_db {
+  style: {
+    stroke: "blue"
+    stroke-width: 2
+  }
+}
+services.order_service -> services.order_db {
+  style: {
+    stroke: "blue"
+    stroke-width: 2
+  }
+}
+services.product_service -> services.product_db {
+  style: {
+    stroke: "blue"
+    stroke-width: 2
+  }
+}
+services.order_service -> message_queue {
+  style: {
+    stroke: "green"
+    stroke-width: 2
+    stroke-dash: 3
+  }
+}

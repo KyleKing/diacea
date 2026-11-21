@@ -1,0 +1,34 @@
+digraph "web_architecture" {
+    rankdir="LR";
+    node [shape="box", fontname="Helvetica"];
+    edge [fontname="Helvetica"];
+
+    subgraph cluster_platform {
+        label="Web Platform";
+        frontend [label="Frontend SPA"];
+        gateway [label="API Gateway"];
+        orders [label="Order Service"];
+        billing [label="Billing Service"];
+        events [label="Event Bus", shape="folder"];
+        orders_db [label="Orders DB", shape="cylinder"];
+    }
+
+    customer [label="Customer", shape="ellipse"];
+    agent_support [label="Support Agent", shape="ellipse"];
+    cdn [label="CDN", shape="cloud"];
+    blobs [label="Object Storage", shape="cylinder"];
+    warehouse [label="Analytics Warehouse", shape="cylinder"];
+
+    customer -> cdn [label="browses"];
+    cdn -> frontend;
+    customer -> frontend;
+    agent_support -> gateway [label="admin API"];
+    frontend -> gateway [label="HTTPS/JSON"];
+    gateway -> orders;
+    gateway -> billing;
+    orders -> orders_db [label="SQL"];
+    orders -> events [label="publishes", style="dashed"];
+    billing -> events [label="publishes", style="dashed"];
+    events -> warehouse [label="streams"];
+    orders -> blobs [label="invoices"];
+}

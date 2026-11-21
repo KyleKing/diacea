@@ -231,7 +231,6 @@ class TestWorkspaceInfo:
 
     def test_info_displays_workspace_details(self, tmp_path, capsys):
         workspace_file = tmp_path / 'workspace.yml'
-
         workspace = Workspace(
             id='my-project',
             name='My Project',
@@ -239,46 +238,40 @@ class TestWorkspaceInfo:
             author='Test Author',
             version='2.0.0',
         )
-        element = ElementDefinition(
-            id='api',
-            label='API Service',
-            element_type='container',
+        workspace.add_element(ElementDefinition(id='api', label='API Service', element_type='container'))
+        workspace.add_view(
+            DiagramView(
+                id='context',
+                name='System Context',
+                view_type='context',
+                file='context.excalidraw',
+                element_refs=['api'],
+            )
         )
-        workspace.add_element(element)
-        view = DiagramView(
-            id='context',
-            name='System Context',
-            view_type='context',
-            file='context.excalidraw',
-            element_refs=['api'],
+        workspace.add_view(
+            DiagramView(id='detail', name='Detail', view_type='container', parent_view='context', element_refs=['api'])
         )
-        workspace.add_view(view)
         save_workspace(workspace, workspace_file)
 
-        args = argparse.Namespace(workspace=str(workspace_file))
-
-        result = workspace_info(args)
-        assert result == 0
-
-        captured = capsys.readouterr()
-        assert 'My Project' in captured.out
-        assert 'my-project' in captured.out
-        assert 'Project description' in captured.out
-        assert 'Test Author' in captured.out
-        assert '2.0.0' in captured.out
-        assert 'api' in captured.out
-        assert 'API Service' in captured.out
-        assert 'context' in captured.out
-        assert 'System Context' in captured.out
-
-    def test_info_nonexistent_file(self, tmp_path, capsys):
-        args = argparse.Namespace(workspace=str(tmp_path / 'nonexistent.yml'))
-
-        result = workspace_info(args)
-        assert result == 1
-
-        captured = capsys.readouterr()
-        assert 'Error' in captured.err
+        assert workspace_info(argparse.Namespace(workspace=str(workspace_file))) == 0
+        assert capsys.readouterr().out == (
+            'Workspace: My Project\n'
+            'ID: my-project\n'
+            'Description: Project description\n'
+            'Author: Test Author\n'
+            'Version: 2.0.0\n'
+            '\n'
+            'Elements (1):\n'
+            '  - api: API Service (container)\n'
+            '    Used in: context, detail\n'
+            '\n'
+            'Views (2):\n'
+            '- context: System Context (context)\n'
+            '  Elements: 1\n'
+            '  File: context.excalidraw\n'
+            '  - detail: Detail (container)\n'
+            '    Elements: 1\n'
+        )
 
 
 class TestWorkspaceAddElement:
@@ -502,14 +495,28 @@ class TestMainWorkspace:
         )
         assert result == 0
 
-        updated = load_workspace(workspace_file)
-        assert 'new-view' in updated.views
+        view = load_workspace(workspace_file).views['new-view']
+        assert (view.name, view.view_type, view.zoom_level, view.file) == ('New View', 'diagram', 0, '')
 
     def test_missing_required_command(self, capsys):
         with pytest.raises(SystemExit) as exc:
             main_workspace([])
 
         assert exc.value.code != 0
+
+    @pytest.mark.parametrize(
+        'argv',
+        [
+            ['add-element', 'missing.yml', '--id', 'x'],
+            ['add-view', 'missing.yml', '--id', 'x'],
+            ['info', 'missing.yml'],
+        ],
+    )
+    def test_missing_workspace_is_an_error(self, argv, tmp_path, monkeypatch, capsys):
+        monkeypatch.chdir(tmp_path)
+
+        assert main_workspace(argv) == 1
+        assert capsys.readouterr().err.startswith('Error loading workspace: ')
 
 
 class TestDiagramSpecSplitting:

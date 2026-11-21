@@ -1,0 +1,13 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+
+
+System_Boundary(group_moat, "Moat") {
+  System(left_box, "Left Box")
+  System(right_box, "Right\nBox")
+}
+
+Rel(left_box, right_box, "")
+@enduml

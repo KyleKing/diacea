@@ -1,0 +1,27 @@
+@startuml
+rectangle "Workflow composition" as workflow_composition
+rectangle "DT developer" as dt_developer
+rectangle "Data and computation\nabstraction" as data_and_computation_abstraction
+rectangle "AI/ML subsystem" as ai_ml_subsystem
+rectangle "Repository" as repository
+rectangle " " as group_node_1 {
+  rectangle "Tooling &amp; Reporting" as tooling_reporting
+  rectangle "JePL library" as jepl_library
+  rectangle "CI system" as ci_system
+  rectangle "SQAaaS API" as sqaaas_api
+  rectangle "SQAaaS web" as sqaaas_web
+}
+dt_developer ..> repository : "Push changes to workflow code"
+data_and_computation_abstraction ..> sqaaas_api : "FAIR and data quality assessment (event and/or polling-based)"
+sqaaas_api ..> ci_system : "Runs/fetches results\nof the QA assessment"
+ci_system ..> ai_ml_subsystem : "Triggers deployment\nof pre-trained ML model"
+repository ..> sqaaas_api : "Event-based\nworfklow validation\n(DevOps)"
+sqaaas_api ..> repository : "Registers/loads\nQA assessment"
+jepl_library ..> repository : "Modifies\nQA assessment"
+tooling_reporting ..> sqaaas_api : "Get tools"
+sqaaas_web ..> sqaaas_api : "Leverages"
+workflow_composition ..> sqaaas_api : "Triggers pre-defined\nQA assessment\nas step in the workflow"
+sqaaas_api ..> workflow_composition : "Gets deployed as\na step in the workflow"
+dt_developer ..> sqaaas_web : "Defines custom\nQA assessment"
+dt_developer ..> workflow_composition
+@enduml

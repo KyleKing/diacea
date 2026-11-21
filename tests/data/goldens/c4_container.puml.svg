@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="436" height="803" viewBox="-24.0 -24.0 436.0 803.0">
+<style>text{font-family:Helvetica,Arial,sans-serif;font-size:14px;fill:#1e1e1e}.group-label{font-size:12px;fill:#868e96}.edge-label{font-size:12px;paint-order:stroke;stroke:#ffffff;stroke-width:4px}</style>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1e1e1e"/></marker></defs>
+<rect x="-24.0" y="-24.0" width="436.0" height="803.0" fill="#ffffff"/>
+<g id="shop" data-semantic="group"><rect x="0.0" y="151.0" width="388.0" height="453.0" rx="8" fill="none" fill-opacity="0.25" stroke="#868e96" stroke-dasharray="6 4"/><text class="group-label" x="10.0" y="169.0">Web Shop</text></g>
+<g id="customer" data-semantic="person"><ellipse cx="194.0" cy="30.5" rx="64.0" ry="30.5" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="194.0" y="35.2" text-anchor="middle">Customer</text></g>
+<g id="payments" data-semantic="system"><rect x="86.0" y="694.0" width="216.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="194.0" y="729.2" text-anchor="middle">Payment Provider</text></g>
+<g id="web" data-semantic="container"><rect x="134.0" y="211.0" width="120.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="194.0" y="246.2" text-anchor="middle">Web App</text></g>
+<g id="api" data-semantic="container"><rect x="134.0" y="362.0" width="120.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="194.0" y="397.2" text-anchor="middle">API</text></g>
+<g id="db" data-semantic="database"><path d="M30.0,523.0 a69.5,10.0 0 0 1 139.0,0 v41.0 a69.5,10.0 0 0 1 -139.0,0 z" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><path d="M30.0,523.0 a69.5,10.0 0 0 0 139.0,0" fill="none" stroke="#1e1e1e" stroke-width="1.5"/><text x="99.5" y="548.2" text-anchor="middle">Orders DB</text></g>
+<g id="bus" data-semantic="queue"><rect x="219.0" y="513.0" width="139.0" height="61.0" rx="10.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="288.5" y="548.2" text-anchor="middle">Event Bus</text></g>
+<polyline points="194.0,61.0 194.0,211.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/><text class="edge-label" x="194.0" y="136.0" text-anchor="middle">Uses</text>
+<polyline points="194.0,272.0 194.0,362.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/><text class="edge-label" x="194.0" y="317.0" text-anchor="middle">Calls</text>
+<polyline points="174.9,423.0 118.6,513.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/><text class="edge-label" x="146.8" y="468.0" text-anchor="middle">Reads/Writes</text>
+<polyline points="213.1,423.0 269.4,513.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/><text class="edge-label" x="241.2" y="468.0" text-anchor="middle">Publishes</text>
+<polyline points="194.0,423.0 194.0,694.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/><text class="edge-label" x="194.0" y="558.5" text-anchor="middle">Charges</text>
+</svg>

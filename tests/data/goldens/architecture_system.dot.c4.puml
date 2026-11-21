@@ -1,0 +1,37 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+
+Person(user, "User")
+Person(admin, "Administrator")
+Container(api_gateway, "API Gateway")
+ComponentQueue(message_queue, "Message\nQueue")
+Container(payment_gateway, "Payment\nGateway")
+
+System_Boundary(group_services, "Microservices") {
+  Container(auth_service, "Auth\nService")
+  Container(order_service, "Order\nService")
+  System(product_service, "Product\nService")
+  Container(inventory_service, "Inventory\nService")
+}
+System_Boundary(group_databases, "Databases") {
+  ComponentDb(auth_db, "Auth DB")
+  ComponentDb(order_db, "Order DB")
+  ComponentDb(product_db, "Product DB")
+  ComponentDb(inventory_db, "Inventory DB")
+}
+
+Rel(user, api_gateway, "HTTP")
+Rel(admin, api_gateway, "HTTPS")
+Rel(api_gateway, auth_service, "auth")
+Rel(api_gateway, order_service, "orders")
+Rel(api_gateway, product_service, "products")
+Rel(auth_service, auth_db, "SQL")
+Rel(order_service, order_db, "SQL")
+Rel(product_service, product_db, "SQL")
+Rel(inventory_service, inventory_db, "SQL")
+Rel(order_service, message_queue, "publish")
+Rel(message_queue, inventory_service, "subscribe")
+Rel(order_service, payment_gateway, "charge")
+@enduml

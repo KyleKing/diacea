@@ -1,0 +1,7 @@
+@startuml
+rectangle "Moat" as group_moat {
+  rectangle "Left Box" as left_box
+  rectangle "Right\nBox" as right_box
+}
+left_box --> right_box
+@enduml
