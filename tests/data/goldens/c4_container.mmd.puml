@@ -1,0 +1,19 @@
+@startuml
+actor "Customer" as customer
+rectangle "Payment Gateway" as payment
+rectangle "Email Service" as email
+rectangle "E-Commerce System" as ecommerce {
+  rectangle "Web Application" as web
+  rectangle "API Application" as api
+  database "Database" as db
+  rectangle "Cache" as cache
+  queue "Message Queue" as queue
+}
+customer --> web : "Uses"
+web --> api : "Makes API calls to"
+api --> db : "Reads/Writes"
+api --> cache : "Reads/Writes"
+api --> queue : "Publishes messages to"
+api --> payment : "Processes payments via"
+api --> email : "Sends emails via"
+@enduml

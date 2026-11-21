@@ -1,0 +1,15 @@
+@startuml
+actor "Customer" as customer
+rectangle "Payment Provider" as payments
+rectangle "Web Shop" as shop {
+  rectangle "Web App" as web
+  rectangle "API" as api
+  database "Orders DB" as db
+  queue "Event Bus" as bus
+}
+customer --> web : "Uses"
+web --> api : "Calls"
+api --> db : "Reads/Writes"
+api --> bus : "Publishes"
+api --> payments : "Charges"
+@enduml

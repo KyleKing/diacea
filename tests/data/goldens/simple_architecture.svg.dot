@@ -1,0 +1,28 @@
+digraph "SVG Diagram" {
+    rankdir="LR";
+    node [shape="box", fontname="Helvetica"];
+    edge [fontname="Helvetica"];
+
+    subgraph cluster_services {
+        label="Services";
+        auth_service [label="Auth Service", fillcolor="#E0E0E0", style="filled", color="black", penwidth="1.0"];
+        order_service [label="Order Service", fillcolor="#E0E0E0", style="filled", color="black", penwidth="1.0"];
+        product_service [label="Product Service", fillcolor="#E0E0E0", style="filled", color="black", penwidth="1.0"];
+        auth_db [label="Auth DB", shape="cylinder", fillcolor="#FFE4B5", style="filled", color="black", penwidth="1.0"];
+        order_db [label="Order DB", shape="cylinder", fillcolor="#FFE4B5", style="filled", color="black", penwidth="1.0"];
+        product_db [label="Product DB", shape="cylinder", fillcolor="#FFE4B5", style="filled", color="black", penwidth="1.0"];
+    }
+
+    user [label="User", shape="ellipse", fillcolor="#87CEEB", style="filled", color="black", penwidth="2.0"];
+    api_gateway [label="API Gateway", fillcolor="#90EE90", style="filled", color="black", penwidth="2.0"];
+    message_queue [label="Message Queue", shape="folder", fillcolor="#FFD700", style="filled", color="black", penwidth="2.0"];
+
+    user -> api_gateway [color="black", penwidth="2.0"];
+    api_gateway -> auth_service [color="black", penwidth="1.5"];
+    api_gateway -> order_service [color="black", penwidth="1.5"];
+    api_gateway -> product_service [color="black", penwidth="1.5"];
+    auth_service -> auth_db [color="blue", penwidth="1.5"];
+    order_service -> order_db [color="blue", penwidth="1.5"];
+    product_service -> product_db [color="blue", penwidth="1.5"];
+    order_service -> message_queue [style="dashed", color="green", penwidth="1.5"];
+}

@@ -1,0 +1,7 @@
+@startuml
+rectangle "Web Server" as rect1
+actor "User" as circle1
+database "Database" as ellipse1
+hexagon "Decision" as diamond1
+rectangle "Service" as rect2
+@enduml

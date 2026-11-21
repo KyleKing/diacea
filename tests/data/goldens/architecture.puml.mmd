@@ -1,0 +1,26 @@
+flowchart LR
+    customer([Customer])
+    agent_support([Support Agent])
+    cdn[CDN]
+    blobs[Object Storage]
+    warehouse[(Analytics Warehouse)]
+    subgraph platform[Web Platform]
+        frontend[Frontend SPA]
+        gateway[API Gateway]
+        orders[Order Service]
+        billing[Billing Service]
+        events[Event Bus]
+        orders_db[(Orders DB)]
+    end
+    customer -->|browses| cdn
+    cdn --> frontend
+    customer --> frontend
+    agent_support -->|admin API| gateway
+    frontend -->|"HTTPS/JSON"| gateway
+    gateway --> orders
+    gateway --> billing
+    orders -->|SQL| orders_db
+    orders -.->|publishes| events
+    billing -.->|publishes| events
+    events -->|streams| warehouse
+    orders -->|invoices| blobs

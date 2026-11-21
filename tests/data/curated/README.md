@@ -1,6 +1,6 @@
 # Curated fixtures
 
-Hand-authored minimal sources, each pinning one behavior. `scripts/render_fixtures.py` converts and renders the full matrix; `tests/test_curated_fixtures.py` runs the conversion, render (DIACEA_RENDER=1), and golden checks. Goldens in `goldens/` regenerate with DIACEA_REGEN_GOLDENS=1 once conversion behavior is trusted.
+Hand-authored minimal sources, each pinning one behavior. `scripts/render_fixtures.py` converts and renders the full matrix; `tests/test_curated_fixtures.py` runs the render (DIACEA_RENDER=1) and golden checks. Goldens in `goldens/` regenerate with DIACEA_REGEN_GOLDENS=1 once conversion behavior is trusted.
 
 - `aws_hatchet_sketch.excalidraw`: realistic 20+ shape architecture (AWS region > Serverless lambdas, VPC > Hatchet on ECS) drawn by hand in excalidraw.com; carries soft-deleted (isDeleted) elements from a cleared canvas, boxes accidentally dragged to straddle boundaries, a stray unbound arrow, and orbit-mode arrow bindings
 - `cloudflare_edge.mmd`: realistic 25-node edge architecture; frontmatter title, 3-level subgraph nesting (Workers platform > Durable Objects), node shape variety (cylinder, double-bracket queue), labeled and dashed edges, externals outside the boundary

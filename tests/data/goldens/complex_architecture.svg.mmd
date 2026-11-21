@@ -1,0 +1,48 @@
+C4Context
+    title SVG Diagram
+    Boundary(external_users, "external_users") {
+        Person(mobile_user, "Mobile")
+        Person(web_user, "Web")
+        Person(admin, "Admin")
+    }
+    Boundary(aws_cloud, "AWS Cloud") {
+        Container(cdn, "CDN")
+        Component(load_balancer, "Load Balancer")
+        Boundary(app_layer, "Application Tier (EKS)") {
+            Container(api_service_1, "API-1")
+            Container(api_service_2, "API-2")
+            Container(api_service_3, "API-3")
+            Container(worker_service, "Worker")
+            Container(scheduler, "Scheduler")
+        }
+        Boundary(data_layer, "Data Tier") {
+            ContainerDb(primary_db, "Primary DB")
+            ContainerDb(read_replica, "Read Replica")
+            ContainerDb(cache, "Redis Cache")
+            ContainerDb(s3_storage, "S3 Storage")
+            ContainerQueue(message_queue, "SQS Queue")
+        }
+    }
+    Boundary(gcp_cloud, "GCP Cloud") {
+        Container(ml_service, "ML Prediction")
+        ContainerDb(analytics_db, "Analytics DB")
+    }
+    Boundary(external_services, " ") {
+        Container(payment_gateway, "Payment")
+        Container(email_service, "Email")
+        Container(monitoring, "Monitoring")
+    }
+    Rel(mobile_user, cdn, " ")
+    Rel(admin, load_balancer, " ")
+    Rel(cdn, load_balancer, " ")
+    Rel(load_balancer, api_service_1, " ")
+    Rel(load_balancer, api_service_2, " ")
+    Rel(load_balancer, api_service_3, " ")
+    Rel(worker_service, primary_db, " ")
+    Rel(scheduler, primary_db, " ")
+    Rel(api_service_3, primary_db, " ")
+    Rel(primary_db, read_replica, " ")
+    Rel(worker_service, cache, " ")
+    Rel(worker_service, message_queue, " ")
+    Rel(api_service_3, ml_service, " ")
+    Rel(read_replica, analytics_db, " ")

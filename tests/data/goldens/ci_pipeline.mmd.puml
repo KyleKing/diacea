@@ -1,0 +1,20 @@
+@startuml
+left to right direction
+rectangle "Developer" as dev
+rectangle "GitHub" as gh
+hexagon "CI Checks" as ci
+rectangle "Build Image" as build
+rectangle "Notify Author" as notify
+database "Container Registry" as registry
+rectangle "Deploy to Staging" as deploy
+hexagon "Smoke Tests" as smoke
+rectangle "Production" as prod
+dev --> gh : "git push"
+gh --> ci
+ci --> build : "pass"
+ci --> notify : "fail"
+build --> registry
+registry --> deploy
+deploy ..> smoke
+smoke --> prod
+@enduml

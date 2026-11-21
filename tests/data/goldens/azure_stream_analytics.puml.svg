@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1105" height="220" viewBox="-24.0 -24.0 1105.0 220.0">
+<style>text{font-family:Helvetica,Arial,sans-serif;font-size:14px;fill:#1e1e1e}.group-label{font-size:12px;fill:#868e96}.edge-label{font-size:12px;paint-order:stroke;stroke:#ffffff;stroke-width:4px}</style>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1e1e1e"/></marker></defs>
+<rect x="-24.0" y="-24.0" width="1105.0" height="220.0" fill="#ffffff"/>
+<g id="devices" data-semantic="database"><rect x="0.0" y="55.5" width="216.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="108.0" y="90.7" text-anchor="middle">Device Simulator</text></g>
+<g id="fareDataEventHub" data-semantic="cloud"><rect x="306.0" y="0.0" width="139.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="375.5" y="35.2" text-anchor="middle">Fare Data</text></g>
+<g id="tripDataEventHub" data-semantic="cloud"><rect x="306.0" y="111.0" width="139.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="375.5" y="146.2" text-anchor="middle">Trip Data</text></g>
+<g id="streamAnalytics" data-semantic="process"><rect x="535.0" y="55.5" width="227.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="648.5" y="90.7" text-anchor="middle">Stream Processing</text></g>
+<g id="outputCosmosDb" data-semantic="database"><rect x="852.0" y="55.5" width="205.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="954.5" y="90.7" text-anchor="middle">Output Database</text></g>
+<polyline points="216.0,63.6 306.0,44.9" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="216.0,108.4 306.0,127.1" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="445.0,44.6 535.0,62.9" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="445.0,127.4 535.0,109.1" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="762.0,86.0 852.0,86.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+</svg>

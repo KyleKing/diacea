@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="538" height="398" viewBox="-14.0 -14.0 538.0 398.0">
+<style>text{font-family:Helvetica,Arial,sans-serif;font-size:14px;fill:#1e1e1e}.group-label{font-size:12px;fill:#868e96}.edge-label{font-size:12px;paint-order:stroke;stroke:#ffffff;stroke-width:4px}</style>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1e1e1e"/></marker></defs>
+<rect x="-14.0" y="-14.0" width="538.0" height="398.0" fill="#ffffff"/>
+<g id="rect1" data-semantic="service"><rect x="10.0" y="10.0" width="150.0" height="80.0" rx="2.0" fill="#E3F2FD" stroke="#1976D2" stroke-width="2.0"/><text x="85.0" y="54.7" text-anchor="middle">Web Server</text></g>
+<g id="circle1" data-semantic="person"><ellipse cx="250.0" cy="50.0" rx="40.0" ry="40.0" fill="#FFEBEE" stroke="#C62828" stroke-width="2.0"/><text x="250.0" y="54.7" text-anchor="middle">User</text></g>
+<g id="ellipse1" data-semantic="database"><ellipse cx="420.0" cy="50.0" rx="80.0" ry="40.0" fill="#E8F5E9" stroke="#388E3C" stroke-width="2.0"/><text x="420.0" y="54.7" text-anchor="middle">Database</text></g>
+<g id="diamond1" data-semantic="decision"><polygon points="300.0,150.0 350.0,200.0 300.0,250.0 250.0,200.0" fill="#FFF3E0" stroke="#F57C00" stroke-width="2.0"/><text x="300.0" y="204.7" text-anchor="middle">Decision</text></g>
+<g id="rect2" data-semantic="service"><rect x="50.0" y="300.0" width="120.0" height="60.0" rx="2.0" fill="#ffffff" stroke="#4CAF50" stroke-width="3.0" stroke-dasharray="6 4"/><text x="110.0" y="334.7" text-anchor="middle">Service</text></g>
+</svg>

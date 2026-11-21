@@ -1,0 +1,48 @@
+@startuml
+rectangle "external_users" as external_users {
+  actor "Mobile" as mobile_user
+  actor "Web" as web_user
+  actor "Admin" as admin
+}
+rectangle "AWS Cloud" as aws_cloud {
+  hexagon "CDN" as cdn
+  rectangle "Load Balancer" as load_balancer
+  rectangle "Application Tier (EKS)" as app_layer {
+    rectangle "API-1" as api_service_1
+    rectangle "API-2" as api_service_2
+    rectangle "API-3" as api_service_3
+    rectangle "Worker" as worker_service
+    rectangle "Scheduler" as scheduler
+  }
+  rectangle "Data Tier" as data_layer {
+    database "Primary DB" as primary_db
+    database "Read Replica" as read_replica
+    storage "Redis Cache" as cache
+    storage "S3 Storage" as s3_storage
+    queue "SQS Queue" as message_queue
+  }
+}
+rectangle "GCP Cloud" as gcp_cloud {
+  rectangle "ML Prediction" as ml_service
+  database "Analytics DB" as analytics_db
+}
+rectangle " " as external_services {
+  rectangle "Payment" as payment_gateway
+  rectangle "Email" as email_service
+  rectangle "Monitoring" as monitoring
+}
+mobile_user --> cdn
+admin --> load_balancer
+cdn --> load_balancer
+load_balancer --> api_service_1
+load_balancer --> api_service_2
+load_balancer --> api_service_3
+worker_service --> primary_db
+scheduler --> primary_db
+api_service_3 --> primary_db
+primary_db ..> read_replica
+worker_service --> cache
+worker_service ..> message_queue
+api_service_3 --> ml_service
+read_replica ..> analytics_db
+@enduml

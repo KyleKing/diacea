@@ -2,8 +2,6 @@
 
 import json
 import re
-import tempfile
-from pathlib import Path
 
 import pytest
 
@@ -20,80 +18,8 @@ from diacea.workspace_format import (
 from .configuration import TEST_DATA_DIR
 
 
-class TestElementDefinition:
-    """Test ElementDefinition class."""
-
-    def test_create_element(self):
-        """Test creating an element definition."""
-        elem = ElementDefinition(
-            id='api-gateway',
-            label='API Gateway',
-            description='Routes requests',
-            element_type='container',
-            technology='Node.js',
-            style={'color': '#90EE90'},
-            tags=['web-tier', 'critical'],
-        )
-
-        assert elem.id == 'api-gateway'
-        assert elem.label == 'API Gateway'
-        assert elem.element_type == 'container'
-        assert elem.technology == 'Node.js'
-        assert 'critical' in elem.tags
-
-
-class TestDiagramView:
-    """Test DiagramView class."""
-
-    def test_create_view(self):
-        """Test creating a diagram view."""
-        view = DiagramView(
-            id='context',
-            name='System Context',
-            view_type='c4-context',
-            description='High-level view',
-            file='diagrams/context.json',
-            zoom_level=1,
-            element_refs=['api-gateway', 'database'],
-        )
-
-        assert view.id == 'context'
-        assert view.view_type == 'c4-context'
-        assert view.zoom_level == 1
-        assert len(view.element_refs) == 2
-
-    def test_create_child_view(self):
-        """Test creating a child view with parent."""
-        view = DiagramView(
-            id='api-containers',
-            name='API Containers',
-            view_type='c4-container',
-            zoom_level=2,
-            parent_view='context',
-            focused_element='api-gateway',
-            element_refs=['router', 'auth'],
-        )
-
-        assert view.parent_view == 'context'
-        assert view.focused_element == 'api-gateway'
-
-
 class TestWorkspace:
     """Test Workspace class."""
-
-    def test_create_workspace(self):
-        """Test creating a workspace."""
-        workspace = Workspace(
-            id='ecommerce',
-            name='E-Commerce Platform',
-            description='Architecture views',
-            version='1.0.0',
-        )
-
-        assert workspace.id == 'ecommerce'
-        assert workspace.name == 'E-Commerce Platform'
-        assert len(workspace.elements) == 0
-        assert len(workspace.views) == 0
 
     def test_add_element(self):
         """Test adding elements to workspace."""
@@ -293,128 +219,101 @@ class TestWorkspace:
         assert 'grandchild' in hierarchy['child1']
 
 
+def _sample_workspace():
+    workspace = Workspace(id='test', name='Test Workspace')
+    workspace.add_element(
+        ElementDefinition(
+            id='elem1', label='Element 1', element_type='container', technology='Node.js', tags=['web', 'core']
+        )
+    )
+    workspace.add_view(
+        DiagramView(id='view1', name='View 1', view_type='context', element_refs=['elem1'], focused_element='elem1')
+    )
+    return workspace
+
+
+_SAMPLE_DICT = {
+    'workspace': {
+        'id': 'test',
+        'name': 'Test Workspace',
+        'description': '',
+        'version': '1.0.0',
+        'author': '',
+        'created': '',
+        'modified': '',
+        'elements': {
+            'elem1': {
+                'id': 'elem1',
+                'label': 'Element 1',
+                'description': '',
+                'type': 'container',
+                'technology': 'Node.js',
+                'style': {},
+                'tags': ['web', 'core'],
+                'metadata': {},
+            }
+        },
+        'views': {
+            'view1': {
+                'id': 'view1',
+                'name': 'View 1',
+                'type': 'context',
+                'description': '',
+                'file': '',
+                'level': 0,
+                'parent': None,
+                'focus': 'elem1',
+                'elements': ['elem1'],
+            }
+        },
+    }
+}
+
+
 class TestWorkspaceFormat:
     """Test workspace file format serialization."""
 
     def test_to_dict(self):
-        """Test converting workspace to dictionary."""
-        workspace = Workspace(id='test', name='Test Workspace')
+        assert to_dict(_sample_workspace()) == _SAMPLE_DICT
 
-        elem = ElementDefinition(
-            id='elem1',
-            label='Element 1',
-            element_type='container',
-            technology='Node.js',
-        )
-        workspace.add_element(elem)
+    def test_from_dict_round_trips_and_fills_defaults(self):
+        assert to_dict(from_dict(_SAMPLE_DICT)) == _SAMPLE_DICT
 
-        view = DiagramView(
-            id='view1',
-            name='View 1',
-            view_type='context',
-            element_refs=['elem1'],
-        )
-        workspace.add_view(view)
+        workspace = from_dict({'workspace': {'id': 'test', 'name': 'T', 'elements': {'e': {}}, 'views': {'v': {}}}})
 
-        data = to_dict(workspace)
+        assert (workspace.version, workspace.description) == ('1.0.0', '')
+        assert workspace.elements['e'] == ElementDefinition(id='e', label='', element_type='component')
+        assert workspace.views['v'] == DiagramView(id='v', name='', view_type='diagram', zoom_level=0)
 
-        assert 'workspace' in data
-        assert data['workspace']['id'] == 'test'
-        assert data['workspace']['name'] == 'Test Workspace'
-        assert 'elem1' in data['workspace']['elements']
-        assert 'view1' in data['workspace']['views']
+    def test_save_yaml_uses_block_style(self, tmp_path):
+        path = tmp_path / 'workspace.yml'
 
-    def test_from_dict(self):
-        """Test converting dictionary to workspace."""
-        data = {
-            'workspace': {
-                'id': 'test',
-                'name': 'Test Workspace',
-                'version': '1.0.0',
-                'elements': {
-                    'elem1': {
-                        'id': 'elem1',
-                        'label': 'Element 1',
-                        'type': 'container',
-                        'technology': 'Node.js',
-                    }
-                },
-                'views': {
-                    'view1': {
-                        'id': 'view1',
-                        'name': 'View 1',
-                        'type': 'context',
-                        'elements': ['elem1'],
-                        'level': 1,
-                    }
-                },
-            }
-        }
+        save_workspace(_sample_workspace(), path)
 
-        workspace = from_dict(data)
+        assert path.read_text().splitlines()[9:23] == [
+            '    elem1:',
+            '      id: elem1',
+            '      label: Element 1',
+            "      description: ''",
+            '      type: container',
+            '      technology: Node.js',
+            '      style: {}',
+            '      tags:',
+            '      - web',
+            '      - core',
+            '      metadata: {}',
+            '  views:',
+            '    view1:',
+            '      id: view1',
+        ]
 
-        assert workspace.id == 'test'
-        assert workspace.name == 'Test Workspace'
-        assert len(workspace.elements) == 1
-        assert len(workspace.views) == 1
+    @pytest.mark.parametrize(('suffix', 'file_format'), [('.yml', 'yaml'), ('.json', 'json')])
+    def test_save_and_load_round_trip(self, tmp_path, suffix, file_format):
+        path = tmp_path / f'workspace{suffix}'
 
-        elem = workspace.get_element('elem1')
-        assert elem is not None
-        assert elem.label == 'Element 1'
+        save_workspace(_sample_workspace(), path, format=file_format)
 
-        view = workspace.get_view('view1')
-        assert view is not None
-        assert view.name == 'View 1'
-
-    def test_save_and_load_yaml(self):
-        """Test saving and loading workspace as YAML."""
-        workspace = Workspace(id='test', name='Test Workspace')
-
-        elem = ElementDefinition(id='elem1', label='Element 1')
-        workspace.add_element(elem)
-
-        view = DiagramView(id='view1', name='View 1', view_type='context', element_refs=['elem1'])
-        workspace.add_view(view)
-
-        with tempfile.NamedTemporaryFile(encoding='utf-8', mode='w', suffix='.yml', delete=False) as f:
-            temp_path = f.name
-
-        try:
-            save_workspace(workspace, temp_path, format='yaml')
-
-            loaded = load_workspace(temp_path)
-
-            assert loaded.id == workspace.id
-            assert loaded.name == workspace.name
-            assert len(loaded.elements) == 1
-            assert len(loaded.views) == 1
-        finally:
-            Path(temp_path).unlink()
-
-    def test_save_and_load_json(self):
-        """Test saving and loading workspace as JSON."""
-        workspace = Workspace(id='test', name='Test Workspace')
-
-        elem = ElementDefinition(id='elem1', label='Element 1')
-        workspace.add_element(elem)
-
-        view = DiagramView(id='view1', name='View 1', view_type='context', element_refs=['elem1'])
-        workspace.add_view(view)
-
-        with tempfile.NamedTemporaryFile(encoding='utf-8', mode='w', suffix='.json', delete=False) as f:
-            temp_path = f.name
-
-        try:
-            save_workspace(workspace, temp_path, format='json')
-
-            loaded = load_workspace(temp_path)
-
-            assert loaded.id == workspace.id
-            assert loaded.name == workspace.name
-            assert len(loaded.elements) == 1
-            assert len(loaded.views) == 1
-        finally:
-            Path(temp_path).unlink()
+        assert to_dict(load_workspace(path)) == _SAMPLE_DICT
 
 
 class TestWorkspaceIntegration:
@@ -634,6 +533,22 @@ class TestWorkspaceIngestion:
             element = workspace.elements['moat']
             assert element.element_type == 'system'
             assert element.metadata['semantic_confidence'] == pytest.approx(0.7)
+
+    def test_conflict_with_equal_confidence_keeps_the_first(self, tmp_path):
+        (tmp_path / 'a.mmd').write_text('flowchart LR\n  o[(Orders)]\n')
+        (tmp_path / 'b.puml').write_text('@startuml\nqueue "Orders" as o\n@enduml\n')
+        files = {'a': (str(tmp_path / 'a.mmd'), 'diagram'), 'b': (str(tmp_path / 'b.puml'), 'diagram')}
+
+        workspace, summary = create_workspace_from_diagrams(workspace_id='t', workspace_name='T', diagram_files=files)
+
+        assert summary.warnings == [
+            (
+                "Element 'Orders' has conflicting semantic types: kept 'database' (confidence 0.90), "
+                f"dropped 'queue' from '{tmp_path / 'b.puml'}'"
+            )
+        ]
+        element = workspace.elements['orders']
+        assert (element.element_type, element.metadata['source_file']) == ('database', str(tmp_path / 'a.mmd'))
 
     def test_ingest_into_existing_workspace_dedups(self, tmp_path):
         diagram = tmp_path / 'd.excalidraw'

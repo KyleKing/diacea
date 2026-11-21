@@ -1,0 +1,29 @@
+direction: right
+
+group-ResultsComponent: ResultsComponent {
+  GameDropDown: GameDropDown
+  DateFilterBar: DateFilterBar
+  Loop_ResultContainer: "Loop:ResultContainer"
+  group-ResultContainer: ResultContainer {
+    ResultBallLoader: ResultBallLoader
+    ResultSummaryLoader: ResultSummaryLoader
+  }
+
+}
+
+API_Results: "API:Results"
+State_LayoutConfig: "State:LayoutConfig"
+GeneralSummaryResult: GeneralSummaryResult
+TwoRowsBallResult: TwoRowsBallResult
+OneRowBallResult: OneRowBallResult
+OneRowAddUpBallResult: OneRowAddUpBallResult
+TwoRowsWithHeaderBallResult: TwoRowsWithHeaderBallResult
+
+group-ResultsComponent -> API_Results: "Get `resultSummary`, `displayResultNumbers`"
+group-ResultsComponent -> State_LayoutConfig: "Get `componetId` of `miniResultLayout` by counter"
+group-ResultsComponent.Loop_ResultContainer -> group-ResultsComponent.group-ResultContainer: Single Result Data
+group-ResultsComponent.group-ResultContainer.ResultSummaryLoader -> GeneralSummaryResult: Dynamic loading by componentId
+group-ResultsComponent.group-ResultContainer.ResultBallLoader -> TwoRowsBallResult: Dynamic loading by componentId
+group-ResultsComponent.group-ResultContainer.ResultBallLoader -> OneRowBallResult: Dynamic loading by componentId
+group-ResultsComponent.group-ResultContainer.ResultBallLoader -> OneRowAddUpBallResult: Dynamic loading by componentId
+group-ResultsComponent.group-ResultContainer.ResultBallLoader -> TwoRowsWithHeaderBallResult: Dynamic loading by componentId

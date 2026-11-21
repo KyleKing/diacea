@@ -1,0 +1,23 @@
+direction: down
+
+shop: Web Shop {
+  web: Web App
+  api: API
+  db: Orders DB {
+    shape: cylinder
+  }
+  bus: Event Bus {
+    shape: queue
+  }
+}
+
+customer: Customer {
+  shape: person
+}
+payments: Payment Provider
+
+customer -> shop.web: Uses
+shop.web -> shop.api: Calls
+shop.api -> shop.db: Reads/Writes
+shop.api -> shop.bus: Publishes
+shop.api -> payments: Charges

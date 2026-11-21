@@ -1,0 +1,167 @@
+direction: right
+
+group-node_1: " " {
+  tooling_reporting: "Tooling & Reporting" {
+    style: {
+      fill: "#55b8f5"
+      stroke: "#343a40"
+      stroke-width: 1
+    }
+  }
+  jepl_library: JePL library {
+    style: {
+      fill: "#55b8f5"
+      stroke: "#343a40"
+      stroke-width: 1
+    }
+  }
+  ci_system: CI system {
+    style: {
+      fill: "#55b8f5"
+      stroke: "#343a40"
+      stroke-width: 1
+    }
+  }
+  sqaaas_api: SQAaaS API {
+    style: {
+      fill: "#55b8f5"
+      stroke: "#343a40"
+      stroke-width: 1
+    }
+  }
+  sqaaas_web: SQAaaS web {
+    style: {
+      fill: "#55b8f5"
+      stroke: "#343a40"
+      stroke-width: 1
+    }
+  }
+}
+
+workflow_composition: Workflow composition {
+  style: {
+    fill: "#228be6"
+    stroke: "#343a40"
+    stroke-width: 1
+  }
+}
+dt_developer: DT developer {
+  shape: person
+  style: {
+    fill: "#0c37a2"
+    stroke: "#0c37a2"
+    stroke-width: 1
+  }
+}
+data_and_computation_abstraction: Data and computation\nabstraction {
+  style: {
+    fill: "#228be6"
+    stroke: "#343a40"
+    stroke-width: 1
+  }
+}
+ai_ml_subsystem: AI/ML subsystem {
+  style: {
+    fill: "#228be6"
+    stroke: "#343a40"
+    stroke-width: 1
+  }
+}
+repository: Repository {
+  style: {
+    fill: "#868e96"
+    stroke-width: 1
+  }
+}
+
+dt_developer -> repository: Push changes to workflow code {
+  style: {
+    stroke: "#495057"
+    stroke-width: 1
+    stroke-dash: 3
+  }
+}
+data_and_computation_abstraction -> group-node_1.sqaaas_api: "FAIR and data quality assessment (event and/or polling-based)" {
+  style: {
+    stroke: "#495057"
+    stroke-width: 1
+    stroke-dash: 3
+  }
+}
+group-node_1.sqaaas_api -> group-node_1.ci_system: Runs/fetches results\nof the QA assessment {
+  style: {
+    stroke: "#495057"
+    stroke-width: 1
+    stroke-dash: 3
+  }
+}
+group-node_1.ci_system -> ai_ml_subsystem: Triggers deployment\nof pre-trained ML model {
+  style: {
+    stroke: "#495057"
+    stroke-width: 1
+    stroke-dash: 3
+  }
+}
+repository -> group-node_1.sqaaas_api: "Event-based\nworfklow validation\n(DevOps)" {
+  style: {
+    stroke: "#495057"
+    stroke-width: 1
+    stroke-dash: 3
+  }
+}
+group-node_1.sqaaas_api -> repository: Registers/loads\nQA assessment {
+  style: {
+    stroke: "#495057"
+    stroke-width: 1
+    stroke-dash: 3
+  }
+}
+group-node_1.jepl_library -> repository: Modifies\nQA assessment {
+  style: {
+    stroke: "#495057"
+    stroke-width: 1
+    stroke-dash: 3
+  }
+}
+group-node_1.tooling_reporting -> group-node_1.sqaaas_api: Get tools {
+  style: {
+    stroke: "#495057"
+    stroke-width: 1
+    stroke-dash: 3
+  }
+}
+group-node_1.sqaaas_web -> group-node_1.sqaaas_api: Leverages {
+  style: {
+    stroke: "#495057"
+    stroke-width: 1
+    stroke-dash: 3
+  }
+}
+workflow_composition -> group-node_1.sqaaas_api: Triggers pre-defined\nQA assessment\nas step in the workflow {
+  style: {
+    stroke: "#495057"
+    stroke-width: 1
+    stroke-dash: 3
+  }
+}
+group-node_1.sqaaas_api -> workflow_composition: Gets deployed as\na step in the workflow {
+  style: {
+    stroke: "#495057"
+    stroke-width: 1
+    stroke-dash: 3
+  }
+}
+dt_developer -> group-node_1.sqaaas_web: Defines custom\nQA assessment {
+  style: {
+    stroke: "#495057"
+    stroke-width: 1
+    stroke-dash: 3
+  }
+}
+dt_developer -> workflow_composition {
+  style: {
+    stroke: "#495057"
+    stroke-width: 1
+    stroke-dash: 3
+  }
+}

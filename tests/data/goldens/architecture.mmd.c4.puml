@@ -1,0 +1,23 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+
+Component(client, "Web Client")
+Container(lb, "Load Balancer")
+
+System_Boundary(group_backend, "Backend Services") {
+  Container(api, "API Service")
+  ComponentDb(db, "PostgreSQL", "PostgreSQL")
+  ComponentDb(cache, "Redis Cache", "Redis")
+  Container(worker, "Worker")
+  ComponentDb(queue, "Message Queue")
+}
+
+Rel(client, lb, "")
+Rel(lb, api, "")
+Rel(lb, worker, "")
+Rel(api, db, "")
+Rel(api, cache, "")
+Rel(worker, queue, "")
+@enduml

@@ -1,0 +1,16 @@
+digraph "E-Commerce System - System Context" {
+    rankdir="TB";
+    node [shape="box", fontname="Helvetica"];
+    edge [fontname="Helvetica"];
+
+    customer [label="Customer", shape="ellipse"];
+    admin [label="Administrator", shape="ellipse"];
+    ecommerce [label="E-Commerce System", shape="box3d"];
+    payment [label="Payment Gateway", shape="box3d"];
+    shipping [label="Shipping Service", shape="box3d"];
+
+    customer -> ecommerce [label="Browses products, places orders"];
+    admin -> ecommerce [label="Manages products, views analytics"];
+    ecommerce -> payment [label="Processes payments via"];
+    ecommerce -> shipping [label="Tracks shipments via"];
+}

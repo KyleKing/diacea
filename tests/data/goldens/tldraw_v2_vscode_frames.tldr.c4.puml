@@ -1,0 +1,32 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+
+System(vs_code, "VS Code")
+Container(each_file_on_disk_can_be_shown_in_multip, "Each file on disk can be shown in multiple WebView\ninstances when you split the editor pane")
+Container(fileopen, "FileOpen")
+Container(tldrawwebviewmanager, "TldrawWebViewManager")
+
+System_Boundary(group_extension, "Extension") {
+  Container(tldraweditorprovider, "TldrawEditorProvider")
+  Container(tldrawdocument, "TldrawDocument")
+  Container(webviewmessagehandler, "WebViewMessageHandler")
+}
+System_Boundary(group_webview, "WebView") {
+  System_Boundary(group_editor, "Editor") {
+    System(app, "App")
+    ComponentDb(changeresponder, "ChangeResponder")
+  }
+}
+
+Rel(vs_code, group_extension, "activate")
+Rel(vs_code, tldraweditorprovider, "openCustomDocument")
+Rel(vs_code, tldraweditorprovider, "save, undo, redo,...")
+Rel(vs_code, tldraweditorprovider, "document")
+Rel(webviewmessagehandler, group_webview, "webview.postMessage")
+Rel(each_file_on_disk_can_be_shown_in_multip, group_webview, "")
+Rel(tldraweditorprovider, tldrawdocument, "create")
+Rel(tldrawwebviewmanager, group_webview, "creates")
+Rel(vs_code, tldrawwebviewmanager, "resolveCustomEditor")
+@enduml

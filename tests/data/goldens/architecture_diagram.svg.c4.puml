@@ -1,0 +1,19 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+
+Person(user1, "User")
+System(webapp, "Web App")
+Container(api, "API Gateway")
+ComponentDb(database1, "PostgreSQL", "PostgreSQL")
+ComponentQueue(queue1, "RabbitMQ")
+Container(storage1, "S3 Storage")
+Container(external1, "Payment API")
+
+
+Rel(user1, webapp, "")
+Rel(webapp, api, "")
+Rel(webapp, database1, "")
+Rel(api, queue1, "")
+@enduml

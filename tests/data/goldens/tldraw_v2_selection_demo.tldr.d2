@@ -1,0 +1,155 @@
+direction: right
+
+is_there_a_shape_under_the_pointer: Is there a shape \nunder the pointer? {
+  shape: diamond
+  style: {
+    stroke: "#1d1d1d"
+    stroke-width: 4
+  }
+}
+is_the_user_holding_the_shift_key_and_no: "Is the user \nholding the shift key? \n(and not the alt key)" {
+  shape: diamond
+  style: {
+    stroke: "#1d1d1d"
+    stroke-width: 4
+  }
+}
+is_the_outermost_selectable_shape_select: Is the outermost \nselectable shape selected? {
+  shape: diamond
+  style: {
+    stroke: "#1d1d1d"
+    stroke-width: 4
+  }
+}
+cancel_any_double_click: Cancel any double click {
+  style: {
+    stroke: "#1d1d1d"
+    stroke-width: 4
+  }
+}
+select_the_hit_shape: Select the hit shape {
+  shape: cylinder
+  style: {
+    fill: "#1d1d1d"
+    stroke: "#1d1d1d"
+    stroke-width: 4
+  }
+}
+select_the_outermost_selectable_shape: Select the outermost selectable shape {
+  shape: cylinder
+  style: {
+    fill: "#1d1d1d"
+    stroke: "#1d1d1d"
+    stroke-width: 4
+  }
+}
+add_the_outermost_selectable_shape_to_se: Add the outermost selectable shape to selection {
+  shape: cylinder
+  style: {
+    fill: "#1d1d1d"
+    stroke: "#1d1d1d"
+    stroke-width: 4
+  }
+}
+de_select_the_outermost_selectable_shape: De-select the outermost selectable shape {
+  shape: cylinder
+  style: {
+    fill: "#1d1d1d"
+    stroke: "#1d1d1d"
+    stroke-width: 4
+  }
+}
+is_oss_shape_the_same_as_the_hit_shape: Is OSS shape the same \nas the hit shape? {
+  shape: diamond
+  style: {
+    stroke: "#1d1d1d"
+    stroke-width: 4
+  }
+}
+is_oss_shape_the_focus_layer_id: Is OSS shape\nthe focus layer id? {
+  shape: diamond
+  style: {
+    stroke: "#1d1d1d"
+    stroke-width: 4
+  }
+}
+is_oss_shape_selected: Is OSS shape\nselected? {
+  shape: diamond
+  style: {
+    stroke: "#1d1d1d"
+    stroke-width: 4
+  }
+}
+
+is_there_a_shape_under_the_pointer -> is_the_user_holding_the_shift_key_and_no: Yes {
+  style: {
+    stroke: "#1d1d1d"
+    stroke-width: 4
+  }
+}
+cancel_any_double_click -> is_the_outermost_selectable_shape_select {
+  style: {
+    stroke: "#1d1d1d"
+    stroke-width: 4
+  }
+}
+is_the_outermost_selectable_shape_select -> de_select_the_outermost_selectable_shape: No {
+  style: {
+    stroke: "#1d1d1d"
+    stroke-width: 4
+  }
+}
+is_the_outermost_selectable_shape_select -> add_the_outermost_selectable_shape_to_se: Yes {
+  style: {
+    stroke: "#1d1d1d"
+    stroke-width: 4
+  }
+}
+is_the_user_holding_the_shift_key_and_no -> cancel_any_double_click: Yes {
+  style: {
+    stroke: "#1d1d1d"
+    stroke-width: 4
+  }
+}
+is_oss_shape_the_same_as_the_hit_shape -> select_the_hit_shape: Yes {
+  style: {
+    stroke: "#1d1d1d"
+    stroke-width: 4
+  }
+}
+is_oss_shape_the_focus_layer_id -> select_the_hit_shape: Yes {
+  style: {
+    stroke: "#1d1d1d"
+    stroke-width: 4
+  }
+}
+is_oss_shape_the_same_as_the_hit_shape -> is_oss_shape_the_focus_layer_id: No {
+  style: {
+    stroke: "#1d1d1d"
+    stroke-width: 4
+  }
+}
+is_oss_shape_the_focus_layer_id -> is_oss_shape_selected: No {
+  style: {
+    stroke: "#1d1d1d"
+    stroke-width: 4
+  }
+}
+is_the_user_holding_the_shift_key_and_no -> is_oss_shape_the_same_as_the_hit_shape: No {
+  style: {
+    stroke: "#1d1d1d"
+    stroke-width: 4
+  }
+}
+is_oss_shape_selected -> select_the_hit_shape: Yes {
+  style: {
+    stroke: "#1d1d1d"
+    stroke-width: 4
+  }
+}
+is_oss_shape_selected -> select_the_outermost_selectable_shape: No {
+  style: {
+    stroke: "#1d1d1d"
+    stroke-width: 4
+  }
+}

@@ -8,10 +8,13 @@ from pathlib import Path
 
 import pytest
 
+from diacea.formats import parse_diagram
 from diacea.generators import C4PlantUMLGenerator, PlantUMLGenerator
 from diacea.ir import Connection, Diagram, Group, SemanticType, Shape
 from diacea.parsers import ExcalidrawParser
 from diacea.parsers.plantuml import PlantUMLParser, is_c4_plantuml, is_plantuml
+
+from .ir_summary import summarize
 
 DATA_DIR = Path(__file__).parent / 'data'
 PLANTUML_DIR = DATA_DIR / 'plantuml'
@@ -45,30 +48,26 @@ def excalidraw_diagram() -> Diagram:
 
 
 class TestSniffing:
-    def test_is_plantuml(self):
-        assert is_plantuml('@startuml\nrectangle a\n@enduml')
-
-    def test_is_not_plantuml(self):
-        assert not is_plantuml('digraph G { a -> b }')
-
-    def test_is_c4_by_include(self):
-        content = '@startuml\n!include <C4/C4_Container>\n@enduml'
-        assert is_c4_plantuml(content)
-
-    def test_is_c4_by_include_url(self):
-        content = (
-            '@startuml\n!include https://raw.githubusercontent.com/'
-            'plantuml-stdlib/C4-PlantUML/master/C4_Component.puml\n@enduml'
-        )
-        assert is_c4_plantuml(content)
-
-    def test_is_c4_by_macros(self):
-        content = '@startuml\nPerson(u, "User")\nRel(u, s, "uses")\n@enduml'
-        assert is_c4_plantuml(content)
-
-    def test_plain_plantuml_is_not_c4(self):
-        content = _wrap('rectangle "Box" as b\nactor "User" as u\nu --> b')
-        assert not is_c4_plantuml(content)
+    @pytest.mark.parametrize(
+        ('content', 'plantuml', 'c4'),
+        [
+            pytest.param('@startuml\nrectangle a\n@enduml', True, False, id='plain'),
+            pytest.param('digraph G { a -> b }', False, False, id='dot'),
+            pytest.param('@startuml\n!include <C4/C4_Container>\n@enduml', True, True, id='c4-include'),
+            pytest.param(
+                '@startuml\n!include https://raw.githubusercontent.com/'
+                'plantuml-stdlib/C4-PlantUML/master/C4_Component.puml\n@enduml',
+                True,
+                True,
+                id='c4-include-url',
+            ),
+            pytest.param('@startuml\nPerson(u, "User")\nRel(u, s, "uses")\n@enduml', True, True, id='c4-macros'),
+            pytest.param('C4Context\n  Person(u, "User")\n  Rel(u, s, "uses")\n', False, False, id='mermaid-c4'),
+            pytest.param(_wrap('rectangle "Box" as b\nactor "User" as u\nu --> b'), True, False, id='plain-with-actor'),
+        ],
+    )
+    def test_sniffing(self, content, plantuml, c4):
+        assert (is_plantuml(content), is_c4_plantuml(content)) == (plantuml, c4)
 
 
 class TestEnvelope:
@@ -565,56 +564,28 @@ class TestRoundTrip:
         assert len(reparsed.get_connections()) == len(excalidraw_diagram.get_connections())
 
 
-class TestArchitectureFixture:
-    @pytest.fixture
-    def fixture_result(self):
-        parser = PlantUMLParser()
-        diagram = parser.parse((PLANTUML_DIR / 'architecture.puml').read_text())
-        return diagram, parser
+def test_architecture_fixture_structure_and_warnings():
+    """Its conversions are pinned by goldens; this checks what no output shows."""
+    parser = PlantUMLParser()
+    diagram = parser.parse((PLANTUML_DIR / 'architecture.puml').read_text())
 
-    def test_parses_all_elements(self, fixture_result):
-        diagram, _ = fixture_result
-        assert len(diagram.get_shapes()) == 11
-        assert len(diagram.get_groups()) == 1
-        assert len(diagram.get_connections()) == 12
-
-    def test_group_membership(self, fixture_result):
-        diagram, _ = fixture_result
-        group = diagram.get_element('platform')
-        assert isinstance(group, Group)
-        assert group.children == [
-            'frontend',
-            'gateway',
-            'orders',
-            'billing',
-            'events',
-            'orders_db',
-        ]
-
-    def test_semantics(self, fixture_result):
-        diagram, _ = fixture_result
-        assert _shape(diagram, 'customer').semantic_type == SemanticType.PERSON
-        assert _shape(diagram, 'orders_db').semantic_type == SemanticType.DATABASE
-        assert _shape(diagram, 'events').semantic_type == SemanticType.QUEUE
-        assert _shape(diagram, 'blobs').semantic_type == SemanticType.STORAGE
-        assert _shape(diagram, 'cdn').semantic_type == SemanticType.CLOUD
-
-    def test_direction_and_name(self, fixture_result):
-        diagram, _ = fixture_result
-        assert diagram.name == 'web_architecture'
-        assert diagram.metadata['direction'] == 'left_to_right'
-
-    def test_only_expected_warnings(self, fixture_result):
-        _, parser = fixture_result
-        assert len(parser.warnings) == 2
-        assert 'skinparam' in parser.warnings[0]
-        assert 'title' in parser.warnings[1]
-
-    def test_dashed_relationships(self, fixture_result):
-        diagram, _ = fixture_result
-        dashed = [c for c in diagram.get_connections() if c.style.stroke_style == 'dashed']
-        assert len(dashed) == 2
-        assert {c.label for c in dashed} == {'publishes'}
+    assert (diagram.name, diagram.metadata['direction']) == ('web_architecture', 'left_to_right')
+    assert parser.warnings == ['Line 3: skipped skinparam directive', 'Line 4: skipped title directive']
+    assert (len(diagram.get_shapes()), len(diagram.get_connections())) == (11, 12)
+    assert [(group.id, group.children) for group in diagram.get_groups()] == [
+        ('platform', ['frontend', 'gateway', 'orders', 'billing', 'events', 'orders_db'])
+    ]
+    assert {conn.label for conn in diagram.get_connections() if conn.style.stroke_style == 'dashed'} == {'publishes'}
+    assert [
+        getattr(_shape(diagram, i).semantic_type, 'value', None)
+        for i in ('customer', 'orders_db', 'events', 'blobs', 'cdn')
+    ] == [
+        'person',
+        'database',
+        'queue',
+        'storage',
+        'cloud',
+    ]
 
 
 @pytest.mark.skipif(shutil.which('plantuml') is None, reason='plantuml binary not installed')
@@ -668,3 +639,33 @@ job --> store
 
         assert 'UpdateElementStyle' not in {shape.id for shape in diagram.get_shapes()}
         assert any('UpdateElementStyle' in warning for warning in parser.warnings)
+
+
+@pytest.mark.parametrize(
+    ('source', 'expected', 'warnings'),
+    [
+        pytest.param(
+            '@startuml\ntitle\nrectangle "Hidden" as h\nend title\nrectangle "B" as b\n@enduml\n',
+            {'nodes': [('b', 'B', 'rectangle', 'component')]},
+            ['Line 2: skipped title directive'],
+            id='title-block-skipped-until-end-title',
+        ),
+        pytest.param(
+            '@startuml\nrectangle "Web App"\nrectangle "Web App"\nrectangle "Web App"\n@enduml\n',
+            {
+                'nodes': [
+                    ('Web_App', 'Web App', 'rectangle', 'system'),
+                    ('Web_App_2', 'Web App', 'rectangle', 'system'),
+                    ('Web_App_3', 'Web App', 'rectangle', 'system'),
+                ]
+            },
+            [],
+            id='repeated-labels-get-numbered-ids',
+        ),
+    ],
+)
+def test_source_parses_to(source, expected, warnings):
+    parsed = parse_diagram(source, 'plantuml')
+
+    assert summarize(parsed.diagram) == expected
+    assert parsed.warnings == warnings

@@ -1,0 +1,51 @@
+direction: right
+
+platform: Web Platform {
+  frontend: Frontend SPA
+  gateway: API Gateway
+  orders: Order Service
+  billing: Billing Service
+  events: Event Bus {
+    shape: queue
+  }
+  orders_db: Orders DB {
+    shape: cylinder
+  }
+}
+
+customer: Customer {
+  shape: person
+}
+agent_support: Support Agent {
+  shape: person
+}
+cdn: CDN {
+  shape: cloud
+}
+blobs: Object Storage {
+  shape: cylinder
+}
+warehouse: Analytics Warehouse {
+  shape: cylinder
+}
+
+customer -> cdn: browses
+cdn -> platform.frontend
+customer -> platform.frontend
+agent_support -> platform.gateway: admin API
+platform.frontend -> platform.gateway: HTTPS/JSON
+platform.gateway -> platform.orders
+platform.gateway -> platform.billing
+platform.orders -> platform.orders_db: SQL
+platform.orders -> platform.events: publishes {
+  style: {
+    stroke-dash: 3
+  }
+}
+platform.billing -> platform.events: publishes {
+  style: {
+    stroke-dash: 3
+  }
+}
+platform.events -> warehouse: streams
+platform.orders -> blobs: invoices

@@ -1,0 +1,26 @@
+C4Context
+    title Page 1
+    System(vs_code, "VS Code")
+    System(each_file_on_disk_can_be_shown_in_multip, "Each file on disk can be shown in multiple WebView<br/>instances when you split the editor pane")
+    System(fileopen, "FileOpen")
+    System(tldrawwebviewmanager, "TldrawWebViewManager")
+    Boundary(group_extension, "Extension") {
+        Container(tldraweditorprovider, "TldrawEditorProvider")
+        Container(tldrawdocument, "TldrawDocument")
+        Container(webviewmessagehandler, "WebViewMessageHandler")
+    }
+    Boundary(group_webview, "WebView") {
+        Boundary(group_editor, "Editor") {
+            System(app, "App")
+            ContainerDb(changeresponder, "ChangeResponder")
+        }
+    }
+    Rel(vs_code, tldraweditorprovider, "activate")
+    Rel(vs_code, tldraweditorprovider, "openCustomDocument")
+    Rel(vs_code, tldraweditorprovider, "save, undo, redo,...")
+    Rel(vs_code, tldraweditorprovider, "document")
+    Rel(webviewmessagehandler, app, "webview.postMessage")
+    Rel(each_file_on_disk_can_be_shown_in_multip, app, " ")
+    Rel(tldraweditorprovider, tldrawdocument, "create")
+    Rel(tldrawwebviewmanager, app, "creates")
+    Rel(vs_code, tldrawwebviewmanager, "resolveCustomEditor")

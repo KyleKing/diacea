@@ -1,0 +1,24 @@
+flowchart TD
+    subgraph group_Client[Client Layer]
+        Browser[User's Browser]
+        Frontend["React Frontend (Dockerized)"]
+    end
+    subgraph group_Backend["Server Layer (Dockerized)"]
+        NodeBackend[Node.js Backend]
+        Template[OpenAI Prompt Template]
+        subgraph group_Processing[Data Processing]
+            InputHandler["Patent ID &amp; Company Input Handler"]
+        end
+    end
+    subgraph group_External[External Services]
+        OpenAI[OpenAI API]
+    end
+    Browser --> Frontend
+    Frontend --> NodeBackend
+    NodeBackend --> InputHandler
+    InputHandler --> Template
+    Template --> InputHandler
+    InputHandler --> NodeBackend
+    NodeBackend -->|"Prompt with Patent &amp; Company Info"| OpenAI
+    OpenAI -->|Response Standard JSON| NodeBackend
+    NodeBackend --> Frontend

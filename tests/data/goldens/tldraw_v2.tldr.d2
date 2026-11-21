@@ -1,0 +1,27 @@
+direction: right
+
+group-backend: Backend {
+  api_server: API Server {
+    style: {
+      fill: "#4465e9"
+      stroke: "#4465e9"
+      stroke-width: 4
+    }
+  }
+}
+
+database: Database {
+  shape: cylinder
+  style: {
+    stroke: "#099268"
+    stroke-width: 5
+    stroke-dash: 3
+  }
+}
+
+group-backend.api_server -> database: queries {
+  style: {
+    stroke: "#1d1d1d"
+    stroke-width: 4
+  }
+}

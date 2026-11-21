@@ -1,0 +1,26 @@
+flowchart LR
+    User[User]
+    API[API Gateway]
+    Auth[Auth Service]
+    Orders[Order Service]
+    Products[Product Service]
+    AuthDB[(Auth Database)]
+    OrderDB[(Order Database)]
+    ProductDB[(Product Database)]
+    Queue[Message Queue]
+    Inventory[Inventory Service]
+    InvDB[(Inventory Database)]
+    User --> API
+    API --> Auth
+    API --> Orders
+    API --> Products
+    Auth --> AuthDB
+    Orders --> OrderDB
+    Products --> ProductDB
+    Orders --> Queue
+    Queue --> Inventory
+    Inventory --> InvDB
+
+    style User fill:#87CEEB
+    style API fill:#90EE90
+    style Queue fill:#FFD700

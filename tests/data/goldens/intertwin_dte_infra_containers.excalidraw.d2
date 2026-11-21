@@ -1,0 +1,130 @@
+group-external_data_source: External Data \nSource {
+  group-resource_info: Resource Info {
+    container: "[Container]" {
+      shape: diamond
+      style: {
+        fill: "#bbcca4"
+        stroke: "#495057"
+        stroke-width: 1
+        stroke-dash: 3
+      }
+    }
+  }
+
+  replica_manager_data_transfer_location_c: Replica Manager \nData Transfer \nLocation Catalog {
+    style: {
+      fill: "#228be6"
+      stroke: "#343a40"
+      stroke-width: 1
+    }
+  }
+  compute_resources_orchestrion_service_de: "Compute Resources \n       Orchestrion - \nService deployment   " {
+    shape: oval
+    style: {
+      fill: "#495057"
+      stroke-width: 1
+      stroke-dash: 3
+    }
+  }
+  container_paas_orchestrator: "[Container:PaaS orchestrator]" {
+    style: {
+      fill: "#228be6"
+      stroke: "#343a40"
+      stroke-width: 1
+    }
+  }
+  group-hpc: HPC {
+    service_offloading: Service Offloading {
+      style: {
+        fill: "#ced4da"
+      }
+    }
+    edge_service_api_2: Edge Service API {
+      style: {
+        fill: "#228be6"
+        stroke: "#343a40"
+        stroke-width: 1
+      }
+    }
+  }
+
+  group-storage: Storage {
+    data_access: Data Access {
+      style: {
+        fill: "#ced4da"
+      }
+    }
+    edge_service_api: Edge Service API {
+      style: {
+        fill: "#228be6"
+        stroke: "#343a40"
+        stroke-width: 1
+      }
+    }
+  }
+
+  group-cloud: CLOUD {
+    node_1: " " {
+      style: {
+        fill: "#ced4da"
+      }
+    }
+  }
+
+  aai_auth_authz: "AAI / Auth & Authz\n\n" {
+    style: {
+      fill: "#868e96"
+      stroke: "#343a40"
+      stroke-width: 1
+    }
+  }
+  software_distribution: Software Distribution {
+    style: {
+      fill: "#868e96"
+      stroke: "#343a40"
+      stroke-width: 1
+    }
+  }
+}
+
+
+group-external_data_source.container_paas_orchestrator <-> group-external_data_source.group-resource_info {
+  style: {
+    stroke: "#495057"
+    stroke-width: 1
+    stroke-dash: 3
+  }
+}
+group-external_data_source.compute_resources_orchestrion_service_de <-> group-external_data_source.replica_manager_data_transfer_location_c {
+  style: {
+    stroke: "#495057"
+    stroke-width: 1
+    stroke-dash: 3
+  }
+}
+group-external_data_source.replica_manager_data_transfer_location_c <-> group-external_data_source.group-storage {
+  style: {
+    stroke: "#495057"
+    stroke-width: 1
+    stroke-dash: 3
+  }
+}
+group-external_data_source.container_paas_orchestrator <-> group-external_data_source.group-cloud.node_1 {
+  style: {
+    stroke: "#030303"
+    stroke-width: 1
+    stroke-dash: 3
+  }
+}
+group-external_data_source.group-cloud.node_1 <-> group-external_data_source.group-hpc.edge_service_api_2 {
+  style: {
+    stroke-width: 1
+    stroke-dash: 3
+  }
+}
+group-external_data_source.group-cloud <-> group-external_data_source.software_distribution {
+  style: {
+    stroke-width: 1
+    stroke-dash: 3
+  }
+}

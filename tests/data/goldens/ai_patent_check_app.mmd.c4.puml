@@ -1,0 +1,31 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+
+
+System_Boundary(group_Client, "Client Layer") {
+  Component(Browser, "User's Browser")
+  Container(Frontend, "React Frontend (Dockerized)")
+}
+System_Boundary(group_Backend, "Server Layer (Dockerized)") {
+  Container(NodeBackend, "Node.js Backend")
+  Container(Template, "OpenAI Prompt Template")
+  System_Boundary(group_Processing, "Data Processing") {
+    Container(InputHandler, "Patent ID &amp; Company Input Handler")
+  }
+}
+System_Boundary(group_External, "External Services") {
+  Container(OpenAI, "OpenAI API")
+}
+
+Rel(Browser, Frontend, "")
+Rel(Frontend, NodeBackend, "")
+Rel(NodeBackend, InputHandler, "")
+Rel(InputHandler, Template, "")
+Rel(Template, InputHandler, "")
+Rel(InputHandler, NodeBackend, "")
+Rel(NodeBackend, OpenAI, "Prompt with Patent &amp; Company Info")
+Rel(OpenAI, NodeBackend, "Response Standard JSON")
+Rel(NodeBackend, Frontend, "")
+@enduml

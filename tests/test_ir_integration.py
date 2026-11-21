@@ -1,23 +1,19 @@
-"""Integration tests for IR-based parsing and generation."""
+"""Generator behavior through the public pipeline: whole outputs, compared exactly."""
 
 import json
+import os
 import re
-from pathlib import Path
 
 import pytest
 
-from diacea.generators import (
-    C4PlantUMLGenerator,
-    D2Generator,
-    GraphVizGenerator,
-    MermaidGenerator,
-    PlantUMLGenerator,
-)
+from diacea.formats import convert, parse_diagram, parse_file, render_diagram, verify_conversion
 from diacea.ir import Connection, Diagram, Dimensions, Group, Point, SemanticType, Shape
-from diacea.parsers import ExcalidrawParser
+
+from .configuration import TEST_DATA_DIR
 
 _ORIGIN = Point(x=0.0, y=0.0)
 _SIZE = Dimensions(width=100.0, height=60.0)
+_GOLDENS_DIR = TEST_DATA_DIR / 'goldens'
 
 
 def _make_shape(shape_id, label, shape_type='rectangle', semantic_type=None):
@@ -42,404 +38,224 @@ def _make_connection(from_id, to_id, label=''):
     )
 
 
-@pytest.fixture
-def excalidraw_data():
-    """Load test Excalidraw data."""
-    data_file = Path('tests/data/excalidraw.json')
-    with Path(data_file).open(encoding='utf-8') as f:
-        return json.load(f)
-
-
-class TestExcalidrawParser:
-    """Test Excalidraw parser."""
-
-    def test_parse_excalidraw(self, excalidraw_data):
-        """Test parsing Excalidraw JSON to IR."""
-        parser = ExcalidrawParser()
-        diagram = parser.parse(excalidraw_data)
-
-        assert isinstance(diagram, Diagram)
-        assert len(diagram.elements) > 0
-
-    def test_parse_shapes(self, excalidraw_data):
-        """Test parsing shapes."""
-        parser = ExcalidrawParser()
-        diagram = parser.parse(excalidraw_data)
-
-        shapes = diagram.get_shapes()
-        assert len(shapes) > 0
-
-        # Check shape properties
-        for shape in shapes:
-            assert shape.id
-            assert shape.size.width >= 0
-            assert shape.size.height >= 0
-
-    def test_parse_connections(self, excalidraw_data):
-        """Test parsing connections."""
-        parser = ExcalidrawParser()
-        diagram = parser.parse(excalidraw_data)
-
-        connections = diagram.get_connections()
-        assert len(connections) > 0
-
-        # Check connection properties
-        for conn in connections:
-            assert conn.id
-            assert conn.from_id
-            assert conn.to_id
-
-    def test_text_association(self, excalidraw_data):
-        """Test that text is associated with shapes as labels."""
-        parser = ExcalidrawParser()
-        diagram = parser.parse(excalidraw_data)
-
-        shapes = diagram.get_shapes()
-
-        # At least one shape should have a label from text association
-        shapes_with_labels = [s for s in shapes if s.label]
-        assert len(shapes_with_labels) > 0
-
-    def test_semantic_inference(self, excalidraw_data):
-        """Test semantic type inference."""
-        parser = ExcalidrawParser()
-        diagram = parser.parse(excalidraw_data)
-
-        shapes = diagram.get_shapes()
-
-        # Shapes should have semantic types inferred
-        shapes_with_semantics = [s for s in shapes if s.semantic_type]
-        assert len(shapes_with_semantics) > 0
-
-        # Check confidence scores
-        for shape in shapes_with_semantics:
-            assert 0.0 <= shape.semantic_confidence <= 1.0
-
-
-class TestPlantUMLGenerator:
-    """Test PlantUML generator."""
-
-    def test_generate_basic_plantuml(self, excalidraw_data):
-        """Test generating basic PlantUML."""
-        parser = ExcalidrawParser()
-        diagram = parser.parse(excalidraw_data)
-
-        generator = PlantUMLGenerator()
-        output = generator.generate(diagram)
-
-        assert '@startuml' in output
-        assert '@enduml' in output
-
-    def test_plantuml_has_shapes(self, excalidraw_data):
-        """Test that PlantUML output includes shapes."""
-        parser = ExcalidrawParser()
-        diagram = parser.parse(excalidraw_data)
-
-        generator = PlantUMLGenerator()
-        output = generator.generate(diagram)
-
-        # Should have rectangle or component declarations
-        assert 'rectangle' in output or 'component' in output or 'actor' in output
-
-    def test_plantuml_has_connections(self, excalidraw_data):
-        """Test that PlantUML output includes connections."""
-        parser = ExcalidrawParser()
-        diagram = parser.parse(excalidraw_data)
-
-        generator = PlantUMLGenerator()
-        output = generator.generate(diagram)
-
-        # Should have arrows
-        assert '-->' in output or '<-->' in output
-
-
-class TestC4PlantUMLGenerator:
-    """Test C4-PlantUML generator."""
-
-    def test_generate_c4_plantuml(self, excalidraw_data):
-        """Test generating C4-PlantUML."""
-        parser = ExcalidrawParser()
-        diagram = parser.parse(excalidraw_data)
-
-        generator = C4PlantUMLGenerator()
-        output = generator.generate(diagram)
-
-        assert '@startuml' in output
-        assert '@enduml' in output
-        assert 'C4_Component.puml' in output
-
-    def test_c4_has_elements(self, excalidraw_data):
-        """Test that C4-PlantUML output includes C4 elements."""
-        parser = ExcalidrawParser()
-        diagram = parser.parse(excalidraw_data)
-
-        generator = C4PlantUMLGenerator()
-        output = generator.generate(diagram)
-
-        # Should have C4 element types
-        c4_elements = ['Person', 'System', 'Container', 'Component', 'ComponentDb']
-        assert any(elem in output for elem in c4_elements)
-
-    def test_c4_has_relationships(self, excalidraw_data):
-        """Test that C4-PlantUML output includes relationships."""
-        parser = ExcalidrawParser()
-        diagram = parser.parse(excalidraw_data)
-
-        generator = C4PlantUMLGenerator()
-        output = generator.generate(diagram)
-
-        # Should have Rel() calls
-        assert 'Rel(' in output
-
-
-class TestMermaidGenerator:
-    """Test Mermaid generator."""
-
-    def test_generate_mermaid(self, excalidraw_data):
-        """Test generating Mermaid diagram."""
-        parser = ExcalidrawParser()
-        diagram = parser.parse(excalidraw_data)
-
-        generator = MermaidGenerator()
-        output = generator.generate(diagram)
-
-        assert 'flowchart' in output or 'C4Context' in output or 'sequenceDiagram' in output
-
-    def test_mermaid_has_nodes(self, excalidraw_data):
-        """Test that Mermaid output includes nodes."""
-        parser = ExcalidrawParser()
-        diagram = parser.parse(excalidraw_data)
-
-        generator = MermaidGenerator(diagram_type='flowchart')
-        output = generator.generate(diagram)
-
-        # Should have node declarations
-        assert len(output.split('\n')) > 2
-
-    def test_mermaid_has_connections(self, excalidraw_data):
-        """Test that Mermaid output includes connections."""
-        parser = ExcalidrawParser()
-        diagram = parser.parse(excalidraw_data)
-
-        generator = MermaidGenerator(diagram_type='flowchart')
-        output = generator.generate(diagram)
-
-        # Should have arrows
-        assert '-->' in output or '<-->' in output or '-..' in output
-
-    def test_c4_declares_all_rel_aliases(self):
-        """Every alias referenced by a Rel() must have a declaration."""
-        diagram = Diagram(id='c4-test')
-        diagram.elements = [
-            _make_shape('customer', 'Customer', semantic_type=SemanticType.PERSON),
-            _make_shape('api', 'API', semantic_type=SemanticType.CONTAINER),
-            _make_shape('db', 'Database', semantic_type=SemanticType.DATABASE),
-            _make_shape('bus', 'Event Bus', semantic_type=SemanticType.QUEUE),
-            _make_shape('warehouse', 'Warehouse', semantic_type=SemanticType.DATABASE),
-            Group(
-                id='platform',
-                label='Platform',
-                children=['api', 'db', 'bus'],
-                position=_ORIGIN,
-                size=_SIZE,
-            ),
-            _make_connection('customer', 'api', 'Uses'),
-            _make_connection('api', 'db', 'Reads'),
-            _make_connection('api', 'bus', 'Publishes'),
-            _make_connection('bus', 'warehouse', 'Streams'),
-        ]
-
-        output = MermaidGenerator(diagram_type='c4').generate(diagram)
-
-        declared = re.findall(
-            r'^\s*(?:Person|System|SystemDb|SystemQueue|Container|ContainerDb|'
-            r'ContainerQueue|Component)\((\w+),',
-            output,
-            flags=re.MULTILINE,
-        )
-        rel_aliases = {alias for match in re.findall(r'Rel\((\w+), (\w+),', output) for alias in match}
-        assert sorted(declared) == sorted(set(declared))
-        assert rel_aliases <= set(declared)
-        assert '        ContainerDb(db, "Database")' in output
-        assert '        ContainerQueue(bus, "Event Bus")' in output
-        assert '    SystemDb(warehouse, "Warehouse")' in output
-
-    def test_flowchart_quotes_labels_with_special_chars(self):
-        """Labels containing Mermaid-special characters use the quoted form."""
-        diagram = Diagram(id='quote-test')
-        diagram.elements = [
-            _make_shape('check', 'Valid (yes/no)?', shape_type='diamond'),
-            _make_shape('note', 'Say "hi" [now]'),
-            _make_shape('pipe', 'a|b{c}', shape_type='circle'),
-            _make_shape('plain', 'Plain label'),
-        ]
-
-        output = MermaidGenerator(diagram_type='flowchart').generate(diagram)
-
-        assert '    check{"Valid (yes/no)?"}' in output
-        assert '    note["Say #quot;hi#quot; [now]"]' in output
-        assert '    pipe(("a|b{c}"))' in output
-        assert '    plain[Plain label]' in output
-
-
-class TestGraphVizGenerator:
-    """Test GraphViz generator."""
-
-    def test_generate_graphviz(self, excalidraw_data):
-        """Test generating GraphViz DOT."""
-        parser = ExcalidrawParser()
-        diagram = parser.parse(excalidraw_data)
-
-        generator = GraphVizGenerator()
-        output = generator.generate(diagram)
-
-        assert 'digraph' in output or 'graph' in output
-        assert output.strip().endswith('}')
-
-    def test_graphviz_has_nodes(self, excalidraw_data):
-        """Test that GraphViz output includes nodes."""
-        parser = ExcalidrawParser()
-        diagram = parser.parse(excalidraw_data)
-
-        generator = GraphVizGenerator()
-        output = generator.generate(diagram)
-
-        # Should have node declarations with attributes
-        assert '[' in output and ']' in output
-
-    def test_graphviz_has_edges(self, excalidraw_data):
-        """Test that GraphViz output includes edges."""
-        parser = ExcalidrawParser()
-        diagram = parser.parse(excalidraw_data)
-
-        generator = GraphVizGenerator()
-        output = generator.generate(diagram)
-
-        # Should have arrows
-        assert '->' in output or '--' in output
-
-
-class TestD2Generator:
-    """Test D2 generator."""
-
-    def test_generate_d2(self, excalidraw_data):
-        """Test generating D2 diagram."""
-        parser = ExcalidrawParser()
-        diagram = parser.parse(excalidraw_data)
-
-        generator = D2Generator()
-        output = generator.generate(diagram)
-
-        # D2 output should have content
-        assert len(output) > 0
-        assert len(output.split('\n')) > 1
-
-    def test_d2_has_shapes(self, excalidraw_data):
-        """Test that D2 output includes shapes."""
-        parser = ExcalidrawParser()
-        diagram = parser.parse(excalidraw_data)
-
-        generator = D2Generator()
-        output = generator.generate(diagram)
-
-        # Should have shape declarations with labels
-        assert ':' in output
-
-    def test_d2_has_connections(self, excalidraw_data):
-        """Test that D2 output includes connections."""
-        parser = ExcalidrawParser()
-        diagram = parser.parse(excalidraw_data)
-
-        generator = D2Generator()
-        output = generator.generate(diagram)
-
-        # Should have arrows
-        assert '->' in output or '<->' in output
-
-    def test_d2_with_direction(self, excalidraw_data):
-        """Test D2 with explicit direction."""
-        parser = ExcalidrawParser()
-        diagram = parser.parse(excalidraw_data)
-
-        from diacea.generators.d2 import D2Config
-
-        config = D2Config(direction='right')
-        generator = D2Generator(config=config)
-        output = generator.generate(diagram)
-
-        assert 'direction: right' in output
-
-
-class TestEndToEndConversion:
-    """Test complete end-to-end conversion workflow."""
-
-    def test_excalidraw_to_plantuml(self, excalidraw_data):
-        """Test Excalidraw → IR → PlantUML conversion."""
-        # Parse Excalidraw
-        parser = ExcalidrawParser()
-        diagram = parser.parse(excalidraw_data)
-
-        # Verify IR
-        assert len(diagram.elements) > 0
-        assert len(diagram.get_shapes()) > 0
-
-        # Generate PlantUML
-        generator = PlantUMLGenerator()
-        plantuml = generator.generate(diagram)
-
-        # Verify output
-        assert plantuml.startswith('@startuml')
-        assert plantuml.endswith('@enduml')
-        assert len(plantuml.split('\n')) > 3  # Has content
-
-    def test_excalidraw_to_c4(self, excalidraw_data):
-        """Test Excalidraw → IR → C4-PlantUML conversion."""
-        # Parse Excalidraw
-        parser = ExcalidrawParser()
-        diagram = parser.parse(excalidraw_data)
-
-        # Generate C4-PlantUML
-        generator = C4PlantUMLGenerator()
-        c4_plantuml = generator.generate(diagram)
-
-        # Verify output
-        assert c4_plantuml.startswith('@startuml')
-        assert c4_plantuml.endswith('@enduml')
-        assert '!include' in c4_plantuml
-        assert len(c4_plantuml.split('\n')) > 5  # Has content
-
-    def test_excalidraw_to_mermaid(self, excalidraw_data):
-        """Test Excalidraw → IR → Mermaid conversion."""
-        parser = ExcalidrawParser()
-        diagram = parser.parse(excalidraw_data)
-
-        generator = MermaidGenerator()
-        mermaid = generator.generate(diagram)
-
-        # Verify output
-        assert len(mermaid.split('\n')) > 2
-        assert 'flowchart' in mermaid or 'C4Context' in mermaid or 'sequenceDiagram' in mermaid
-
-    def test_excalidraw_to_graphviz(self, excalidraw_data):
-        """Test Excalidraw → IR → GraphViz conversion."""
-        parser = ExcalidrawParser()
-        diagram = parser.parse(excalidraw_data)
-
-        generator = GraphVizGenerator()
-        graphviz = generator.generate(diagram)
-
-        # Verify output
-        assert 'digraph' in graphviz or 'graph' in graphviz
-        assert graphviz.strip().endswith('}')
-
-    def test_excalidraw_to_d2(self, excalidraw_data):
-        """Test Excalidraw → IR → D2 conversion."""
-        parser = ExcalidrawParser()
-        diagram = parser.parse(excalidraw_data)
-
-        generator = D2Generator()
-        d2 = generator.generate(diagram)
-
-        # Verify output
-        assert len(d2.split('\n')) > 1
-        assert '->' in d2 or '<->' in d2
+def _excalidraw(*elements):
+    return json.dumps({'type': 'excalidraw', 'elements': list(elements)})
+
+
+def _rect(element_id, x, y, width=100, height=60):
+    return {'id': element_id, 'type': 'rectangle', 'x': x, 'y': y, 'width': width, 'height': height}
+
+
+@pytest.mark.parametrize(
+    ('output_format', 'options', 'suffix'),
+    [
+        ('d2', {'d2_direction': 'down'}, '.down.d2'),
+        ('mermaid', {'mermaid_type': 'flowchart'}, '.flowchart.mmd'),
+        ('graphviz', {'graphviz_direction': 'TB'}, '.tb.dot'),
+    ],
+)
+def test_generator_options_change_the_output_as_pinned(output_format, options, suffix):
+    golden = _GOLDENS_DIR / f'excalidraw.json{suffix}'
+    output = render_diagram(parse_file(TEST_DATA_DIR / 'excalidraw.json').diagram, output_format, **options).output
+
+    if os.environ.get('DIACEA_REGEN_GOLDENS') == '1':
+        golden.parent.mkdir(parents=True, exist_ok=True)
+        golden.write_text(output + '\n', encoding='utf-8')
+    assert output + '\n' == golden.read_text(encoding='utf-8')
+
+
+def test_c4_declares_all_rel_aliases():
+    """Every alias referenced by a Rel() must have a declaration."""
+    diagram = Diagram(id='c4-test')
+    diagram.elements = [
+        _make_shape('customer', 'Customer', semantic_type=SemanticType.PERSON),
+        _make_shape('api', 'API', semantic_type=SemanticType.CONTAINER),
+        _make_shape('db', 'Database', semantic_type=SemanticType.DATABASE),
+        _make_shape('bus', 'Event Bus', semantic_type=SemanticType.QUEUE),
+        _make_shape('warehouse', 'Warehouse', semantic_type=SemanticType.DATABASE),
+        Group(id='platform', label='Platform', children=['api', 'db', 'bus'], position=_ORIGIN, size=_SIZE),
+        _make_connection('customer', 'api', 'Uses'),
+        _make_connection('api', 'db', 'Reads'),
+        _make_connection('api', 'bus', 'Publishes'),
+        _make_connection('bus', 'warehouse', 'Streams'),
+    ]
+
+    output = render_diagram(diagram, 'mermaid', mermaid_type='c4').output
+
+    declared = re.findall(
+        r'^\s*(?:Person|System|SystemDb|SystemQueue|Container|ContainerDb|ContainerQueue|Component)\((\w+),',
+        output,
+        flags=re.MULTILINE,
+    )
+    rel_aliases = {alias for match in re.findall(r'Rel\((\w+), (\w+),', output) for alias in match}
+    assert sorted(declared) == sorted(set(declared))
+    assert rel_aliases <= set(declared)
+    assert '        ContainerDb(db, "Database")' in output
+    assert '        ContainerQueue(bus, "Event Bus")' in output
+    assert '    SystemDb(warehouse, "Warehouse")' in output
+
+
+def test_flowchart_quotes_labels_with_special_chars():
+    diagram = Diagram(id='quote-test')
+    diagram.elements = [
+        _make_shape('check', 'Valid (yes/no)?', shape_type='diamond'),
+        _make_shape('note', 'Say "hi" [now]'),
+        _make_shape('pipe', 'a|b{c}', shape_type='circle'),
+        _make_shape('plain', 'Plain label'),
+    ]
+
+    output = render_diagram(diagram, 'mermaid', mermaid_type='flowchart').output
+
+    assert output == (
+        'flowchart LR\n'
+        '    check{"Valid (yes/no)?"}\n'
+        '    note["Say #quot;hi#quot; [now]"]\n'
+        '    pipe(("a|b{c}"))\n'
+        '    plain[Plain label]'
+    )
+
+
+@pytest.mark.parametrize(
+    ('elements', 'rankdir'),
+    [
+        pytest.param([_rect('a', 500, 0), _rect('b', 500, 300)], 'TB', id='tall-away-from-origin'),
+        pytest.param([_rect('a', 0, 500), _rect('b', 400, 500)], 'LR', id='wide-away-from-origin'),
+        pytest.param([_rect('a', 500, 500, 100, 100)], 'LR', id='square'),
+        pytest.param([], 'LR', id='empty'),
+    ],
+)
+def test_graphviz_direction_follows_the_drawing_aspect_ratio(elements, rankdir):
+    output = convert(_excalidraw(*elements), 'graphviz').output
+
+    assert [line.strip() for line in output.splitlines() if 'rankdir' in line] == [f'rankdir="{rankdir}";']
+
+
+@pytest.mark.parametrize(
+    ('source', 'input_format', 'output_format', 'expected', 'diagram_type'),
+    [
+        pytest.param(
+            'sequenceDiagram\n  participant A\n  participant B as Bob\n  A->>B: hi\n',
+            'mermaid',
+            'mermaid',
+            'sequenceDiagram\n    participant A as A\n    participant B as Bob\n    A->>B: hi',
+            'sequence',
+            id='mermaid-sequence-participants',
+        ),
+        pytest.param(
+            'flowchart LR\n  a -->|"x -- y"| b\n  a -->|say "hi"| c\n  a -->|plain| d\n',
+            'mermaid',
+            'mermaid',
+            'flowchart LR\n    a[a]\n    b[b]\n    c[c]\n    d[d]\n'
+            '    a -->|"x -- y"| b\n    a -->|"say #quot;hi#quot;"| c\n    a -->|plain| d',
+            'flowchart',
+            id='mermaid-edge-labels-quoted-only-when-needed',
+        ),
+        pytest.param(
+            'a: A {style.fill: "#f00"}\nb: B {style.stroke: "#0f0"}\nc: C\n'
+            'g: G {\n  style.fill: "#00f"\n  style.stroke: "#0f0"\n  d: D\n}\n',
+            'd2',
+            'mermaid',
+            'flowchart LR\n    a[A]\n    b[B]\n    c[C]\n    subgraph g[G]\n        d[D]\n    end\n\n'
+            '    style a fill:#f00\n    style b stroke:#0f0\n    style g fill:#00f,stroke:#0f0',
+            'flowchart',
+            id='mermaid-styles-for-fill-or-stroke-and-groups',
+        ),
+        pytest.param(
+            '@startuml\nrectangle "Users DB" as db\ndatabase "Orders" as o\n@enduml\n',
+            'plantuml',
+            'mermaid',
+            'flowchart TD\n    db[Users DB]\n    o[(Orders)]',
+            'flowchart',
+            id='guessed-type-never-overrides-an-explicit-plantuml-shape',
+        ),
+        pytest.param(
+            'g: G {\n  x: X\n}\ng -> g\n',
+            'd2',
+            'd2',
+            'g: G {\n  x: X\n}\n',
+            None,
+            id='d2-drops-self-loop-on-container',
+        ),
+        pytest.param(
+            '<svg xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="100" height="50" '
+            'fill="rgb(255,0,0)" stroke="none"/><polygon id="gate" points="200,0 250,25 200,50 150,25" '
+            'style="fill:#ff0000"/></svg>',
+            'svg',
+            'd2',
+            'direction: right\n\nelem_1: elem_1\n'
+            'gate: gate {\n  shape: diamond\n  style: {\n    fill: "#ff0000"\n  }\n}',
+            None,
+            id='d2-keeps-hex-colors-only-and-svg-ids',
+        ),
+        pytest.param(
+            'a: {\n b: {\n  c: {\n   d: {\n    e: E\n   }\n  }\n }\n}\n',
+            'd2',
+            'mermaid',
+            'flowchart LR\n    subgraph a[a]\n        subgraph b[b]\n            subgraph c[c]\n'
+            '            end\n        end\n    end',
+            'flowchart',
+            id='mermaid-subgraphs-stop-at-depth-three',
+        ),
+    ],
+)
+def test_conversion_output(source, input_format, output_format, expected, diagram_type):
+    result = convert(source, output_format, input_format=input_format)
+
+    assert result.output == expected
+    assert result.diagram_type == diagram_type
+
+
+def test_svg_draws_multiline_edge_labels_one_line_per_row():
+    output = convert('a: A\nb: B\na -> b: "line1\\nline2"\n', 'svg', input_format='d2').output
+
+    assert (
+        '<polyline points="60.0,61.0 60.0,151.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" '
+        'marker-end="url(#arrow)"/><text class="edge-label" x="60.0" y="106.0" text-anchor="middle">line1</text>'
+        '<text class="edge-label" x="60.0" y="120.0" text-anchor="middle">line2</text>\n'
+    ) in output
+
+
+def test_drawings_skip_connections_to_missing_nodes():
+    half_routed = Connection(
+        id='c2', from_id='a', to_id='ghost2', position=_ORIGIN, size=_SIZE, start_point=Point(50.0, 60.0)
+    )
+    diagram = Diagram(id='dangling', elements=[_make_shape('a', 'A'), _make_connection('a', 'ghost'), half_routed])
+
+    svg = render_diagram(diagram, 'svg').output
+    scene = json.loads(render_diagram(diagram, 'excalidraw').output)
+
+    assert svg.splitlines()[-2:] == [
+        (
+            '<g id="a" data-semantic=""><rect x="0.0" y="0.0" width="100.0" height="60.0" rx="2.0" fill="#ffffff" '
+            'stroke="#1e1e1e" stroke-width="1.5"/><text x="50.0" y="34.7" text-anchor="middle">A</text></g>'
+        ),
+        '</svg>',
+    ]
+    assert [element['type'] for element in scene['elements']] == ['rectangle', 'text']
+
+
+def test_excalidraw_group_label_sits_inside_its_border_at_two_decimals():
+    scene = _excalidraw(
+        _rect('g', 10.12345, 20.98765, 400, 300),
+        {'id': 'gt', 'type': 'text', 'x': 15, 'y': 25, 'width': 50, 'height': 20, 'text': 'Group', 'fontSize': 20},
+        {**_rect('a', 100, 100), 'boundElements': [{'id': 'at', 'type': 'text'}]},
+        {'id': 'at', 'type': 'text', 'x': 110, 'y': 120, 'width': 50, 'height': 20, 'text': 'A', 'containerId': 'a'},
+    )
+
+    elements = json.loads(convert(scene, 'excalidraw').output)['elements']
+
+    assert [(e['id'], e['x'], e['y']) for e in elements if e['type'] == 'text'] == [
+        ('group-g-label', 20.12, 30.99),
+        ('a-label', 144.5, 117.5),
+    ]
+
+
+def test_verification_counts_only_connections_lost_beyond_the_reported_ones():
+    source = 'flowchart LR\n  subgraph g[Group]\n    a[A]\n  end\n  g --> a\n  a --> b[B]\n  b --> c[C]\n'
+    result = render_diagram(parse_diagram(source).diagram, 'graphviz')
+    assert result.warnings == ['Dropping connection between container and its own content: group-g -> a']
+    result.output = result.output.replace('    b -> c;\n', '')
+
+    assert verify_conversion(result) == [
+        "1 connection(s) lost without a warning, among: 'B' -> 'C', 'Group' -> 'A'",
+    ]

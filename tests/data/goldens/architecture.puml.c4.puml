@@ -1,0 +1,33 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+
+Person(customer, "Customer")
+Person(agent_support, "Support Agent")
+Container(cdn, "CDN")
+Container(blobs, "Object Storage")
+ComponentDb(warehouse, "Analytics Warehouse")
+
+System_Boundary(platform, "Web Platform") {
+  Component(frontend, "Frontend SPA")
+  Component(gateway, "API Gateway")
+  Container(orders, "Order Service")
+  Container(billing, "Billing Service")
+  ComponentQueue(events, "Event Bus")
+  ComponentDb(orders_db, "Orders DB")
+}
+
+Rel(customer, cdn, "browses")
+Rel(cdn, frontend, "")
+Rel(customer, frontend, "")
+Rel(agent_support, gateway, "admin API")
+Rel(frontend, gateway, "HTTPS/JSON")
+Rel(gateway, orders, "")
+Rel(gateway, billing, "")
+Rel(orders, orders_db, "SQL")
+Rel(orders, events, "publishes")
+Rel(billing, events, "publishes")
+Rel(events, warehouse, "streams")
+Rel(orders, blobs, "invoices")
+@enduml

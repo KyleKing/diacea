@@ -1,0 +1,21 @@
+digraph "SVG Diagram" {
+    rankdir="LR";
+    node [shape="box", fontname="Helvetica"];
+    edge [fontname="Helvetica"];
+
+    subgraph cluster_system_boundary {
+        label="Microservices System";
+        service1 [label="User Service", fillcolor="#E3F2FD", style="filled", color="#1565C0", penwidth="2.0"];
+        service2 [label="Order Service", fillcolor="#F3E5F5", style="filled", color="#6A1B9A", penwidth="2.0"];
+        service3 [label="Payment Service", fillcolor="#E8F5E9", style="filled", color="#2E7D32", penwidth="2.0"];
+        subgraph cluster_data_layer {
+            label="Data Layer";
+            db1 [label="Users DB", shape="cylinder", fillcolor="#C8E6C9", style="filled", color="#1B5E20", penwidth="2.0"];
+            db2 [label="Orders DB", shape="cylinder", fillcolor="#C8E6C9", style="filled", color="#1B5E20", penwidth="2.0"];
+            db3 [label="Payments DB", shape="cylinder", fillcolor="#C8E6C9", style="filled", color="#1B5E20", penwidth="2.0"];
+        }
+    }
+
+    user [label="Customer", shape="ellipse", fillcolor="#FFCCBC", style="filled", color="#BF360C", penwidth="2.0"];
+
+}

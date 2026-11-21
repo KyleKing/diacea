@@ -1,0 +1,27 @@
+C4Context
+    title Architecture Diagram
+    System(workflow_composition, "Workflow composition")
+    Person(dt_developer, "DT developer")
+    Container(data_and_computation_abstraction, "Data and computation<br/>abstraction")
+    Container(ai_ml_subsystem, "AI/ML subsystem")
+    Component(repository, "Repository")
+    Boundary(group_node_1, " ") {
+        Container(tooling_reporting, "Tooling &amp; Reporting")
+        Component(jepl_library, "JePL library")
+        System(ci_system, "CI system")
+        Container(sqaaas_api, "SQAaaS API")
+        Container(sqaaas_web, "SQAaaS web")
+    }
+    Rel(dt_developer, repository, "Push changes to workflow code")
+    Rel(data_and_computation_abstraction, sqaaas_api, "FAIR and data quality assessment (event and/or polling-based)")
+    Rel(sqaaas_api, ci_system, "Runs/fetches results<br/>of the QA assessment")
+    Rel(ci_system, ai_ml_subsystem, "Triggers deployment<br/>of pre-trained ML model")
+    Rel(repository, sqaaas_api, "Event-based<br/>worfklow validation<br/>(DevOps)")
+    Rel(sqaaas_api, repository, "Registers/loads<br/>QA assessment")
+    Rel(jepl_library, repository, "Modifies<br/>QA assessment")
+    Rel(tooling_reporting, sqaaas_api, "Get tools")
+    Rel(sqaaas_web, sqaaas_api, "Leverages")
+    Rel(workflow_composition, sqaaas_api, "Triggers pre-defined<br/>QA assessment<br/>as step in the workflow")
+    Rel(sqaaas_api, workflow_composition, "Gets deployed as<br/>a step in the workflow")
+    Rel(dt_developer, sqaaas_web, "Defines custom<br/>QA assessment")
+    Rel(dt_developer, workflow_composition, " ")

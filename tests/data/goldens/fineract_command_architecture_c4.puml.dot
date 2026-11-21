@@ -1,0 +1,25 @@
+digraph "diagram" {
+    rankdir="LR";
+    node [shape="box", fontname="Helvetica"];
+    edge [fontname="Helvetica"];
+
+    subgraph cluster_fineractSystem {
+        label="Fineract";
+        api [label="Fineract REST API", shape="component"];
+        subgraph cluster_commandSystem {
+            label="Command Processing";
+            dispatcher [label="Command Dispatcher", shape="component"];
+            hookManager [label="Command Hook Manager", shape="component"];
+            handlerManager [label="Command Handler Manager", shape="component"];
+        }
+    }
+
+    client [label="Client", shape="ellipse"];
+
+    client -> api [label="Sends requests"];
+    api -> dispatcher [label="Converts request into command"];
+    dispatcher -> hookManager [label="Call before handler"];
+    dispatcher -> hookManager [label="Call after handler"];
+    dispatcher -> hookManager [label="Call on handler error"];
+    dispatcher -> handlerManager [label="Handle command"];
+}

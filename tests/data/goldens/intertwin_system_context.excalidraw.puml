@@ -1,0 +1,26 @@
+@startuml
+rectangle "DT User" as dt_user
+rectangle "DT Developer" as dt_developer
+rectangle "DT application" as dt_application
+rectangle "Thematic\ncapabilities" as group_thematic_capabilities {
+  rectangle "Thematic module" as thematic_module
+  rectangle "Thematic module" as thematic_module_2
+  rectangle "Thematic module" as thematic_module_3
+}
+rectangle "Core\ncapabilities" as group_core_capabilities {
+  rectangle "Quality verification" as quality_verification
+  rectangle "Workflow Composition" as workflow_composition
+  rectangle "Real-time data\nacquisition and\nprocessing" as real_time_data_acquisition_and_processin
+}
+rectangle "Infrastructure" as group_infrastructure {
+  rectangle "Orchestration" as orchestration
+  rectangle "Federated data\nmanagement" as federated_data_management
+}
+dt_application ..> thematic_module
+dt_application ..> thematic_module_2
+dt_application ..> thematic_module_3
+dt_developer ..> thematic_module
+dt_developer ..> quality_verification
+dt_developer ..> group_infrastructure
+dt_user ..> dt_application
+@enduml

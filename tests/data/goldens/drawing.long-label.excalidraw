@@ -1,0 +1,80 @@
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "https://github.com/KyleKing/diacea",
+  "elements": [
+    {
+      "id": "a",
+      "type": "rectangle",
+      "x": 0.0,
+      "y": 0.0,
+      "width": 315.0,
+      "height": 86.0,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": null,
+      "seed": 3904355907,
+      "version": 1,
+      "versionNonce": 3085492508,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "id": "a-label",
+          "type": "text"
+        }
+      ],
+      "updated": 1,
+      "link": null,
+      "locked": false
+    },
+    {
+      "id": "a-label",
+      "type": "text",
+      "x": 20.0,
+      "y": 18.0,
+      "width": 275.0,
+      "height": 50.0,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": null,
+      "seed": 3273271602,
+      "version": 1,
+      "versionNonce": 2621797997,
+      "isDeleted": false,
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "text": "Extract the required data\nsuch as tables and prices",
+      "originalText": "Extract the required data such as tables and prices",
+      "fontSize": 20,
+      "fontFamily": 5,
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "a",
+      "autoResize": true,
+      "lineHeight": 1.25
+    }
+  ],
+  "appState": {
+    "gridSize": null,
+    "viewBackgroundColor": "#ffffff"
+  },
+  "files": {}
+}

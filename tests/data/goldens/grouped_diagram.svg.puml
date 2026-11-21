@@ -1,0 +1,13 @@
+@startuml
+actor "Customer" as user
+rectangle "Microservices System" as system_boundary {
+  rectangle "User Service" as service1
+  rectangle "Order Service" as service2
+  rectangle "Payment Service" as service3
+  rectangle "Data Layer" as data_layer {
+    database "Users DB" as db1
+    database "Orders DB" as db2
+    database "Payments DB" as db3
+  }
+}
+@enduml

@@ -1,0 +1,21 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+
+Person(customer, "Customer")
+System_Ext(payments, "Payment Provider")
+
+System_Boundary(shop, "Web Shop") {
+  Container(web, "Web App", "React")
+  Container(api, "API", "FastAPI", "Handles business logic")
+  ComponentDb(db, "Orders DB", "PostgreSQL")
+  ComponentQueue(bus, "Event Bus", "Kafka")
+}
+
+Rel(customer, web, "Uses", "HTTPS")
+Rel(web, api, "Calls", "JSON/HTTPS")
+Rel(api, db, "Reads/Writes")
+Rel(api, bus, "Publishes")
+Rel(api, payments, "Charges", "HTTPS")
+@enduml

@@ -1,0 +1,19 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+
+Person(user, "Customer")
+
+System_Boundary(system_boundary, "Microservices System") {
+  Container(service1, "User Service")
+  Container(service2, "Order Service")
+  Container(service3, "Payment Service")
+  System_Boundary(data_layer, "Data Layer") {
+    ComponentDb(db1, "Users DB")
+    ComponentDb(db2, "Orders DB")
+    ComponentDb(db3, "Payments DB")
+  }
+}
+
+@enduml

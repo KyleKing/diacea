@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3946" height="521" viewBox="-24.0 -24.0 3946.0 521.0">
+<style>text{font-family:Helvetica,Arial,sans-serif;font-size:14px;fill:#1e1e1e}.group-label{font-size:12px;fill:#868e96}.edge-label{font-size:12px;paint-order:stroke;stroke:#ffffff;stroke-width:4px}</style>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1e1e1e"/></marker></defs>
+<rect x="-24.0" y="-24.0" width="3946.0" height="521.0" fill="#ffffff"/>
+<g id="group-MCP" data-semantic="group"><rect x="300.0" y="0.0" width="1612.0" height="473.0" rx="8" fill="none" fill-opacity="0.25" stroke="#868e96" stroke-dasharray="6 4"/><text class="group-label" x="310.0" y="18.0">MCP</text></g>
+<g id="group-Playwright_MCP_Server" data-semantic="group"><rect x="2002.0" y="191.5" width="1896.0" height="201.0" rx="8" fill="none" fill-opacity="0.25" stroke="#868e96" stroke-dasharray="6 4"/><text class="group-label" x="2012.0" y="209.5">Playwright MCP Server</text></g>
+<g id="group-Frontend" data-semantic="group"><rect x="0.0" y="216.5" width="210.0" height="151.0" rx="8" fill="none" fill-opacity="0.25" stroke="#868e96" stroke-dasharray="6 4"/><text class="group-label" x="10.0" y="234.5">Frontend</text></g>
+<g id="A" data-semantic="component"><rect x="30.0" y="276.5" width="150.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="105.0" y="311.7" text-anchor="middle">User Input</text></g>
+<g id="B1" data-semantic="component"><rect x="352.0" y="140.5" width="282.0" height="86.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="493.0" y="179.2" text-anchor="middle">1 Preprocessing: Parse</text><text x="493.0" y="197.2" text-anchor="middle">Intent, Clean Text</text></g>
+<g id="B2" data-semantic="component"><rect x="751.5" y="103.0" width="315.0" height="136.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="909.0" y="148.7" text-anchor="middle">2 Context Management:</text><text x="909.0" y="166.7" text-anchor="middle">Retrieve Conversation</text><text x="909.0" y="184.7" text-anchor="middle">History, Memory, Relevant</text><text x="909.0" y="202.7" text-anchor="middle">Knowledge</text></g>
+<g id="B3" data-semantic="component"><rect x="1184.0" y="60.0" width="260.0" height="111.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="1314.0" y="102.2" text-anchor="middle">3 Conditional Check:</text><text x="1314.0" y="120.2" text-anchor="middle">Whether Web Query is</text><text x="1314.0" y="138.2" text-anchor="middle">Needed</text></g>
+<g id="B4a" data-semantic="database"><rect x="1556.0" y="85.0" width="326.0" height="86.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="1719.0" y="123.7" text-anchor="middle">4a RAG Data Retrieval from</text><text x="1719.0" y="141.7" text-anchor="middle">Context Database</text></g>
+<g id="B5" data-semantic="service"><rect x="1583.5" y="221.0" width="271.0" height="86.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="1719.0" y="259.7" text-anchor="middle">4b Web Browsing: Call</text><text x="1719.0" y="277.7" text-anchor="middle">Playwright MCP Server</text></g>
+<g id="B6" data-semantic="component"><rect x="1162.0" y="221.0" width="304.0" height="111.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="1314.0" y="263.2" text-anchor="middle">5 Prompt Assembly: Merge</text><text x="1314.0" y="281.2" text-anchor="middle">User Input + Context +</text><text x="1314.0" y="299.2" text-anchor="middle">Query Results</text></g>
+<g id="B7" data-semantic="service"><rect x="1622.0" y="357.0" width="194.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="1719.0" y="392.2" text-anchor="middle">6 Call LLM API</text></g>
+<g id="B8" data-semantic="component"><rect x="330.0" y="276.5" width="326.0" height="86.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="493.0" y="315.2" text-anchor="middle">7 Post-processing: Filter,</text><text x="493.0" y="333.2" text-anchor="middle">Format, Supplement</text></g>
+<g id="B9" data-semantic="storage"><rect x="746.0" y="289.0" width="326.0" height="111.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="909.0" y="331.2" text-anchor="middle">8 Memory Storage: Update</text><text x="909.0" y="349.2" text-anchor="middle">Conversation History, User</text><text x="909.0" y="367.2" text-anchor="middle">Preferences</text></g>
+<g id="B10" data-semantic="component"><rect x="1206.0" y="382.0" width="216.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="1314.0" y="417.2" text-anchor="middle">9 Return Results</text></g>
+<g id="P1" data-semantic="component"><rect x="2032.0" y="276.5" width="315.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="2189.5" y="311.7" text-anchor="middle">Receive MCP Query Request</text></g>
+<g id="P2" data-semantic="component"><rect x="2437.0" y="276.5" width="293.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="2583.5" y="311.7" text-anchor="middle">Launch Headless Browser</text></g>
+<g id="P3" data-semantic="screen"><rect x="2820.0" y="276.5" width="293.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="2966.5" y="311.7" text-anchor="middle">Navigate to Target Page</text></g>
+<g id="P4" data-semantic="component"><rect x="3203.0" y="251.5" width="326.0" height="111.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="3366.0" y="293.7" text-anchor="middle">Extract Required Data such</text><text x="3366.0" y="311.7" text-anchor="middle">as Tables, Prices, Latest</text><text x="3366.0" y="329.7" text-anchor="middle">Announcements</text></g>
+<g id="P5" data-semantic="document"><rect x="3619.0" y="276.5" width="249.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="3743.5" y="311.7" text-anchor="middle">Return JSON Results</text></g>
+<g id="E" data-semantic="component"><rect x="19.0" y="105.5" width="172.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="105.0" y="140.7" text-anchor="middle">LLM Response</text></g>
+<g id="F" data-semantic="interface"><rect x="2853.0" y="80.5" width="194.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="2950.0" y="115.7" text-anchor="middle">User Interface</text></g>
+<polyline points="180.0,283.1 357.9,226.5" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="634.0,179.3 751.5,175.7" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="1066.5,149.4 1184.0,133.3" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="1444.0,163.2 1601.7,221.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/><text class="edge-label" x="1522.9" y="192.1" text-anchor="middle">Yes</text>
+<polyline points="1444.0,119.5 1556.0,123.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/><text class="edge-label" x="1500.0" y="121.2" text-anchor="middle">No</text>
+<polyline points="1556.0,136.7 1066.5,162.6" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="1854.5,276.4 2032.0,292.6" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="2347.0,307.0 2437.0,307.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="2730.0,307.0 2820.0,307.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="3113.0,307.0 3203.0,307.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="3529.0,307.0 3619.0,307.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="3619.0,304.4 1854.5,266.9" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="1066.5,212.0 1162.0,236.9" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="1466.0,318.2 1622.0,360.9" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="1622.0,372.4 191.0,149.4" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="169.5,166.5 402.1,276.5" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="656.0,329.3 746.0,334.7" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="1072.0,371.9 1206.0,394.4" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="1422.0,392.6 2853.0,128.9" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+</svg>

@@ -1,0 +1,18 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+
+ComponentDb(devices, "Device Simulator")
+Container(fareDataEventHub, "Fare Data", "PK: Medallion HackLicense VendorId; 3 TUs")
+Container(tripDataEventHub, "Trip Data", "PK: Medallion HackLicense VendorId; 3 TUs")
+Container(streamAnalytics, "Stream Processing", "6 SUs")
+ComponentDb(outputCosmosDb, "Output Database", "1,000 RUs")
+
+
+Rel(devices, fareDataEventHub, "")
+Rel(devices, tripDataEventHub, "")
+Rel(fareDataEventHub, streamAnalytics, "")
+Rel(tripDataEventHub, streamAnalytics, "")
+Rel(streamAnalytics, outputCosmosDb, "")
+@enduml

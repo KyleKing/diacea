@@ -1,0 +1,5 @@
+@startuml
+rectangle "Client" as client
+rectangle "Server" as server
+client --> server
+@enduml

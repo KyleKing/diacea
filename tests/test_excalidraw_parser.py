@@ -4,10 +4,12 @@ import json
 
 import pytest
 
-from diacea.ir import Connection, SemanticType, Shape, Text
+from diacea.formats import parse_diagram
+from diacea.ir import Connection, Dimensions, Point, SemanticType, Shape, Text
 from diacea.parsers import ExcalidrawParser
 
 from .configuration import TEST_DATA_DIR
+from .ir_summary import summarize
 
 REAL_DATA_DIR = TEST_DATA_DIR / 'real'
 
@@ -450,3 +452,142 @@ class TestArrowsFromRealSketches:
         assert shapes['body'].semantic_type == SemanticType.PERSON
         assert diagram.get_connections()[0].from_id == 'body'
         assert diagram.get_groups() == []
+
+
+def _ellipse(element_id, x, y, width, height, group):
+    return {'id': element_id, 'type': 'ellipse', 'x': x, 'y': y, 'width': width, 'height': height, 'groupIds': [group]}
+
+
+@pytest.mark.parametrize(
+    ('elements', 'expected'),
+    [
+        pytest.param(
+            [_sketch_box('b', 0, 100), _sketch_text('t', 'Cache', 10, 70)],
+            {'nodes': [('b', 'Cache', 'rectangle', 'database')]},
+            id='loose-text-above-a-box-labels-it',
+        ),
+        pytest.param(
+            [_sketch_box('c', 0, 0, 600, 400), _sketch_box('b', 100, 200), _sketch_text('t', 'Near', 110, 170)],
+            {
+                'nodes': [('c', 'Near', 'rectangle', 'system'), ('b', '', 'rectangle', 'component')],
+                'groups': [('group-c', 'Near', ['b'])],
+            },
+            id='container-keeps-its-sole-text',
+        ),
+        pytest.param(
+            [
+                _sketch_box('c', 0, 0, 600, 400),
+                _sketch_text('ct', 'Region', 10, 10),
+                _sketch_box('b', 100, 200),
+                _sketch_text('t', 'Near', 110, 170),
+            ],
+            {
+                'nodes': [('c', 'Region', 'rectangle', 'cloud'), ('b', 'Near', 'rectangle', 'component')],
+                'groups': [('group-c', 'Region', ['b'])],
+            },
+            id='container-with-two-texts-gives-one-away',
+        ),
+        pytest.param(
+            [_ellipse('h', 50, 0, 40, 40, 'g1'), _ellipse('bd', 30, 50, 80, 100, 'g1')],
+            {
+                'nodes': [('h', '', 'ellipse', 'person'), ('bd', '', 'ellipse', 'person')],
+                'groups': [('group-g1', '', ['h', 'bd'])],
+            },
+            id='two-grouped-ellipses-are-not-a-stick-figure',
+        ),
+        pytest.param(
+            [
+                _sketch_box('a', 0, 0, 200, 40),
+                _sketch_text('at', 'A', 10, 10),
+                _sketch_box('b', 210, 0, 20, 40),
+                _sketch_text('bt', 'B', 212, 10, font_size=8),
+                _sketch_box('z', 0, 300),
+                _sketch_text('zt', 'Z', 10, 310),
+                _sketch_arrow('r', (80, 330), (200, 20)),
+            ],
+            {
+                'nodes': [
+                    ('a', 'A', 'rectangle', 'database'),
+                    ('b', 'B', 'rectangle', 'component'),
+                    ('z', 'Z', 'rectangle', 'component'),
+                ],
+                'edges': [('z', 'a', '')],
+            },
+            id='unbound-arrow-ending-on-a-right-border-joins-that-shape',
+        ),
+        pytest.param(
+            [
+                _sketch_box('a', 0, 0, 200, 40),
+                _sketch_text('at', 'A', 10, 10),
+                _sketch_box('b', 90, 42, 20, 20),
+                _sketch_text('bt', 'B', 92, 44, font_size=8),
+                _sketch_box('z', 400, 300),
+                _sketch_text('zt', 'Z', 410, 310),
+                _sketch_arrow('r', (480, 330), (100, 40)),
+            ],
+            {
+                'nodes': [
+                    ('a', 'A', 'rectangle', 'database'),
+                    ('b', 'B', 'rectangle', 'component'),
+                    ('z', 'Z', 'rectangle', 'component'),
+                ],
+                'edges': [('z', 'a', '')],
+            },
+            id='unbound-arrow-ending-on-a-bottom-border-joins-that-shape',
+        ),
+        pytest.param(
+            [
+                _sketch_box('a', 300, 0, 200, 40),
+                _sketch_text('at', 'A', 310, 10),
+                _sketch_box('c', 270, 0, 20, 40),
+                _sketch_text('ct', 'C', 272, 10, font_size=8),
+                _sketch_box('z', 300, 300),
+                _sketch_text('zt', 'Z', 310, 310),
+                _sketch_arrow('r', (380, 330), (300, 20)),
+            ],
+            {
+                'nodes': [
+                    ('a', 'A', 'rectangle', 'database'),
+                    ('c', 'C', 'rectangle', 'component'),
+                    ('z', 'Z', 'rectangle', 'component'),
+                ],
+                'edges': [('z', 'a', '')],
+            },
+            id='unbound-arrow-ending-on-a-left-border-joins-that-shape',
+        ),
+        pytest.param(
+            [
+                _sketch_box('a', 0, 100, 200, 40),
+                _sketch_text('at', 'A', 10, 110),
+                _sketch_box('c', 90, 75, 20, 20),
+                _sketch_text('ct', 'C', 92, 78, font_size=8),
+                _sketch_box('z', 400, 300),
+                _sketch_text('zt', 'Z', 410, 310),
+                _sketch_arrow('r', (480, 330), (100, 100)),
+            ],
+            {
+                'nodes': [
+                    ('a', 'A', 'rectangle', 'database'),
+                    ('c', 'C', 'rectangle', 'component'),
+                    ('z', 'Z', 'rectangle', 'component'),
+                ],
+                'edges': [('z', 'a', '')],
+            },
+            id='unbound-arrow-ending-on-a-top-border-joins-that-shape',
+        ),
+    ],
+)
+def test_sketch_parses_to(elements, expected):
+    assert summarize(parse_diagram(json.dumps({'elements': elements}), 'excalidraw').diagram) == expected
+
+
+def test_missing_geometry_and_opacity_default_to_zero_and_opaque():
+    diagram = parse_diagram(
+        json.dumps({'elements': [{'id': 'r', 'type': 'rectangle'}, {'id': 'tx', 'type': 'text', 'text': 'Hi'}]}),
+        'excalidraw',
+    ).diagram
+
+    assert [(e.id, e.position, e.size, e.style.opacity) for e in diagram.elements] == [
+        ('r', Point(0.0, 0.0), Dimensions(0.0, 0.0), 1.0),
+        ('tx', Point(0.0, 0.0), Dimensions(0.0, 0.0), None),
+    ]

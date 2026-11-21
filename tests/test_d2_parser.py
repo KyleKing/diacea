@@ -1,10 +1,15 @@
 """Tests for the D2 parser."""
 
+import re
+
 import pytest
 
+from diacea.formats import parse_diagram
 from diacea.generators import D2Generator
 from diacea.ir import SemanticType
 from diacea.parsers import D2Parser, is_d2
+
+from .ir_summary import summarize
 
 D2 = """
 direction: right
@@ -119,13 +124,17 @@ class TestSkippedSyntax:
 
 
 class TestErrors:
-    def test_unclosed_brace_raises(self):
-        with pytest.raises(ValueError, match='unclosed'):
-            D2Parser().parse('a: {\n  b\n')
-
-    def test_non_string_input_raises(self):
-        with pytest.raises(ValueError, match='expects a string'):
-            D2Parser().parse(['a -> b'])
+    @pytest.mark.parametrize(
+        ('text', 'message'),
+        [
+            ('a: {\n  b\n', "Line 1: unclosed '{' in D2 input"),
+            ('\n\na: {\n', "Line 3: unclosed '{' in D2 input"),
+            (['a -> b'], 'D2 parser expects a string input'),
+        ],
+    )
+    def test_invalid_d2_raises(self, text, message):
+        with pytest.raises(ValueError, match=f'^{re.escape(message)}$'):
+            D2Parser().parse(text)
 
 
 def test_own_output_is_a_fixpoint():
@@ -133,3 +142,114 @@ def test_own_output_is_a_fixpoint():
     second = D2Generator().generate(D2Parser().parse(first))
 
     assert second == first
+
+
+@pytest.mark.parametrize(
+    ('source', 'expected', 'warnings'),
+    [
+        pytest.param(
+            'a: {\n  b: {\n    x -> _.y\n    x -> _._.z\n  }\n}\n',
+            {
+                'nodes': [
+                    ('x', 'x', 'rectangle', 'component'),
+                    ('y', 'y', 'rectangle', 'component'),
+                    ('z', 'z', 'rectangle', 'component'),
+                ],
+                'groups': [('a', 'a', ['b', 'y']), ('b', 'b', ['x'])],
+                'edges': [('x', 'y', ''), ('x', 'z', '')],
+            },
+            [],
+            id='parent-references-resolve-one-level-each',
+        ),
+        pytest.param(
+            'a -> b -> c -> d\n',
+            {
+                'nodes': [
+                    ('a', 'a', 'rectangle', 'component'),
+                    ('b', 'b', 'rectangle', 'component'),
+                    ('c', 'c', 'rectangle', 'component'),
+                    ('d', 'd', 'rectangle', 'component'),
+                ],
+                'edges': [('a', 'b', ''), ('b', 'c', ''), ('c', 'd', '')],
+            },
+            [],
+            id='connection-chain',
+        ),
+        pytest.param(
+            'x:"a;b"\ny: "c;d"\nx->y\n',
+            {
+                'nodes': [('x', 'a;b', 'rectangle', 'component'), ('y', 'c;d', 'rectangle', 'component')],
+                'edges': [('x', 'y', '')],
+            },
+            [],
+            id='quoted-labels-hide-separators',
+        ),
+        pytest.param(
+            'a: A {style.stroke: "#f00"}\n',
+            {'nodes': [('a', 'A', 'rectangle', 'component')], 'styles': {'a': (None, '#f00', None)}},
+            [],
+            id='stroke-only-style',
+        ),
+        pytest.param(
+            'a: |md # Hi | there|\nb: c\na -> b\n',
+            {
+                'nodes': [('a', 'Hi | there', 'rectangle', 'component'), ('b', 'c', 'rectangle', 'component')],
+                'edges': [('a', 'b', '')],
+            },
+            [],
+            id='block-string-with-pipe',
+        ),
+        pytest.param(
+            'a: ||md x | y||\nb\na -> b\n',
+            {
+                'nodes': [('a', 'x | y', 'rectangle', 'component'), ('b', 'b', 'rectangle', 'component')],
+                'edges': [('a', 'b', '')],
+            },
+            [],
+            id='double-pipe-block-string',
+        ),
+        pytest.param(
+            'a: |`md x | y`|\nb\na -> b\n',
+            {
+                'nodes': [('a', 'x | y', 'rectangle', 'component'), ('b', 'b', 'rectangle', 'component')],
+                'edges': [('a', 'b', '')],
+            },
+            [],
+            id='backtick-block-string',
+        ),
+        pytest.param(
+            'g: {\n  a: ||md x | y } z {||\n}\nb -> g.a\n',
+            {
+                'nodes': [('a', 'x | y } z {', 'rectangle', 'component'), ('b', 'b', 'rectangle', 'component')],
+                'groups': [('g', 'g', ['a'])],
+                'edges': [('b', 'a', '')],
+            },
+            [],
+            id='double-pipe-block-string-hides-pipe-and-brace',
+        ),
+        pytest.param(
+            'a: |`md x | y; z`|; b -> a\n',
+            {
+                'nodes': [('a', 'x | y; z', 'rectangle', 'component'), ('b', 'b', 'rectangle', 'component')],
+                'edges': [('b', 'a', '')],
+            },
+            [],
+            id='backtick-block-string-hides-pipe-and-semicolon',
+        ),
+        pytest.param(
+            'g."x.y": X\nb -> g."x.y"\n',
+            {
+                'nodes': [('x.y', 'X', 'rectangle', 'component'), ('b', 'b', 'rectangle', 'component')],
+                'groups': [('g', 'g', ['x.y'])],
+                'edges': [('b', 'x.y', '')],
+            },
+            [],
+            id='quoted-key-segment-keeps-its-dot',
+        ),
+    ],
+)
+def test_source_parses_to(source, expected, warnings):
+    parsed = parse_diagram(source, 'd2')
+
+    assert summarize(parsed.diagram) == expected
+    assert parsed.warnings == warnings

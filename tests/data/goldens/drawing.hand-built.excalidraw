@@ -1,0 +1,209 @@
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "https://github.com/KyleKing/diacea",
+  "elements": [
+    {
+      "id": "a",
+      "type": "rectangle",
+      "x": 0.0,
+      "y": 0.0,
+      "width": 120.0,
+      "height": 60.0,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": null,
+      "seed": 3904355907,
+      "version": 1,
+      "versionNonce": 3085492508,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "id": "a-label",
+          "type": "text"
+        },
+        {
+          "id": "c",
+          "type": "arrow"
+        }
+      ],
+      "updated": 1,
+      "link": null,
+      "locked": false
+    },
+    {
+      "id": "a-label",
+      "type": "text",
+      "x": 54.5,
+      "y": 17.5,
+      "width": 11.0,
+      "height": 25.0,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": null,
+      "seed": 3273271602,
+      "version": 1,
+      "versionNonce": 2621797997,
+      "isDeleted": false,
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "text": "A",
+      "originalText": "A",
+      "fontSize": 20,
+      "fontFamily": 5,
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "a",
+      "autoResize": true,
+      "lineHeight": 1.25
+    },
+    {
+      "id": "b",
+      "type": "rectangle",
+      "x": 0.0,
+      "y": 150.0,
+      "width": 120.0,
+      "height": 60.0,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": null,
+      "seed": 1908338681,
+      "version": 1,
+      "versionNonce": 786542758,
+      "isDeleted": false,
+      "boundElements": [
+        {
+          "id": "b-label",
+          "type": "text"
+        },
+        {
+          "id": "c",
+          "type": "arrow"
+        }
+      ],
+      "updated": 1,
+      "link": null,
+      "locked": false
+    },
+    {
+      "id": "b-label",
+      "type": "text",
+      "x": 54.5,
+      "y": 167.5,
+      "width": 11.0,
+      "height": 25.0,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": null,
+      "seed": 4075959215,
+      "version": 1,
+      "versionNonce": 2913823984,
+      "isDeleted": false,
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "text": "B",
+      "originalText": "B",
+      "fontSize": 20,
+      "fontFamily": 5,
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "b",
+      "autoResize": true,
+      "lineHeight": 1.25
+    },
+    {
+      "id": "c",
+      "type": "arrow",
+      "x": 60.0,
+      "y": 60.0,
+      "width": 0.0,
+      "height": 90.0,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": {
+        "type": 2
+      },
+      "seed": 112844655,
+      "version": 1,
+      "versionNonce": 1508278320,
+      "isDeleted": false,
+      "boundElements": [],
+      "updated": 1,
+      "link": null,
+      "locked": false,
+      "points": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          90.0
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": {
+        "elementId": "a",
+        "focus": 0,
+        "gap": 4.0
+      },
+      "endBinding": {
+        "elementId": "b",
+        "focus": 0,
+        "gap": 4.0
+      },
+      "startArrowhead": null,
+      "endArrowhead": "arrow",
+      "elbowed": false
+    }
+  ],
+  "appState": {
+    "gridSize": null,
+    "viewBackgroundColor": "#ffffff"
+  },
+  "files": {}
+}

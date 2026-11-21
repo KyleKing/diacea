@@ -1,0 +1,24 @@
+digraph "diagram" {
+    rankdir="LR";
+    node [shape="box", fontname="Helvetica"];
+    edge [fontname="Helvetica"];
+
+    dev [label="Developer"];
+    gh [label="GitHub"];
+    ci [label="CI Checks", shape="diamond"];
+    build [label="Build Image"];
+    notify [label="Notify Author"];
+    registry [label="Container Registry", shape="cylinder"];
+    deploy [label="Deploy to Staging"];
+    smoke [label="Smoke Tests", shape="hexagon"];
+    prod [label="Production"];
+
+    dev -> gh [label="git push"];
+    gh -> ci;
+    ci -> build [label="pass"];
+    ci -> notify [label="fail"];
+    build -> registry;
+    registry -> deploy;
+    deploy -> smoke [style="dashed"];
+    smoke -> prod [penwidth="3.0"];
+}

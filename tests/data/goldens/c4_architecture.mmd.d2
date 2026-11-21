@@ -1,0 +1,16 @@
+direction: down
+
+customer: Customer {
+  shape: person
+}
+admin: Administrator {
+  shape: person
+}
+ecommerce: E-Commerce System
+payment: Payment Gateway
+shipping: Shipping Service
+
+customer -> ecommerce: Browses products, places orders
+admin -> ecommerce: Manages products, views analytics
+ecommerce -> payment: Processes payments via
+ecommerce -> shipping: Tracks shipments via

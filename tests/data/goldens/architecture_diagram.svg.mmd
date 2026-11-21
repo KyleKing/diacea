@@ -1,0 +1,13 @@
+C4Context
+    title SVG Diagram
+    Person(user1, "User")
+    System(webapp, "Web App")
+    System(api, "API Gateway")
+    SystemDb(database1, "PostgreSQL")
+    SystemQueue(queue1, "RabbitMQ")
+    SystemDb(storage1, "S3 Storage")
+    System(external1, "Payment API")
+    Rel(user1, webapp, " ")
+    Rel(webapp, api, " ")
+    Rel(webapp, database1, " ")
+    Rel(api, queue1, " ")

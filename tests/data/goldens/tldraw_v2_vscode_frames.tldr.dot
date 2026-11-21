@@ -1,0 +1,36 @@
+digraph "Page 1" {
+    compound=true;
+    rankdir="LR";
+    node [shape="box", fontname="Helvetica"];
+    edge [fontname="Helvetica"];
+
+    subgraph cluster_group_extension {
+        label="Extension";
+        tldraweditorprovider [label="TldrawEditorProvider", shape="component", color="#1d1d1d", penwidth="3.5"];
+        tldrawdocument [label="TldrawDocument", color="#1d1d1d", penwidth="3.5"];
+        webviewmessagehandler [label="WebViewMessageHandler", color="#1d1d1d", penwidth="3.5"];
+    }
+    subgraph cluster_group_webview {
+        label="WebView";
+        subgraph cluster_group_editor {
+            label="Editor";
+            app [label="App", shape="box3d", color="#1d1d1d", penwidth="3.5"];
+            changeresponder [label="ChangeResponder", shape="cylinder", color="#1d1d1d", penwidth="3.5"];
+        }
+    }
+
+    vs_code [label="VS Code", shape="box3d", color="#1d1d1d", penwidth="3.5"];
+    each_file_on_disk_can_be_shown_in_multip [label="Each file on disk can be shown in multiple WebView\ninstances when you split the editor pane", color="#1d1d1d", penwidth="2.0"];
+    fileopen [label="FileOpen", color="#1d1d1d", penwidth="3.5"];
+    tldrawwebviewmanager [label="TldrawWebViewManager", color="#1d1d1d", penwidth="3.5"];
+
+    vs_code -> tldraweditorprovider [label="activate", color="#1d1d1d", penwidth="2.0", lhead="cluster_group_extension"];
+    vs_code -> tldraweditorprovider [label="openCustomDocument", color="#1d1d1d", penwidth="2.0"];
+    vs_code -> tldraweditorprovider [label="save, undo, redo,...", color="#1d1d1d", penwidth="2.0"];
+    vs_code -> tldraweditorprovider [label="document", color="#1d1d1d", penwidth="2.0"];
+    webviewmessagehandler -> app [label="webview.postMessage", color="#1d1d1d", penwidth="2.0", lhead="cluster_group_webview"];
+    each_file_on_disk_can_be_shown_in_multip -> app [color="#1d1d1d", penwidth="2.0", lhead="cluster_group_webview"];
+    tldraweditorprovider -> tldrawdocument [label="create", color="#1d1d1d", penwidth="2.0"];
+    tldrawwebviewmanager -> app [label="creates", color="#1d1d1d", penwidth="2.0", lhead="cluster_group_webview"];
+    vs_code -> tldrawwebviewmanager [label="resolveCustomEditor", color="#1d1d1d", penwidth="2.0"];
+}

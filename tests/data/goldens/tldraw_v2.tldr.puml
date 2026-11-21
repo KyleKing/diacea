@@ -1,0 +1,7 @@
+@startuml
+database "Database" as database
+rectangle "Backend" as group_backend {
+  rectangle "API Server" as api_server
+}
+api_server --> database : "queries"
+@enduml

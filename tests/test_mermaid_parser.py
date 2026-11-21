@@ -5,8 +5,9 @@ import textwrap
 
 import pytest
 
+from diacea.formats import parse_diagram
 from diacea.generators.mermaid import MermaidGenerator
-from diacea.ir import Diagram, Shape
+from diacea.ir import Diagram, Dimensions, Point, Shape
 from diacea.ir.semantic import SemanticType
 from diacea.parsers.excalidraw import ExcalidrawParser
 from diacea.parsers.mermaid import (
@@ -18,6 +19,7 @@ from diacea.parsers.mermaid import (
 from diacea.parsers.plantuml import PlantUMLParser
 
 from .configuration import TEST_DATA_DIR
+from .ir_summary import summarize
 
 MERMAID_DATA_DIR = TEST_DATA_DIR / 'mermaid'
 
@@ -794,3 +796,92 @@ class TestExtraNodeShapes:
         source = f'flowchart TD\n{nodes}    a --- b\n    b ==> c'
 
         assert MermaidGenerator().generate(MermaidParser().parse(source)) == source
+
+
+@pytest.mark.parametrize(
+    ('source', 'expected', 'warnings'),
+    [
+        pytest.param(
+            'flowchart LR\n  a[""] --> b["x"]\n',
+            {
+                'nodes': [('a', '', 'rectangle', 'component'), ('b', 'x', 'rectangle', 'component')],
+                'edges': [('a', 'b', '')],
+            },
+            [],
+            id='empty-quoted-label',
+        ),
+        pytest.param(
+            'sequenceDiagram\n  A->>B: hi\n  participant A as Alice\n  actor B as Bob\n',
+            {
+                'nodes': [('A', 'Alice', 'rectangle', 'component'), ('B', 'Bob', 'rectangle', 'person')],
+                'edges': [('A', 'B', 'hi')],
+            },
+            [],
+            id='sequence-redeclared-participants',
+        ),
+        pytest.param(
+            '```mermaid\nsequenceDiagram\n\n  A->>B: hi\n```\n',
+            {
+                'nodes': [('A', 'A', 'rectangle', 'component'), ('B', 'B', 'rectangle', 'component')],
+                'edges': [('A', 'B', 'hi')],
+            },
+            [],
+            id='sequence-in-code-fence-with-blank-line',
+        ),
+        pytest.param(
+            'flowchart LR\n  a --> \n  b --> c\n',
+            {
+                'nodes': [('b', 'b', 'rectangle', 'component'), ('c', 'c', 'rectangle', 'component')],
+                'edges': [('b', 'c', '')],
+            },
+            ["line 2: unrecognized line skipped: 'a -->'"],
+            id='dangling-edge-skipped',
+        ),
+        pytest.param(
+            'flowchart LR\n  a["x & y"] & b --> c\n',
+            {
+                'nodes': [
+                    ('a', 'x & y', 'rectangle', 'component'),
+                    ('b', 'b', 'rectangle', 'component'),
+                    ('c', 'c', 'rectangle', 'component'),
+                ],
+                'edges': [('a', 'c', ''), ('b', 'c', '')],
+            },
+            [],
+            id='ampersand-inside-quotes',
+        ),
+        pytest.param(
+            'flowchart LR\n  a["x ] & y"] & b --> c\n',
+            {
+                'nodes': [
+                    ('a', 'x ] & y', 'rectangle', 'component'),
+                    ('b', 'b', 'rectangle', 'component'),
+                    ('c', 'c', 'rectangle', 'component'),
+                ],
+                'edges': [('a', 'c', ''), ('b', 'c', '')],
+            },
+            [],
+            id='bracket-inside-quoted-label',
+        ),
+        pytest.param(
+            'flowchart LR\n  a[A]\n  style a fill:url(x:y),stroke:#f00\n',
+            {'nodes': [('a', 'A', 'rectangle', 'component')], 'styles': {'a': ('url(x:y)', '#f00', None)}},
+            [],
+            id='style-value-with-colon',
+        ),
+    ],
+)
+def test_source_parses_to(source, expected, warnings):
+    parsed = parse_diagram(source, 'mermaid')
+
+    assert summarize(parsed.diagram) == expected
+    assert parsed.warnings == warnings
+
+
+def test_sequence_messages_are_drawn_top_down_between_lifelines():
+    diagram = parse_diagram('sequenceDiagram\n  participant A\n  participant B\n  A->>B: hi\n  B-->>A: yo\n').diagram
+
+    assert [(conn.start_point, conn.end_point, conn.position, conn.size) for conn in diagram.get_connections()] == [
+        (Point(60.0, 100.0), Point(300.0, 100.0), Point(60.0, 100.0), Dimensions(240.0, 1.0)),
+        (Point(300.0, 140.0), Point(60.0, 140.0), Point(60.0, 140.0), Dimensions(240.0, 1.0)),
+    ]

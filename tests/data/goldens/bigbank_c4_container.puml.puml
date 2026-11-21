@@ -1,0 +1,22 @@
+@startuml
+actor "Customer" as customer
+rectangle "E-Mail System" as email_system
+rectangle "Mainframe Banking System" as banking_system
+rectangle "Internet Banking" as c1 {
+  rectangle "Web Application" as web_app
+  rectangle "Single-Page App" as spa
+  rectangle "Mobile App" as mobile_app
+  database "Database" as database
+  rectangle "API Application" as backend_api
+}
+customer --> web_app : "Uses"
+customer --> spa : "Uses"
+customer --> mobile_app : "Uses"
+web_app --> spa : "Delivers"
+spa --> backend_api : "Uses"
+mobile_app --> backend_api : "Uses"
+database --> backend_api : "Reads from and writes to"
+customer --> email_system : "Sends e-mails to"
+email_system --> backend_api : "Sends e-mails using"
+backend_api --> banking_system : "Uses"
+@enduml

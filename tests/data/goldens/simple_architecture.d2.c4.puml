@@ -1,0 +1,33 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+
+Person(user, "User")
+Container(api_gateway, "API Gateway")
+ComponentQueue(queue, "Message Queue")
+
+System_Boundary(services, "Services") {
+  Container(auth, "Auth Service")
+  Container(orders, "Order Service")
+  Container(products, "Product Service")
+  Container(inventory, "Inventory Service")
+}
+System_Boundary(databases, "Databases") {
+  ComponentDb(auth_db, "Auth DB")
+  ComponentDb(order_db, "Order DB")
+  ComponentDb(product_db, "Product DB")
+  ComponentDb(inventory_db, "Inventory DB")
+}
+
+Rel(user, api_gateway, "HTTP Requests")
+Rel(api_gateway, auth, "Authenticate")
+Rel(api_gateway, orders, "Place Order")
+Rel(api_gateway, products, "Get Products")
+Rel(auth, auth_db, "Query")
+Rel(orders, order_db, "Query")
+Rel(products, product_db, "Query")
+Rel(inventory, inventory_db, "Query")
+Rel(orders, queue, "Order Placed Event")
+Rel(queue, inventory, "Process Order")
+@enduml

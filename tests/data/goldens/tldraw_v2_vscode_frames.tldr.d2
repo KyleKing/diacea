@@ -1,0 +1,122 @@
+direction: right
+
+group-extension: Extension {
+  tldraweditorprovider: TldrawEditorProvider {
+    style: {
+      stroke: "#1d1d1d"
+      stroke-width: 4
+    }
+  }
+  tldrawdocument: TldrawDocument {
+    shape: document
+    style: {
+      stroke: "#1d1d1d"
+      stroke-width: 4
+    }
+  }
+  webviewmessagehandler: WebViewMessageHandler {
+    style: {
+      stroke: "#1d1d1d"
+      stroke-width: 4
+    }
+  }
+}
+
+group-webview: WebView {
+  group-editor: Editor {
+    app: App {
+      style: {
+        stroke: "#1d1d1d"
+        stroke-width: 4
+      }
+    }
+    changeresponder: ChangeResponder {
+      shape: cylinder
+      style: {
+        stroke: "#1d1d1d"
+        stroke-width: 4
+      }
+    }
+  }
+
+}
+
+vs_code: VS Code {
+  style: {
+    stroke: "#1d1d1d"
+    stroke-width: 4
+  }
+}
+each_file_on_disk_can_be_shown_in_multip: Each file on disk can be shown in multiple WebView\ninstances when you split the editor pane {
+  style: {
+    stroke: "#1d1d1d"
+    stroke-width: 2
+  }
+}
+fileopen: FileOpen {
+  style: {
+    stroke: "#1d1d1d"
+    stroke-width: 4
+  }
+}
+tldrawwebviewmanager: TldrawWebViewManager {
+  style: {
+    stroke: "#1d1d1d"
+    stroke-width: 4
+  }
+}
+
+vs_code -> group-extension: activate {
+  style: {
+    stroke: "#1d1d1d"
+    stroke-width: 2
+  }
+}
+vs_code -> group-extension.tldraweditorprovider: openCustomDocument {
+  style: {
+    stroke: "#1d1d1d"
+    stroke-width: 2
+  }
+}
+vs_code -> group-extension.tldraweditorprovider: save, undo, redo,... {
+  style: {
+    stroke: "#1d1d1d"
+    stroke-width: 2
+  }
+}
+vs_code -> group-extension.tldraweditorprovider: document {
+  style: {
+    stroke: "#1d1d1d"
+    stroke-width: 2
+  }
+}
+group-extension.webviewmessagehandler -> group-webview: webview.postMessage {
+  style: {
+    stroke: "#1d1d1d"
+    stroke-width: 2
+  }
+}
+each_file_on_disk_can_be_shown_in_multip -> group-webview {
+  style: {
+    stroke: "#1d1d1d"
+    stroke-width: 2
+  }
+}
+group-extension.tldraweditorprovider -> group-extension.tldrawdocument: create {
+  style: {
+    stroke: "#1d1d1d"
+    stroke-width: 2
+  }
+}
+tldrawwebviewmanager -> group-webview: creates {
+  style: {
+    stroke: "#1d1d1d"
+    stroke-width: 2
+  }
+}
+vs_code -> tldrawwebviewmanager: resolveCustomEditor {
+  style: {
+    stroke: "#1d1d1d"
+    stroke-width: 2
+  }
+}

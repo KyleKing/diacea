@@ -1,0 +1,21 @@
+@startuml
+actor "User" as user
+rectangle "API Gateway" as api_gateway
+queue "Message Queue" as message_queue
+rectangle "Services" as services {
+  rectangle "Auth Service" as auth_service
+  rectangle "Order Service" as order_service
+  rectangle "Product Service" as product_service
+  database "Auth DB" as auth_db
+  database "Order DB" as order_db
+  database "Product DB" as product_db
+}
+user --> api_gateway
+api_gateway --> auth_service
+api_gateway --> order_service
+api_gateway --> product_service
+auth_service --> auth_db
+order_service --> order_db
+product_service --> product_db
+order_service ..> message_queue
+@enduml

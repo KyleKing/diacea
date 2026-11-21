@@ -1,0 +1,52 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+
+
+System_Boundary(group_external_data_source, "External Data \nSource") {
+  System_Boundary(group_resource_info, "Resource Info") {
+    Container(container, "[Container]")
+  }
+  Container(replica_manager_data_transfer_location_c, "Replica Manager \nData Transfer \nLocation Catalog", "", "[Containers: Rucio, FTS]\nDataset replica management \nData transfer")
+  Container(compute_resources_orchestrion_service_de, "Compute Resources \n       Orchestrion - \nService deployment   ")
+  Container(container_paas_orchestrator, "[Container:PaaS orchestrator]", "", "Perform the deployment of services on the\n infrastructure ")
+  System_Boundary(group_hpc, "HPC") {
+    Container(service_offloading, "Service Offloading")
+    Container(edge_service_api_2, "Edge Service API")
+  }
+  System_Boundary(group_storage, "Storage") {
+    Component(data_access, "Data Access")
+    Container(edge_service_api, "Edge Service API")
+  }
+  System_Boundary(group_cloud, "CLOUD") {
+    Component(node_1, " ")
+  }
+  Container(aai_auth_authz, "AAI / Auth &amp; Authz\n\n")
+  Container(software_distribution, "Software Distribution")
+}
+
+BiRel(container_paas_orchestrator, group_resource_info, "")
+BiRel(replica_manager_data_transfer_location_c, group_external_data_source, "")
+BiRel(compute_resources_orchestrion_service_de, replica_manager_data_transfer_location_c, "")
+BiRel(replica_manager_data_transfer_location_c, group_storage, "")
+BiRel(data_access, group_storage, "")
+BiRel(group_external_data_source, group_resource_info, "Push info")
+BiRel(service_offloading, group_hpc, "")
+BiRel(container_paas_orchestrator, node_1, "")
+BiRel(edge_service_api, group_external_data_source, "")
+BiRel(edge_service_api_2, group_external_data_source, "")
+BiRel(group_cloud, group_external_data_source, "")
+BiRel(node_1, group_cloud, "")
+BiRel(node_1, edge_service_api_2, "")
+BiRel(replica_manager_data_transfer_location_c, group_external_data_source, "")
+BiRel(group_external_data_source, group_external_data_source, "")
+BiRel(group_external_data_source, group_hpc, "")
+BiRel(group_external_data_source, group_cloud, "")
+BiRel(group_storage, group_storage, "")
+BiRel(service_offloading, group_hpc, "")
+BiRel(node_1, group_cloud, "")
+BiRel(group_cloud, software_distribution, "")
+BiRel(data_access, group_storage, "")
+BiRel(group_external_data_source, group_external_data_source, "")
+@enduml

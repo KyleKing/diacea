@@ -1,0 +1,79 @@
+digraph "SVG Diagram" {
+    rankdir="LR";
+    node [shape="box", fontname="Helvetica"];
+    edge [fontname="Helvetica"];
+
+    subgraph cluster_items {
+        label="items";
+        subgraph cluster_blend {
+            label="blend";
+            subgraph cluster_g_root_cp_1_g_1_qvabl8w095he_stroke {
+                label=" ";
+                subgraph cluster_cp_1_g_1_qvabl8w095he_stroke {
+                    label=" ";
+                    elem_3 [label="elem_3"];
+                }
+            }
+            subgraph cluster_g_root_cp_2_g_2_djtt7ww0972b_stroke {
+                label=" ";
+                subgraph cluster_cp_2_g_2_djtt7ww0972b_stroke {
+                    label=" ";
+                    elem_5 [label="elem_5"];
+                }
+            }
+            subgraph cluster_g_root_cp_3_g_3_4ota24w094p8_stroke {
+                label=" ";
+                subgraph cluster_cp_3_g_3_4ota24w094p8_stroke {
+                    label=" ";
+                    elem_7 [label="elem_7"];
+                }
+            }
+            subgraph cluster_g_root_cp_0_g_0_1qegtnww09631_stroke {
+                label=" ";
+                subgraph cluster_cp_0_g_0_1qegtnww09631_stroke {
+                    label=" ";
+                    elem_9 [label="1"];
+                }
+            }
+            subgraph cluster_g_root_cp_1_line_1_1_1lynbjgw096va_stroke {
+                label=" ";
+                subgraph cluster_cp_1_line_1_1_1lynbjgw096va_stroke {
+                    label=" ";
+                    elem_11 [label="elem_11"];
+                }
+            }
+            subgraph cluster_g_root_cp_1_line_1_2_1d30bakw097nz_stroke {
+                label=" ";
+                subgraph cluster_cp_1_line_1_2_1d30bakw097nz_stroke {
+                    label=" ";
+                    elem_13 [label="elem_13"];
+                }
+            }
+            subgraph cluster_g_root_cp_2_line_2_1_18nta98w095ag_stroke {
+                label=" ";
+                subgraph cluster_cp_2_line_2_1_18nta98w095ag_stroke {
+                    label=" ";
+                    elem_15 [label="elem_15"];
+                }
+            }
+            subgraph cluster_g_root_cp_2_line_2_2_147zs4sw0962p_stroke {
+                label=" ";
+                subgraph cluster_cp_2_line_2_2_147zs4sw0962p_stroke {
+                    label=" ";
+                    elem_17 [label="elem_17"];
+                }
+            }
+            subgraph cluster_g_root_cp_3_line_3_1_dbpn3gw0akn7_stroke {
+                label=" ";
+                subgraph cluster_cp_3_line_3_1_dbpn3gw0akn7_stroke {
+                    label=" ";
+                    elem_19 [label="elem_19"];
+                }
+            }
+        }
+    }
+
+    elem_1 [label="OpenClaw Gateway to LLM Upstream", fillcolor="#2c2c2c", style="filled"];
+    w1ly1ab0wabjsz [label="w1ly1ab0wabjsz", fillcolor="#acacac88", style="filled"];
+
+}

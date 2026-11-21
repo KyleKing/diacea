@@ -1,0 +1,259 @@
+direction: right
+
+external_users: external_users {
+  mobile_user: Mobile {
+    shape: person
+    style: {
+      fill: "#87CEEB"
+      stroke: "black"
+      stroke-width: 2
+    }
+  }
+  web_user: Web {
+    shape: person
+    style: {
+      fill: "#87CEEB"
+      stroke: "black"
+      stroke-width: 2
+    }
+  }
+  admin: Admin {
+    shape: person
+    style: {
+      fill: "#FFB6C1"
+      stroke: "black"
+      stroke-width: 2
+    }
+  }
+}
+
+aws_cloud: AWS Cloud {
+  cdn: CDN {
+    shape: diamond
+    style: {
+      fill: "#FFA500"
+      stroke: "black"
+      stroke-width: 2
+    }
+  }
+  load_balancer: Load Balancer {
+    style: {
+      fill: "#90EE90"
+      stroke: "black"
+      stroke-width: 2
+    }
+  }
+  app_layer: "Application Tier (EKS)" {
+    api_service_1: API-1 {
+      style: {
+        fill: "#B0C4DE"
+        stroke: "black"
+        stroke-width: 1
+      }
+    }
+    api_service_2: API-2 {
+      style: {
+        fill: "#B0C4DE"
+        stroke: "black"
+        stroke-width: 1
+      }
+    }
+    api_service_3: API-3 {
+      style: {
+        fill: "#B0C4DE"
+        stroke: "black"
+        stroke-width: 1
+      }
+    }
+    worker_service: Worker {
+      style: {
+        fill: "#DDA0DD"
+        stroke: "black"
+        stroke-width: 1
+      }
+    }
+    scheduler: Scheduler {
+      style: {
+        fill: "#DDA0DD"
+        stroke: "black"
+        stroke-width: 1
+      }
+    }
+  }
+
+  data_layer: Data Tier {
+    primary_db: Primary DB {
+      shape: cylinder
+      style: {
+        fill: "#FFE4B5"
+        stroke: "black"
+        stroke-width: 2
+      }
+    }
+    read_replica: Read Replica {
+      shape: cylinder
+      style: {
+        fill: "#FFE4B5"
+        stroke: "black"
+        stroke-width: 2
+        stroke-dash: 3
+      }
+    }
+    cache: Redis Cache {
+      shape: cylinder
+      style: {
+        fill: "#FF6347"
+        stroke: "black"
+        stroke-width: 2
+      }
+    }
+    s3_storage: S3 Storage {
+      shape: cylinder
+      style: {
+        fill: "#98FB98"
+        stroke: "black"
+        stroke-width: 2
+      }
+    }
+    message_queue: SQS Queue {
+      shape: queue
+      style: {
+        fill: "#FFD700"
+        stroke: "black"
+        stroke-width: 2
+      }
+    }
+  }
+
+}
+
+gcp_cloud: GCP Cloud {
+  ml_service: ML Prediction {
+    style: {
+      fill: "#E6E6FA"
+      stroke: "black"
+      stroke-width: 2
+    }
+  }
+  analytics_db: Analytics DB {
+    shape: cylinder
+    style: {
+      fill: "#F0E68C"
+      stroke: "black"
+      stroke-width: 2
+    }
+  }
+}
+
+external_services: " " {
+  payment_gateway: Payment {
+    style: {
+      fill: "#FFFACD"
+      stroke: "black"
+      stroke-width: 2
+    }
+  }
+  email_service: Email {
+    style: {
+      fill: "#FFFACD"
+      stroke: "black"
+      stroke-width: 2
+    }
+  }
+  monitoring: Monitoring {
+    style: {
+      fill: "#FFFACD"
+      stroke: "black"
+      stroke-width: 2
+    }
+  }
+}
+
+
+external_users.mobile_user -> aws_cloud.cdn {
+  style: {
+    stroke: "black"
+    stroke-width: 2
+  }
+}
+external_users.admin -> aws_cloud.load_balancer {
+  style: {
+    stroke: "black"
+    stroke-width: 2
+  }
+}
+aws_cloud.cdn -> aws_cloud.load_balancer {
+  style: {
+    stroke: "blue"
+    stroke-width: 2
+  }
+}
+aws_cloud.load_balancer -> aws_cloud.app_layer.api_service_1 {
+  style: {
+    stroke: "green"
+    stroke-width: 2
+  }
+}
+aws_cloud.load_balancer -> aws_cloud.app_layer.api_service_2 {
+  style: {
+    stroke: "green"
+    stroke-width: 2
+  }
+}
+aws_cloud.load_balancer -> aws_cloud.app_layer.api_service_3 {
+  style: {
+    stroke: "green"
+    stroke-width: 2
+  }
+}
+aws_cloud.app_layer.worker_service -> aws_cloud.data_layer.primary_db {
+  style: {
+    stroke: "purple"
+    stroke-width: 2
+  }
+}
+aws_cloud.app_layer.scheduler -> aws_cloud.data_layer.primary_db {
+  style: {
+    stroke: "purple"
+    stroke-width: 2
+  }
+}
+aws_cloud.app_layer.api_service_3 -> aws_cloud.data_layer.primary_db {
+  style: {
+    stroke: "purple"
+    stroke-width: 2
+  }
+}
+aws_cloud.data_layer.primary_db -> aws_cloud.data_layer.read_replica {
+  style: {
+    stroke: "red"
+    stroke-width: 2
+    stroke-dash: 3
+  }
+}
+aws_cloud.app_layer.worker_service -> aws_cloud.data_layer.cache {
+  style: {
+    stroke: "orange"
+    stroke-width: 2
+  }
+}
+aws_cloud.app_layer.worker_service -> aws_cloud.data_layer.message_queue {
+  style: {
+    stroke: "green"
+    stroke-width: 2
+    stroke-dash: 3
+  }
+}
+aws_cloud.app_layer.api_service_3 -> gcp_cloud.ml_service {
+  style: {
+    stroke: "brown"
+    stroke-width: 2
+  }
+}
+aws_cloud.data_layer.read_replica -> gcp_cloud.analytics_db {
+  style: {
+    stroke: "teal"
+    stroke-width: 2
+    stroke-dash: 3
+  }
+}

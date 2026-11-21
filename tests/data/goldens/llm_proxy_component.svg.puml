@@ -1,0 +1,53 @@
+@startuml
+rectangle "OpenClaw Gateway to LLM Upstream" as elem_1
+rectangle "w1ly1ab0wabjsz" as w1ly1ab0wabjsz
+rectangle "items" as items {
+  rectangle "blend" as blend {
+    rectangle " " as g_root_cp_1_g_1_qvabl8w095he_stroke {
+      rectangle " " as cp_1_g_1_qvabl8w095he_stroke {
+        rectangle "elem_3" as elem_3
+      }
+    }
+    rectangle " " as g_root_cp_2_g_2_djtt7ww0972b_stroke {
+      rectangle " " as cp_2_g_2_djtt7ww0972b_stroke {
+        rectangle "elem_5" as elem_5
+      }
+    }
+    rectangle " " as g_root_cp_3_g_3_4ota24w094p8_stroke {
+      rectangle " " as cp_3_g_3_4ota24w094p8_stroke {
+        rectangle "elem_7" as elem_7
+      }
+    }
+    rectangle " " as g_root_cp_0_g_0_1qegtnww09631_stroke {
+      rectangle " " as cp_0_g_0_1qegtnww09631_stroke {
+        rectangle "1" as elem_9
+      }
+    }
+    rectangle " " as g_root_cp_1_line_1_1_1lynbjgw096va_stroke {
+      rectangle " " as cp_1_line_1_1_1lynbjgw096va_stroke {
+        rectangle "elem_11" as elem_11
+      }
+    }
+    rectangle " " as g_root_cp_1_line_1_2_1d30bakw097nz_stroke {
+      rectangle " " as cp_1_line_1_2_1d30bakw097nz_stroke {
+        rectangle "elem_13" as elem_13
+      }
+    }
+    rectangle " " as g_root_cp_2_line_2_1_18nta98w095ag_stroke {
+      rectangle " " as cp_2_line_2_1_18nta98w095ag_stroke {
+        rectangle "elem_15" as elem_15
+      }
+    }
+    rectangle " " as g_root_cp_2_line_2_2_147zs4sw0962p_stroke {
+      rectangle " " as cp_2_line_2_2_147zs4sw0962p_stroke {
+        rectangle "elem_17" as elem_17
+      }
+    }
+    rectangle " " as g_root_cp_3_line_3_1_dbpn3gw0akn7_stroke {
+      rectangle " " as cp_3_line_3_1_dbpn3gw0akn7_stroke {
+        rectangle "elem_19" as elem_19
+      }
+    }
+  }
+}
+@enduml

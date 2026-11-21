@@ -1,0 +1,17 @@
+digraph "Basic usage - Stream processing with Azure Stream Analytics" {
+    rankdir="LR";
+    node [shape="box", fontname="Helvetica"];
+    edge [fontname="Helvetica"];
+
+    devices [label="Device Simulator"];
+    fareDataEventHub [label="Fare Data"];
+    tripDataEventHub [label="Trip Data"];
+    streamAnalytics [label="Stream Processing"];
+    outputCosmosDb [label="Output Database"];
+
+    devices -> fareDataEventHub;
+    devices -> tripDataEventHub;
+    fareDataEventHub -> streamAnalytics;
+    tripDataEventHub -> streamAnalytics;
+    streamAnalytics -> outputCosmosDb;
+}

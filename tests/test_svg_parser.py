@@ -5,8 +5,8 @@ from pathlib import Path
 import pytest
 from defusedxml import EntitiesForbidden
 
-from diacea.cli import detect_input_format
-from diacea.ir import Connection, Group, Shape, Text
+from diacea.formats import convert, parse_diagram
+from diacea.ir import Connection, Dimensions, Group, Point, Shape, Text
 from diacea.ir.semantic import SemanticType
 from diacea.parsers import SVGParser
 
@@ -513,160 +513,118 @@ class TestSVGSecurity:
             parser.parse(svg)
 
 
-class TestSVGCLI:
-    """Test SVG CLI integration."""
-
-    def test_auto_detect_svg_xml(self):
-        """Test auto-detection of SVG with XML header."""
-        svg_content = '<?xml version="1.0"?><svg></svg>'
-        format_type = detect_input_format(svg_content)
-        assert format_type == 'svg'
-
-    def test_auto_detect_svg_no_header(self):
-        """Test auto-detection of SVG without XML header."""
-        svg_content = '<svg xmlns="http://www.w3.org/2000/svg"></svg>'
-        format_type = detect_input_format(svg_content)
-        assert format_type == 'svg'
-
-    def test_auto_detect_svg_with_whitespace(self):
-        """Test auto-detection with leading whitespace."""
-        svg_content = '  \n  <?xml version="1.0"?><svg></svg>'
-        format_type = detect_input_format(svg_content)
-        assert format_type == 'svg'
+_HINTED_SVG = (
+    '<svg xmlns="http://www.w3.org/2000/svg"><rect id="svc1" x="10" y="10" width="100" height="50" '
+    'data-semantic="service" data-label="API"/><ellipse id="db1" cx="200" cy="35" rx="60" ry="30" '
+    'data-semantic="database" data-label="PostgreSQL"/><rect id="comp1" x="0" y="100" width="100" height="50" '
+    'data-label="Component A"/></svg>'
+)
 
 
-class TestSVGTestData:
-    """Test with actual SVG test data files."""
-
-    def test_simple_shapes_svg(self):
-        """Test parsing simple shapes SVG file."""
-        svg_path = Path(__file__).parent / 'data' / 'svg' / 'simple_shapes.svg'
-        if not svg_path.exists():
-            pytest.skip('Test data file not found')
-
-        svg_content = Path(svg_path).read_text(encoding='utf-8')
-
-        parser = SVGParser()
-        diagram = parser.parse(svg_content)
-
-        shapes = [e for e in diagram.elements if isinstance(e, Shape)]
-        # Should have rect, circle, ellipse, polygon, rect (5 shapes)
-        assert len(shapes) >= 4
-
-        # Check some shapes have labels
-        labeled = [s for s in shapes if s.label]
-        assert len(labeled) >= 3
-
-    def test_architecture_diagram_svg(self):
-        """Test parsing architecture diagram with semantic hints."""
-        svg_path = Path(__file__).parent / 'data' / 'svg' / 'architecture_diagram.svg'
-        if not svg_path.exists():
-            pytest.skip('Test data file not found')
-
-        svg_content = Path(svg_path).read_text(encoding='utf-8')
-
-        parser = SVGParser()
-        diagram = parser.parse(svg_content)
-
-        shapes = [e for e in diagram.elements if isinstance(e, Shape)]
-        # Should have several shapes with semantic types
-        assert len(shapes) >= 6
-
-        # Check semantic types are parsed
-        databases = [s for s in shapes if s.semantic_type == SemanticType.DATABASE.value]
-        persons = [s for s in shapes if s.semantic_type == SemanticType.PERSON.value]
-        services = [s for s in shapes if s.semantic_type == SemanticType.SERVICE.value]
-
-        assert len(databases) >= 1
-        assert len(persons) >= 1
-        assert len(services) >= 1
-
-    def test_grouped_diagram_svg(self):
-        """Test parsing grouped diagram."""
-        svg_path = Path(__file__).parent / 'data' / 'svg' / 'grouped_diagram.svg'
-        if not svg_path.exists():
-            pytest.skip('Test data file not found')
-
-        svg_content = Path(svg_path).read_text(encoding='utf-8')
-
-        parser = SVGParser()
-        diagram = parser.parse(svg_content)
-
-        groups = [e for e in diagram.elements if isinstance(e, Group)]
-        # Should have at least 2 groups (system_boundary and data_layer)
-        assert len(groups) >= 2
-
-        # Check groups have children
-        for group in groups:
-            assert len(group.children) > 0
+@pytest.mark.parametrize(
+    ('output_format', 'expected'),
+    [
+        (
+            'plantuml',
+            (
+                '@startuml\nrectangle "API" as svc1\ndatabase "PostgreSQL" as db1\n'
+                'rectangle "Component A" as comp1\n@enduml'
+            ),
+        ),
+        (
+            'mermaid',
+            (
+                'C4Context\n    title SVG Diagram\n    System(svc1, "API")\n    SystemDb(db1, "PostgreSQL")\n'
+                '    Component(comp1, "Component A")'
+            ),
+        ),
+        ('d2', 'direction: right\n\nsvc1: API\ndb1: PostgreSQL {\n  shape: cylinder\n}\ncomp1: Component A'),
+    ],
+)
+def test_svg_hints_and_labels_convert(output_format, expected):
+    assert convert(_HINTED_SVG, output_format).output == expected
 
 
-class TestSVGEndToEnd:
-    """Test end-to-end SVG to output format conversion."""
+def _layout(body):
+    diagram = parse_diagram(f'<svg xmlns="http://www.w3.org/2000/svg">{body}</svg>', 'svg').diagram
+    return [
+        (
+            type(element).__name__,
+            element.id,
+            element.label if isinstance(element, (Shape, Group)) else getattr(element, 'content', None),
+            (element.position.x, element.position.y, element.size.width, element.size.height),
+            {key: value for key, value in element.metadata.items() if key != 'svg'},
+        )
+        for element in diagram.elements
+        if not isinstance(element, Connection)
+    ], [(conn.from_id, conn.to_id, conn.position, conn.size) for conn in diagram.get_connections()]
 
-    def test_svg_to_plantuml(self):
-        """Test SVG → IR → PlantUML."""
-        svg = """
-        <svg xmlns="http://www.w3.org/2000/svg">
-            <rect id="svc1" x="10" y="10" width="100" height="50"
-                  data-semantic="service" data-label="API"/>
-            <ellipse id="db1" cx="200" cy="35" rx="60" ry="30"
-                     data-semantic="database" data-label="PostgreSQL"/>
-        </svg>
-        """
 
-        from diacea.generators import PlantUMLGenerator
-
-        parser = SVGParser()
-        diagram = parser.parse(svg)
-
-        generator = PlantUMLGenerator()
-        output = generator.generate(diagram)
-
-        assert output.startswith('@startuml')
-        assert output.endswith('@enduml')
-        assert 'API' in output or 'svc1' in output
-        assert 'PostgreSQL' in output or 'db1' in output
-
-    def test_svg_to_mermaid(self):
-        """Test SVG → IR → Mermaid."""
-        svg = """
-        <svg xmlns="http://www.w3.org/2000/svg">
-            <rect id="comp1" x="0" y="0" width="100" height="50"
-                  data-label="Component A"/>
-            <rect id="comp2" x="150" y="0" width="100" height="50"
-                  data-label="Component B"/>
-        </svg>
-        """
-
-        from diacea.generators import MermaidGenerator
-
-        parser = SVGParser()
-        diagram = parser.parse(svg)
-
-        generator = MermaidGenerator()
-        output = generator.generate(diagram)
-
-        # Can be flowchart, graph, or C4Context
-        assert 'flowchart' in output or 'graph' in output or 'C4Context' in output
-        assert len(output.split('\n')) > 2
-
-    def test_svg_to_d2(self):
-        """Test SVG → IR → D2."""
-        svg = """
-        <svg xmlns="http://www.w3.org/2000/svg">
-            <rect id="svc" x="10" y="10" width="120" height="60"
-                  data-semantic="service" data-label="Web Service"/>
-        </svg>
-        """
-
-        from diacea.generators import D2Generator
-
-        parser = SVGParser()
-        diagram = parser.parse(svg)
-
-        generator = D2Generator()
-        output = generator.generate(diagram)
-
-        assert len(output) > 0
-        assert ':' in output  # D2 syntax
+@pytest.mark.parametrize(
+    ('body', 'elements', 'connections'),
+    [
+        pytest.param(
+            '<g id="grp"><rect x="0" y="0" width="300" height="200"/><rect x="50" y="0" width="100" height="200"/>'
+            '<rect x="200" y="50" width="50" height="50"/></g>',
+            [
+                ('Group', 'grp', '', (0.0, 0.0, 300.0, 200.0), {}),
+                ('Shape', 'elem_2', '', (50.0, 0.0, 100.0, 200.0), {}),
+                ('Shape', 'elem_3', '', (200.0, 50.0, 50.0, 50.0), {}),
+            ],
+            [],
+            id='border-may-touch-a-member-top-and-bottom',
+        ),
+        pytest.param(
+            '<ellipse cx="100" rx="40" ry="20"/><ellipse cx="300" cy="50" rx="40"/>',
+            [('Shape', 'elem_1', '', (60.0, -20.0, 80.0, 40.0), {})],
+            [],
+            id='ellipse-without-cy-sits-on-zero-and-without-ry-is-dropped',
+        ),
+        pytest.param(
+            '<rect x="0" y="0" width="200" height="100"/><text x="50" y="50">Solo</text>',
+            [
+                ('Shape', 'elem_1', 'Solo', (0.0, 0.0, 200.0, 100.0), {}),
+                ('Text', 'elem_2', 'Solo', (50.0, 50.0, 33.6, 16.8), {'label_of': 'elem_1'}),
+            ],
+            [],
+            id='single-text-is-the-label-with-no-description',
+        ),
+        pytest.param(
+            '<rect x="0" y="0" width="200" height="100"/><text x="20" y="30" font-size="12px">small</text>'
+            '<text x="20" y="70" font-size="30px">Big</text>',
+            [
+                ('Shape', 'elem_1', 'Big', (0.0, 0.0, 200.0, 100.0), {'description': 'small'}),
+                ('Text', 'elem_2', 'small', (20.0, 30.0, 36.0, 14.399999999999999), {'label_of': 'elem_1'}),
+                ('Text', 'elem_3', 'Big', (20.0, 70.0, 54.0, 36.0), {'label_of': 'elem_1'}),
+            ],
+            [],
+            id='largest-font-with-units-is-the-label',
+        ),
+        pytest.param(
+            '<rect id="a" x="-20" y="-20" width="40" height="40"/><rect id="b" x="180" y="-20" width="40" height="40"/>'
+            '<rect id="c" x="180" y="180" width="40" height="40"/><line x2="200" y2="0"/>'
+            '<polyline points="200,0 200,200"/><rect id="d" x="-20" y="180" width="40" height="40"/>'
+            '<line x1="200" y1="200" y2="200"/>',
+            [
+                ('Shape', 'a', '', (-20.0, -20.0, 40.0, 40.0), {}),
+                ('Shape', 'b', '', (180.0, -20.0, 40.0, 40.0), {}),
+                ('Shape', 'c', '', (180.0, 180.0, 40.0, 40.0), {}),
+                ('Shape', 'd', '', (-20.0, 180.0, 40.0, 40.0), {}),
+            ],
+            [
+                ('a', 'b', Point(100.0, 0.0), Dimensions(200.0, 0.0)),
+                ('b', 'c', Point(200.0, 100.0), Dimensions(0.0, 200.0)),
+                ('c', 'd', Point(100.0, 200.0), Dimensions(200.0, 0.0)),
+            ],
+            id='line-coordinates-default-to-zero-and-a-two-point-polyline-connects',
+        ),
+        pytest.param(
+            '<rect id="r" x="0" y="0" width="100" height="50" transform="rotate(90 50 25)"/>',
+            [('Shape', 'r', '', (0.0, 0.0, 100.0, 50.0), {})],
+            [],
+            id='rotation-about-a-center-parses',
+        ),
+    ],
+)
+def test_svg_parses_to(body, elements, connections):
+    assert _layout(body) == (elements, connections)

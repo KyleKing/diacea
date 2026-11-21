@@ -1,4 +1,4 @@
-"""Conversion, render, and golden checks over the curated fixtures in tests/data/curated.
+"""Render and golden checks over the curated fixtures in tests/data/curated.
 
 Each fixture pins one behavior (see tests/data/curated/README.md). Render checks
 shell out to mmdc/plantuml/dot/d2 and only run when DIACEA_RENDER=1. Goldens
@@ -61,13 +61,6 @@ def _matrix_params(*, with_render_marks: bool = False):
     return params
 
 
-@pytest.mark.parametrize(('fixture_path', 'output_format'), _matrix_params())
-def test_curated_conversion(fixture_path, output_format):
-    output = _convert(fixture_path, output_format)
-
-    assert output.strip()
-
-
 def _render_command(renderer, source, out_dir):
     match renderer:
         case 'mmdc':
@@ -111,7 +104,5 @@ def test_curated_golden(fixture_path, output_format):
         golden_path.parent.mkdir(parents=True, exist_ok=True)
         golden_path.write_text(output, encoding='utf-8')
         return
-    if not golden_path.exists():
-        pytest.skip('golden not generated yet')
 
     assert output == golden_path.read_text(encoding='utf-8')

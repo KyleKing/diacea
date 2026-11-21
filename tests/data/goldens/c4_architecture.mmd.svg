@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="519" height="411" viewBox="-24.0 -24.0 519.0 411.0">
+<style>text{font-family:Helvetica,Arial,sans-serif;font-size:14px;fill:#1e1e1e}.group-label{font-size:12px;fill:#868e96}.edge-label{font-size:12px;paint-order:stroke;stroke:#ffffff;stroke-width:4px}</style>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1e1e1e"/></marker></defs>
+<rect x="-24.0" y="-24.0" width="519.0" height="411.0" fill="#ffffff"/>
+<g id="customer" data-semantic="person"><ellipse cx="119.0" cy="30.5" rx="64.0" ry="30.5" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="119.0" y="35.2" text-anchor="middle">Customer</text></g>
+<g id="admin" data-semantic="person"><ellipse cx="324.5" cy="30.5" rx="91.5" ry="30.5" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="324.5" y="35.2" text-anchor="middle">Administrator</text></g>
+<g id="ecommerce" data-semantic="system"><rect x="122.0" y="151.0" width="227.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="235.5" y="186.2" text-anchor="middle">E-Commerce System</text></g>
+<g id="payment" data-semantic="system"><rect x="0.0" y="302.0" width="205.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="102.5" y="337.2" text-anchor="middle">Payment Gateway</text></g>
+<g id="shipping" data-semantic="system"><rect x="255.0" y="302.0" width="216.0" height="61.0" rx="2.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="363.0" y="337.2" text-anchor="middle">Shipping Service</text></g>
+<polyline points="142.5,61.0 212.0,151.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/><text class="edge-label" x="177.2" y="106.0" text-anchor="middle">Browses products, places orders</text>
+<polyline points="306.5,61.0 253.5,151.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/><text class="edge-label" x="280.0" y="106.0" text-anchor="middle">Manages products, views analytics</text>
+<polyline points="208.6,212.0 129.4,302.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/><text class="edge-label" x="169.0" y="257.0" text-anchor="middle">Processes payments via</text>
+<polyline points="261.3,212.0 337.2,302.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/><text class="edge-label" x="299.2" y="257.0" text-anchor="middle">Tracks shipments via</text>
+</svg>

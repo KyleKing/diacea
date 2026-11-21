@@ -1,0 +1,59 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+
+Container(elem_1, "OpenClaw Gateway to LLM Upstream", "", "iclaw-openclaw-proxy\nLLM upstream\nOpenClaw Gateway\nstrip incoming auth headers\ninject real LLM_API_KEY from memory\n(OpenAI / Anthropic / Google / DeepSeek / Ollama / …)\nPOST /v1/chat/completions\nOpenClaw never sees the real API key")
+Container(w1ly1ab0wabjsz, "w1ly1ab0wabjsz")
+
+System_Boundary(items, "items") {
+  System_Boundary(blend, "blend") {
+    System_Boundary(g_root_cp_1_g_1_qvabl8w095he_stroke, " ") {
+      System_Boundary(cp_1_g_1_qvabl8w095he_stroke, " ") {
+        Container(elem_3, "elem_3")
+      }
+    }
+    System_Boundary(g_root_cp_2_g_2_djtt7ww0972b_stroke, " ") {
+      System_Boundary(cp_2_g_2_djtt7ww0972b_stroke, " ") {
+        Container(elem_5, "elem_5")
+      }
+    }
+    System_Boundary(g_root_cp_3_g_3_4ota24w094p8_stroke, " ") {
+      System_Boundary(cp_3_g_3_4ota24w094p8_stroke, " ") {
+        Container(elem_7, "elem_7")
+      }
+    }
+    System_Boundary(g_root_cp_0_g_0_1qegtnww09631_stroke, " ") {
+      System_Boundary(cp_0_g_0_1qegtnww09631_stroke, " ") {
+        Container(elem_9, "1", "", "2\n3")
+      }
+    }
+    System_Boundary(g_root_cp_1_line_1_1_1lynbjgw096va_stroke, " ") {
+      System_Boundary(cp_1_line_1_1_1lynbjgw096va_stroke, " ") {
+        Container(elem_11, "elem_11")
+      }
+    }
+    System_Boundary(g_root_cp_1_line_1_2_1d30bakw097nz_stroke, " ") {
+      System_Boundary(cp_1_line_1_2_1d30bakw097nz_stroke, " ") {
+        Container(elem_13, "elem_13")
+      }
+    }
+    System_Boundary(g_root_cp_2_line_2_1_18nta98w095ag_stroke, " ") {
+      System_Boundary(cp_2_line_2_1_18nta98w095ag_stroke, " ") {
+        Container(elem_15, "elem_15")
+      }
+    }
+    System_Boundary(g_root_cp_2_line_2_2_147zs4sw0962p_stroke, " ") {
+      System_Boundary(cp_2_line_2_2_147zs4sw0962p_stroke, " ") {
+        Container(elem_17, "elem_17")
+      }
+    }
+    System_Boundary(g_root_cp_3_line_3_1_dbpn3gw0akn7_stroke, " ") {
+      System_Boundary(cp_3_line_3_1_dbpn3gw0akn7_stroke, " ") {
+        Container(elem_19, "elem_19")
+      }
+    }
+  }
+}
+
+@enduml

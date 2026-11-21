@@ -1,482 +1,139 @@
-"""Round-trip limitation tests.
+"""What one-way conversion keeps and what it drops.
 
-These tests document and track what information is preserved vs lost
-when parsing source formats to IR and generating output formats.
-
-Round-trip conversion is NOT supported (e.g., Excalidraw -> Mermaid -> Excalidraw).
-These tests document the one-way conversion limitations.
+Parsers keep geometry, labels, fill, and connections; text generators keep
+structure, labels, styles, and semantics but leave positions to the target
+format's layout engine.
 """
 
-from diacea.generators import (
-    D2Generator,
-    GraphVizGenerator,
-    MermaidGenerator,
-    PlantUMLGenerator,
-)
-from diacea.ir.elements import Dimensions
+import pytest
+
+from diacea.formats import render_diagram
+from diacea.ir import Connection, Diagram, Dimensions, Point, Shape
+from diacea.ir.elements import Style
 from diacea.parsers import ExcalidrawParser, SVGParser, TLDrawParser
 
 
-class TestExcalidrawToIRPreservation:
-    """Test what Excalidraw properties are preserved in IR."""
-
-    def test_shape_positions_preserved(self):
-        data = {
-            'elements': [
-                {
-                    'id': 'a',
-                    'type': 'rectangle',
-                    'x': 100.0,
-                    'y': 200.0,
-                    'width': 150.0,
-                    'height': 80.0,
-                }
-            ]
-        }
-        parser = ExcalidrawParser()
-        diagram = parser.parse(data)
-
-        shapes = diagram.get_shapes()
-        assert len(shapes) == 1
-        assert shapes[0].position.x == 100.0
-        assert shapes[0].position.y == 200.0
-        assert shapes[0].size.width == 150.0
-        assert shapes[0].size.height == 80.0
-
-    def test_text_labels_associated_with_shapes(self):
-        data = {
-            'elements': [
-                {
-                    'id': 'rect1',
-                    'type': 'rectangle',
-                    'x': 0.0,
-                    'y': 0.0,
-                    'width': 100.0,
-                    'height': 50.0,
-                },
-                {
-                    'id': 'text1',
-                    'type': 'text',
-                    'x': 10.0,
-                    'y': 15.0,
-                    'width': 80.0,
-                    'height': 20.0,
-                    'text': 'My Label',
-                },
-            ]
-        }
-        parser = ExcalidrawParser()
-        diagram = parser.parse(data)
-
-        shapes = diagram.get_shapes()
-        labeled_shapes = [s for s in shapes if s.label]
-        assert any(s.label == 'My Label' for s in labeled_shapes)
-
-    def test_arrow_connections_preserved(self):
-        data = {
-            'elements': [
-                {'id': 'a', 'type': 'rectangle', 'x': 0.0, 'y': 0.0, 'width': 100.0, 'height': 50.0},
-                {'id': 'b', 'type': 'rectangle', 'x': 200.0, 'y': 0.0, 'width': 100.0, 'height': 50.0},
-                {
-                    'id': 'arr',
-                    'type': 'arrow',
-                    'x': 100.0,
-                    'y': 25.0,
-                    'points': [[0.0, 0.0], [100.0, 0.0]],
-                    'startBinding': {'elementId': 'a'},
-                    'endBinding': {'elementId': 'b'},
-                },
-            ]
-        }
-        parser = ExcalidrawParser()
-        diagram = parser.parse(data)
-
-        connections = diagram.get_connections()
-        assert len(connections) == 1
-        assert connections[0].from_id == 'a'
-        assert connections[0].to_id == 'b'
-
-    def test_roughness_not_preserved(self):
-        """Excalidraw roughness (hand-drawn style) is not preserved in IR."""
-        data = {
-            'elements': [
-                {
-                    'id': 'a',
-                    'type': 'rectangle',
-                    'x': 0.0,
-                    'y': 0.0,
-                    'width': 100.0,
-                    'height': 50.0,
-                    'roughness': 2,
-                }
-            ]
-        }
-        parser = ExcalidrawParser()
-        diagram = parser.parse(data)
-
-        shapes = diagram.get_shapes()
-        assert shapes[0].style.stroke_style in {'solid', 'dashed', None}
-
-    def test_seed_not_preserved(self):
-        """Excalidraw seed (randomization) is not preserved in IR."""
-        data = {
-            'elements': [
-                {
-                    'id': 'a',
-                    'type': 'rectangle',
-                    'x': 0.0,
-                    'y': 0.0,
-                    'width': 100.0,
-                    'height': 50.0,
-                    'seed': 12345,
-                }
-            ]
-        }
-        parser = ExcalidrawParser()
-        diagram = parser.parse(data)
-
-        shapes = diagram.get_shapes()
-        assert 'seed' not in shapes[0].metadata
-
-
-class TestTLDrawToIRPreservation:
-    """Test what TLDraw properties are preserved in IR."""
-
-    def test_shape_positions_preserved(self):
-        data = {
-            'document': {
-                'pages': {
-                    'page1': {
-                        'id': 'page1',
-                        'shapes': {
-                            'shape1': {
-                                'type': 'rectangle',
-                                'point': [50.0, 100.0],
-                                'size': [120.0, 60.0],
-                            }
-                        },
-                        'bindings': {},
-                    }
-                }
-            }
-        }
-        parser = TLDrawParser()
-        diagram = parser.parse(data)
-
-        shapes = diagram.get_shapes()
-        assert len(shapes) == 1
-        assert shapes[0].position.x == 50.0
-        assert shapes[0].position.y == 100.0
-        assert shapes[0].size.width == 120.0
-        assert shapes[0].size.height == 60.0
-
-    def test_only_first_page_by_default(self):
-        """TLDraw parser processes only first page by default."""
-        data = {
-            'document': {
-                'pages': {
-                    'page1': {
-                        'id': 'page1',
-                        'shapes': {'shape1': {'type': 'rectangle', 'point': [0.0, 0.0], 'size': [100.0, 50.0]}},
-                        'bindings': {},
-                    },
-                    'page2': {
-                        'id': 'page2',
-                        'shapes': {'shape2': {'type': 'ellipse', 'point': [0.0, 0.0], 'size': [100.0, 50.0]}},
-                        'bindings': {},
-                    },
-                }
-            }
-        }
-        parser = TLDrawParser()
-        diagram = parser.parse(data)
-
-        shapes = diagram.get_shapes()
-        assert len(shapes) == 1
-
-    def test_all_pages_when_page_index_none(self):
-        """TLDraw parser can process all pages."""
-        data = {
-            'document': {
-                'pages': {
-                    'page1': {
-                        'id': 'page1',
-                        'shapes': {'shape1': {'type': 'rectangle', 'point': [0.0, 0.0], 'size': [100.0, 50.0]}},
-                        'bindings': {},
-                    },
-                    'page2': {
-                        'id': 'page2',
-                        'shapes': {'shape2': {'type': 'ellipse', 'point': [0.0, 0.0], 'size': [100.0, 50.0]}},
-                        'bindings': {},
-                    },
-                }
-            }
-        }
-        parser = TLDrawParser(page_index=None)
-        diagram = parser.parse(data)
-
-        shapes = diagram.get_shapes()
-        assert len(shapes) == 2
-
-
-class TestSVGToIRPreservation:
-    """Test what SVG properties are preserved in IR."""
-
-    def test_rect_dimensions_preserved(self):
-        svg = """<svg xmlns="http://www.w3.org/2000/svg">
-            <rect x="10" y="20" width="100" height="50" fill="blue"/>
-        </svg>"""
-        parser = SVGParser()
-        diagram = parser.parse(svg)
-
-        shapes = diagram.get_shapes()
-        assert len(shapes) == 1
-        assert shapes[0].position.x == 10.0
-        assert shapes[0].position.y == 20.0
-        assert shapes[0].size.width == 100.0
-        assert shapes[0].size.height == 50.0
-
-    def test_fill_color_preserved(self):
-        svg = """<svg xmlns="http://www.w3.org/2000/svg">
-            <rect x="0" y="0" width="100" height="50" fill="#ff0000"/>
-        </svg>"""
-        parser = SVGParser()
-        diagram = parser.parse(svg)
-
-        shapes = diagram.get_shapes()
-        assert shapes[0].style.fill_color == '#ff0000'
-
-    def test_complex_paths_converted_to_bounding_box(self):
-        """Complex SVG paths are converted to bounding box rectangles."""
-        svg = """<svg xmlns="http://www.w3.org/2000/svg">
-            <path d="M 10 10 L 100 10 L 100 50 L 10 50 Z" fill="green"/>
-        </svg>"""
-        parser = SVGParser()
-        diagram = parser.parse(svg)
-
-        shapes = diagram.get_shapes()
-        assert len(shapes) == 1
-        assert shapes[0].size.width > 0
-        assert shapes[0].size.height > 0
-
-
-class TestIRToOutputLimitations:
-    """Test what IR properties are lost in output formats."""
-
-    def _make_diagram_with_styled_shape(self):
-        from diacea.ir import Diagram
-        from diacea.ir.elements import Point, Shape, Style
-
-        shape = Shape(
-            id='styled',
-            label='Styled Shape',
+def _styled_diagram():
+    def shape(shape_id, label, x, semantic=None, style=None):
+        result = Shape(
+            id=shape_id,
+            label=label,
             shape_type='rectangle',
-            position=Point(x=100.0, y=200.0),
-            size=Dimensions(width=150.0, height=80.0),
-            style=Style(
-                fill_color='#ff0000',
-                stroke_color='#0000ff',
-                stroke_width=3.0,
-                stroke_style='dashed',
+            position=Point(x, 200.0),
+            size=Dimensions(150.0, 80.0),
+            style=style or Style(),
+        )
+        result.semantic_type = semantic
+        return result
+
+    styled = Style(fill_color='#ff0000', stroke_color='#0000ff', stroke_width=3.0, stroke_style='dashed')
+    return Diagram(
+        id='t',
+        elements=[
+            shape('styled', 'Styled Shape', 100.0, style=styled),
+            shape('db', 'Database', 400.0, semantic='database'),
+            Connection(
+                id='c1', from_id='styled', to_id='db', label='HTTP', position=Point(0.0, 0.0), size=Dimensions(0.0, 0.0)
             ),
-        )
-        return Diagram(id='test', elements=[shape])
-
-    def test_plantuml_preserves_basic_structure(self):
-        diagram = self._make_diagram_with_styled_shape()
-        gen = PlantUMLGenerator()
-        output = gen.generate(diagram)
-
-        assert '@startuml' in output
-        assert 'Styled Shape' in output
-        assert '@enduml' in output
-
-    def test_plantuml_loses_exact_positions(self):
-        """PlantUML output doesn't include exact x,y positions."""
-        diagram = self._make_diagram_with_styled_shape()
-        gen = PlantUMLGenerator()
-        output = gen.generate(diagram)
-
-        assert '100.0' not in output
-        assert '200.0' not in output
-
-    def test_mermaid_loses_exact_positions(self):
-        """Mermaid output doesn't include exact x,y positions."""
-        diagram = self._make_diagram_with_styled_shape()
-        gen = MermaidGenerator(diagram_type='flowchart')
-        output = gen.generate(diagram)
-
-        assert '100' not in output or output.count('100') < 2
-        assert '200' not in output
-
-    def test_graphviz_lets_engine_decide_layout(self):
-        """GraphViz positions are determined by layout engine, not IR."""
-        diagram = self._make_diagram_with_styled_shape()
-        gen = GraphVizGenerator()
-        output = gen.generate(diagram)
-
-        assert 'pos=' not in output
-
-    def test_d2_lets_engine_decide_layout(self):
-        """D2 positions are determined by layout engine, not IR."""
-        diagram = self._make_diagram_with_styled_shape()
-        gen = D2Generator()
-        output = gen.generate(diagram)
-
-        assert 'position:' not in output.lower()
+            Connection(
+                id='c2',
+                from_id='db',
+                to_id='styled',
+                label='sync',
+                connection_type='bidirectional',
+                position=Point(0.0, 0.0),
+                size=Dimensions(0.0, 0.0),
+            ),
+        ],
+    )
 
 
-class TestSemanticTypePreservation:
-    """Test semantic type inference and preservation."""
+@pytest.mark.parametrize(
+    ('output_format', 'options', 'expected'),
+    [
+        (
+            'plantuml',
+            {},
+            (
+                '@startuml\nrectangle "Styled Shape" as styled\ndatabase "Database" as db\n'
+                'styled --> db : "HTTP"\ndb <--> styled : "sync"\n@enduml'
+            ),
+        ),
+        (
+            'mermaid',
+            {'mermaid_type': 'flowchart'},
+            (
+                'flowchart LR\n    styled[Styled Shape]\n    db[(Database)]\n    styled -->|HTTP| db\n'
+                '    db <-->|sync| styled\n\n    style styled fill:#ff0000,stroke:#0000ff,stroke-dasharray:5 5'
+            ),
+        ),
+        (
+            'graphviz',
+            {},
+            (
+                'digraph "diagram" {\n    rankdir="LR";\n    node [shape="box", fontname="Helvetica"];\n'
+                '    edge [fontname="Helvetica"];\n\n'
+                '    styled [label="Styled Shape", fillcolor="#ff0000", style="filled", '
+                'color="#0000ff", penwidth="3.0"];\n'
+                '    db [label="Database", shape="cylinder"];\n\n'
+                '    styled -> db [label="HTTP"];\n    db -> styled [label="sync", dir="both"];\n}'
+            ),
+        ),
+        (
+            'd2',
+            {},
+            (
+                'direction: right\n\nstyled: Styled Shape {\n  style: {\n    fill: "#ff0000"\n    stroke: "#0000ff"\n'
+                '    stroke-width: 3\n    stroke-dash: 3\n  }\n}\ndb: Database {\n  shape: cylinder\n}\n\n'
+                'styled -> db: HTTP\ndb <-> styled: sync'
+            ),
+        ),
+    ],
+)
+def test_text_output_keeps_structure_style_and_semantics_but_not_positions(output_format, options, expected):
+    assert render_diagram(_styled_diagram(), output_format, **options).output == expected
 
-    def test_database_cylinder_recognized(self):
-        from diacea.ir.semantic import SemanticType, infer_semantic_type
 
-        semantic, _confidence = infer_semantic_type(shape_type='cylinder')
-        assert semantic == SemanticType.DATABASE
+def test_excalidraw_keeps_geometry_and_keeps_sketch_settings_only_as_metadata():
+    element = {'id': 'a', 'type': 'rectangle', 'x': 100.0, 'y': 200.0, 'width': 150.0, 'height': 80.0}
+    shape = ExcalidrawParser().parse({'elements': [{**element, 'roughness': 2, 'seed': 12345}]}).get_shapes()[0]
 
-    def test_diamond_is_decision(self):
-        from diacea.ir.semantic import SemanticType, infer_semantic_type
-
-        semantic, _confidence = infer_semantic_type(shape_type='diamond')
-        assert semantic == SemanticType.DECISION
-
-    def test_semantic_type_affects_output(self):
-        from diacea.ir import Diagram
-        from diacea.ir.elements import Point, Shape, Style
-
-        shape = Shape(
-            id='db',
-            label='Database',
-            shape_type='rectangle',
-            position=Point(x=0.0, y=0.0),
-            size=Dimensions(width=100.0, height=50.0),
-            style=Style(),
-        )
-        shape.semantic_type = 'database'
-        diagram = Diagram(id='test', elements=[shape])
-
-        graphviz = GraphVizGenerator().generate(diagram)
-        assert 'cylinder' in graphviz
-
-        d2 = D2Generator().generate(diagram)
-        assert 'cylinder' in d2
+    assert (shape.position, shape.size, shape.style) == (
+        Point(100.0, 200.0),
+        Dimensions(150.0, 80.0),
+        Style(stroke_style='solid', opacity=1.0),
+    )
+    assert shape.metadata['excalidraw']['seed'] == 12345
 
 
-class TestConnectionPreservation:
-    """Test connection information preservation."""
+def test_svg_keeps_rect_geometry_and_fill_and_reduces_paths_to_bounding_boxes():
+    diagram = SVGParser().parse(
+        '<svg xmlns="http://www.w3.org/2000/svg"><rect x="10" y="20" width="100" height="50" fill="#ff0000"/>'
+        '<path d="M 210 10 L 300 10 L 300 50 L 210 50 Z" fill="green"/></svg>'
+    )
 
-    def test_connection_endpoints_preserved(self):
-        from diacea.ir import Diagram
-        from diacea.ir.elements import Connection, Point, Shape, Style
+    assert [(s.shape_type, s.position, s.size, s.style.fill_color) for s in diagram.get_shapes()] == [
+        ('rectangle', Point(10.0, 20.0), Dimensions(100.0, 50.0), '#ff0000'),
+        ('rectangle', Point(210.0, 10.0), Dimensions(90.0, 40.0), 'green'),
+    ]
 
-        shape_a = Shape(
-            id='a',
-            label='A',
-            shape_type='rectangle',
-            position=Point(x=0.0, y=0.0),
-            size=Dimensions(width=100.0, height=50.0),
-            style=Style(),
-        )
-        shape_b = Shape(
-            id='b',
-            label='B',
-            shape_type='rectangle',
-            position=Point(x=200.0, y=0.0),
-            size=Dimensions(width=100.0, height=50.0),
-            style=Style(),
-        )
-        conn = Connection(
-            id='conn',
-            from_id='a',
-            to_id='b',
-            label='connects',
-            connection_type='directed',
-            position=Point(x=100.0, y=25.0),
-            size=Dimensions(width=100.0, height=0.0),
-            style=Style(),
-        )
-        diagram = Diagram(id='test', elements=[shape_a, shape_b, conn])
 
-        plantuml = PlantUMLGenerator().generate(diagram)
-        assert 'a -->' in plantuml
-        assert 'b' in plantuml
+@pytest.mark.parametrize(('options', 'expected_ids'), [({}, ['shape1']), ({'page_index': None}, ['shape1', 'shape2'])])
+def test_legacy_tldraw_reads_the_first_page_unless_asked_for_all(options, expected_ids):
+    def page(page_id, shape_id, shape_type, point):
+        shape = {'type': shape_type, 'point': point, 'size': [120.0, 60.0]}
+        return {'id': page_id, 'shapes': {shape_id: shape}, 'bindings': {}}
 
-        mermaid = MermaidGenerator(diagram_type='flowchart').generate(diagram)
-        assert 'a -->' in mermaid
+    data = {
+        'document': {
+            'pages': {
+                'page1': page('page1', 'shape1', 'rectangle', [50.0, 100.0]),
+                'page2': page('page2', 'shape2', 'ellipse', [0.0, 0.0]),
+            }
+        }
+    }
 
-    def test_connection_label_preserved(self):
-        from diacea.ir import Diagram
-        from diacea.ir.elements import Connection, Point, Shape, Style
+    shapes = TLDrawParser(**options).parse(data).get_shapes()
 
-        shape_a = Shape(
-            id='a',
-            label='A',
-            shape_type='rectangle',
-            position=Point(x=0.0, y=0.0),
-            size=Dimensions(width=100.0, height=50.0),
-            style=Style(),
-        )
-        shape_b = Shape(
-            id='b',
-            label='B',
-            shape_type='rectangle',
-            position=Point(x=200.0, y=0.0),
-            size=Dimensions(width=100.0, height=50.0),
-            style=Style(),
-        )
-        conn = Connection(
-            id='conn',
-            from_id='a',
-            to_id='b',
-            label='HTTP',
-            connection_type='directed',
-            position=Point(x=100.0, y=25.0),
-            size=Dimensions(width=100.0, height=0.0),
-            style=Style(),
-        )
-        diagram = Diagram(id='test', elements=[shape_a, shape_b, conn])
-
-        plantuml = PlantUMLGenerator().generate(diagram)
-        assert 'HTTP' in plantuml
-
-        graphviz = GraphVizGenerator().generate(diagram)
-        assert 'HTTP' in graphviz
-
-    def test_bidirectional_connection_preserved(self):
-        from diacea.ir import Diagram
-        from diacea.ir.elements import Connection, Point, Shape, Style
-
-        shape_a = Shape(
-            id='a',
-            label='A',
-            shape_type='rectangle',
-            position=Point(x=0.0, y=0.0),
-            size=Dimensions(width=100.0, height=50.0),
-            style=Style(),
-        )
-        shape_b = Shape(
-            id='b',
-            label='B',
-            shape_type='rectangle',
-            position=Point(x=200.0, y=0.0),
-            size=Dimensions(width=100.0, height=50.0),
-            style=Style(),
-        )
-        conn = Connection(
-            id='conn',
-            from_id='a',
-            to_id='b',
-            label='sync',
-            connection_type='bidirectional',
-            position=Point(x=100.0, y=25.0),
-            size=Dimensions(width=100.0, height=0.0),
-            style=Style(),
-        )
-        diagram = Diagram(id='test', elements=[shape_a, shape_b, conn])
-
-        plantuml = PlantUMLGenerator().generate(diagram)
-        assert '<-->' in plantuml
-
-        mermaid = MermaidGenerator(diagram_type='flowchart').generate(diagram)
-        assert '<-->' in mermaid
+    assert [s.id for s in shapes] == expected_ids
+    assert (shapes[0].position, shapes[0].size) == (Point(50.0, 100.0), Dimensions(120.0, 60.0))

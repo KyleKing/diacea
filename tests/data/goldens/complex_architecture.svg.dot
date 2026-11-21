@@ -1,0 +1,59 @@
+digraph "SVG Diagram" {
+    rankdir="LR";
+    node [shape="box", fontname="Helvetica"];
+    edge [fontname="Helvetica"];
+
+    subgraph cluster_external_users {
+        label="external_users";
+        mobile_user [label="Mobile", shape="ellipse", fillcolor="#87CEEB", style="filled", color="black", penwidth="2.0"];
+        web_user [label="Web", shape="ellipse", fillcolor="#87CEEB", style="filled", color="black", penwidth="2.0"];
+        admin [label="Admin", shape="ellipse", fillcolor="#FFB6C1", style="filled", color="black", penwidth="2.0"];
+    }
+    subgraph cluster_aws_cloud {
+        label="AWS Cloud";
+        cdn [label="CDN", shape="octagon", fillcolor="#FFA500", style="filled", color="black", penwidth="1.5"];
+        load_balancer [label="Load Balancer", fillcolor="#90EE90", style="filled", color="black", penwidth="2.0"];
+        subgraph cluster_app_layer {
+            label="Application Tier (EKS)";
+            api_service_1 [label="API-1", shape="component", fillcolor="#B0C4DE", style="filled", color="black", penwidth="1.0"];
+            api_service_2 [label="API-2", shape="component", fillcolor="#B0C4DE", style="filled", color="black", penwidth="1.0"];
+            api_service_3 [label="API-3", shape="component", fillcolor="#B0C4DE", style="filled", color="black", penwidth="1.0"];
+            worker_service [label="Worker", shape="component", fillcolor="#DDA0DD", style="filled", color="black", penwidth="1.0"];
+            scheduler [label="Scheduler", shape="component", fillcolor="#DDA0DD", style="filled", color="black", penwidth="1.0"];
+        }
+        subgraph cluster_data_layer {
+            label="Data Tier";
+            primary_db [label="Primary DB", shape="cylinder", fillcolor="#FFE4B5", style="filled", color="black", penwidth="2.0"];
+            read_replica [label="Read Replica", shape="cylinder", fillcolor="#FFE4B5", style="filled", color="black", penwidth="1.5"];
+            cache [label="Redis Cache", shape="cylinder", fillcolor="#FF6347", style="filled", color="black", penwidth="1.5"];
+            s3_storage [label="S3 Storage", shape="cylinder", fillcolor="#98FB98", style="filled", color="black", penwidth="1.5"];
+            message_queue [label="SQS Queue", shape="folder", fillcolor="#FFD700", style="filled", color="black", penwidth="2.0"];
+        }
+    }
+    subgraph cluster_gcp_cloud {
+        label="GCP Cloud";
+        ml_service [label="ML Prediction", fillcolor="#E6E6FA", style="filled", color="black", penwidth="1.5"];
+        analytics_db [label="Analytics DB", shape="cylinder", fillcolor="#F0E68C", style="filled", color="black", penwidth="1.5"];
+    }
+    subgraph cluster_external_services {
+        label=" ";
+        payment_gateway [label="Payment", shape="octagon", fillcolor="#FFFACD", style="filled", color="black", penwidth="2.0"];
+        email_service [label="Email", shape="octagon", fillcolor="#FFFACD", style="filled", color="black", penwidth="2.0"];
+        monitoring [label="Monitoring", shape="octagon", fillcolor="#FFFACD", style="filled", color="black", penwidth="2.0"];
+    }
+
+    mobile_user -> cdn [color="black", penwidth="2.0"];
+    admin -> load_balancer [color="black", penwidth="2.0"];
+    cdn -> load_balancer [color="blue", penwidth="2.0"];
+    load_balancer -> api_service_1 [color="green", penwidth="1.5"];
+    load_balancer -> api_service_2 [color="green", penwidth="1.5"];
+    load_balancer -> api_service_3 [color="green", penwidth="1.5"];
+    worker_service -> primary_db [color="purple", penwidth="1.5"];
+    scheduler -> primary_db [color="purple", penwidth="1.5"];
+    api_service_3 -> primary_db [color="purple", penwidth="1.5"];
+    primary_db -> read_replica [style="dashed", color="red", penwidth="1.5"];
+    worker_service -> cache [color="orange", penwidth="1.5"];
+    worker_service -> message_queue [style="dashed", color="green", penwidth="1.5"];
+    api_service_3 -> ml_service [color="brown", penwidth="1.5"];
+    read_replica -> analytics_db [style="dashed", color="teal", penwidth="1.5"];
+}

@@ -1,0 +1,24 @@
+digraph "diagram" {
+    rankdir="TB";
+    node [shape="box", fontname="Helvetica"];
+    edge [fontname="Helvetica"];
+
+    subgraph cluster_group_backend {
+        label="Backend Services";
+        api [label="API Service"];
+        db [label="PostgreSQL", shape="cylinder"];
+        cache [label="Redis Cache", shape="cylinder"];
+        worker [label="Worker"];
+        queue [label="Message Queue", shape="cylinder"];
+    }
+
+    client [label="Web Client"];
+    lb [label="Load Balancer", shape="parallelogram"];
+
+    client -> lb;
+    lb -> api;
+    lb -> worker;
+    api -> db;
+    api -> cache;
+    worker -> queue;
+}

@@ -1,0 +1,32 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+
+Person(dt_user, "DT User", "[person]\nPerson who use an\nspecific DT")
+Person(dt_developer, "DT Developer", "[person]\nPerson who use the DTE\nto developpe a DT")
+System(dt_application, "DT application", "[software system]\nDT application developed\nwith the DTE")
+
+System_Boundary(group_thematic_capabilities, "Thematic\ncapabilities") {
+  Component(thematic_module, "Thematic module", "", "[software system]\nIt offers functions DT\napplications need to achieve\ntheir goals")
+  Component(thematic_module_2, "Thematic module", "", "[software system]\nIt offers functions DT\napplications need to achieve\ntheir goals")
+  Component(thematic_module_3, "Thematic module", "", "[software system]\nIt offers functions DT\napplications need to achieve\ntheir goals")
+}
+System_Boundary(group_core_capabilities, "Core\ncapabilities") {
+  Container(quality_verification, "Quality verification", "", "[software system]\nToolkit for designing and\nvalidating DT models,\nensuring the quality, reliability,\nand accuracy of application\noutputs")
+  Container(workflow_composition, "Workflow Composition", "", "[software system]\nThe software handles the\nexecution of workflows,\nreads data from multiple\nsources, and assists in\ndecision-making")
+  Container(real_time_data_acquisition_and_processin, "Real-time data\nacquisition and\nprocessing", "", "[software system]\nIt acquires and analyzes data\nin real-time using severless\ntechnology. It adapts and\nscales according to data\nprocessing needs")
+}
+System_Boundary(group_infrastructure, "Infrastructure") {
+  Container(orchestration, "Orchestration", "", "[software system]\nStorage and computing\nresources are allocated to\ndifferent parts of the workflow\nfor task execution. This\nallocation is based on\npreset configurations and data\nfrom past executions")
+  Container(federated_data_management, "Federated data\nmanagement", "", "[software system]\nIt creates a cloud of data\nservices and storage")
+}
+
+Rel(dt_application, thematic_module, "")
+Rel(dt_application, thematic_module_2, "")
+Rel(dt_application, thematic_module_3, "")
+Rel(dt_developer, thematic_module, "")
+Rel(dt_developer, quality_verification, "")
+Rel(dt_developer, group_infrastructure, "")
+Rel(dt_user, dt_application, "")
+@enduml

@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3147" height="1417" viewBox="-24.0 -24.0 3147.0 1417.0">
+<style>text{font-family:Helvetica,Arial,sans-serif;font-size:14px;fill:#1e1e1e}.group-label{font-size:12px;fill:#868e96}.edge-label{font-size:12px;paint-order:stroke;stroke:#ffffff;stroke-width:4px}</style>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1e1e1e"/></marker></defs>
+<rect x="-24.0" y="-24.0" width="3147.0" height="1417.0" fill="#ffffff"/>
+<g id="9e122290_1ec3_e711_8c5a_005056ad0002" data-semantic="process"><rect x="1441.5" y="0.0" width="216.0" height="86.0" rx="10.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="1549.5" y="38.7" text-anchor="middle">My System | Test</text><text x="1549.5" y="56.7" text-anchor="middle">Environment</text></g>
+<g id="82072290_1ec3_e711_8c5a_005056ad0002" data-semantic="service"><rect x="1146.5" y="352.0" width="271.0" height="86.0" rx="10.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="1282.0" y="390.7" text-anchor="middle">Shared Business Logic</text><text x="1282.0" y="408.7" text-anchor="middle">Server:Service 1</text></g>
+<g id="db052290_1ec3_e711_8c5a_005056ad0002" data-semantic="service"><rect x="998.5" y="176.0" width="271.0" height="86.0" rx="10.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="1134.0" y="214.7" text-anchor="middle">Shared Business Logic</text><text x="1134.0" y="232.7" text-anchor="middle">Server:Service 2</text></g>
+<g id="4e112290_1ec3_e711_8c5a_005056ad0002" data-semantic="service"><rect x="1467.5" y="352.0" width="216.0" height="86.0" rx="10.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="1575.5" y="390.7" text-anchor="middle">Shared Report</text><text x="1575.5" y="408.7" text-anchor="middle">Server:Service 1</text></g>
+<g id="30122290_1ec3_e711_8c5a_005056ad0002" data-semantic="service"><rect x="1319.5" y="176.0" width="216.0" height="86.0" rx="10.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="1427.5" y="214.7" text-anchor="middle">Shared Report</text><text x="1427.5" y="232.7" text-anchor="middle">Server:Service 2</text></g>
+<g id="5e112290_1ec3_e711_8c5a_005056ad0002" data-semantic="service"><rect x="1733.5" y="352.0" width="293.0" height="86.0" rx="10.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="1880.0" y="390.7" text-anchor="middle">Dedicated Test Business</text><text x="1880.0" y="408.7" text-anchor="middle">Logic Server:Service 1</text></g>
+<g id="c1112290_1ec3_e711_8c5a_005056ad0002" data-semantic="service"><rect x="1807.5" y="176.0" width="293.0" height="86.0" rx="10.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="1954.0" y="214.7" text-anchor="middle">Dedicated Test Business</text><text x="1954.0" y="232.7" text-anchor="middle">Logic Server:Service 2</text></g>
+<g id="b7042290_1ec3_e711_8c5a_005056ad0002" data-semantic="process"><rect x="631.0" y="540.5" width="469.0" height="61.0" rx="10.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="865.5" y="575.7" text-anchor="middle">[DBServer\SharedDbInstance].[SupportDb]</text></g>
+<g id="8f102290_1ec3_e711_8c5a_005056ad0002" data-semantic="process"><rect x="1636.0" y="540.5" width="513.0" height="61.0" rx="10.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="1892.5" y="575.7" text-anchor="middle">[DBServer\SharedDbInstance].[DevelopmentDb]</text></g>
+<g id="0e102290_1ec3_e711_8c5a_005056ad0002" data-semantic="process"><rect x="1150.0" y="540.5" width="436.0" height="61.0" rx="10.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="1368.0" y="575.7" text-anchor="middle">[DBServer\SharedDbInstance].[TestDb]</text></g>
+<g id="07132290_1ec3_e711_8c5a_005056ad0002" data-semantic="process"><rect x="2199.0" y="540.5" width="557.0" height="61.0" rx="10.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="2477.5" y="575.7" text-anchor="middle">[DBServer\SharedDbInstance].[SharedReportingDb]</text></g>
+<g id="c7072290_1ec3_e711_8c5a_005056ad0002" data-semantic="server"><rect x="0.0" y="528.0" width="271.0" height="86.0" rx="10.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="135.5" y="566.7" text-anchor="middle">Shared Business Logic</text><text x="135.5" y="584.7" text-anchor="middle">Server</text></g>
+<g id="ca122290_1ec3_e711_8c5a_005056ad0002" data-semantic="server"><rect x="321.0" y="540.5" width="260.0" height="61.0" rx="10.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="451.0" y="575.7" text-anchor="middle">Shared Report Server</text></g>
+<g id="68102290_1ec3_e711_8c5a_005056ad0002" data-semantic="server"><rect x="2806.0" y="528.0" width="293.0" height="86.0" rx="10.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="2952.5" y="566.7" text-anchor="middle">Dedicated Test Business</text><text x="2952.5" y="584.7" text-anchor="middle">Logic Server</text></g>
+<g id="f4112290_1ec3_e711_8c5a_005056ad0002" data-semantic="database"><rect x="1514.0" y="704.0" width="337.0" height="61.0" rx="10.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="1682.5" y="739.2" text-anchor="middle">[DBServer\SharedDbInstance]</text></g>
+<g id="d6072290_1ec3_e711_8c5a_005056ad0002" data-semantic="server"><rect x="1448.5" y="1157.0" width="128.0" height="61.0" rx="10.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="1512.5" y="1192.2" text-anchor="middle">DBServer</text></g>
+<g id="71082290_1ec3_e711_8c5a_005056ad0002" data-semantic="service"><rect x="1414.0" y="1006.0" width="271.0" height="61.0" rx="10.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="1549.5" y="1041.2" text-anchor="middle">DBServer\:MSSQLSERVER</text></g>
+<g id="c0102290_1ec3_e711_8c5a_005056ad0002" data-semantic="service"><rect x="1164.5" y="855.0" width="238.0" height="61.0" rx="10.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="1283.5" y="890.2" text-anchor="middle">DBServer\:SQLAgent</text></g>
+<g id="9a072290_1ec3_e711_8c5a_005056ad0002" data-semantic="service"><rect x="1452.5" y="855.0" width="260.0" height="61.0" rx="10.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="1582.5" y="890.2" text-anchor="middle">DBServer\:SQLBrowser</text></g>
+<g id="1d0a2290_1ec3_e711_8c5a_005056ad0002" data-semantic="server"><rect x="1174.0" y="704.0" width="120.0" height="61.0" rx="10.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="1234.0" y="739.2" text-anchor="middle">VmHost1</text></g>
+<g id="200a2290_1ec3_e711_8c5a_005056ad0002" data-semantic="server"><rect x="1344.0" y="704.0" width="120.0" height="61.0" rx="10.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="1404.0" y="739.2" text-anchor="middle">VmHost2</text></g>
+<g id="1c0a2290_1ec3_e711_8c5a_005056ad0002" data-semantic="server"><rect x="1489.5" y="1308.0" width="120.0" height="61.0" rx="10.0" fill="#ffffff" stroke="#1e1e1e" stroke-width="1.5"/><text x="1549.5" y="1343.2" text-anchor="middle">VmHost3</text></g>
+<polyline points="1561.2,86.0 1597.5,219.0 1359.1,352.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="1448.0,86.0 1235.5,176.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="1579.3,86.0 1671.5,219.0 1599.0,352.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="1519.7,86.0 1457.3,176.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="1597.4,86.0 1745.5,219.0 1847.1,352.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="1648.3,86.0 1855.2,176.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="1180.2,438.0 937.7,540.5" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="1417.5,434.1 1786.7,540.5" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="1303.0,438.0 1353.1,540.5" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="1146.5,415.8 271.0,550.2" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="1103.8,262.0 1010.5,395.0 271.0,543.7" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="1170.2,262.0 1245.8,352.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="1467.5,421.8 988.5,540.5" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="1652.9,438.0 1837.6,540.5" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="1524.8,438.0 1404.0,540.5" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="1683.5,416.1 2321.2,540.5" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="1467.5,411.9 581.0,550.7" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="1343.7,262.0 1084.5,395.0 560.8,540.5" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="1463.7,262.0 1539.3,352.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="1883.1,438.0 1890.3,540.5" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="2026.5,419.0 2806.0,547.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="1986.9,262.0 2088.5,395.0 2806.0,541.2" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="1935.9,262.0 1898.1,352.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="1017.9,601.5 1530.1,704.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="1853.3,601.5 1721.7,704.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="1426.7,601.5 1623.8,704.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="2329.2,601.5 1830.8,704.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="271.0,591.2 1174.0,725.6" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="581.0,593.3 1344.0,724.2" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="2806.0,594.0 1913.0,734.5 1922.5,885.5 1821.0,1036.5 1638.5,1187.5 1567.5,1308.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="1716.0,765.0 1848.5,885.5 1747.0,1036.5 1559.9,1157.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="1701.1,765.0 1774.5,885.5 1594.9,1006.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="1601.9,765.0 1364.1,855.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="1662.3,765.0 1602.7,855.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="1520.0,1218.0 1542.0,1308.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="1542.0,1067.0 1520.0,1157.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="1282.4,916.0 1278.0,1036.5 1465.1,1157.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="1337.2,916.0 1495.8,1006.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="1535.9,916.0 1352.0,1036.5 1480.1,1157.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="1575.8,916.0 1556.2,1006.0" fill="none" stroke="#1e1e1e" stroke-width="1.5" marker-end="url(#arrow)"/>
+</svg>

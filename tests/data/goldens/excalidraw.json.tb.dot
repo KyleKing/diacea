@@ -1,0 +1,13 @@
+digraph "diagram" {
+    rankdir="TB";
+    node [shape="box", fontname="Helvetica"];
+    edge [fontname="Helvetica"];
+
+    subgraph cluster_group_moat {
+        label="Moat";
+        left_box [label="Left Box", shape="box3d"];
+        right_box [label="Right\nBox", shape="box3d"];
+    }
+
+    left_box -> right_box;
+}

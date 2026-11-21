@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="933" height="548" viewBox="1.0 26.0 933.0 548.0">
+<style>text{font-family:Helvetica,Arial,sans-serif;font-size:14px;fill:#1e1e1e}.group-label{font-size:12px;fill:#868e96}.edge-label{font-size:12px;paint-order:stroke;stroke:#ffffff;stroke-width:4px}</style>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1e1e1e"/></marker></defs>
+<rect x="1.0" y="26.0" width="933.0" height="548.0" fill="#ffffff"/>
+<g id="aws_cloud" data-semantic="group"><rect x="130.0" y="50.0" width="400.0" height="500.0" rx="8" fill="#FFF5E6" fill-opacity="0.25" stroke="#FF9900" stroke-dasharray="6 4"/><text class="group-label" x="140.0" y="68.0">AWS Cloud</text></g>
+<g id="data_layer" data-semantic="group"><rect x="150.0" y="370.0" width="360.0" height="160.0" rx="8" fill="white" fill-opacity="0.25" stroke="#8B4513" stroke-dasharray="6 4"/><text class="group-label" x="160.0" y="388.0">Data Tier</text></g>
+<g id="app_layer" data-semantic="group"><rect x="150.0" y="200.0" width="360.0" height="150.0" rx="8" fill="white" fill-opacity="0.25" stroke="#4169E1" stroke-dasharray="6 4"/><text class="group-label" x="160.0" y="218.0">Application Tier (EKS)</text></g>
+<g id="gcp_cloud" data-semantic="group"><rect x="570.0" y="150.0" width="200.0" height="200.0" rx="8" fill="#F0F8FF" fill-opacity="0.25" stroke="#4285F4" stroke-dasharray="6 4"/><text class="group-label" x="580.0" y="168.0">GCP Cloud</text></g>
+<g id="external_services" data-semantic="group"><rect x="800.0" y="100.0" width="110.0" height="250.0" rx="8" fill="none" fill-opacity="0.25" stroke="#868e96" stroke-dasharray="6 4"/><text class="group-label" x="810.0" y="118.0"></text></g>
+<g id="external_users" data-semantic="group"><rect x="25.0" y="65.0" width="70.0" height="270.0" rx="8" fill="none" fill-opacity="0.25" stroke="#868e96" stroke-dasharray="6 4"/><text class="group-label" x="35.0" y="83.0">external_users</text></g>
+<g id="mobile_user" data-semantic="person"><ellipse cx="60.0" cy="100.0" rx="35.0" ry="35.0" fill="#87CEEB" stroke="black" stroke-width="2.0"/><text x="60.0" y="104.7" text-anchor="middle">Mobile</text></g>
+<g id="web_user" data-semantic="person"><ellipse cx="60.0" cy="200.0" rx="35.0" ry="35.0" fill="#87CEEB" stroke="black" stroke-width="2.0"/><text x="60.0" y="204.7" text-anchor="middle">Web</text></g>
+<g id="admin" data-semantic="person"><ellipse cx="60.0" cy="300.0" rx="35.0" ry="35.0" fill="#FFB6C1" stroke="black" stroke-width="2.0"/><text x="60.0" y="304.7" text-anchor="middle">Admin</text></g>
+<g id="cdn" data-semantic="external"><polygon points="360.0,85.0 390.0,100.0 360.0,115.0 330.0,100.0" fill="#FFA500" stroke="black" stroke-width="1.5"/><text x="360.0" y="104.7" text-anchor="middle">CDN</text></g>
+<g id="load_balancer" data-semantic="component"><rect x="300.0" y="140.0" width="120.0" height="40.0" rx="2.0" fill="#90EE90" stroke="black" stroke-width="2.0"/><text x="360.0" y="164.7" text-anchor="middle">Load Balancer</text></g>
+<g id="api_service_1" data-semantic="container"><rect x="170.0" y="235.0" width="80.0" height="50.0" rx="2.0" fill="#B0C4DE" stroke="black" stroke-width="1.0"/><text x="210.0" y="264.7" text-anchor="middle">API-1</text></g>
+<g id="api_service_2" data-semantic="container"><rect x="270.0" y="235.0" width="80.0" height="50.0" rx="2.0" fill="#B0C4DE" stroke="black" stroke-width="1.0"/><text x="310.0" y="264.7" text-anchor="middle">API-2</text></g>
+<g id="api_service_3" data-semantic="container"><rect x="370.0" y="235.0" width="80.0" height="50.0" rx="2.0" fill="#B0C4DE" stroke="black" stroke-width="1.0"/><text x="410.0" y="264.7" text-anchor="middle">API-3</text></g>
+<g id="worker_service" data-semantic="container"><rect x="170.0" y="295.0" width="80.0" height="45.0" rx="2.0" fill="#DDA0DD" stroke="black" stroke-width="1.0"/><text x="210.0" y="322.2" text-anchor="middle">Worker</text></g>
+<g id="scheduler" data-semantic="container"><rect x="270.0" y="295.0" width="80.0" height="45.0" rx="2.0" fill="#DDA0DD" stroke="black" stroke-width="1.0"/><text x="310.0" y="322.2" text-anchor="middle">Scheduler</text></g>
+<g id="primary_db" data-semantic="database"><ellipse cx="240.0" cy="440.0" rx="70.0" ry="35.0" fill="#FFE4B5" stroke="black" stroke-width="2.0"/><text x="240.0" y="444.7" text-anchor="middle">Primary DB</text></g>
+<g id="read_replica" data-semantic="database"><ellipse cx="380.0" cy="440.0" rx="70.0" ry="35.0" fill="#FFE4B5" stroke="black" stroke-width="1.5" stroke-dasharray="6 4"/><text x="380.0" y="444.7" text-anchor="middle">Read Replica</text></g>
+<g id="cache" data-semantic="storage"><rect x="160.0" y="490.0" width="100.0" height="30.0" rx="2.0" fill="#FF6347" stroke="black" stroke-width="1.5"/><text x="210.0" y="509.7" text-anchor="middle">Redis Cache</text></g>
+<g id="s3_storage" data-semantic="storage"><rect x="280.0" y="490.0" width="100.0" height="30.0" rx="2.0" fill="#98FB98" stroke="black" stroke-width="1.5"/><text x="330.0" y="509.7" text-anchor="middle">S3 Storage</text></g>
+<g id="message_queue" data-semantic="queue"><rect x="400.0" y="490.0" width="90.0" height="30.0" rx="2.0" fill="#FFD700" stroke="black" stroke-width="2.0"/><text x="445.0" y="509.7" text-anchor="middle">SQS Queue</text></g>
+<g id="ml_service" data-semantic="service"><rect x="590.0" y="195.0" width="160.0" height="50.0" rx="2.0" fill="#E6E6FA" stroke="black" stroke-width="1.5"/><text x="670.0" y="224.7" text-anchor="middle">ML Prediction</text></g>
+<g id="analytics_db" data-semantic="database"><ellipse cx="670.0" cy="295.0" rx="75.0" ry="35.0" fill="#F0E68C" stroke="black" stroke-width="1.5"/><text x="670.0" y="299.7" text-anchor="middle">Analytics DB</text></g>
+<g id="payment_gateway" data-semantic="external"><rect x="800.0" y="100.0" width="110.0" height="50.0" rx="2.0" fill="#FFFACD" stroke="black" stroke-width="2.0"/><text x="855.0" y="129.7" text-anchor="middle">Payment</text></g>
+<g id="email_service" data-semantic="external"><rect x="800.0" y="200.0" width="110.0" height="50.0" rx="2.0" fill="#FFFACD" stroke="black" stroke-width="2.0"/><text x="855.0" y="229.7" text-anchor="middle">Email</text></g>
+<g id="monitoring" data-semantic="external"><rect x="800.0" y="300.0" width="110.0" height="50.0" rx="2.0" fill="#FFFACD" stroke="black" stroke-width="2.0"/><text x="855.0" y="329.7" text-anchor="middle">Monitoring</text></g>
+<polyline points="95.0,100.0 320.0,100.0" fill="none" stroke="black" stroke-width="2.0" marker-end="url(#arrow)"/>
+<polyline points="95.0,300.0 310.0,140.0" fill="none" stroke="black" stroke-width="2.0" marker-end="url(#arrow)"/>
+<polyline points="360.0,115.0 360.0,140.0" fill="none" stroke="blue" stroke-width="2.0" marker-end="url(#arrow)"/>
+<polyline points="330.0,180.0 210.0,235.0" fill="none" stroke="green" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="360.0,180.0 310.0,235.0" fill="none" stroke="green" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="390.0,180.0 410.0,235.0" fill="none" stroke="green" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="210.0,285.0 240.0,405.0" fill="none" stroke="purple" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="310.0,285.0 270.0,405.0" fill="none" stroke="purple" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="410.0,285.0 300.0,405.0" fill="none" stroke="purple" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="310.0,440.0 340.0,440.0" fill="none" stroke="red" stroke-width="1.5" stroke-dasharray="6 4" marker-end="url(#arrow)"/>
+<polyline points="210.0,285.0 210.0,490.0" fill="none" stroke="orange" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="250.0,318.0 400.0,505.0" fill="none" stroke="green" stroke-width="1.5" stroke-dasharray="6 4" marker-end="url(#arrow)"/>
+<polyline points="450.0,260.0 590.0,220.0" fill="none" stroke="brown" stroke-width="1.5" marker-end="url(#arrow)"/>
+<polyline points="450.0,440.0 595.0,295.0" fill="none" stroke="teal" stroke-width="1.5" stroke-dasharray="6 4" marker-end="url(#arrow)"/>
+</svg>

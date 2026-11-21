@@ -116,23 +116,32 @@ def test_unconnected_nodes_form_a_grid():
     assert len({shape.position.y for shape in diagram.get_shapes()}) == 3
 
 
-def test_group_membership_cycle_is_tolerated():
+@pytest.mark.parametrize(
+    ('memberships', 'expected'),
+    [
+        pytest.param(
+            [('g1', ['g2', 'leaf']), ('g2', ['g1', 'leaf'])],
+            [('leaf', 30.0, 80.0, 100.0, 50.0), ('g1', 0.0, 0.0, 330.0, 180.0), ('g2', 180.0, 60.0, 120.0, 90.0)],
+            id='cycle-through-the-first-node',
+        ),
+        pytest.param(
+            [('g1', ['leaf', 'g2']), ('g2', ['g1'])],
+            [('leaf', 60.0, 120.0, 100.0, 50.0), ('g1', 30.0, 60.0, 160.0, 140.0), ('g2', 0.0, 0.0, 220.0, 230.0)],
+            id='cycle-above-the-first-node',
+        ),
+    ],
+)
+def test_group_membership_cycle_is_broken(memberships, expected):
     diagram = Diagram(id='d')
     diagram.add_element(Shape(id='leaf', position=Point(0.0, 0.0), size=Dimensions(100.0, 50.0), label='Leaf'))
-    for group_id, child_id in (('g1', 'g2'), ('g2', 'g1')):
+    for group_id, children in memberships:
         diagram.add_element(
-            Group(
-                id=group_id,
-                position=Point(0.0, 0.0),
-                size=Dimensions(1.0, 1.0),
-                label=group_id,
-                children=[child_id, 'leaf'],
-            )
+            Group(id=group_id, position=Point(0.0, 0.0), size=Dimensions(1.0, 1.0), label=group_id, children=children)
         )
 
     layout_diagram(diagram)
 
-    assert diagram.metadata['synthesized_layout'] is True
+    assert [(e.id, e.position.x, e.position.y, e.size.width, e.size.height) for e in diagram.elements] == expected
 
 
 def test_long_chain_is_laid_out_quickly():

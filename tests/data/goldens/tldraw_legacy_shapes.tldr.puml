@@ -1,0 +1,5 @@
+@startuml
+rectangle "Rectangles with labels" as rectangles_with_labels
+actor "Ovals with labels" as ovals_with_labels
+rectangles_with_labels --> ovals_with_labels : "Arrows with labels"
+@enduml

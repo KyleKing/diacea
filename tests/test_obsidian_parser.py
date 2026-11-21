@@ -46,11 +46,20 @@ class TestExtraction:
 class TestDetection:
     """Test auto-detection of the Obsidian markdown format."""
 
-    def test_is_obsidian_excalidraw(self):
-        assert is_obsidian_excalidraw(PLAIN_FIXTURE.read_text())
-        assert is_obsidian_excalidraw(COMPRESSED_FIXTURE.read_text())
-        assert not is_obsidian_excalidraw('{"elements": []}')
-        assert not is_obsidian_excalidraw('# A regular markdown note\n\nSome text.')
+    @pytest.mark.parametrize(
+        ('content', 'expected'),
+        [
+            pytest.param(PLAIN_FIXTURE.read_text(), True, id='plain-fixture'),
+            pytest.param(COMPRESSED_FIXTURE.read_text(), True, id='compressed-fixture'),
+            pytest.param('---\nexcalidraw-plugin: parsed\n---\n', True, id='frontmatter-only'),
+            pytest.param('note\n# Drawing\n```json\n{}\n```\n', True, id='json-drawing-only'),
+            pytest.param('note\n## Drawing\n```compressed-json\nabc\n```\n', True, id='compressed-drawing-only'),
+            pytest.param('{"elements": []}', False, id='excalidraw-json'),
+            pytest.param('# A regular markdown note\n\nSome text.', False, id='plain-markdown'),
+        ],
+    )
+    def test_is_obsidian_excalidraw(self, content, expected):
+        assert is_obsidian_excalidraw(content) is expected
 
     def test_detect_input_format(self):
         assert detect_input_format(PLAIN_FIXTURE.read_text()) == 'obsidian'

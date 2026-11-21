@@ -1,0 +1,61 @@
+direction: right
+
+system_boundary: Microservices System {
+  service1: User Service {
+    style: {
+      fill: "#E3F2FD"
+      stroke: "#1565C0"
+      stroke-width: 2
+    }
+  }
+  service2: Order Service {
+    style: {
+      fill: "#F3E5F5"
+      stroke: "#6A1B9A"
+      stroke-width: 2
+    }
+  }
+  service3: Payment Service {
+    style: {
+      fill: "#E8F5E9"
+      stroke: "#2E7D32"
+      stroke-width: 2
+    }
+  }
+  data_layer: Data Layer {
+    db1: Users DB {
+      shape: cylinder
+      style: {
+        fill: "#C8E6C9"
+        stroke: "#1B5E20"
+        stroke-width: 2
+      }
+    }
+    db2: Orders DB {
+      shape: cylinder
+      style: {
+        fill: "#C8E6C9"
+        stroke: "#1B5E20"
+        stroke-width: 2
+      }
+    }
+    db3: Payments DB {
+      shape: cylinder
+      style: {
+        fill: "#C8E6C9"
+        stroke: "#1B5E20"
+        stroke-width: 2
+      }
+    }
+  }
+
+}
+
+user: Customer {
+  shape: person
+  style: {
+    fill: "#FFCCBC"
+    stroke: "#BF360C"
+    stroke-width: 2
+  }
+}

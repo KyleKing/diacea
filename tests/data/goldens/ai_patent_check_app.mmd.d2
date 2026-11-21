@@ -1,0 +1,30 @@
+direction: down
+
+group-Client: Client Layer {
+  Browser: "User's Browser"
+  Frontend: "React Frontend (Dockerized)"
+}
+
+group-Backend: "Server Layer (Dockerized)" {
+  NodeBackend: Node.js Backend
+  Template: OpenAI Prompt Template
+  group-Processing: Data Processing {
+    InputHandler: "Patent ID & Company Input Handler"
+  }
+
+}
+
+group-External: External Services {
+  OpenAI: OpenAI API
+}
+
+
+group-Client.Browser -> group-Client.Frontend
+group-Client.Frontend -> group-Backend.NodeBackend
+group-Backend.NodeBackend -> group-Backend.group-Processing.InputHandler
+group-Backend.group-Processing.InputHandler -> group-Backend.Template
+group-Backend.Template -> group-Backend.group-Processing.InputHandler
+group-Backend.group-Processing.InputHandler -> group-Backend.NodeBackend
+group-Backend.NodeBackend -> group-External.OpenAI: "Prompt with Patent & Company Info"
+group-External.OpenAI -> group-Backend.NodeBackend: Response Standard JSON
+group-Backend.NodeBackend -> group-Client.Frontend

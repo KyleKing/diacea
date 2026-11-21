@@ -1,0 +1,46 @@
+@startuml
+rectangle "External Data \nSource" as group_external_data_source {
+  rectangle "Resource Info" as group_resource_info {
+    hexagon "[Container]" as container
+  }
+  rectangle "Replica Manager \nData Transfer \nLocation Catalog" as replica_manager_data_transfer_location_c
+  actor "Compute Resources \n       Orchestrion - \nService deployment   " as compute_resources_orchestrion_service_de
+  rectangle "[Container:PaaS orchestrator]" as container_paas_orchestrator
+  rectangle "HPC" as group_hpc {
+    rectangle "Service Offloading" as service_offloading
+    rectangle "Edge Service API" as edge_service_api_2
+  }
+  rectangle "Storage" as group_storage {
+    rectangle "Data Access" as data_access
+    rectangle "Edge Service API" as edge_service_api
+  }
+  rectangle "CLOUD" as group_cloud {
+    rectangle " " as node_1
+  }
+  rectangle "AAI / Auth &amp; Authz\n\n" as aai_auth_authz
+  rectangle "Software Distribution" as software_distribution
+}
+container_paas_orchestrator <..> group_resource_info
+replica_manager_data_transfer_location_c <..> group_external_data_source
+compute_resources_orchestrion_service_de <..> replica_manager_data_transfer_location_c
+replica_manager_data_transfer_location_c <..> group_storage
+data_access <..> group_storage
+group_external_data_source <..> group_resource_info : "Push info"
+service_offloading <..> group_hpc
+container_paas_orchestrator <..> node_1
+edge_service_api <..> group_external_data_source
+edge_service_api_2 <..> group_external_data_source
+group_cloud <..> group_external_data_source
+node_1 <..> group_cloud
+node_1 <..> edge_service_api_2
+replica_manager_data_transfer_location_c <..> group_external_data_source
+group_external_data_source <..> group_external_data_source
+group_external_data_source <..> group_hpc
+group_external_data_source <..> group_cloud
+group_storage <..> group_storage
+service_offloading <..> group_hpc
+node_1 <..> group_cloud
+group_cloud <..> software_distribution
+data_access <..> group_storage
+group_external_data_source <..> group_external_data_source
+@enduml

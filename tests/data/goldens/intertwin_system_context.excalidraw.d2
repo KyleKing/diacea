@@ -1,0 +1,131 @@
+group-thematic_capabilities: Thematic\ncapabilities {
+  thematic_module: Thematic module {
+    style: {
+      fill: "#228be6"
+      stroke: "#343a40"
+      stroke-width: 1
+    }
+  }
+  thematic_module_2: Thematic module {
+    style: {
+      fill: "#228be6"
+      stroke: "#343a40"
+      stroke-width: 1
+    }
+  }
+  thematic_module_3: Thematic module {
+    style: {
+      fill: "#228be6"
+      stroke: "#343a40"
+      stroke-width: 1
+    }
+  }
+}
+
+group-core_capabilities: Core\ncapabilities {
+  quality_verification: Quality verification {
+    style: {
+      fill: "#228be6"
+      stroke: "#343a40"
+      stroke-width: 1
+    }
+  }
+  workflow_composition: Workflow Composition {
+    style: {
+      fill: "#228be6"
+      stroke: "#343a40"
+      stroke-width: 1
+    }
+  }
+  real_time_data_acquisition_and_processin: Real-time data\nacquisition and\nprocessing {
+    style: {
+      fill: "#228be6"
+      stroke: "#343a40"
+      stroke-width: 1
+    }
+  }
+}
+
+group-infrastructure: Infrastructure {
+  orchestration: Orchestration {
+    style: {
+      fill: "#228be6"
+      stroke: "#343a40"
+      stroke-width: 1
+    }
+  }
+  federated_data_management: Federated data\nmanagement {
+    style: {
+      fill: "#228be6"
+      stroke: "#343a40"
+      stroke-width: 1
+    }
+  }
+}
+
+dt_user: DT User {
+  shape: person
+  style: {
+    fill: "#0c37a2"
+    stroke: "#0c37a2"
+    stroke-width: 1
+  }
+}
+dt_developer: DT Developer {
+  shape: person
+  style: {
+    fill: "#0c37a2"
+    stroke: "#0c37a2"
+    stroke-width: 1
+  }
+}
+dt_application: DT application {
+  style: {
+    fill: "#228be6"
+    stroke: "#343a40"
+    stroke-width: 1
+  }
+}
+
+dt_application -> group-thematic_capabilities.thematic_module {
+  style: {
+    stroke-width: 1
+    stroke-dash: 3
+  }
+}
+dt_application -> group-thematic_capabilities.thematic_module_2 {
+  style: {
+    stroke-width: 1
+    stroke-dash: 3
+  }
+}
+dt_application -> group-thematic_capabilities.thematic_module_3 {
+  style: {
+    stroke-width: 1
+    stroke-dash: 3
+  }
+}
+dt_developer -> group-thematic_capabilities.thematic_module {
+  style: {
+    stroke-width: 1
+    stroke-dash: 3
+  }
+}
+dt_developer -> group-core_capabilities.quality_verification {
+  style: {
+    stroke-width: 1
+    stroke-dash: 3
+  }
+}
+dt_developer -> group-infrastructure {
+  style: {
+    stroke-width: 1
+    stroke-dash: 3
+  }
+}
+dt_user -> dt_application {
+  style: {
+    stroke-width: 1
+    stroke-dash: 3
+  }
+}

@@ -1,0 +1,34 @@
+digraph "diagram" {
+    rankdir="LR";
+    node [shape="box", fontname="Helvetica"];
+    edge [fontname="Helvetica"];
+
+    subgraph cluster_group_node_1 {
+        label=" ";
+        tooling_reporting [label="Tooling & Reporting", shape="component", fillcolor="#55b8f5", style="filled", color="#343a40", penwidth="1.0"];
+        jepl_library [label="JePL library", fillcolor="#55b8f5", style="filled", color="#343a40", penwidth="1.0"];
+        ci_system [label="CI system", shape="box3d", fillcolor="#55b8f5", style="filled", color="#343a40", penwidth="1.0"];
+        sqaaas_api [label="SQAaaS API", fillcolor="#55b8f5", style="filled", color="#343a40", penwidth="1.0"];
+        sqaaas_web [label="SQAaaS web", shape="component", fillcolor="#55b8f5", style="filled", color="#343a40", penwidth="1.0"];
+    }
+
+    workflow_composition [label="Workflow composition", fillcolor="#228be6", style="filled", color="#343a40", penwidth="1.0"];
+    dt_developer [label="DT developer", shape="ellipse", fillcolor="#0c37a2", style="filled", color="#0c37a2", penwidth="1.0"];
+    data_and_computation_abstraction [label="Data and computation\nabstraction", shape="component", fillcolor="#228be6", style="filled", color="#343a40", penwidth="1.0"];
+    ai_ml_subsystem [label="AI/ML subsystem", shape="component", fillcolor="#228be6", style="filled", color="#343a40", penwidth="1.0"];
+    repository [label="Repository", fillcolor="#868e96", style="filled", penwidth="1.0"];
+
+    dt_developer -> repository [label="Push changes to workflow code", style="dashed", color="#495057", penwidth="1.0"];
+    data_and_computation_abstraction -> sqaaas_api [label="FAIR and data quality assessment (event and/or polling-based)", style="dashed", color="#495057", penwidth="1.0"];
+    sqaaas_api -> ci_system [label="Runs/fetches results\nof the QA assessment", style="dashed", color="#495057", penwidth="1.0"];
+    ci_system -> ai_ml_subsystem [label="Triggers deployment\nof pre-trained ML model", style="dashed", color="#495057", penwidth="1.0"];
+    repository -> sqaaas_api [label="Event-based\nworfklow validation\n(DevOps)", style="dashed", color="#495057", penwidth="1.0"];
+    sqaaas_api -> repository [label="Registers/loads\nQA assessment", style="dashed", color="#495057", penwidth="1.0"];
+    jepl_library -> repository [label="Modifies\nQA assessment", style="dashed", color="#495057", penwidth="1.0"];
+    tooling_reporting -> sqaaas_api [label="Get tools", style="dashed", color="#495057", penwidth="1.0"];
+    sqaaas_web -> sqaaas_api [label="Leverages", style="dashed", color="#495057", penwidth="1.0"];
+    workflow_composition -> sqaaas_api [label="Triggers pre-defined\nQA assessment\nas step in the workflow", style="dashed", color="#495057", penwidth="1.0"];
+    sqaaas_api -> workflow_composition [label="Gets deployed as\na step in the workflow", style="dashed", color="#495057", penwidth="1.0"];
+    dt_developer -> sqaaas_web [label="Defines custom\nQA assessment", style="dashed", color="#495057", penwidth="1.0"];
+    dt_developer -> workflow_composition [style="dashed", color="#495057", penwidth="1.0"];
+}

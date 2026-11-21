@@ -1,18 +1,14 @@
 """CLI integration tests and edge case tests."""
 
 import json
-import subprocess
-import sys
 from io import StringIO
-from typing import Any
 
 import pytest
 
-from diacea.cli import detect_input_format, main
+from diacea.cli import main
+from diacea.formats import render_diagram
 from diacea.generators import (
     C4PlantUMLGenerator,
-    D2Generator,
-    GraphVizGenerator,
     MermaidGenerator,
     PlantUMLGenerator,
 )
@@ -25,493 +21,218 @@ from diacea.parsers import ExcalidrawParser
 class TestCLIBasics:
     """Test CLI basic functionality."""
 
-    def test_cli_help(self):
-        result = subprocess.run(
-            [sys.executable, '-m', 'diacea.cli', '--help'],
-            capture_output=True,
-            text=True,
-        )
-        assert result.returncode == 0
-        assert 'Universal diagram converter' in result.stdout
+    def test_cli_help(self, capsys):
+        with pytest.raises(SystemExit) as exit_:
+            main(['--help'])
 
-    def test_cli_version(self):
-        result = subprocess.run(
-            [sys.executable, '-m', 'diacea.cli', '--version'],
-            capture_output=True,
-            text=True,
-        )
-        assert result.returncode == 0
-        assert 'diacea' in result.stdout
+        assert exit_.value.code == 0
+        assert 'Universal diagram converter' in capsys.readouterr().out
 
-    def test_cli_nonexistent_file(self):
-        result = main(['-i', 'nonexistent.json', '-f', 'mermaid'])
-        assert result == 1
+    @pytest.mark.parametrize(
+        ('name', 'content', 'extra', 'error'),
+        [
+            ('nonexistent.json', None, [], 'Input file not found: nonexistent.json'),
+            (
+                'bad.json',
+                'not valid json',
+                ['-v'],
+                (
+                    'Could not detect input format (supported: d2, excalidraw, graphviz, mermaid, obsidian, '
+                    'plantuml, svg, tldraw); if the file is valid, name its format with --input-format '
+                    '(or input_format= in Python)'
+                ),
+            ),
+            (
+                'unknown.json',
+                '{"not": "excalidraw"}',
+                [],
+                'Unrecognized input format: JSON is neither an Excalidraw scene nor a TLDraw document',
+            ),
+        ],
+    )
+    def test_cli_input_errors(self, name, content, extra, error, tmp_path, monkeypatch, capsys):
+        monkeypatch.chdir(tmp_path)
+        if content is not None:
+            (tmp_path / name).write_text(content)
 
-    def test_cli_invalid_json(self, tmp_path):
-        bad_file = tmp_path / 'bad.json'
-        bad_file.write_text('not valid json')
-        result = main(['-i', str(bad_file), '-f', 'mermaid'])
-        assert result == 1
-
-    def test_cli_unknown_format(self, tmp_path):
-        unknown_file = tmp_path / 'unknown.json'
-        unknown_file.write_text('{"not": "excalidraw"}')
-        result = main(['-i', str(unknown_file), '-f', 'mermaid'])
-        assert result == 1
-
-    def test_cli_verbose_error(self, tmp_path, capsys):
-        bad_file = tmp_path / 'bad.json'
-        bad_file.write_text('not valid json')
-        result = main(['-i', str(bad_file), '-f', 'mermaid', '-v'])
-        assert result == 1
-        captured = capsys.readouterr()
-        assert 'Traceback' in captured.err or 'Error' in captured.err
-
-    def test_cli_creates_output_directory(self, tmp_path):
-        data = {'elements': [{'id': 'a', 'type': 'rectangle', 'x': 0.0, 'y': 0.0, 'width': 100.0, 'height': 50.0}]}
-        input_file = tmp_path / 'input.json'
-        input_file.write_text(json.dumps(data))
-
-        nested_output = tmp_path / 'nested' / 'dir' / 'output.puml'
-        result = main(['-i', str(input_file), '-f', 'plantuml', '-o', str(nested_output)])
-        assert result == 0
-        assert nested_output.exists()
+        assert main(['-i', name, '-f', 'mermaid', *extra]) == 1
+        assert capsys.readouterr() == ('', f'Error: {error}\n')
 
 
-class TestCLIFormats:
-    """Test CLI with different input/output formats."""
-
-    @pytest.fixture
-    def excalidraw_file(self, tmp_path):
-        data = {
-            'elements': [
-                {'id': 'a', 'type': 'rectangle', 'x': 0.0, 'y': 0.0, 'width': 100.0, 'height': 50.0},
-                {'id': 'b', 'type': 'rectangle', 'x': 200.0, 'y': 0.0, 'width': 100.0, 'height': 50.0},
-                {
-                    'id': 'arr',
-                    'type': 'arrow',
-                    'x': 100.0,
-                    'y': 25.0,
-                    'points': [[0.0, 0.0], [100.0, 0.0]],
-                    'startBinding': {'elementId': 'a'},
-                    'endBinding': {'elementId': 'b'},
-                },
-            ]
-        }
-        f = tmp_path / 'test.json'
-        f.write_text(json.dumps(data))
-        return f
-
-    @pytest.mark.parametrize('output_format', ['plantuml', 'c4', 'mermaid', 'graphviz', 'd2'])
-    def test_cli_output_formats(self, excalidraw_file, output_format, tmp_path):
-        output_file = tmp_path / f'output.{output_format}'
-        result = main(['-i', str(excalidraw_file), '-f', output_format, '-o', str(output_file)])
-        assert result == 0
-        assert output_file.exists()
-        content = output_file.read_text()
-        assert len(content) > 0
-
-    def test_cli_stdout_output(self, excalidraw_file, capsys):
-        result = main(['-i', str(excalidraw_file), '-f', 'plantuml', '-o', '-'])
-        assert result == 0
-        captured = capsys.readouterr()
-        assert '@startuml' in captured.out
-
-    def test_cli_stdin_input(self, monkeypatch, capsys):
-        data = json.dumps(
-            {'elements': [{'id': 'a', 'type': 'rectangle', 'x': 0.0, 'y': 0.0, 'width': 100.0, 'height': 50.0}]}
-        )
-        monkeypatch.setattr('sys.stdin', StringIO(data))
-        result = main(['-i', '-', '-f', 'plantuml'])
-        assert result == 0
-        captured = capsys.readouterr()
-        assert '@startuml' in captured.out
-
-
-class TestCLIInputFormats:
-    """Test CLI with explicit input format selection."""
-
-    def test_explicit_excalidraw_format(self, tmp_path, capsys):
-        data = {'elements': [{'id': 'a', 'type': 'rectangle', 'x': 0.0, 'y': 0.0, 'width': 100.0, 'height': 50.0}]}
-        f = tmp_path / 'test.json'
-        f.write_text(json.dumps(data))
-        result = main(['-i', str(f), '--input-format', 'excalidraw', '-f', 'plantuml'])
-        assert result == 0
-        captured = capsys.readouterr()
-        assert '@startuml' in captured.out
-
-    def test_explicit_svg_format(self, tmp_path, capsys):
-        svg_content = """<?xml version="1.0"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="200" height="100">
-    <rect x="10" y="10" width="80" height="40" fill="blue"/>
-</svg>"""
-        f = tmp_path / 'test.svg'
-        f.write_text(svg_content)
-        result = main(['-i', str(f), '--input-format', 'svg', '-f', 'plantuml'])
-        assert result == 0
-        captured = capsys.readouterr()
-        assert '@startuml' in captured.out
-
-    def test_explicit_tldraw_format(self, tmp_path, capsys):
-        data = {
+_SIMPLE_SCENE = {
+    'elements': [
+        {'id': 'a', 'type': 'rectangle', 'x': 0.0, 'y': 0.0, 'width': 100.0, 'height': 50.0},
+        {'id': 'b', 'type': 'rectangle', 'x': 200.0, 'y': 0.0, 'width': 100.0, 'height': 50.0},
+        {
+            'id': 'arr',
+            'type': 'arrow',
+            'x': 100.0,
+            'y': 25.0,
+            'points': [[0.0, 0.0], [100.0, 0.0]],
+            'startBinding': {'elementId': 'a'},
+            'endBinding': {'elementId': 'b'},
+        },
+    ]
+}
+_CLI_INPUTS = {
+    'simple.json': json.dumps(_SIMPLE_SCENE),
+    'box.svg': '<?xml version="1.0"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="200" height="100">'
+    '<rect x="10" y="10" width="80" height="40" fill="blue"/></svg>',
+    'legacy.json': json.dumps(
+        {
             'document': {
                 'pages': {
                     'page1': {
                         'id': 'page1',
                         'name': 'Test Page',
                         'shapes': {
-                            'shape1': {
-                                'id': 'shape1',
-                                'type': 'rectangle',
-                                'point': [0.0, 0.0],
-                                'size': [100.0, 50.0],
-                            }
+                            'shape1': {'id': 'shape1', 'type': 'rectangle', 'point': [0.0, 0.0], 'size': [100.0, 50.0]}
                         },
                         'bindings': {},
                     }
                 }
             }
         }
-        f = tmp_path / 'test.json'
-        f.write_text(json.dumps(data))
-        result = main(['-i', str(f), '--input-format', 'tldraw', '-f', 'd2'])
-        assert result == 0
-        captured = capsys.readouterr()
-        assert 'shape1' in captured.out
-
-    def test_svg_auto_detection(self, tmp_path, capsys):
-        svg_content = "<svg><rect x='0' y='0' width='100' height='50'/></svg>"
-        f = tmp_path / 'test.svg'
-        f.write_text(svg_content)
-        result = main(['-i', str(f), '-f', 'graphviz'])
-        assert result == 0
-        captured = capsys.readouterr()
-        assert 'digraph' in captured.out
+    ),
+}
+_DOT_AB = (
+    '"diagram" {{\n    rankdir="{rankdir}";\n    node [shape="box", fontname="Helvetica"];\n'
+    '    edge [fontname="Helvetica"];\n\n    a [label="a"];\n    b [label="b"];\n\n    a {arrow} b;\n}}\n'
+)
+_C4_AB = 'C4Context\n    title Architecture Diagram\n    Component(a, "a")\n    Component(b, "b")\n    Rel(a, b, " ")\n'
 
 
-class TestCLIFormatOptions:
-    """Test CLI format-specific options."""
+@pytest.mark.parametrize(
+    ('argv', 'expected'),
+    [
+        (['simple.json', '-f', 'plantuml'], '@startuml\nrectangle "a" as a\nrectangle "b" as b\na --> b\n@enduml\n'),
+        (
+            ['simple.json', '-f', 'c4'],
+            (
+                '@startuml\n!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml'
+                '\n\nLAYOUT_WITH_LEGEND()\n\nComponent(a, "a")\nComponent(b, "b")\n\n\nRel(a, b, "")\n@enduml\n'
+            ),
+        ),
+        (['simple.json', '-f', 'mermaid'], _C4_AB),
+        (['simple.json', '-f', 'mermaid', '--mermaid-type', 'c4'], _C4_AB),
+        (
+            ['simple.json', '-f', 'mermaid', '--mermaid-type', 'flowchart'],
+            'flowchart LR\n    a[a]\n    b[b]\n    a --> b\n',
+        ),
+        (['simple.json', '-f', 'graphviz'], 'digraph ' + _DOT_AB.format(rankdir='LR', arrow='->')),
+        (
+            ['simple.json', '-f', 'graphviz', '--graphviz-direction', 'TB'],
+            'digraph ' + _DOT_AB.format(rankdir='TB', arrow='->'),
+        ),
+        (
+            ['simple.json', '-f', 'graphviz', '--graphviz-type', 'graph'],
+            'graph ' + _DOT_AB.format(rankdir='LR', arrow='--'),
+        ),
+        (['simple.json', '-f', 'd2'], 'direction: right\n\na: a\nb: b\n\na -> b\n'),
+        (['simple.json', '-f', 'd2', '--d2-direction', 'up'], 'direction: up\n\na: a\nb: b\n\na -> b\n'),
+        (['simple.json', '-f', 'd2', '--d2-sketch', '-o', '-'], 'direction: right\n\na: a\nb: b\n\na -> b\n'),
+        (
+            ['-i', 'box.svg', '--input-format', 'svg', '-f', 'plantuml'],
+            '@startuml\nrectangle "elem_1" as elem_1\n@enduml\n',
+        ),
+        (
+            ['legacy.json', '--input-format', 'tldraw', '-f', 'd2'],
+            'direction: right\n\nshape1: shape1 {\n  style: {\n    stroke: "#1d1d1d"\n    stroke-width: 3\n  }\n}\n',
+        ),
+        (
+            ['box.svg', '-f', 'graphviz'],
+            (
+                'digraph "SVG Diagram" {\n    rankdir="LR";\n    node [shape="box", fontname="Helvetica"];\n'
+                '    edge [fontname="Helvetica"];\n\n'
+                '    elem_1 [label="elem_1", fillcolor="blue", style="filled"];\n\n}\n'
+            ),
+        ),
+    ],
+)
+def test_cli_converts_to_stdout(argv, expected, tmp_path, monkeypatch, capsys):
+    for name, content in _CLI_INPUTS.items():
+        (tmp_path / name).write_text(content)
+    monkeypatch.chdir(tmp_path)
 
-    @pytest.fixture
-    def simple_excalidraw_file(self, tmp_path):
-        data = {
-            'elements': [
-                {'id': 'a', 'type': 'rectangle', 'x': 0.0, 'y': 0.0, 'width': 100.0, 'height': 50.0},
-                {'id': 'b', 'type': 'rectangle', 'x': 200.0, 'y': 0.0, 'width': 100.0, 'height': 50.0},
-                {
-                    'id': 'arr',
-                    'type': 'arrow',
-                    'x': 100.0,
-                    'y': 25.0,
-                    'points': [[0.0, 0.0], [100.0, 0.0]],
-                    'startBinding': {'elementId': 'a'},
-                    'endBinding': {'elementId': 'b'},
-                },
-            ]
-        }
-        f = tmp_path / 'test.json'
-        f.write_text(json.dumps(data))
-        return f
+    assert main(argv) == 0
+    assert capsys.readouterr().out == expected
 
-    def test_mermaid_type_c4(self, simple_excalidraw_file, capsys):
-        result = main(
-            [
-                '-i',
-                str(simple_excalidraw_file),
-                '-f',
-                'mermaid',
-                '--mermaid-type',
-                'c4',
-            ]
+
+def test_cli_reads_stdin_and_writes_into_new_directories(tmp_path, monkeypatch, capsys):
+    monkeypatch.setattr('sys.stdin', StringIO(json.dumps(_SIMPLE_SCENE)))
+    target = tmp_path / 'nested' / 'dir' / 'output.puml'
+
+    assert main(['-i', '-', '-f', 'plantuml', '-o', str(target)]) == 0
+    assert target.read_text() == '@startuml\nrectangle "a" as a\nrectangle "b" as b\na --> b\n@enduml'
+
+
+def _escaping_diagram() -> Diagram:
+    def shape(shape_id, label):
+        return Shape(
+            id=shape_id, label=label, shape_type='rectangle', position=Point(0.0, 0.0), size=Dimensions(100.0, 50.0)
         )
-        assert result == 0
-        captured = capsys.readouterr()
-        assert 'C4' in captured.out
 
-    def test_mermaid_type_flowchart(self, simple_excalidraw_file, capsys):
-        result = main(
-            [
-                '-i',
-                str(simple_excalidraw_file),
-                '-f',
-                'mermaid',
-                '--mermaid-type',
-                'flowchart',
-            ]
-        )
-        assert result == 0
-        captured = capsys.readouterr()
-        assert 'flowchart' in captured.out
-
-    def test_graphviz_direction_tb(self, simple_excalidraw_file, capsys):
-        result = main(
-            [
-                '-i',
-                str(simple_excalidraw_file),
-                '-f',
-                'graphviz',
-                '--graphviz-direction',
-                'TB',
-            ]
-        )
-        assert result == 0
-        captured = capsys.readouterr()
-        assert 'rankdir="TB"' in captured.out
-
-    def test_graphviz_direction_lr(self, simple_excalidraw_file, capsys):
-        result = main(
-            [
-                '-i',
-                str(simple_excalidraw_file),
-                '-f',
-                'graphviz',
-                '--graphviz-direction',
-                'LR',
-            ]
-        )
-        assert result == 0
-        captured = capsys.readouterr()
-        assert 'rankdir="LR"' in captured.out
-
-    def test_graphviz_type_graph(self, simple_excalidraw_file, capsys):
-        result = main(
-            [
-                '-i',
-                str(simple_excalidraw_file),
-                '-f',
-                'graphviz',
-                '--graphviz-type',
-                'graph',
-            ]
-        )
-        assert result == 0
-        captured = capsys.readouterr()
-        assert captured.out.strip().startswith('graph')
-
-    def test_d2_direction_up(self, simple_excalidraw_file, capsys):
-        result = main(
-            [
-                '-i',
-                str(simple_excalidraw_file),
-                '-f',
-                'd2',
-                '--d2-direction',
-                'up',
-            ]
-        )
-        assert result == 0
-        captured = capsys.readouterr()
-        assert 'direction: up' in captured.out
-
-    def test_d2_sketch_mode(self, simple_excalidraw_file, capsys):
-        result = main(
-            [
-                '-i',
-                str(simple_excalidraw_file),
-                '-f',
-                'd2',
-                '--d2-sketch',
-            ]
-        )
-        assert result == 0
-        captured = capsys.readouterr()
-        assert 'a:' in captured.out or 'a ->' in captured.out
+    connection = Connection(
+        id='c', from_id='q', to_id='n', label='A | B & C', position=Point(0.0, 0.0), size=Dimensions(0.0, 0.0)
+    )
+    return Diagram(id='t', elements=[shape('q', 'Hello "World" & <Test>'), shape('n', 'Line1\nLine2'), connection])
 
 
-class TestFormatDetection:
-    """Test input format auto-detection."""
-
-    def test_detect_excalidraw(self):
-        data: dict[str, Any] = {'elements': []}
-        assert detect_input_format(data) == 'excalidraw'
-
-    def test_detect_excalidraw_clipboard(self):
-        data = {'type': 'excalidraw/clipboard', 'elements': []}
-        assert detect_input_format(data) == 'excalidraw'
-
-    def test_detect_tldraw(self):
-        data: dict[str, Any] = {'document': {'pages': {}}}
-        assert detect_input_format(data) == 'tldraw'
-
-    def test_detect_svg_xml_header(self):
-        data = '<?xml version="1.0"?><svg></svg>'
-        assert detect_input_format(data) == 'svg'
-
-    def test_detect_svg_no_header(self):
-        data = '<svg></svg>'
-        assert detect_input_format(data) == 'svg'
-
-    def test_detect_unknown_dict(self):
-        with pytest.raises(ValueError, match='Unrecognized input format'):
-            detect_input_format({'random': 'data'})
-
-    def test_detect_unknown_string(self):
-        with pytest.raises(ValueError, match='Could not detect input format'):
-            detect_input_format('random string')
-
-
-class TestLabelEscaping:
-    """Test that special characters in labels are properly escaped."""
-
-    def _make_diagram_with_label(self, label: str) -> Diagram:
-        shape = Shape(
-            id='test_shape',
-            label=label,
-            shape_type='rectangle',
-            position=Point(x=0.0, y=0.0),
-            size=Dimensions(width=100.0, height=50.0),
-            style=Style(),
-        )
-        return Diagram(id='test', elements=[shape])
-
-    def _make_diagram_with_connection_label(self, label: str) -> Diagram:
-        shape1 = Shape(
-            id='a',
-            label='A',
-            shape_type='rectangle',
-            position=Point(x=0.0, y=0.0),
-            size=Dimensions(width=100.0, height=50.0),
-            style=Style(),
-        )
-        shape2 = Shape(
-            id='b',
-            label='B',
-            shape_type='rectangle',
-            position=Point(x=200.0, y=0.0),
-            size=Dimensions(width=100.0, height=50.0),
-            style=Style(),
-        )
-        conn = Connection(
-            id='conn',
-            from_id='a',
-            to_id='b',
-            label=label,
-            connection_type='directed',
-            position=Point(x=100.0, y=25.0),
-            size=Dimensions(width=100.0, height=0.0),
-            style=Style(),
-        )
-        return Diagram(id='test', elements=[shape1, shape2, conn])
-
-    def test_plantuml_escapes_quotes(self):
-        diagram = self._make_diagram_with_label('Test "quoted"')
-        gen = PlantUMLGenerator()
-        output = gen.generate(diagram)
-        assert '\\"quoted\\"' in output
-
-    def test_plantuml_escapes_newlines(self):
-        diagram = self._make_diagram_with_label('Line1\nLine2')
-        gen = PlantUMLGenerator()
-        output = gen.generate(diagram)
-        assert '\\n' in output
-
-    def test_c4plantuml_escapes_quotes(self):
-        diagram = self._make_diagram_with_label('Test "quoted"')
-        gen = C4PlantUMLGenerator()
-        output = gen.generate(diagram)
-        # C4 macros have no escaped quote, so a quote is written as a code point
-        assert '<U+0022>quoted<U+0022>' in output
-
-    def test_mermaid_escapes_quotes_in_flowchart(self):
-        diagram = self._make_diagram_with_label('Test "quoted"')
-        gen = MermaidGenerator(diagram_type='flowchart')
-        output = gen.generate(diagram)
-        assert '#quot;' in output
-
-    def test_mermaid_escapes_angle_brackets(self):
-        diagram = self._make_diagram_with_label('Test <html>')
-        gen = MermaidGenerator(diagram_type='flowchart')
-        output = gen.generate(diagram)
-        assert '&lt;' in output
-        assert '&gt;' in output
-
-    def test_mermaid_escapes_newlines(self):
-        diagram = self._make_diagram_with_label('Line1\nLine2')
-        gen = MermaidGenerator(diagram_type='flowchart')
-        output = gen.generate(diagram)
-        assert '<br/>' in output
-
-    def test_mermaid_escapes_pipe_in_connection(self):
-        diagram = self._make_diagram_with_connection_label('A | B')
-        gen = MermaidGenerator(diagram_type='flowchart')
-        output = gen.generate(diagram)
-        assert '&#124;' in output
-
-    def test_graphviz_escapes_quotes(self):
-        diagram = self._make_diagram_with_label('Test "quoted"')
-        gen = GraphVizGenerator()
-        output = gen.generate(diagram)
-        assert '\\"quoted\\"' in output
-
-    def test_d2_escapes_newlines(self):
-        diagram = self._make_diagram_with_label('Line1\nLine2')
-        gen = D2Generator()
-        output = gen.generate(diagram)
-        assert '\\n' in output
-
-    def test_plantuml_escapes_ampersand(self):
-        diagram = self._make_diagram_with_label('A & B')
-        gen = PlantUMLGenerator()
-        output = gen.generate(diagram)
-        assert '&amp;' in output
-
-    def test_plantuml_escapes_angle_brackets(self):
-        diagram = self._make_diagram_with_label('Test <html>')
-        gen = PlantUMLGenerator()
-        output = gen.generate(diagram)
-        assert '~<' in output
-        assert '~>' in output
-
-    def test_c4plantuml_escapes_ampersand(self):
-        diagram = self._make_diagram_with_label('A & B')
-        gen = C4PlantUMLGenerator()
-        output = gen.generate(diagram)
-        assert '&amp;' in output
-
-    def test_c4plantuml_escapes_angle_brackets(self):
-        diagram = self._make_diagram_with_label('Test <html>')
-        gen = C4PlantUMLGenerator()
-        output = gen.generate(diagram)
-        assert '~<' in output
-        assert '~>' in output
-
-    def test_mermaid_escapes_ampersand(self):
-        diagram = self._make_diagram_with_label('A & B')
-        gen = MermaidGenerator(diagram_type='flowchart')
-        output = gen.generate(diagram)
-        assert '&amp;' in output
-
-    def test_mermaid_c4_escapes_special_chars(self):
-        diagram = self._make_diagram_with_label('Test "quoted" & <xml>')
-        diagram.elements[0].semantic_type = 'person'
-        gen = MermaidGenerator(diagram_type='c4')
-        output = gen.generate(diagram)
-        assert '#quot;quoted#quot;' in output
-        assert '&amp;' in output
-        assert '&lt;' in output
-        assert '&gt;' in output
-
-    def test_mermaid_connection_escapes_ampersand(self):
-        diagram = self._make_diagram_with_connection_label('A & B')
-        gen = MermaidGenerator(diagram_type='flowchart')
-        output = gen.generate(diagram)
-        assert '&amp;' in output
-
-    def test_combined_special_chars_plantuml(self):
-        diagram = self._make_diagram_with_label('Hello "World" & <Test>')
-        gen = PlantUMLGenerator()
-        output = gen.generate(diagram)
-        assert '\\"World\\"' in output
-        assert '&amp;' in output
-        assert '~<Test~>' in output
-
-    def test_combined_special_chars_mermaid(self):
-        diagram = self._make_diagram_with_label('Hello "World" & <Test>')
-        gen = MermaidGenerator(diagram_type='flowchart')
-        output = gen.generate(diagram)
-        assert '#quot;' in output
-        assert '&amp;' in output
-        assert '&lt;Test&gt;' in output
+@pytest.mark.parametrize(
+    ('output_format', 'options', 'expected'),
+    [
+        (
+            'plantuml',
+            {},
+            (
+                '@startuml\nrectangle "Hello \\"World\\" &amp; ~<Test~>" as q\nrectangle "Line1\\nLine2" as n\n'
+                'q --> n : "A | B &amp; C"\n@enduml'
+            ),
+        ),
+        (
+            'c4',
+            {},
+            (
+                '@startuml\n!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml'
+                '\n\nLAYOUT_WITH_LEGEND()\n\nContainer(q, "Hello <U+0022>World<U+0022> &amp; ~<Test~>")\n'
+                'Container(n, "Line1\\nLine2")\n\n\nRel(q, n, "A | B &amp; C")\n@enduml'
+            ),
+        ),
+        (
+            'mermaid',
+            {'mermaid_type': 'flowchart'},
+            (
+                'flowchart LR\n    q["Hello #quot;World#quot; &amp; &lt;Test&gt;"]\n    n[Line1<br/>Line2]\n'
+                '    q -->|"A &#124; B &amp; C"| n'
+            ),
+        ),
+        (
+            'mermaid',
+            {'mermaid_type': 'c4'},
+            (
+                'C4Context\n    title Architecture Diagram\n'
+                '    System(q, "Hello #quot;World#quot; &amp; &lt;Test&gt;")\n'
+                '    System(n, "Line1<br/>Line2")\n    Rel(q, n, "A | B &amp; C")'
+            ),
+        ),
+        (
+            'graphviz',
+            {},
+            (
+                'digraph "diagram" {\n    rankdir="LR";\n    node [shape="box", fontname="Helvetica"];\n'
+                '    edge [fontname="Helvetica"];\n\n    q [label="Hello \\"World\\" & <Test>"];\n'
+                '    n [label="Line1\\nLine2"];\n\n    q -> n [label="A | B & C"];\n}'
+            ),
+        ),
+        (
+            'd2',
+            {},
+            'direction: right\n\nq: "Hello \\"World\\" & <Test>"\nn: Line1\\nLine2\n\nq -> n: "A | B & C"',
+        ),
+    ],
+)
+def test_labels_are_escaped_for_each_format(output_format, options, expected):
+    assert render_diagram(_escaping_diagram(), output_format, **options).output == expected
 
 
 class TestEdgeCases:
@@ -915,208 +636,87 @@ class TestNestedC4Boundaries:
         assert output.count('(sys,') == 0
 
 
-class TestSemanticInference:
-    """Test semantic type inference heuristics."""
-
-    def test_diamond_shape_is_decision(self):
-        from diacea.ir.semantic import SemanticType, infer_semantic_type
-
-        semantic, confidence = infer_semantic_type(shape_type='diamond')
-        assert semantic == SemanticType.DECISION
-        assert confidence >= 0.9
-
-    def test_note_shape_is_note(self):
-        from diacea.ir.semantic import SemanticType, infer_semantic_type
-
-        semantic, confidence = infer_semantic_type(shape_type='note')
-        assert semantic == SemanticType.NOTE
-        assert confidence >= 0.8
-
-    def test_sticky_shape_is_note(self):
-        from diacea.ir.semantic import SemanticType, infer_semantic_type
-
-        semantic, confidence = infer_semantic_type(shape_type='sticky')
-        assert semantic == SemanticType.NOTE
-        assert confidence >= 0.8
-
-    def test_cylinder_shape_is_database(self):
-        from diacea.ir.semantic import SemanticType, infer_semantic_type
-
-        semantic, confidence = infer_semantic_type(shape_type='cylinder')
-        assert semantic == SemanticType.DATABASE
-        assert confidence >= 0.8
-
-    def test_label_database_keyword(self):
-        from diacea.ir.semantic import SemanticType, infer_semantic_type
-
-        semantic, confidence = infer_semantic_type(shape_type='rectangle', label='PostgreSQL Database')
-        assert semantic == SemanticType.DATABASE
-        assert confidence >= 0.6
-
-    def test_label_api_keyword(self):
-        from diacea.ir.semantic import SemanticType, infer_semantic_type
-
-        semantic, confidence = infer_semantic_type(shape_type='rectangle', label='REST API Service')
-        assert semantic == SemanticType.SERVICE
-        assert confidence >= 0.6
-
-    def test_label_user_keyword(self):
-        from diacea.ir.semantic import SemanticType, infer_semantic_type
-
-        semantic, confidence = infer_semantic_type(shape_type='ellipse', label='Admin User')
-        assert semantic == SemanticType.PERSON
-        assert confidence >= 0.6
-
-    def test_label_queue_keyword(self):
-        from diacea.ir.semantic import SemanticType, infer_semantic_type
-
-        semantic, confidence = infer_semantic_type(shape_type='rectangle', label='Kafka Queue')
-        assert semantic == SemanticType.QUEUE
-        assert confidence >= 0.6
-
-    def test_icon_person_emoji(self):
-        from diacea.ir.semantic import SemanticType, infer_semantic_type
-
-        semantic, confidence = infer_semantic_type(shape_type='rectangle', label='👤 Customer')
-        assert semantic == SemanticType.PERSON
-        assert confidence >= 0.8
-
-    def test_icon_database_emoji(self):
-        from diacea.ir.semantic import SemanticType, infer_semantic_type
-
-        semantic, confidence = infer_semantic_type(shape_type='rectangle', label='🗄️ Storage')
-        assert semantic == SemanticType.DATABASE
-        assert confidence >= 0.8
-
-    def test_icon_cloud_emoji(self):
-        from diacea.ir.semantic import SemanticType, infer_semantic_type
-
-        semantic, confidence = infer_semantic_type(shape_type='rectangle', label='☁️ AWS')
-        assert semantic == SemanticType.CLOUD
-        assert confidence >= 0.8
-
-    def test_yellow_fill_is_note(self):
-        from diacea.ir.semantic import SemanticType, infer_semantic_type
-
-        style = Style(fill_color='#ffff00')
-        semantic, confidence = infer_semantic_type(shape_type='rectangle', label='', style=style)
-        assert semantic == SemanticType.NOTE
-        assert confidence >= 0.6
-
-    def test_gray_dashed_is_external(self):
-        from diacea.ir.semantic import SemanticType, infer_semantic_type
-
-        style = Style(fill_color='#808080', stroke_style='dashed')
-        semantic, confidence = infer_semantic_type(shape_type='rectangle', label='', style=style)
-        assert semantic == SemanticType.EXTERNAL
-        assert confidence >= 0.5
-
-    def test_explicit_metadata_hint(self):
-        from diacea.ir.semantic import SemanticType, infer_semantic_type
-
-        semantic, confidence = infer_semantic_type(
-            shape_type='rectangle',
-            label='Box',
-            metadata={'semantic_type': 'database'},
-        )
-        assert semantic == SemanticType.DATABASE
-        assert confidence == 1.0
-
-    def test_large_rectangle_is_system(self):
-        from diacea.ir.semantic import SemanticType, infer_semantic_type
-
-        size = Dimensions(width=500.0, height=300.0)
-        semantic, confidence = infer_semantic_type(shape_type='rectangle', label='', size=size)
-        assert semantic == SemanticType.SYSTEM
-        assert confidence >= 0.6
-
-    def test_wide_ellipse_is_database(self):
-        from diacea.ir.semantic import SemanticType, infer_semantic_type
-
-        size = Dimensions(width=200.0, height=50.0)
-        semantic, confidence = infer_semantic_type(shape_type='ellipse', label='', size=size)
-        assert semantic == SemanticType.DATABASE
-        assert confidence >= 0.6
-
-    def test_combined_shape_and_label(self):
-        from diacea.ir.semantic import SemanticType, infer_semantic_type
-
-        semantic, confidence = infer_semantic_type(
-            shape_type='ellipse', label='Customer', size=Dimensions(width=60.0, height=60.0)
-        )
-        assert semantic == SemanticType.PERSON
-        assert confidence >= 0.6
-
-    def test_camelcase_label_not_database(self):
-        from diacea.ir.semantic import SemanticType, infer_semantic_type
-
-        semantic, _ = infer_semantic_type(shape_type='rectangle', label='GameDropDown')
-        assert semantic != SemanticType.DATABASE
-
-    def test_sentence_label_not_database(self):
-        from diacea.ir.semantic import SemanticType, infer_semantic_type
-
-        semantic, _ = infer_semantic_type(shape_type='rectangle', label='Select the hit shape')
-        assert semantic != SemanticType.DATABASE
-
-    def test_keyword_inside_word_not_matched(self):
-        from diacea.ir.semantic import SemanticType, infer_semantic_type
-
-        semantic, _ = infer_semantic_type(shape_type='rectangle', label='Feedback')
-        assert semantic != SemanticType.DATABASE
-
-    def test_whole_word_db_still_matches(self):
-        from diacea.ir.semantic import SemanticType, infer_semantic_type
-
-        semantic, confidence = infer_semantic_type(shape_type='rectangle', label='Orders DB')
-        assert semantic == SemanticType.DATABASE
-        assert confidence >= 0.8
-
-    def test_camelcase_split_enables_word_match(self):
-        from diacea.ir.semantic import SemanticType, infer_semantic_type
-
-        semantic, confidence = infer_semantic_type(shape_type='rectangle', label='UserDatabase')
-        assert semantic == SemanticType.DATABASE
-        assert confidence >= 0.8
-
-    def test_snake_case_split_enables_word_match(self):
-        from diacea.ir.semantic import SemanticType, infer_semantic_type
-
-        semantic, confidence = infer_semantic_type(shape_type='rectangle', label='mobile_user')
-        assert semantic == SemanticType.PERSON
-        assert confidence >= 0.8
+def _style(fill, stroke_style='solid'):
+    return Style(fill_color=fill, stroke_style=stroke_style)
 
 
-class TestHeadNounInference:
+@pytest.mark.parametrize(
+    ('kwargs', 'expected', 'confidence'),
+    [
+        ({'shape_type': 'diamond'}, 'decision', 0.9),
+        ({'shape_type': 'note'}, 'note', 0.9),
+        ({'shape_type': 'sticky'}, 'note', 0.9),
+        ({'shape_type': 'cylinder'}, 'database', 0.9),
+        ({'shape_type': 'rectangle', 'label': 'PostgreSQL Database'}, 'database', 0.8),
+        ({'shape_type': 'rectangle', 'label': 'REST API Service'}, 'service', 0.8),
+        ({'shape_type': 'ellipse', 'label': 'Admin User'}, 'person', 0.85),
+        ({'shape_type': 'rectangle', 'label': 'Kafka Queue'}, 'queue', 0.8),
+        ({'shape_type': 'rectangle', 'label': '👤 Customer'}, 'person', 0.85),
+        ({'shape_type': 'rectangle', 'label': '🗄️ Storage'}, 'database', 0.85),
+        ({'shape_type': 'rectangle', 'label': '☁️ AWS'}, 'cloud', 0.85),
+        ({'shape_type': 'rectangle', 'style': _style('#ffff00')}, 'note', 0.7),
+        ({'shape_type': 'rectangle', 'style': _style('#808080', 'dashed')}, 'external', 0.65),
+        ({'shape_type': 'rectangle', 'style': _style('#808080ff', 'dashed')}, 'external', 0.65),
+        ({'shape_type': 'rectangle', 'style': _style('#808093', 'dashed')}, 'external', 0.65),
+        (
+            {'shape_type': 'rectangle', 'style': _style('#80948a', 'dashed'), 'size': Dimensions(100.0, 60.0)},
+            'component',
+            0.55,
+        ),
+        (
+            {'shape_type': 'rectangle', 'style': _style('#8a8094', 'dashed'), 'size': Dimensions(100.0, 60.0)},
+            'component',
+            0.55,
+        ),
+        (
+            {'shape_type': 'rectangle', 'style': _style('#808a94', 'dashed'), 'size': Dimensions(100.0, 60.0)},
+            'component',
+            0.55,
+        ),
+        ({'shape_type': 'rectangle', 'label': 'Box', 'metadata': {'semantic_type': 'database'}}, 'database', 1.0),
+        ({'shape_type': 'rectangle', 'size': Dimensions(500.0, 300.0)}, 'system', 0.7),
+        ({'shape_type': 'rectangle', 'size': Dimensions(500.0, 0.0)}, 'component', 0.4),
+        ({'shape_type': 'ellipse', 'size': Dimensions(200.0, 50.0)}, 'database', 0.7),
+        ({'shape_type': 'ellipse', 'label': 'Customer', 'size': Dimensions(60.0, 60.0)}, 'person', 0.925),
+        ({'shape_type': 'rectangle', 'label': 'GameDropDown'}, 'component', 0.4),
+        ({'shape_type': 'rectangle', 'label': 'Select the hit shape'}, 'component', 0.4),
+        ({'shape_type': 'rectangle', 'label': 'Feedback'}, 'component', 0.4),
+        ({'shape_type': 'rectangle', 'label': 'Orders DB'}, 'database', 0.8),
+        ({'shape_type': 'rectangle', 'label': 'UserDatabase'}, 'database', 0.8),
+        ({'shape_type': 'rectangle', 'label': 'mobile_user'}, 'person', 0.8),
+    ],
+)
+def test_semantic_inference(kwargs, expected, confidence):
+    from diacea.ir.semantic import infer_semantic_type
+
+    semantic, inferred_confidence = infer_semantic_type(**kwargs)
+
+    assert getattr(semantic, 'value', semantic) == expected
+    assert inferred_confidence == pytest.approx(confidence)
+
+
+@pytest.mark.parametrize(
+    ('label', 'expected'),
+    [
+        ('Mobile user', 'person'),
+        ('Customer', 'person'),
+        ('Customer\nA person with an account', 'person'),
+        ('Customer Database', 'database'),
+        ('User Store DB', 'database'),
+        ('Admin console', 'interface'),
+        ('Message Queue', 'queue'),
+        ('Check stock?', 'decision'),
+        ('Replica Manager', 'container'),
+        ('User Input', None),
+        ('Filter results', None),
+        ('HTTP client', None),
+        ('ChangeResponder', None),
+    ],
+)
+def test_label_head_noun_names_the_type(label, expected):
     """A label names what an element is with its last word; earlier words only qualify it."""
+    from diacea.ir.semantic import _infer_from_text
 
-    @pytest.mark.parametrize(
-        ('label', 'expected'),
-        [
-            ('Mobile user', 'person'),
-            ('Customer', 'person'),
-            ('Customer\nA person with an account', 'person'),
-            ('Customer Database', 'database'),
-            ('User Store DB', 'database'),
-            ('Admin console', 'interface'),
-            ('Message Queue', 'queue'),
-            ('Check stock?', 'decision'),
-        ],
-    )
-    def test_last_keyword_names_the_type(self, label, expected):
-        from diacea.ir.semantic import _infer_from_text
+    semantic, confidence = _infer_from_text(label)
 
-        semantic, _ = _infer_from_text(label)
-
-        assert semantic is not None
-        assert semantic.value == expected
-
-    @pytest.mark.parametrize(
-        'label', ['User Input', 'Filter results', 'Replica Manager', 'HTTP client', 'ChangeResponder']
-    )
-    def test_qualifiers_and_verbs_are_not_types(self, label):
-        from diacea.ir.semantic import SemanticType, _infer_from_text
-
-        semantic, _ = _infer_from_text(label)
-
-        assert semantic not in {SemanticType.PERSON, SemanticType.DECISION}
+    assert (getattr(semantic, 'value', None), confidence) == (expected, 0.8 if expected else 0.0)

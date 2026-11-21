@@ -1,0 +1,16 @@
+flowchart TD
+    client[Web Client]
+    lb[/Load Balancer/]
+    subgraph group_backend[Backend Services]
+        api[API Service]
+        db[(PostgreSQL)]
+        cache[(Redis Cache)]
+        worker[Worker]
+        queue[(Message Queue)]
+    end
+    client --> lb
+    lb --> api
+    lb --> worker
+    api --> db
+    api --> cache
+    worker --> queue

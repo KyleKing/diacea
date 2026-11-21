@@ -1,0 +1,10 @@
+digraph "diagram" {
+    rankdir="LR";
+    node [shape="box", fontname="Helvetica"];
+    edge [fontname="Helvetica"];
+
+    client [label="Client"];
+    server [label="Server"];
+
+    client -> server;
+}

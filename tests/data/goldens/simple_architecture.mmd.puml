@@ -1,0 +1,24 @@
+@startuml
+left to right direction
+rectangle "User" as User
+rectangle "API Gateway" as API
+rectangle "Auth Service" as Auth
+rectangle "Order Service" as Orders
+rectangle "Product Service" as Products
+database "Auth Database" as AuthDB
+database "Order Database" as OrderDB
+database "Product Database" as ProductDB
+rectangle "Message Queue" as Queue
+rectangle "Inventory Service" as Inventory
+database "Inventory Database" as InvDB
+User --> API
+API --> Auth
+API --> Orders
+API --> Products
+Auth --> AuthDB
+Orders --> OrderDB
+Products --> ProductDB
+Orders --> Queue
+Queue --> Inventory
+Inventory --> InvDB
+@enduml

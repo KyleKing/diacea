@@ -1,0 +1,39 @@
+digraph "Microservices_Architecture" {
+    rankdir="LR";
+    node [shape="box", fontname="Helvetica"];
+    edge [fontname="Helvetica"];
+
+    subgraph cluster_group_services {
+        label="Microservices";
+        auth_service [label="Auth\nService"];
+        order_service [label="Order\nService"];
+        product_service [label="Product\nService"];
+        inventory_service [label="Inventory\nService"];
+    }
+    subgraph cluster_group_databases {
+        label="Databases";
+        auth_db [label="Auth DB", shape="cylinder"];
+        order_db [label="Order DB", shape="cylinder"];
+        product_db [label="Product DB", shape="cylinder"];
+        inventory_db [label="Inventory DB", shape="cylinder"];
+    }
+
+    user [label="User", shape="ellipse", fillcolor="lightblue", style="filled"];
+    admin [label="Administrator", shape="ellipse", fillcolor="lightblue", style="filled"];
+    api_gateway [label="API Gateway", shape="hexagon", fillcolor="lightgreen", style="filled"];
+    message_queue [label="Message\nQueue", shape="folder", fillcolor="gold", style="filled"];
+    payment_gateway [label="Payment\nGateway", shape="octagon", fillcolor="lightyellow", style="filled"];
+
+    user -> api_gateway [label="HTTP"];
+    admin -> api_gateway [label="HTTPS"];
+    api_gateway -> auth_service [label="auth"];
+    api_gateway -> order_service [label="orders"];
+    api_gateway -> product_service [label="products"];
+    auth_service -> auth_db [label="SQL"];
+    order_service -> order_db [label="SQL"];
+    product_service -> product_db [label="SQL"];
+    inventory_service -> inventory_db [label="SQL"];
+    order_service -> message_queue [label="publish", style="dashed"];
+    message_queue -> inventory_service [label="subscribe", style="dashed"];
+    order_service -> payment_gateway [label="charge", color="red"];
+}

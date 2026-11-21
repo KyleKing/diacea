@@ -1,0 +1,10 @@
+flowchart LR
+    database[(Database)]
+    subgraph group_backend[Backend]
+        api_server[API Server]
+    end
+    api_server ==>|queries| database
+
+    style api_server fill:#4465e9,stroke:#4465e9
+    style database stroke:#099268,stroke-dasharray:5 5
+    style group_backend stroke:#1d1d1d

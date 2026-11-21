@@ -1,0 +1,36 @@
+direction: right
+
+dev: Developer
+gh: GitHub
+ci: CI Checks {
+  shape: diamond
+}
+build: Build Image
+notify: Notify Author
+registry: Container Registry {
+  shape: cylinder
+}
+deploy: Deploy to Staging {
+  shape: oval
+}
+smoke: Smoke Tests {
+  shape: hexagon
+}
+prod: Production
+
+dev -> gh: git push
+gh -> ci
+ci -> build: pass
+ci -> notify: fail
+build -> registry
+registry -> deploy
+deploy -> smoke {
+  style: {
+    stroke-dash: 3
+  }
+}
+smoke -> prod {
+  style: {
+    stroke-width: 3
+  }
+}

@@ -1,0 +1,11 @@
+C4Context
+    title E-Commerce System - System Context
+    Person(customer, "Customer")
+    Person(admin, "Administrator")
+    System(ecommerce, "E-Commerce System")
+    System(payment, "Payment Gateway")
+    System(shipping, "Shipping Service")
+    Rel(customer, ecommerce, "Browses products, places orders")
+    Rel(admin, ecommerce, "Manages products, views analytics")
+    Rel(ecommerce, payment, "Processes payments via")
+    Rel(ecommerce, shipping, "Tracks shipments via")

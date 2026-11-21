@@ -1,0 +1,36 @@
+flowchart LR
+    user([User])
+    admin([Administrator])
+    api_gateway{{API Gateway}}
+    message_queue[Message<br/>Queue]
+    payment_gateway[Payment<br/>Gateway]
+    subgraph group_services[Microservices]
+        auth_service[Auth<br/>Service]
+        order_service[Order<br/>Service]
+        product_service[Product<br/>Service]
+        inventory_service[Inventory<br/>Service]
+    end
+    subgraph group_databases[Databases]
+        auth_db[(Auth DB)]
+        order_db[(Order DB)]
+        product_db[(Product DB)]
+        inventory_db[(Inventory DB)]
+    end
+    user -->|HTTP| api_gateway
+    admin -->|HTTPS| api_gateway
+    api_gateway -->|auth| auth_service
+    api_gateway -->|orders| order_service
+    api_gateway -->|products| product_service
+    auth_service -->|SQL| auth_db
+    order_service -->|SQL| order_db
+    product_service -->|SQL| product_db
+    inventory_service -->|SQL| inventory_db
+    order_service -.->|publish| message_queue
+    message_queue -.->|subscribe| inventory_service
+    order_service -->|charge| payment_gateway
+
+    style user fill:lightblue
+    style admin fill:lightblue
+    style api_gateway fill:lightgreen
+    style message_queue fill:gold
+    style payment_gateway fill:lightyellow

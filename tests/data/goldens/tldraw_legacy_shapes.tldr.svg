@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="897" height="217" viewBox="222.0 211.1 897.3 216.5">
+<style>text{font-family:Helvetica,Arial,sans-serif;font-size:14px;fill:#1e1e1e}.group-label{font-size:12px;fill:#868e96}.edge-label{font-size:12px;paint-order:stroke;stroke:#ffffff;stroke-width:4px}</style>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1e1e1e"/></marker></defs>
+<rect x="222.0" y="211.1" width="897.3" height="216.5" fill="#ffffff"/>
+<g id="rectangles_with_labels" data-semantic="container"><rect x="246.0" y="277.9" width="292.4" height="125.8" rx="2.0" fill="#ffffff" stroke="#ffffff" stroke-width="2.0"/><text x="392.2" y="345.4" text-anchor="middle">Rectangles with labels</text></g>
+<g id="ovals_with_labels" data-semantic="person"><ellipse cx="1045.2" cy="285.1" rx="50.0" ry="50.0" fill="#ffffff" stroke="#ffffff" stroke-width="2.0"/><text x="1045.2" y="289.8" text-anchor="middle">Ovals with labels</text></g>
+<polyline points="538.4,328.3 995.2,289.4" fill="none" stroke="#ffffff" stroke-width="2.0" marker-end="url(#arrow)"/><text class="edge-label" x="766.8" y="308.8" text-anchor="middle">Arrows with labels</text>
+</svg>
