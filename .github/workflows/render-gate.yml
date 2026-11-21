@@ -17,9 +17,18 @@ jobs:
           python-version: "3.10"
 
       - name: Install renderers
+        env:
+          PLANTUML_VERSION: "1.2025.4"
         run: |
           sudo apt-get update
-          sudo apt-get install --yes graphviz plantuml
+          sudo apt-get install --yes graphviz default-jre-headless
+          # apt ships PlantUML 1.2020, which predates the hexagon shape and the current C4 library
+          mkdir -p "$HOME/.local/bin" "$HOME/.local/share/plantuml"
+          curl -fsSL -o "$HOME/.local/share/plantuml/plantuml.jar" \
+            "https://github.com/plantuml/plantuml/releases/download/v${PLANTUML_VERSION}/plantuml-${PLANTUML_VERSION}.jar"
+          printf '#!/bin/sh\nexec java -Djava.awt.headless=true -jar "%s" "$@"\n' \
+            "$HOME/.local/share/plantuml/plantuml.jar" > "$HOME/.local/bin/plantuml"
+          chmod +x "$HOME/.local/bin/plantuml"
           npm install --global @mermaid-js/mermaid-cli
           curl -fsSL https://d2lang.com/install.sh | sh -s --
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
