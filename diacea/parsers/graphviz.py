@@ -179,13 +179,15 @@ def _unquote(raw: str) -> str:
 _LABEL_ESCAPE_RE = re.compile(r'\\(.)', re.DOTALL)
 
 
-def _unescape_label(label: str) -> str:
-    r"""Resolve DOT label escapes: `\n`, `\l`, `\r` are line breaks and `\\` is a backslash."""
+def _unescape_label(label: str, node_id: str | None = None) -> str:
+    r"""Resolve DOT label escapes: `\n`, `\l`, `\r` break lines, `\\` is a backslash, `\N` is the node name."""
 
     def resolve(match: re.Match[str]) -> str:
         char = match.group(1)
         if char in 'nlr':
             return '\n'
+        if char == 'N' and node_id is not None:
+            return node_id
         return char if char == '\\' else match.group(0)
 
     return _LABEL_ESCAPE_RE.sub(resolve, label).rstrip('\n')
@@ -477,7 +479,7 @@ class GraphVizParser(Parser):
         if label.startswith(_HTML_MARK):
             self.warnings.append(f"node '{node_id}': HTML label flattened to plain text")
             return _strip_html(label.removeprefix(_HTML_MARK))
-        return _unescape_label(label.replace('\\N', node_id))
+        return _unescape_label(label, node_id)
 
     def _add_connection(self, from_id: str, to_id: str, operator: str, attrs: dict[str, str]) -> None:
         # An edge clipped at a cluster border (lhead/ltail) links the cluster, not the node it is anchored to

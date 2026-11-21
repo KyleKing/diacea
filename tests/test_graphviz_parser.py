@@ -210,6 +210,18 @@ def test_own_output_is_a_fixpoint():
             [],
             id='numeric-penwidth-only',
         ),
+        pytest.param(
+            'digraph { api [label="\\N service"]; b [label="C:\\\\Nodes"]; c [label="\\\\N"] }',
+            {
+                'nodes': [
+                    ('api', 'api service', 'ellipse', 'service'),
+                    ('b', 'C:\\Nodes', 'ellipse', 'person'),
+                    ('c', '\\N', 'ellipse', 'person'),
+                ],
+            },
+            [],
+            id='node-name-escape-is-not-read-inside-an-escaped-backslash',
+        ),
     ],
 )
 def test_source_parses_to(source, expected, warnings):
