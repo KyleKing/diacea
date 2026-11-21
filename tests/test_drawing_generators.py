@@ -51,6 +51,7 @@ _DRAWINGS = {
         ('single', 'svg', {}),
         ('sequence', 'svg', {}),
         ('empty', 'svg', {}),
+        ('flow', 'excalidraw', {'excalidraw_roughness': 0}),
     ],
 )
 def test_drawing_matches_golden(case, output_format, options):

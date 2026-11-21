@@ -153,6 +153,11 @@ def _is_excalidraw(data: dict[str, Any]) -> bool:
     return 'elements' in data or data.get('type') == 'excalidraw/clipboard'
 
 
+def _excalidraw_roughness(value: int | str | None) -> int:
+    # An explicit 0 (architect) is a choice, so only a missing value falls back to the default
+    return 1 if value is None else int(value)
+
+
 # Order matters: earlier formats win when more than one signature matches
 INPUT_FORMATS: dict[str, InputFormat] = {
     fmt.name: fmt
@@ -265,7 +270,7 @@ OUTPUT_FORMATS: dict[str, OutputFormat] = {
             suffix='.excalidraw',
             reads_back_as='excalidraw',
             build=lambda options: ExcalidrawGenerator(
-                config=ExcalidrawConfig(roughness=int(options.get('excalidraw_roughness') or 1))
+                config=ExcalidrawConfig(roughness=_excalidraw_roughness(options.get('excalidraw_roughness')))
             ),
             options=(
                 FormatOption(
